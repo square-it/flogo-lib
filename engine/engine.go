@@ -5,19 +5,6 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/engine/starter"
 )
 
-// EngineConfig is a configuration object used when creating an
-// Engine that contains all necessary settings
-type EngineConfig struct {
-	NumWorkers    int `json:"workers_count"`
-	WorkQueueSize int `json:"workqueue_size"`
-	MaxStepCount  int `json:"stepcount_max"`
-}
-
-// NewEngineConfig creates an EngineConfig with default values
-func NewEngineConfig() *EngineConfig {
-
-	return &EngineConfig{NumWorkers: 5, WorkQueueSize: 50, MaxStepCount: 100}
-}
 
 // Engine creates and executes ProcessInstances.  It contains
 // a Worker pool that handles the instance executions.
