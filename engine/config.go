@@ -26,11 +26,11 @@ func NewConfiguration() *Configuration {
 		LogLevel: "INFO",
 		StateServiceURI:"http://localhost:9190",
 		EngineConfig: engineConfig,
-		Triggers:make(map[string]string),
+		Triggers:make(map[string]*TriggerConfig),
 	}
 }
 
-func newConfiguration(rep *configRep) {
+func newConfiguration(rep *configRep) *Configuration {
 
 	config := &Configuration{
 		LogLevel:rep.LogLevel,
@@ -42,12 +42,14 @@ func newConfiguration(rep *configRep) {
 	for _, trigger := range rep.Triggers {
 		config.Triggers[trigger.Name] = trigger
 	}
+
+	return config
 }
 
 func LoadConfigurationFromFile(fileName string) *Configuration {
 
-	if fileName == nil {
-		panic("file name cannot be nil")
+	if len(fileName) == 0 {
+		panic("file name cannot be empty")
 	}
 
 	configFile, _ := os.Open(fileName)
