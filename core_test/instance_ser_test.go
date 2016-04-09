@@ -4,15 +4,15 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/TIBCOSoftware/flogo-lib/util"
-	"github.com/op/go-logging"
 	"github.com/TIBCOSoftware/flogo-lib/core/process"
 	"github.com/TIBCOSoftware/flogo-lib/core/processinst"
+	"github.com/TIBCOSoftware/flogo-lib/util"
+	"github.com/op/go-logging"
 )
 
 var log = logging.MustGetLogger("core")
 
-const defJSON =  `
+const defJSON = `
 {
     "type": 1,
     "name": "test",
@@ -47,7 +47,6 @@ func TestFullSerialization(t *testing.T) {
 	json.Unmarshal([]byte(defJSON), defRep)
 
 	log.Infof("Def Rep: %v", defRep)
-
 
 	def := process.NewDefinition(defRep)
 

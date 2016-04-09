@@ -1,22 +1,26 @@
 package engine
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/core/process"
-	"encoding/json"
-	"net/http"
-	"io/ioutil"
-	"github.com/TIBCOSoftware/flogo-lib/core/processinst"
 	"bytes"
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/process"
+	"github.com/TIBCOSoftware/flogo-lib/core/processinst"
+	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
 )
 
 /////////////////////////////////////////////////////////////////////////////
 // Process Registry - Implements process.Provider
 // todo: make this pluggable
 
+// ProcessRegistry is a simple Process registry
 type ProcessRegistry struct {
 	Processes map[string]*process.Definition
 }
 
+// NewProcessRegistry creates a new Process registry
 func NewProcessRegistry() *ProcessRegistry {
 
 	var processRegistry ProcessRegistry
@@ -25,6 +29,7 @@ func NewProcessRegistry() *ProcessRegistry {
 	return &processRegistry
 }
 
+// GetProcess implements process.Provider.GetProcess
 func (pr *ProcessRegistry) GetProcess(processURI string) *process.Definition {
 
 	if process, ok := pr.Processes[processURI]; ok {
@@ -63,6 +68,7 @@ func (pr *ProcessRegistry) GetProcess(processURI string) *process.Definition {
 	return def
 }
 
+// RegisterProcess registers a process locally
 func (pr *ProcessRegistry) RegisterProcess(uri string, process *process.Definition) {
 
 	log.Debugf("registering process: %s\n", uri)
@@ -73,10 +79,12 @@ func (pr *ProcessRegistry) RegisterProcess(uri string, process *process.Definiti
 /////////////////////////////////////////////////////////////////////////////
 // REST StateService - Implements StateRecorder
 
+// RestStateService simple REST implementation of the StateRecorder
 type RestStateService struct {
 	host string
 }
 
+// NewRestStateService creates a new RestStateService
 func NewRestStateService(host string) processinst.StateRecorder {
 
 	var stateService RestStateService
@@ -85,6 +93,7 @@ func NewRestStateService(host string) processinst.StateRecorder {
 	return &stateService
 }
 
+// RecordSnapshot implements processinst.StateRecorder.RecordSnapshot
 func (ss *RestStateService) RecordSnapshot(instance *processinst.Instance) {
 
 	storeReq := &RecordSnapshotReq{
@@ -120,6 +129,7 @@ func (ss *RestStateService) RecordSnapshot(instance *processinst.Instance) {
 	}
 }
 
+// RecordStep implements processinst.StateRecorder.RecordStep
 func (ss *RestStateService) RecordStep(instance *processinst.Instance) {
 
 	storeReq := &RecordStepReq{
@@ -155,6 +165,7 @@ func (ss *RestStateService) RecordStep(instance *processinst.Instance) {
 	}
 }
 
+// RecordSnapshotReq serializable representation of the RecordSnapshot request
 type RecordSnapshotReq struct {
 	ID        int    `json:"id"`
 	ProcessID string `json:"processID"`
@@ -164,6 +175,7 @@ type RecordSnapshotReq struct {
 	SnapshotData *processinst.Instance `json:"snapshotData"`
 }
 
+// RecordStepReq serializable representation of the RecordStep request
 type RecordStepReq struct {
 	ID        int    `json:"id"`
 	ProcessID string `json:"processID"`
@@ -171,4 +183,21 @@ type RecordStepReq struct {
 	Status    int    `json:"status"`
 
 	StepData *processinst.InstanceChangeTracker `json:"stepData"`
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Tester
+// todo create Managed interface (with Start/Stop)
+
+// Tester is an engine interface to assist in testing processes
+type Tester interface {
+
+	//Init initializes the EngineTester
+	Init(instManager *processinst.Manager, runner runner.Runner, config map[string]string)
+
+	// Start starts the EngineTester
+	Start()
+
+	// Stop stops the EngineTester
+	Stop()
 }

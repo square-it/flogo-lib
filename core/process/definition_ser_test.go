@@ -1,8 +1,9 @@
 package process
+
 import (
-"encoding/json"
-"testing"
+	"encoding/json"
 	"fmt"
+	"testing"
 )
 
 const defJSON = `

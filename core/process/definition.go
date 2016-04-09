@@ -84,37 +84,43 @@ type Task struct {
 	tasks        []*Task
 	links        []*Link
 
-	definition   *Definition
-	parent       *Task
-	attrs        map[string]*data.Attribute
+	definition *Definition
+	parent     *Task
+	attrs      map[string]*data.Attribute
 
 	inputMapper  *data.Mapper
 	outputMapper *data.Mapper
 
-	toLinks      []*Link
-	fromLinks    []*Link
+	toLinks   []*Link
+	fromLinks []*Link
 }
 
+// ID gets the id of the task
 func (task *Task) ID() int {
 	return task.id
 }
 
+// Name gets the name of the task
 func (task *Task) Name() string {
 	return task.name
 }
 
+// TypeID gets the id of the task type
 func (task *Task) TypeID() int {
 	return task.typeID
 }
 
+// ActivityType gets the activity type
 func (task *Task) ActivityType() string {
 	return task.activityType
 }
 
+// Parent gets the parent task of the task
 func (task *Task) Parent() *Task {
 	return task.parent
 }
 
+// ChildTasks gets the child tasks of the task
 func (task *Task) ChildTasks() []*Task {
 	return task.tasks
 }
@@ -176,19 +182,20 @@ const (
 // Link is the object that describes the definition of
 // a link.
 type Link struct {
-	id         int
-	name       string
-	fromTask   *Task
-	toTask     *Task
-	linkType   LinkType
-	value      string //expression or label
+	id       int
+	name     string
+	fromTask *Task
+	toTask   *Task
+	linkType LinkType
+	value    string //expression or label
 
 	definition *Definition
 	parent     *Task
 }
 
-func (task *Link) ID() int {
-	return task.id
+// ID gets the id of the link
+func (link *Link) ID() int {
+	return link.id
 }
 
 // FromTask returns the task the link is coming from

@@ -1,11 +1,11 @@
 package core_test
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/core/process"
 	"github.com/TIBCOSoftware/flogo-lib/core/ext/model"
+	"github.com/TIBCOSoftware/flogo-lib/core/process"
 )
 
-func init()  {
+func init() {
 	model.Register(NewTestModel())
 }
 
@@ -126,7 +126,7 @@ func (b *SimpleTaskBehavior) PostEval(context model.TaskContext, evalCode int, d
 	if activity != nil { //and is async
 
 		//done := activity.PostEval(activityContext, data)
-		done:= true
+		done := true
 
 		return done, 0
 	}
@@ -181,7 +181,7 @@ func (b *SimpleTaskBehavior) ChildDone(context model.TaskContext, childTask *pro
 type SimpleLinkBehavior struct {
 }
 
-func (b *SimpleLinkBehavior) Eval(context  model.LinkContext, evalCode int) {
+func (b *SimpleLinkBehavior) Eval(context model.LinkContext, evalCode int) {
 
 	log.Debugf("Link Eval\n")
 

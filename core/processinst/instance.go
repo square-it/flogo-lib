@@ -62,7 +62,8 @@ func NewProcessInstance(instanceID string, processURI string, process *process.D
 	return &instance
 }
 
-func (pi *Instance) SetProcessProvidcer(provider process.Provider) {
+// SetProcessProvider sets the proces.Provider that the instance should use
+func (pi *Instance) SetProcessProvider(provider process.Provider) {
 	pi.processProvider = provider
 }
 
@@ -219,7 +220,7 @@ func (pi *Instance) scheduleEval(taskData *TaskData, evalCode int) {
 
 // execTask executes the specified Work Item of the Process Instance
 func (pi *Instance) execTask(workItem *WorkItem) {
-	
+
 	taskBehavior := pi.ProcessModel.GetTaskBehavior(workItem.TaskData.task.TypeID())
 
 	var done bool

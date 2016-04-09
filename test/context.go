@@ -4,19 +4,21 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
+// TestActivityContext is a dummy AcitivityContext to assist in testing
 type TestActivityContext struct {
-	ProcessIDVal string
+	ProcessIDVal   string
 	ProcessNameVal string
-	TaskNameVal string
-	Attrs   map[string]*data.Attribute
+	TaskNameVal    string
+	Attrs          map[string]*data.Attribute
 }
 
+// NewTestActivityContext creates a new TestActivityContext
 func NewTestActivityContext() *TestActivityContext {
 	tc := &TestActivityContext{
-		ProcessIDVal:"1",
-		ProcessNameVal:"Test Process",
-		TaskNameVal:"Test Task",
-		Attrs: make(map[string]*data.Attribute),
+		ProcessIDVal:   "1",
+		ProcessNameVal: "Test Process",
+		TaskNameVal:    "Test Task",
+		Attrs:          make(map[string]*data.Attribute),
 	}
 
 	return tc
@@ -28,7 +30,7 @@ func (c *TestActivityContext) ProcessInstanceID() string {
 }
 
 // ProcessName implements activity.Context.ProcessName
-func (c *TestActivityContext) ProcessName() string{
+func (c *TestActivityContext) ProcessName() string {
 	return c.ProcessNameVal
 }
 
@@ -67,8 +69,6 @@ func (c *TestActivityContext) SetAttrValue(attrName string, value string) {
 	attr, found := c.Attrs[attrName]
 
 	if found {
-		 attr.Value = value
+		attr.Value = value
 	}
 }
-
-

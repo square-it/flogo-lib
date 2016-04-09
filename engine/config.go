@@ -1,52 +1,108 @@
 package engine
 
 import (
-	"os"
 	"encoding/json"
+	"os"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/ext/trigger"
+	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
 )
 
-type Configuration struct {
-	LogLevel        string                    `json:"loglevel"`
-	StateServiceURI string                    `json:"state_service"`
-	EngineConfig    *EngineConfig             `json:"engine"`
-	Triggers        map[string]*TriggerConfig `json:"triggers"`
+// Config is the configuration for the engine
+type Config struct {
+	LogLevel        string                     `json:"loglevel"`
+	StateServiceURI string                     `json:"stateServiceURI"`
+	Triggers        map[string]*trigger.Config `json:"triggers"`
+	RunnerConfig    *RunnerConfig              `json:"triggers"`
+	TesterConfig    *TesterConfig              `json:"tester,omitempty"`
 }
 
-type configRep struct {
-	LogLevel        string           `json:"loglevel"`
-	StateServiceURI string           `json:"state_service"`
-	EngineConfig    *EngineConfig    `json:"engine"`
-	Triggers        []*TriggerConfig `json:"triggers"`
+// RunnerConfig is the configuration for the engine level runner
+type RunnerConfig struct {
+	Type   string               `json:"type"`
+	Pooled *runner.PooledConfig `json:"pooled,omitempty"`
+	Direct *runner.DirectConfig `json:"direct,omitempty"`
 }
 
-func NewConfiguration() *Configuration {
-	engineConfig := NewEngineConfig()
+// TesterConfig is the configuration for the engine tester
+type TesterConfig struct {
+	Enabled  bool              `json:"enabled"`
+	Settings map[string]string `json:"settings"`
+}
 
-	return &Configuration{
-		LogLevel: "INFO",
-		StateServiceURI:"http://localhost:9190",
-		EngineConfig: engineConfig,
-		Triggers:make(map[string]*TriggerConfig),
+type serEngineConfig struct {
+	LogLevel        string            `json:"loglevel"`
+	StateServiceURI string            `json:"stateServiceURI"`
+	Triggers        []*trigger.Config `json:"triggers"`
+	RunnerConfig    *RunnerConfig     `json:"processRunner"`
+	TesterConfig    *TesterConfig     `json:"tester,omitempty"`
+}
+
+// DefaultConfig returns the default engine configuration
+func DefaultConfig() *Config {
+
+	var engineConfig Config
+
+	engineConfig.LogLevel = "DEBUG"
+	engineConfig.Triggers = make(map[string]*trigger.Config)
+	engineConfig.RunnerConfig = defaultRunnerConfig()
+	engineConfig.TesterConfig = defaultTesterConfig()
+
+	return &engineConfig
+}
+
+// MarshalJSON marshals the EngineConfig to JSON
+func (ec *Config) MarshalJSON() ([]byte, error) {
+
+	var triggers []*trigger.Config
+
+	for _, value := range ec.Triggers {
+		triggers = append(triggers, value)
 	}
+
+	return json.Marshal(&serEngineConfig{
+		LogLevel:        ec.LogLevel,
+		StateServiceURI: ec.StateServiceURI,
+		Triggers:        triggers,
+		RunnerConfig:    ec.RunnerConfig,
+		TesterConfig:    ec.TesterConfig,
+	})
 }
 
-func newConfiguration(rep *configRep) *Configuration {
+// UnmarshalJSON unmarshals EngineConfog from JSON
+func (ec *Config) UnmarshalJSON(data []byte) error {
 
-	config := &Configuration{
-		LogLevel:rep.LogLevel,
-		StateServiceURI:rep.StateServiceURI,
-		EngineConfig:rep.EngineConfig,
-		Triggers:make(map[string]*TriggerConfig),
+	ser := &serEngineConfig{}
+	if err := json.Unmarshal(data, ser); err != nil {
+		return err
 	}
 
-	for _, trigger := range rep.Triggers {
-		config.Triggers[trigger.Name] = trigger
+	ec.LogLevel = ser.LogLevel
+	ec.StateServiceURI = ser.StateServiceURI
+
+	if ser.RunnerConfig != nil {
+		ec.RunnerConfig = ser.RunnerConfig
+	} else {
+		ec.RunnerConfig = defaultRunnerConfig()
 	}
 
-	return config
+	if ser.TesterConfig != nil {
+		ec.TesterConfig = ser.TesterConfig
+	} else {
+		ec.TesterConfig = defaultTesterConfig()
+	}
+
+	ec.Triggers = make(map[string]*trigger.Config)
+
+	for _, value := range ser.Triggers {
+		ec.Triggers[value.Name] = value
+	}
+
+	return nil
 }
 
-func LoadConfigurationFromFile(fileName string) *Configuration {
+//LoadConfigFromFile loads the engine Config from the specified JSON file
+func LoadConfigFromFile(fileName string) *Config {
 
 	if len(fileName) == 0 {
 		panic("file name cannot be empty")
@@ -56,35 +112,24 @@ func LoadConfigurationFromFile(fileName string) *Configuration {
 
 	if configFile != nil {
 
-		rep := &configRep{}
+		engineConfig := &Config{}
 
 		decoder := json.NewDecoder(configFile)
-		decodeErr := decoder.Decode(rep)
+		decodeErr := decoder.Decode(engineConfig)
 		if decodeErr != nil {
 			log.Error("error:", decodeErr)
 		}
 
-		return newConfiguration(rep)
+		return engineConfig
 	}
 
 	return nil
 }
 
-type TriggerConfig struct {
-	Name   string `json:"name"`
-	Config map[string]string  `json:"config"`
+func defaultTesterConfig() *TesterConfig {
+	return &TesterConfig{Enabled: true, Settings: map[string]string{"port": "8080"}}
 }
 
-// EngineConfig is a configuration object used when creating an
-// Engine that contains all necessary settings
-type EngineConfig struct {
-	NumWorkers    int `json:"workers_count"`
-	WorkQueueSize int `json:"workqueue_size"`
-	MaxStepCount  int `json:"stepcount_max"`
-}
-
-// NewEngineConfig creates an EngineConfig with default values
-func NewEngineConfig() *EngineConfig {
-
-	return &EngineConfig{NumWorkers: 5, WorkQueueSize: 50, MaxStepCount: 100}
+func defaultRunnerConfig() *RunnerConfig {
+	return &RunnerConfig{Type: "pooled", Pooled: &runner.PooledConfig{NumWorkers: 5, WorkQueueSize: 50, MaxStepCount: 100}}
 }

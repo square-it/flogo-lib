@@ -1,7 +1,7 @@
 package trigger
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/engine/starter"
+	"github.com/TIBCOSoftware/flogo-lib/core/processinst"
 )
 
 // Trigger is object that triggers/starts process instances and
@@ -12,8 +12,7 @@ type Trigger interface {
 	Metadata() *Metadata
 
 	// Init sets up the trigger, it is called before Start()
-	// todo: switch to config map[string]interface{}
-	Init(processStarter starter.ProcessStarter, config map[string]string)
+	Init(starter processinst.Starter, config *Config)
 
 	// Start starts the trigger
 	Start()

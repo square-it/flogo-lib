@@ -1,143 +1,128 @@
 package engine
 
 import (
+	"encoding/json"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/ext/trigger"
+	"github.com/TIBCOSoftware/flogo-lib/core/processinst"
+	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
 	"github.com/TIBCOSoftware/flogo-lib/util"
-	"github.com/TIBCOSoftware/flogo-lib/engine/starter"
+	"github.com/op/go-logging"
 )
 
+var log = logging.MustGetLogger("engine")
 
-// Engine creates and executes ProcessInstances.  It contains
-// a Worker pool that handles the instance executions.
+// Engine creates and executes ProcessInstances.
 type Engine struct {
-	workerQueue chan chan WorkRequest
-	workQueue   chan WorkRequest
-	numWorkers  int
-	workers     []*Worker
-	active      bool
-	runner      *Runner
 	generator   *util.Generator
-
-	//lock sync.Mutex
+	runner      runner.Runner
+	env         *Environment
+	instManager *processinst.Manager
 }
 
 // NewEngine create a new Engine
-func NewEngine(system *System, config *EngineConfig) *Engine {
-	var engine Engine
-	engine.numWorkers = config.NumWorkers
-	engine.active = false
-	engine.runner = NewRunner(system, config.MaxStepCount)
-	engine.generator, _ = util.NewGenerator()
+func NewEngine(env *Environment) *Engine {
 
-	// config via engine config
-	engine.workQueue = make(chan WorkRequest, config.WorkQueueSize)
+	var engine Engine
+	engine.generator, _ = util.NewGenerator()
+	engine.env = env
+
+	runnerConfig := engine.env.engineConfig.RunnerConfig
+
+	if runnerConfig.Type == "direct" {
+		engine.runner = runner.NewDirectRunner(env.stateRecorder, runnerConfig.Direct.MaxStepCount)
+	} else {
+		engine.runner = runner.NewPooledRunner(runnerConfig.Pooled, env.stateRecorder)
+	}
+
+	if log.IsEnabledFor(logging.DEBUG) {
+		cfgJSON, _ := json.MarshalIndent(env.engineConfig, "", "  ")
+		log.Debugf("Engine Configuration:\n%s\n", string(cfgJSON))
+	}
+
+	engine.instManager = processinst.NewManager(env.ProcessProvider(), &engine)
 
 	return &engine
 }
 
-// Start will start the engine, by starting all of its workers
+// Start will start the engine, by starting all of its triggers and runner
 func (e *Engine) Start() {
-	// e.lock.Lock()
-	// defer e.lock.Unlock()
 
-	if !e.active {
+	log.Info("Starting Engine...")
 
-		e.workerQueue = make(chan chan WorkRequest, e.numWorkers)
+	triggers := trigger.Triggers()
 
-		e.workers = make([]*Worker, e.numWorkers)
+	// initialize triggers
+	for _, trigger := range triggers {
 
-		for i := 0; i < e.numWorkers; i++ {
-			log.Debug("Starting worker", i+1)
-			worker := NewWorker(i+1, e.runner, e.workerQueue)
-			e.workers[i] = &worker
-			worker.Start()
-		}
-
-		go func() {
-			for {
-				select {
-				case work := <-e.workQueue:
-					log.Debug("Received work requeust")
-					go func() {
-						worker := <-e.workerQueue
-
-						log.Debug("Dispatching work request")
-						worker <- work
-					}()
-				}
-			}
-		}()
-
-		e.active = true
+		triggerConfig := e.env.engineConfig.Triggers[trigger.Metadata().ID]
+		trigger.Init(nil, triggerConfig)
 	}
+
+	//start runner
+	e.runner.Start()
+
+	// start triggers
+	for _, trigger := range triggers {
+
+		log.Debugf("Starting trigger: %s", trigger.Metadata().ID)
+		trigger.Start()
+	}
+
+	tester := e.env.engineTester
+	testerConfig := e.env.engineConfig.TesterConfig
+
+	if tester != nil && testerConfig.Enabled {
+		log.Info("Starting Engine Tester...")
+		tester.Init(e.instManager, e.runner, testerConfig.Settings)
+		tester.Start()
+		log.Info("Started Engine Tester...")
+	}
+
+	log.Info("Started Engine")
+
 }
 
-// Stop will stop the engine, by stopping all of its workers
+// Stop will stop the engine, by stopping all of its triggers and runner
 func (e *Engine) Stop() {
 
-	// e.lock.Lock()
-	// defer e.lock.Unlock()
-	if e.active {
+	log.Info("Stopping Engine...")
 
-		for _, worker := range e.workers {
-			worker.Stop()
-		}
+	triggers := trigger.Triggers()
 
-		//stop loop
+	// stop triggers
+	for _, trigger := range triggers {
+		log.Debugf("Stopping trigger: %s", trigger.Metadata().ID)
+		trigger.Stop()
 	}
+
+	tester := e.env.engineTester
+	testerConfig := e.env.engineConfig.TesterConfig
+
+	if tester != nil && testerConfig.Enabled {
+		log.Info("Stopping Engine Tester...")
+		tester.Stop()
+		log.Info("Stopped Engine Tester...")
+	}
+
+	// stop runner
+	e.runner.Stop()
+
+	log.Info("Stopped Engine")
 }
 
-// StartProcess implements engine.ProcessStarter.StartProcess
-func (e *Engine) StartProcess(startRequest *starter.StartRequest) string {
-
-	if e.active {
-
-		instanceID := e.generator.NextAsString()
-
-		//todo should we create instance here? so we can immediately return an error if necessary
-		work := WorkRequest{ReqType: RtStart, ID: instanceID, Request: startRequest}
-
-		e.workQueue <- work
-		log.Debug("Start Process queued")
-
-		return instanceID
-	}
-
-	//reject start
-
-	return ""
+// NewProcessInstanceID implements processinst.IdGenerator.NewProcessInstanceID
+func (e *Engine) NewProcessInstanceID() string {
+	return e.generator.NextAsString()
 }
 
-// RestartProcess implements engine.ProcessStarter.RestartProcess
-func (e *Engine) RestartProcess(restartRequest *starter.RestartRequest) string {
+// StartProcessInstance implements processinst.IdGenerator.NewProcessInstanceID
+func (e *Engine) StartProcessInstance(processURI string, startData map[string]string, replyHandler processinst.ReplyHandler, execOptions *processinst.ExecOptions) string {
 
-	if e.active {
+	//todo fix for synchronous execution (DirectRunner)
 
-		instanceID := e.generator.NextAsString()
+	instance := e.instManager.StartInstance(processURI, startData, replyHandler, execOptions)
+	e.runner.RunInstance(instance)
 
-		//todo should we create instance here? so we can immediately return an error if necessary
-		work := WorkRequest{ReqType: RtRestart, ID: instanceID, Request: restartRequest}
-
-		e.workQueue <- work
-		log.Debug("Restart Process queued")
-
-		return instanceID
-	}
-
-	//reject restart
-
-	return ""
-}
-
-// ResumeProcess implements engine.ProcessStarter.ResumeProcess
-func (e *Engine) ResumeProcess(resumeRequest *starter.ResumeRequest) {
-
-	if e.active {
-
-		work := WorkRequest{ReqType: RtResume, Request: resumeRequest}
-
-		e.workQueue <- work
-		log.Debug("Resume Process queued")
-	} else {
-		//reject resume
-	}
+	return instance.ID()
 }

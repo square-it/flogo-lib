@@ -27,7 +27,7 @@ func New(name string) *ProcessModel {
 	return &processModel
 }
 
-// GetName returns the name of the ProcessModel
+// Name returns the name of the ProcessModel
 func (pm *ProcessModel) Name() string {
 	return pm.name
 }

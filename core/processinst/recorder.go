@@ -4,9 +4,9 @@ package processinst
 // snapshots and steps of a Process Instance
 type StateRecorder interface {
 
-	// StoreSnapshot records a Snapshot of the ProcessInstance
+	// RecordSnapshot records a Snapshot of the ProcessInstance
 	RecordSnapshot(instance *Instance)
 
-	// StoreStep records the changes for the current Step of the Process Instance
+	// RecordStep records the changes for the current Step of the Process Instance
 	RecordStep(instance *Instance)
 }

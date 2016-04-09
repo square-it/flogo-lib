@@ -4,15 +4,17 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
+// DefinitionRep is a serialiable represention of a process Definition
 type DefinitionRep struct {
 	TypeID        int               `json:"type"`
 	Name          string            `json:"name"`
 	ModelID       string            `json:"model"`
 	Attributes    []*data.Attribute `json:"attributes,omitempty"`
 	InputMappings []*data.Mapping   `json:"inputMappings,omitempty"`
-	RootTask      *TaskRep             `json:"rootTask"`
+	RootTask      *TaskRep          `json:"rootTask"`
 }
 
+// TaskRep is a serialiable represention of a process Task
 type TaskRep struct {
 	ID             int               `json:"id"`
 	TypeID         int               `json:"type"`
@@ -25,6 +27,7 @@ type TaskRep struct {
 	Links          []*LinkRep        `json:"links,omitempty"`
 }
 
+// LinkRep is a serialiable represention of a process Link
 type LinkRep struct {
 	ID     int    `json:"id"`
 	Type   int    `json:"type"`
@@ -34,7 +37,9 @@ type LinkRep struct {
 	Value  string `json:"value"`
 }
 
-func NewDefinition(rep *DefinitionRep) *Definition{
+// NewDefinition creates a process Definition from a serialiable
+// definition representation
+func NewDefinition(rep *DefinitionRep) *Definition {
 
 	def := &Definition{}
 	def.typeID = rep.TypeID
