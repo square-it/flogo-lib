@@ -6,15 +6,21 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/ext/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
+	"github.com/TIBCOSoftware/flogo-lib/services"
 )
 
 // Config is the configuration for the engine
 type Config struct {
-	LogLevel        string                     `json:"loglevel"`
-	StateServiceURI string                     `json:"stateServiceURI"`
-	Triggers        map[string]*trigger.Config `json:"triggers"`
-	RunnerConfig    *RunnerConfig              `json:"triggers"`
-	TesterConfig    *TesterConfig              `json:"tester,omitempty"`
+	LogLevel     string                     `json:"loglevel"`
+	RunnerConfig *RunnerConfig              `json:"processRunner"`
+	Triggers     map[string]*trigger.Config `json:"triggers"`
+	Services     map[string]*ServiceConfig  `json:"services"`
+}
+
+type ServiceConfig struct {
+	Name     string            `json:"name"`
+	Enabled  bool              `json:"enabled"`
+	Settings map[string]string `json:"settings,omitempty"`
 }
 
 // RunnerConfig is the configuration for the engine level runner
@@ -24,18 +30,11 @@ type RunnerConfig struct {
 	Direct *runner.DirectConfig `json:"direct,omitempty"`
 }
 
-// TesterConfig is the configuration for the engine tester
-type TesterConfig struct {
-	Enabled  bool              `json:"enabled"`
-	Settings map[string]string `json:"settings"`
-}
-
 type serEngineConfig struct {
-	LogLevel        string            `json:"loglevel"`
-	StateServiceURI string            `json:"stateServiceURI"`
-	Triggers        []*trigger.Config `json:"triggers"`
-	RunnerConfig    *RunnerConfig     `json:"processRunner"`
-	TesterConfig    *TesterConfig     `json:"tester,omitempty"`
+	LogLevel     string            `json:"loglevel"`
+	RunnerConfig *RunnerConfig     `json:"processRunner"`
+	Triggers     []*trigger.Config `json:"triggers"`
+	Services     []*ServiceConfig  `json:"services"`
 }
 
 // DefaultConfig returns the default engine configuration
@@ -46,7 +45,7 @@ func DefaultConfig() *Config {
 	engineConfig.LogLevel = "DEBUG"
 	engineConfig.Triggers = make(map[string]*trigger.Config)
 	engineConfig.RunnerConfig = defaultRunnerConfig()
-	engineConfig.TesterConfig = defaultTesterConfig()
+	engineConfig.Services = defaultServicesConfig()
 
 	return &engineConfig
 }
@@ -60,14 +59,21 @@ func (ec *Config) MarshalJSON() ([]byte, error) {
 		triggers = append(triggers, value)
 	}
 
+	var services []*ServiceConfig
+
+	for _, value := range ec.Services {
+		services = append(services, value)
+	}
+
 	return json.Marshal(&serEngineConfig{
 		LogLevel:        ec.LogLevel,
-		StateServiceURI: ec.StateServiceURI,
-		Triggers:        triggers,
 		RunnerConfig:    ec.RunnerConfig,
-		TesterConfig:    ec.TesterConfig,
+		Triggers:        triggers,
+		Services:    services,
 	})
 }
+
+//		StateServiceURI: ec.StateServiceURI,
 
 // UnmarshalJSON unmarshals EngineConfog from JSON
 func (ec *Config) UnmarshalJSON(data []byte) error {
@@ -78,7 +84,6 @@ func (ec *Config) UnmarshalJSON(data []byte) error {
 	}
 
 	ec.LogLevel = ser.LogLevel
-	ec.StateServiceURI = ser.StateServiceURI
 
 	if ser.RunnerConfig != nil {
 		ec.RunnerConfig = ser.RunnerConfig
@@ -86,10 +91,14 @@ func (ec *Config) UnmarshalJSON(data []byte) error {
 		ec.RunnerConfig = defaultRunnerConfig()
 	}
 
-	if ser.TesterConfig != nil {
-		ec.TesterConfig = ser.TesterConfig
+	if ser.Services != nil {
+		ec.Services = make(map[string]*ServiceConfig)
+
+		for _, value := range ser.Services {
+			ec.Services[value.Name] = value
+		}
 	} else {
-		ec.TesterConfig = defaultTesterConfig()
+		ec.Services = defaultServicesConfig()
 	}
 
 	ec.Triggers = make(map[string]*trigger.Config)
@@ -101,7 +110,7 @@ func (ec *Config) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-//LoadConfigFromFile loads the engine Config from the specified JSON file
+// LoadConfigFromFile loads the engine Config from the specified JSON file
 func LoadConfigFromFile(fileName string) *Config {
 
 	if len(fileName) == 0 {
@@ -126,8 +135,14 @@ func LoadConfigFromFile(fileName string) *Config {
 	return nil
 }
 
-func defaultTesterConfig() *TesterConfig {
-	return &TesterConfig{Enabled: true, Settings: map[string]string{"port": "8080"}}
+func defaultServicesConfig() map[string]*ServiceConfig {
+	servicesCfg := make(map[string]*ServiceConfig)
+
+	servicesCfg[services.ServiceStateRecorder] = &ServiceConfig{Name:services.ServiceStateRecorder, Enabled: true, Settings: map[string]string{"uri": ""}}
+	servicesCfg[services.ServiceProcessProvider] = &ServiceConfig{Name:services.ServiceProcessProvider, Enabled: true}
+	servicesCfg[services.ServiceEngineTester] = &ServiceConfig{Name: services.ServiceEngineTester, Enabled: true, Settings: map[string]string{"port": "8080"}}
+
+	return servicesCfg
 }
 
 func defaultRunnerConfig() *RunnerConfig {

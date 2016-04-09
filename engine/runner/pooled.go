@@ -5,6 +5,7 @@ import (
 )
 
 // PooledRunner is a process runner that queues and runs a process in a worker pool
+// todo: rename to AsyncProcessRunner?
 type PooledRunner struct {
 	workerQueue chan chan WorkRequest
 	workQueue   chan WorkRequest
@@ -40,8 +41,6 @@ func (runner *PooledRunner) Start() {
 
 	if !runner.active {
 
-		log.Debug("Starting Pooled Process Instance Runner...")
-
 		runner.workerQueue = make(chan chan WorkRequest, runner.numWorkers)
 
 		runner.workers = make([]*Worker, runner.numWorkers)
@@ -69,8 +68,6 @@ func (runner *PooledRunner) Start() {
 		}()
 
 		runner.active = true
-
-		log.Debug("Started Pooled Process Instance Runner")
 	}
 }
 
@@ -79,16 +76,12 @@ func (runner *PooledRunner) Stop() {
 
 	if runner.active {
 
-		log.Debug("Stopping Pooled Process Instance Runner...")
-
 		runner.active = false
 
 		for _, worker := range runner.workers {
 			log.Debug("Stopping worker", worker.ID)
 			worker.Stop()
 		}
-
-		log.Debug("Stopped Pooled Process Instance Runner")
 	}
 }
 

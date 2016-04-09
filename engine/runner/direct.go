@@ -9,6 +9,7 @@ var log = logging.MustGetLogger("runner")
 
 // DirectRunner is a process runner that executes a process directly on the same
 // thread
+// todo: rename to SyncProcessRunner?
 type DirectRunner struct {
 	maxStepCount  int
 	stateRecorder processinst.StateRecorder

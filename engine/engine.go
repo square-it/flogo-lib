@@ -30,9 +30,9 @@ func NewEngine(env *Environment) *Engine {
 	runnerConfig := engine.env.engineConfig.RunnerConfig
 
 	if runnerConfig.Type == "direct" {
-		engine.runner = runner.NewDirectRunner(env.stateRecorder, runnerConfig.Direct.MaxStepCount)
+		engine.runner = runner.NewDirectRunner(env.recorderService, runnerConfig.Direct.MaxStepCount)
 	} else {
-		engine.runner = runner.NewPooledRunner(runnerConfig.Pooled, env.stateRecorder)
+		engine.runner = runner.NewPooledRunner(runnerConfig.Pooled, env.recorderService)
 	}
 
 	if log.IsEnabledFor(logging.DEBUG) {
@@ -40,7 +40,7 @@ func NewEngine(env *Environment) *Engine {
 		log.Debugf("Engine Configuration:\n%s\n", string(cfgJSON))
 	}
 
-	engine.instManager = processinst.NewManager(env.ProcessProvider(), &engine)
+	engine.instManager = processinst.NewManager(env.ProcessProviderService(), &engine)
 
 	return &engine
 }
@@ -48,67 +48,79 @@ func NewEngine(env *Environment) *Engine {
 // Start will start the engine, by starting all of its triggers and runner
 func (e *Engine) Start() {
 
-	log.Info("Starting Engine...")
+	log.Info("Engine: Starting...")
 
 	triggers := trigger.Triggers()
+
+	engineConfig := e.env.engineConfig
 
 	// initialize triggers
 	for _, trigger := range triggers {
 
-		triggerConfig := e.env.engineConfig.Triggers[trigger.Metadata().ID]
+		triggerConfig := engineConfig.Triggers[trigger.Metadata().ID]
 		trigger.Init(nil, triggerConfig)
 	}
 
-	//start runner
-	e.runner.Start()
+	settings, enabled := e.env.ProcessProviderServiceSettings()
+
+	// init & start the process provider service
+	e.env.providerService.Init(settings)
+	startManaged("ProcessProvider Service", e.env.ProcessProviderService())
+
+	settings, enabled = e.env.StateRecorderServiceSettings()
+
+	// init & start the state recorder service if available
+	if enabled {
+		e.env.StateRecorderService().Init(settings)
+		startManaged("StateRecorder Service", e.env.StateRecorderService())
+	}
+
+	startManaged("ProcessRunner Service", e.runner)
 
 	// start triggers
 	for _, trigger := range triggers {
-
-		log.Debugf("Starting trigger: %s", trigger.Metadata().ID)
-		trigger.Start()
+		startManaged("Trigger [ " + trigger.Metadata().ID + " ]", trigger)
 	}
 
-	tester := e.env.engineTester
-	testerConfig := e.env.engineConfig.TesterConfig
+	settings, enabled = e.env.EngineTesterServiceSettings()
 
-	if tester != nil && testerConfig.Enabled {
-		log.Info("Starting Engine Tester...")
-		tester.Init(e.instManager, e.runner, testerConfig.Settings)
-		tester.Start()
-		log.Info("Started Engine Tester...")
+	if enabled {
+		e.env.EngineTesterService().Init(e.instManager, e.runner, settings)
+		startManaged("EngineTester Service", e.env.EngineTesterService())
 	}
 
-	log.Info("Started Engine")
-
+	log.Info("Engine: Started")
 }
 
 // Stop will stop the engine, by stopping all of its triggers and runner
 func (e *Engine) Stop() {
 
-	log.Info("Stopping Engine...")
+	log.Info("Engine: Stopping...")
 
 	triggers := trigger.Triggers()
 
 	// stop triggers
 	for _, trigger := range triggers {
-		log.Debugf("Stopping trigger: %s", trigger.Metadata().ID)
-		trigger.Stop()
+		stopManaged("Trigger [ " + trigger.Metadata().ID + " ]", trigger)
 	}
 
-	tester := e.env.engineTester
-	testerConfig := e.env.engineConfig.TesterConfig
+	_, enabled := e.env.EngineTesterServiceSettings()
 
-	if tester != nil && testerConfig.Enabled {
-		log.Info("Stopping Engine Tester...")
-		tester.Stop()
-		log.Info("Stopped Engine Tester...")
+	if enabled {
+		stopManaged("EngineTester Service", e.env.EngineTesterService())
 	}
 
-	// stop runner
-	e.runner.Stop()
+	stopManaged("Process Runner", e.runner)
 
-	log.Info("Stopped Engine")
+	stopManaged("ProcessProvider Service", e.env.ProcessProviderService())
+
+	_, enabled = e.env.StateRecorderServiceSettings()
+
+	if enabled {
+		stopManaged("StateRecorder Service", e.env.StateRecorderService())
+	}
+
+	log.Info("Engine: Stopped")
 }
 
 // NewProcessInstanceID implements processinst.IdGenerator.NewProcessInstanceID
@@ -125,4 +137,26 @@ func (e *Engine) StartProcessInstance(processURI string, startData map[string]st
 	e.runner.RunInstance(instance)
 
 	return instance.ID()
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+func startManaged(name string, managed util.Managed) {
+
+	log.Debugf("%s: Starting...", name)
+	managed.Start()
+	log.Debugf("%s: Started", name)
+}
+
+func stopManaged(name string, managed util.Managed) {
+
+	log.Debugf("%s: Stopping...", name)
+
+	err := util.StopManaged(managed)
+
+	if err != nil {
+		log.Errorf("Error stopping '%s': %s", name, err.Error())
+	} else {
+		log.Debugf("%s: Stopped", name)
+	}
 }
