@@ -6,7 +6,7 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/ext/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
-	"github.com/TIBCOSoftware/flogo-lib/services"
+	"github.com/TIBCOSoftware/flogo-lib/service"
 )
 
 // Config is the configuration for the engine
@@ -14,13 +14,7 @@ type Config struct {
 	LogLevel     string                     `json:"loglevel"`
 	RunnerConfig *RunnerConfig              `json:"processRunner"`
 	Triggers     map[string]*trigger.Config `json:"triggers"`
-	Services     map[string]*ServiceConfig  `json:"services"`
-}
-
-type ServiceConfig struct {
-	Name     string            `json:"name"`
-	Enabled  bool              `json:"enabled"`
-	Settings map[string]string `json:"settings,omitempty"`
+	Services     map[string]*service.Config  `json:"services"`
 }
 
 // RunnerConfig is the configuration for the engine level runner
@@ -34,7 +28,7 @@ type serEngineConfig struct {
 	LogLevel     string            `json:"loglevel"`
 	RunnerConfig *RunnerConfig     `json:"processRunner"`
 	Triggers     []*trigger.Config `json:"triggers"`
-	Services     []*ServiceConfig  `json:"services"`
+	Services     []*service.Config `json:"services"`
 }
 
 // DefaultConfig returns the default engine configuration
@@ -45,7 +39,7 @@ func DefaultConfig() *Config {
 	engineConfig.LogLevel = "DEBUG"
 	engineConfig.Triggers = make(map[string]*trigger.Config)
 	engineConfig.RunnerConfig = defaultRunnerConfig()
-	engineConfig.Services = defaultServicesConfig()
+	engineConfig.Services = service.DefaultServicesConfig()
 
 	return &engineConfig
 }
@@ -59,7 +53,7 @@ func (ec *Config) MarshalJSON() ([]byte, error) {
 		triggers = append(triggers, value)
 	}
 
-	var services []*ServiceConfig
+	var services []*service.Config
 
 	for _, value := range ec.Services {
 		services = append(services, value)
@@ -73,7 +67,6 @@ func (ec *Config) MarshalJSON() ([]byte, error) {
 	})
 }
 
-//		StateServiceURI: ec.StateServiceURI,
 
 // UnmarshalJSON unmarshals EngineConfog from JSON
 func (ec *Config) UnmarshalJSON(data []byte) error {
@@ -92,13 +85,13 @@ func (ec *Config) UnmarshalJSON(data []byte) error {
 	}
 
 	if ser.Services != nil {
-		ec.Services = make(map[string]*ServiceConfig)
+		ec.Services = make(map[string]*service.Config)
 
 		for _, value := range ser.Services {
 			ec.Services[value.Name] = value
 		}
 	} else {
-		ec.Services = defaultServicesConfig()
+		ec.Services = service.DefaultServicesConfig()
 	}
 
 	ec.Triggers = make(map[string]*trigger.Config)
@@ -133,16 +126,6 @@ func LoadConfigFromFile(fileName string) *Config {
 	}
 
 	return nil
-}
-
-func defaultServicesConfig() map[string]*ServiceConfig {
-	servicesCfg := make(map[string]*ServiceConfig)
-
-	servicesCfg[services.ServiceStateRecorder] = &ServiceConfig{Name:services.ServiceStateRecorder, Enabled: true, Settings: map[string]string{"uri": ""}}
-	servicesCfg[services.ServiceProcessProvider] = &ServiceConfig{Name:services.ServiceProcessProvider, Enabled: true}
-	servicesCfg[services.ServiceEngineTester] = &ServiceConfig{Name: services.ServiceEngineTester, Enabled: true, Settings: map[string]string{"port": "8080"}}
-
-	return servicesCfg
 }
 
 func defaultRunnerConfig() *RunnerConfig {

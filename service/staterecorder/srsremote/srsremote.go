@@ -1,39 +1,52 @@
-package services
+package srsremote
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/core/processinst"
+	"bytes"
 	"encoding/json"
 	"net/http"
-	"bytes"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/processinst"
+	"github.com/op/go-logging"
 )
 
-//todo create local,remote version of service
+var log = logging.MustGetLogger("staterecorder")
 
-// RestStateService simple REST implementation of the StateRecorder
-type RestStateService struct {
+// RemoteStateRecorder is an implementation of StateRecorder service
+// that can access processes via URI
+type RemoteStateRecorder struct {
 	host string
 }
 
-// NewRestStateService creates a new RestStateService
-func NewRestStateService() StateRecorderService {
+// NewRemoteStateRecorder creates a new RemoteStateRecorder
+func NewRemoteStateRecorder() *RemoteStateRecorder {
 
-	return &RestStateService{}
+	return &RemoteStateRecorder{}
 }
 
-func (ss *RestStateService) Start() {
+// Start implements util.Managed.Start()
+func (srs *RemoteStateRecorder) Start() {
 	// no-op
 }
 
-func (ss *RestStateService) Stop() {
+// Stop implements util.Managed.Stop()
+func (srs *RemoteStateRecorder) Stop() {
 	// no-op
 }
 
-func (ss *RestStateService) Init(settings map[string]string) {
-	ss.host = settings["host"]
+// Init implements services.StateRecorderService.Init()
+func (srs *RemoteStateRecorder) Init(settings map[string]string) {
+
+	host, set := settings["host"]
+
+	if !set {
+		panic("RemoteStateRecorder: requried setting 'host' not set")
+	}
+
+	srs.host = host
 }
 
 // RecordSnapshot implements processinst.StateRecorder.RecordSnapshot
-func (ss *RestStateService) RecordSnapshot(instance *processinst.Instance) {
+func (srs *RemoteStateRecorder) RecordSnapshot(instance *processinst.Instance) {
 
 	storeReq := &RecordSnapshotReq{
 		ID:           instance.StepID(),
@@ -43,7 +56,7 @@ func (ss *RestStateService) RecordSnapshot(instance *processinst.Instance) {
 		SnapshotData: instance,
 	}
 
-	uri := ss.host + "/instances/snapshot"
+	uri := srs.host + "/instances/snapshot"
 
 	log.Debugf("POST Snapshot: %s\n", uri)
 
@@ -69,7 +82,7 @@ func (ss *RestStateService) RecordSnapshot(instance *processinst.Instance) {
 }
 
 // RecordStep implements processinst.StateRecorder.RecordStep
-func (ss *RestStateService) RecordStep(instance *processinst.Instance) {
+func (ss *RemoteStateRecorder) RecordStep(instance *processinst.Instance) {
 
 	storeReq := &RecordStepReq{
 		ID:        instance.StepID(),

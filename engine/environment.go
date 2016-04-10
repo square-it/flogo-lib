@@ -1,65 +1,65 @@
 package engine
 
-import "github.com/TIBCOSoftware/flogo-lib/services"
+import "github.com/TIBCOSoftware/flogo-lib/service"
 
 
 // Environment defines the environment in which the engine will run
 type Environment struct {
-	providerService     services.ProcessProviderService
-	recorderService     services.StateRecorderService
-	engineTesterService services.TesterService
-	engineConfig        *Config
+	processProvider service.ProcessProviderService
+	stateRecorder   service.StateRecorderService
+	engineTester    service.EngineTesterService
+	engineConfig    *Config
 }
 
 // NewEnvironment creates a new engine Environment from the provided configuration and the specified
 // StateRecorder and ProcessProvider
-func NewEnvironment(providerService services.ProcessProviderService, recorderService services.StateRecorderService, testerService services.TesterService, config *Config) *Environment {
+func NewEnvironment(processProvider service.ProcessProviderService, stateRecorder service.StateRecorderService, engineTester service.EngineTesterService, config *Config) *Environment {
 
 	var engineEnv Environment
 
-	if providerService == nil {
+	if processProvider == nil {
 		panic("Engine Environment: ProcessProvider Service cannot be nil")
 	}
 
-	engineEnv.providerService = providerService
-	engineEnv.recorderService = recorderService
-	engineEnv.engineTesterService = testerService
+	engineEnv.processProvider = processProvider
+	engineEnv.stateRecorder = stateRecorder
+	engineEnv.engineTester = engineTester
 	engineEnv.engineConfig = config
 
 	return &engineEnv
 }
 
 // ProcessProviderService returns the process.Provider service associated with the EngineEnv
-func (e *Environment) ProcessProviderService() services.ProcessProviderService {
-	return e.providerService
+func (e *Environment) ProcessProviderService() service.ProcessProviderService {
+	return e.processProvider
 }
 
 // ProcessProviderService returns the process.Provider service associated with the EngineEnv
 func (e *Environment) ProcessProviderServiceSettings() (settings map[string]string, enabled bool) {
-	settings, enabled =  getServiceSettings(e.engineConfig, services.ServiceProcessProvider)
-	return settings, enabled && e.providerService != nil
+	settings, enabled =  getServiceSettings(e.engineConfig, service.ServiceProcessProvider)
+	return settings, enabled && e.processProvider != nil
 }
 
 // StateRecorderService returns the StateRecorder service associated with the EngineEnv
-func (e *Environment) StateRecorderService() services.StateRecorderService {
-	return e.recorderService
+func (e *Environment) StateRecorderService() service.StateRecorderService {
+	return e.stateRecorder
 }
 
 // ProcessProviderService returns the process.Provider service associated with the EngineEnv
 func (e *Environment) StateRecorderServiceSettings() (settings map[string]string, enabled bool) {
-	settings, enabled = getServiceSettings(e.engineConfig, services.ServiceStateRecorder)
-	return settings, enabled && e.recorderService != nil
+	settings, enabled = getServiceSettings(e.engineConfig, service.ServiceStateRecorder)
+	return settings, enabled && e.stateRecorder != nil
 }
 
 // EngineTesterService returns the EngineTester service associated with the EngineEnv
-func (e *Environment) EngineTesterService() services.TesterService {
-	return e.engineTesterService
+func (e *Environment) EngineTesterService() service.EngineTesterService {
+	return e.engineTester
 }
 
 // ProcessProviderService returns the process.Provider service associated with the EngineEnv
 func (e *Environment) EngineTesterServiceSettings() (settings map[string]string, enabled bool) {
-	settings, enabled =  getServiceSettings(e.engineConfig, services.ServiceEngineTester)
-	return settings, enabled && e.engineTesterService != nil
+	settings, enabled =  getServiceSettings(e.engineConfig, service.ServiceEngineTester)
+	return settings, enabled && e.engineTester != nil
 }
 
 // EngineConfig returns the Engine Config for the Engine Environment

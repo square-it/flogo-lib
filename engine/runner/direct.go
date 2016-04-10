@@ -26,6 +26,7 @@ func NewDirectRunner(stateRecorder processinst.StateRecorder, maxStepCount int) 
 
 	var directRunner DirectRunner
 	directRunner.stateRecorder = stateRecorder
+	directRunner.record = stateRecorder != nil
 
 	if maxStepCount < 1 {
 		directRunner.maxStepCount = int(^uint16(0))

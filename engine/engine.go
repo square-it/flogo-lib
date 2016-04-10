@@ -30,9 +30,9 @@ func NewEngine(env *Environment) *Engine {
 	runnerConfig := engine.env.engineConfig.RunnerConfig
 
 	if runnerConfig.Type == "direct" {
-		engine.runner = runner.NewDirectRunner(env.recorderService, runnerConfig.Direct.MaxStepCount)
+		engine.runner = runner.NewDirectRunner(env.stateRecorder, runnerConfig.Direct.MaxStepCount)
 	} else {
-		engine.runner = runner.NewPooledRunner(runnerConfig.Pooled, env.recorderService)
+		engine.runner = runner.NewPooledRunner(runnerConfig.Pooled, env.stateRecorder)
 	}
 
 	if log.IsEnabledFor(logging.DEBUG) {
@@ -64,7 +64,7 @@ func (e *Engine) Start() {
 	settings, enabled := e.env.ProcessProviderServiceSettings()
 
 	// init & start the process provider service
-	e.env.providerService.Init(settings)
+	e.env.processProvider.Init(settings)
 	startManaged("ProcessProvider Service", e.env.ProcessProviderService())
 
 	settings, enabled = e.env.StateRecorderServiceSettings()
