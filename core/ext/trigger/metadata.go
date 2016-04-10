@@ -11,7 +11,6 @@ type Metadata struct {
 	ID                string            `json:"name"`
 	Settings          []*data.Attribute `json:"settings"`
 	Outputs           []*data.Attribute `json:"outputs"`
-	SupportsEndpoints bool              `json:"supportsEndpoints"`
 	Endpoint          EndpointMetadata  `json:"endpoint"`
 }
 
