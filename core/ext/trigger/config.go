@@ -11,6 +11,6 @@ type Config struct {
 // EndpointConfig is the configuration for a specific endpoint for the
 // Trigger
 type EndpointConfig struct {
-	ProcessURI string `json:"processURI"`
-	ConfigData string `json:"configData"` // if string, the trigger can unmarshall its own config
+	ProcessURI string            `json:"processURI"`
+	Settings   map[string]string `json:"settings"`
 }

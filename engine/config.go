@@ -128,6 +128,18 @@ func LoadConfigFromFile(fileName string) *Config {
 	return nil
 }
 
+// LoadConfigFromFile loads the engine Config from the specified JSON file
+func LoadConfigFromJSON(configJSON string) *Config {
+
+	engineConfig := &Config{}
+	decodeErr := json.Unmarshal([]byte(configJSON), engineConfig)
+	if decodeErr != nil {
+		log.Error("error:", decodeErr)
+	}
+
+	return engineConfig
+}
+
 func defaultRunnerConfig() *RunnerConfig {
 	return &RunnerConfig{Type: "pooled", Pooled: &runner.PooledConfig{NumWorkers: 5, WorkQueueSize: 50, MaxStepCount: 100}}
 }

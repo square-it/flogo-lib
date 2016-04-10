@@ -8,9 +8,16 @@ import (
 
 // Metadata is the metadata for a Trigger
 type Metadata struct {
-	ID       string            `json:"name"`
+	ID                string            `json:"name"`
+	Settings          []*data.Attribute `json:"settings"`
+	Outputs           []*data.Attribute `json:"outputs"`
+	SupportsEndpoints bool              `json:"supportsEndpoints"`
+	Endpoint          EndpointMetadata  `json:"endpoint"`
+}
+
+// EndpointMetadata is the metadata for a Trigger Endpoint
+type EndpointMetadata struct {
 	Settings []*data.Attribute `json:"settings"`
-	Outputs  []*data.Attribute `json:"outputs"`
 }
 
 // NewMetadata creates a Metadata object from the json representation
