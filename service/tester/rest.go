@@ -89,9 +89,7 @@ func (et *RestEngineTester) StartProcess(w http.ResponseWriter, r *http.Request,
 
 	resp := &IDResponse{ID: instance.ID()}
 
-	log.Infof("ID: %v", instance.ID())
-
-	log.Infof("Runner: %v", et.runner)
+	log.Debugf("Starting Instance [ID:%s] for %s", instance.ID(), req.ProcessURI)
 
 	et.runner.RunInstance(instance)
 

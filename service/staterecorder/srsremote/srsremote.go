@@ -7,6 +7,7 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/processinst"
 	"github.com/op/go-logging"
+	"strings"
 )
 
 var log = logging.MustGetLogger("staterecorder")
@@ -37,12 +38,19 @@ func (srs *RemoteStateRecorder) Stop() {
 func (srs *RemoteStateRecorder) Init(settings map[string]string) {
 
 	host, set := settings["host"]
+	port, set := settings["port"]
 
 	if !set {
 		panic("RemoteStateRecorder: requried setting 'host' not set")
 	}
 
-	srs.host = host
+	if strings.Index(host, "http") != 0 {
+		srs.host = "http://" + host + ":" + port
+	} else {
+		srs.host = host + ":" + port
+	}
+
+	log.Debugf("RemoteStateRecorder: StateRecoder Server = %s" + srs.host)
 }
 
 // RecordSnapshot implements processinst.StateRecorder.RecordSnapshot
