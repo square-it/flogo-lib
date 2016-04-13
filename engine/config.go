@@ -14,7 +14,7 @@ type Config struct {
 	LogLevel     string                     `json:"loglevel"`
 	RunnerConfig *RunnerConfig              `json:"processRunner"`
 	Triggers     map[string]*trigger.Config `json:"triggers"`
-	Services     map[string]*service.Config  `json:"services"`
+	Services     map[string]*service.Config `json:"services"`
 }
 
 // RunnerConfig is the configuration for the engine level runner
@@ -60,13 +60,12 @@ func (ec *Config) MarshalJSON() ([]byte, error) {
 	}
 
 	return json.Marshal(&serEngineConfig{
-		LogLevel:        ec.LogLevel,
-		RunnerConfig:    ec.RunnerConfig,
-		Triggers:        triggers,
-		Services:    services,
+		LogLevel:     ec.LogLevel,
+		RunnerConfig: ec.RunnerConfig,
+		Triggers:     triggers,
+		Services:     services,
 	})
 }
-
 
 // UnmarshalJSON unmarshals EngineConfog from JSON
 func (ec *Config) UnmarshalJSON(data []byte) error {
@@ -128,7 +127,7 @@ func LoadConfigFromFile(fileName string) *Config {
 	return nil
 }
 
-// LoadConfigFromFile loads the engine Config from the specified JSON file
+// LoadConfigFromJSON loads the engine Config from the specified JSON file
 func LoadConfigFromJSON(configJSON string) *Config {
 
 	engineConfig := &Config{}
