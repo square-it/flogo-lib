@@ -50,7 +50,7 @@ func (srs *RemoteStateRecorder) Init(settings map[string]string) {
 		srs.host = host + ":" + port
 	}
 
-	log.Debugf("RemoteStateRecorder: StateRecoder Server = %s" + srs.host)
+	log.Debugf("RemoteStateRecorder: StateRecoder Server = %s", srs.host)
 }
 
 // RecordSnapshot implements processinst.StateRecorder.RecordSnapshot
