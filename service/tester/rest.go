@@ -25,6 +25,7 @@ func NewRestEngineTester() *RestEngineTester {
 func (et *RestEngineTester) Init(instManager *processinst.Manager, runner runner.Runner, config map[string]string) {
 
 	et.reqProcessor = NewRequestProcessor(instManager)
+	et.runner = runner
 
 	router := httprouter.New()
 	router.OPTIONS("/process/start", handleOption)
