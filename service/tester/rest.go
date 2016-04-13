@@ -84,10 +84,14 @@ func (et *RestEngineTester) StartProcess(w http.ResponseWriter, r *http.Request,
 
 	instance := et.reqProcessor.StartProcess(req, nil) //nil replyHandler
 
-	// If we didn'et find it, 404
+	// If we didn't find it, 404
 	//w.WriteHeader(http.StatusNotFound)
 
 	resp := &IDResponse{ID: instance.ID()}
+
+	log.Infof("ID: %v", instance.ID())
+
+	log.Infof("Runner: %v", et.runner)
 
 	et.runner.RunInstance(instance)
 
