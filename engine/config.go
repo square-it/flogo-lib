@@ -12,7 +12,7 @@ import (
 // Config is the configuration for the engine
 type Config struct {
 	LogLevel     string                     `json:"loglevel"`
-	RunnerConfig *RunnerConfig              `json:"processRunner"`
+	RunnerConfig *RunnerConfig              `json:"flowRunner"`
 	Triggers     map[string]*trigger.Config `json:"triggers"`
 	Services     map[string]*service.Config `json:"services"`
 }
@@ -26,7 +26,7 @@ type RunnerConfig struct {
 
 type serEngineConfig struct {
 	LogLevel     string            `json:"loglevel"`
-	RunnerConfig *RunnerConfig     `json:"processRunner"`
+	RunnerConfig *RunnerConfig     `json:"flowRunner"`
 	Triggers     []*trigger.Config `json:"triggers"`
 	Services     []*service.Config `json:"services"`
 }

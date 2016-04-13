@@ -70,7 +70,7 @@
     }
   },
 
-  "title": "process",
+  "title": "flow",
   "type": "object",
   "properties": {
     "id"      : { "type": "string" },

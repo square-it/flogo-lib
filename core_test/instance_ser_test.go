@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/process"
-	"github.com/TIBCOSoftware/flogo-lib/core/processinst"
+	"github.com/TIBCOSoftware/flogo-lib/core/flow"
+	"github.com/TIBCOSoftware/flogo-lib/core/flowinst"
 	"github.com/TIBCOSoftware/flogo-lib/util"
 	"github.com/op/go-logging"
 )
@@ -43,23 +43,23 @@ const defJSON = `
 
 func TestFullSerialization(t *testing.T) {
 
-	defRep := &process.DefinitionRep{}
+	defRep := &flow.DefinitionRep{}
 	json.Unmarshal([]byte(defJSON), defRep)
 
 	log.Infof("Def Rep: %v", defRep)
 
-	def := process.NewDefinition(defRep)
+	def := flow.NewDefinition(defRep)
 
 	idGen, _ := util.NewGenerator()
 	id := idGen.NextAsString()
 
-	instance := processinst.NewProcessInstance(id, "uri1", def)
+	instance := flowinst.NewFlowInstance(id, "uri1", def)
 
 	instance.Start(nil)
 
 	hasWork := true
 
-	for hasWork && instance.Status() < processinst.StatusCompleted {
+	for hasWork && instance.Status() < flowinst.StatusCompleted {
 		hasWork = instance.DoStep()
 
 		json, _ := json.Marshal(instance)
@@ -69,21 +69,21 @@ func TestFullSerialization(t *testing.T) {
 
 func TestIncrementalSerialization(t *testing.T) {
 
-	defRep := &process.DefinitionRep{}
+	defRep := &flow.DefinitionRep{}
 	json.Unmarshal([]byte(defJSON), defRep)
 
 	idGen, _ := util.NewGenerator()
 	id := idGen.NextAsString()
 
-	def := process.NewDefinition(defRep)
+	def := flow.NewDefinition(defRep)
 
-	instance := processinst.NewProcessInstance(id, "uri2", def)
+	instance := flowinst.NewFlowInstance(id, "uri2", def)
 
 	instance.Start(nil)
 
 	hasWork := true
 
-	for hasWork && instance.Status() < processinst.StatusCompleted {
+	for hasWork && instance.Status() < flowinst.StatusCompleted {
 		hasWork = instance.DoStep()
 
 		json, _ := json.Marshal(instance.GetChanges())

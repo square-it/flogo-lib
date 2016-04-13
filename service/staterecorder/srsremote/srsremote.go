@@ -4,16 +4,16 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
-
-	"github.com/TIBCOSoftware/flogo-lib/core/processinst"
-	"github.com/op/go-logging"
 	"strings"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/flowinst"
+	"github.com/op/go-logging"
 )
 
 var log = logging.MustGetLogger("staterecorder")
 
 // RemoteStateRecorder is an implementation of StateRecorder service
-// that can access processes via URI
+// that can access flowes via URI
 type RemoteStateRecorder struct {
 	host string
 }
@@ -53,12 +53,12 @@ func (srs *RemoteStateRecorder) Init(settings map[string]string) {
 	log.Debugf("RemoteStateRecorder: StateRecoder Server = %s", srs.host)
 }
 
-// RecordSnapshot implements processinst.StateRecorder.RecordSnapshot
-func (srs *RemoteStateRecorder) RecordSnapshot(instance *processinst.Instance) {
+// RecordSnapshot implements flowinst.StateRecorder.RecordSnapshot
+func (srs *RemoteStateRecorder) RecordSnapshot(instance *flowinst.Instance) {
 
 	storeReq := &RecordSnapshotReq{
 		ID:           instance.StepID(),
-		ProcessID:    instance.ID(),
+		FlowID:       instance.ID(),
 		State:        instance.State(),
 		Status:       int(instance.Status()),
 		SnapshotData: instance,
@@ -89,15 +89,15 @@ func (srs *RemoteStateRecorder) RecordSnapshot(instance *processinst.Instance) {
 	}
 }
 
-// RecordStep implements processinst.StateRecorder.RecordStep
-func (ss *RemoteStateRecorder) RecordStep(instance *processinst.Instance) {
+// RecordStep implements flowinst.StateRecorder.RecordStep
+func (ss *RemoteStateRecorder) RecordStep(instance *flowinst.Instance) {
 
 	storeReq := &RecordStepReq{
-		ID:        instance.StepID(),
-		ProcessID: instance.ID(),
-		State:     instance.State(),
-		Status:    int(instance.Status()),
-		StepData:  instance.ChangeTracker,
+		ID:       instance.StepID(),
+		FlowID:   instance.ID(),
+		State:    instance.State(),
+		Status:   int(instance.Status()),
+		StepData: instance.ChangeTracker,
 	}
 
 	uri := ss.host + "/instances/steps"
@@ -127,20 +127,20 @@ func (ss *RemoteStateRecorder) RecordStep(instance *processinst.Instance) {
 
 // RecordSnapshotReq serializable representation of the RecordSnapshot request
 type RecordSnapshotReq struct {
-	ID        int    `json:"id"`
-	ProcessID string `json:"processID"`
-	State     int    `json:"state"`
-	Status    int    `json:"status"`
+	ID     int    `json:"id"`
+	FlowID string `json:"flowID"`
+	State  int    `json:"state"`
+	Status int    `json:"status"`
 
-	SnapshotData *processinst.Instance `json:"snapshotData"`
+	SnapshotData *flowinst.Instance `json:"snapshotData"`
 }
 
 // RecordStepReq serializable representation of the RecordStep request
 type RecordStepReq struct {
-	ID        int    `json:"id"`
-	ProcessID string `json:"processID"`
-	State     int    `json:"state"`
-	Status    int    `json:"status"`
+	ID     int    `json:"id"`
+	FlowID string `json:"flowID"`
+	State  int    `json:"state"`
+	Status int    `json:"status"`
 
-	StepData *processinst.InstanceChangeTracker `json:"stepData"`
+	StepData *flowinst.InstanceChangeTracker `json:"stepData"`
 }

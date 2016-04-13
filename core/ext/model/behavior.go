@@ -1,37 +1,37 @@
 package model
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/core/process"
+	"github.com/TIBCOSoftware/flogo-lib/core/flow"
 )
 
 // TaskEntry is a struct used to specify what Task to
 // enter and its corresponding enter code
 type TaskEntry struct {
-	Task      *process.Task
+	Task      *flow.Task
 	EnterCode int
 }
 
-// ProcessBehavior is the execution behavior of the Process.
-type ProcessBehavior interface {
+// FlowBehavior is the execution behavior of the Flow.
+type FlowBehavior interface {
 
-	// Start the process instance.  Returning true indicates that the
-	// process can start and eval will be scheduled on the Root Task.
-	// Return false indicates that the process could not be started
+	// Start the flow instance.  Returning true indicates that the
+	// flow can start and eval will be scheduled on the Root Task.
+	// Return false indicates that the flow could not be started
 	// at this time.
-	Start(context ProcessContext, data interface{}) (start bool, evalCode int)
+	Start(context FlowContext, data interface{}) (start bool, evalCode int)
 
-	// Resume the process instance.  Returning true indicates that the
-	// process can resume.  Return false indicates that the process
+	// Resume the flow instance.  Returning true indicates that the
+	// flow can resume.  Return false indicates that the flow
 	// could not be resumed at this time.
-	Resume(context ProcessContext, data interface{}) bool //<---
+	Resume(context FlowContext, data interface{}) bool //<---
 
 	//do we need the following two
 
 	// TasksDone is called when the RootTask is Done.
-	TasksDone(context ProcessContext, doneCode int)
+	TasksDone(context FlowContext, doneCode int)
 
-	// Done is called when the process is done.
-	Done(context ProcessContext) //maybe return something to the state server?
+	// Done is called when the flow is done.
+	Done(context FlowContext) //maybe return something to the state server?
 }
 
 // TaskBehavior is the execution behavior of a Task.
@@ -59,7 +59,7 @@ type TaskBehavior interface {
 	// ChildDone is called when child task is Done and has indicated that its
 	// parent should be notified.  Returning true indicates that the task
 	// is done.
-	ChildDone(context TaskContext, childTask *process.Task, childDoneCode int) (done bool, doneCode int)
+	ChildDone(context TaskContext, childTask *flow.Task, childDoneCode int) (done bool, doneCode int)
 }
 
 // LinkBehavior is the execution behavior of a Link.

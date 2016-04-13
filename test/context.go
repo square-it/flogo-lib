@@ -6,32 +6,32 @@ import (
 
 // TestActivityContext is a dummy AcitivityContext to assist in testing
 type TestActivityContext struct {
-	ProcessIDVal   string
-	ProcessNameVal string
-	TaskNameVal    string
-	Attrs          map[string]*data.Attribute
+	FlowIDVal   string
+	FlowNameVal string
+	TaskNameVal string
+	Attrs       map[string]*data.Attribute
 }
 
 // NewTestActivityContext creates a new TestActivityContext
 func NewTestActivityContext() *TestActivityContext {
 	tc := &TestActivityContext{
-		ProcessIDVal:   "1",
-		ProcessNameVal: "Test Process",
-		TaskNameVal:    "Test Task",
-		Attrs:          make(map[string]*data.Attribute),
+		FlowIDVal:   "1",
+		FlowNameVal: "Test Flow",
+		TaskNameVal: "Test Task",
+		Attrs:       make(map[string]*data.Attribute),
 	}
 
 	return tc
 }
 
-// ProcessInstanceID implements activity.Context.ProcessInstanceID
-func (c *TestActivityContext) ProcessInstanceID() string {
-	return c.ProcessIDVal
+// FlowInstanceID implements activity.Context.FlowInstanceID
+func (c *TestActivityContext) FlowInstanceID() string {
+	return c.FlowIDVal
 }
 
-// ProcessName implements activity.Context.ProcessName
-func (c *TestActivityContext) ProcessName() string {
-	return c.ProcessNameVal
+// FlowName implements activity.Context.FlowName
+func (c *TestActivityContext) FlowName() string {
+	return c.FlowNameVal
 }
 
 // TaskName implements activity.Context.TaskName

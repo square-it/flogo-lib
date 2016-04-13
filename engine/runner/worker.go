@@ -1,7 +1,7 @@
 package runner
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/core/processinst"
+	"github.com/TIBCOSoftware/flogo-lib/core/flowinst"
 )
 
 // Based off: http://nesv.github.io/golang/2014/02/25/worker-queues-in-go.html
@@ -10,7 +10,7 @@ import (
 type RequestType int
 
 const (
-	// RtRun denotes a run process instance request
+	// RtRun denotes a run flow instance request
 	RtRun RequestType = 10
 )
 
@@ -22,7 +22,7 @@ type WorkRequest struct {
 }
 
 // A Worker handles WorkRequest, work requests consist of start, restart
-// and resume of ProcessInstances
+// and resume of FlowInstances
 type Worker struct {
 	ID          int
 	runner      *DirectRunner
@@ -62,7 +62,7 @@ func (w Worker) Start() {
 				switch work.ReqType {
 				case RtRun:
 
-					instance := work.Request.(*processinst.Instance)
+					instance := work.Request.(*flowinst.Instance)
 
 					log.Debugf("worker-%d: Received Run Request: %s - %s\n", w.ID, work.ID, instance.ID())
 					w.runner.RunInstance(instance)

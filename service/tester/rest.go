@@ -4,16 +4,16 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/processinst"
+	"github.com/TIBCOSoftware/flogo-lib/core/flowinst"
 	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
 	"github.com/julienschmidt/httprouter"
 )
 
 // RestEngineTester is default REST implementation of the EngineTester
 type RestEngineTester struct {
-	reqProcessor *RequestProcessor
-	server       *Server
-	runner       runner.Runner
+	reqFlowor *RequestFlowor
+	server    *Server
+	runner    runner.Runner
 }
 
 // NewRestEngineTester creates a new REST EngineTester
@@ -22,20 +22,20 @@ func NewRestEngineTester() *RestEngineTester {
 }
 
 // Init implements engine.EngineTester.Init
-func (et *RestEngineTester) Init(settings map[string]string, instManager *processinst.Manager, runner runner.Runner) {
+func (et *RestEngineTester) Init(settings map[string]string, instManager *flowinst.Manager, runner runner.Runner) {
 
-	et.reqProcessor = NewRequestProcessor(instManager)
+	et.reqFlowor = NewRequestFlowor(instManager)
 	et.runner = runner
 
 	router := httprouter.New()
-	router.OPTIONS("/process/start", handleOption)
-	router.POST("/process/start", et.StartProcess)
+	router.OPTIONS("/flow/start", handleOption)
+	router.POST("/flow/start", et.StartFlow)
 
-	router.OPTIONS("/process/restart", handleOption)
-	router.POST("/process/restart", et.RestartProcess)
+	router.OPTIONS("/flow/restart", handleOption)
+	router.POST("/flow/restart", et.RestartFlow)
 
-	router.OPTIONS("/process/resume", handleOption)
-	router.POST("/process/resume", et.ResumeProcess)
+	router.OPTIONS("/flow/resume", handleOption)
+	router.POST("/flow/resume", et.ResumeFlow)
 
 	addr := ":" + settings["port"]
 	et.server = NewServer(addr, router)
@@ -67,11 +67,11 @@ type IDResponse struct {
 	ID string `json:"id"`
 }
 
-// StartProcess starts a new Process Instance (POST "/process/start").
+// StartFlow starts a new Flow Instance (POST "/flow/start").
 //
-// To post a start process, try this at a shell:
-// $ curl -H "Content-Type: application/json" -X POST -d '{"processUri":"base"}' http://localhost:8080/process/start
-func (et *RestEngineTester) StartProcess(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+// To post a start flow, try this at a shell:
+// $ curl -H "Content-Type: application/json" -X POST -d '{"flowUri":"base"}' http://localhost:8080/flow/start
+func (et *RestEngineTester) StartFlow(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
@@ -82,14 +82,14 @@ func (et *RestEngineTester) StartProcess(w http.ResponseWriter, r *http.Request,
 		return
 	}
 
-	instance := et.reqProcessor.StartProcess(req, nil) //nil replyHandler
+	instance := et.reqFlowor.StartFlow(req, nil) //nil replyHandler
 
 	// If we didn't find it, 404
 	//w.WriteHeader(http.StatusNotFound)
 
 	resp := &IDResponse{ID: instance.ID()}
 
-	log.Debugf("Starting Instance [ID:%s] for %s", instance.ID(), req.ProcessURI)
+	log.Debugf("Starting Instance [ID:%s] for %s", instance.ID(), req.FlowURI)
 
 	et.runner.RunInstance(instance)
 
@@ -99,17 +99,17 @@ func (et *RestEngineTester) StartProcess(w http.ResponseWriter, r *http.Request,
 	w.WriteHeader(http.StatusOK)
 }
 
-// RestartProcess restarts a Process Instance (POST "/process/restart").
+// RestartFlow restarts a Flow Instance (POST "/flow/restart").
 //
-// To post a restart process, try this at a shell:
-// $ curl -H "Content-Type: application/json" -X POST -d '{...}' http://localhost:8080/process/restart
-func (et *RestEngineTester) RestartProcess(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+// To post a restart flow, try this at a shell:
+// $ curl -H "Content-Type: application/json" -X POST -d '{...}' http://localhost:8080/flow/restart
+func (et *RestEngineTester) RestartFlow(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
 	//defer func() {
 	//	if r := recover(); r != nil {
-	//		log.Error("Unable to restart process, make sure definition registered")
+	//		log.Error("Unable to restart flow, make sure definition registered")
 	//	}
 	//}()
 
@@ -120,7 +120,7 @@ func (et *RestEngineTester) RestartProcess(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	instance := et.reqProcessor.RestartProcess(req, nil) //nil replyHandler
+	instance := et.reqFlowor.RestartFlow(req, nil) //nil replyHandler
 
 	// If we didn'et find it, 404
 	//w.WriteHeader(http.StatusNotFound)
@@ -135,17 +135,17 @@ func (et *RestEngineTester) RestartProcess(w http.ResponseWriter, r *http.Reques
 	w.WriteHeader(http.StatusOK)
 }
 
-// ResumeProcess resumes a Process Instance (POST "/process/resume").
+// ResumeFlow resumes a Flow Instance (POST "/flow/resume").
 //
-// To post a resume process, try this at a shell:
-// $ curl -H "Content-Type: application/json" -X POST -d '{...}' http://localhost:8080/process/resume
-func (et *RestEngineTester) ResumeProcess(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+// To post a resume flow, try this at a shell:
+// $ curl -H "Content-Type: application/json" -X POST -d '{...}' http://localhost:8080/flow/resume
+func (et *RestEngineTester) ResumeFlow(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
 	defer func() {
 		if r := recover(); r != nil {
-			log.Error("Unable to resume process, make sure definition registered")
+			log.Error("Unable to resume flow, make sure definition registered")
 		}
 	}()
 
@@ -156,7 +156,7 @@ func (et *RestEngineTester) ResumeProcess(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	instance := et.reqProcessor.ResumeProcess(req, nil) //nil replyHandler
+	instance := et.reqFlowor.ResumeFlow(req, nil) //nil replyHandler
 	et.runner.RunInstance(instance)
 
 	w.WriteHeader(http.StatusOK)

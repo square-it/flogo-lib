@@ -1,4 +1,4 @@
-package process
+package flow
 
 import (
 	"fmt"
@@ -7,10 +7,10 @@ import (
 	"github.com/op/go-logging"
 )
 
-var log = logging.MustGetLogger("process")
+var log = logging.MustGetLogger("flow")
 
 // Definition is the object that describes the definition of
-// a process.  It contains its data (attributes) and
+// a flow.  It contains its data (attributes) and
 // structure (tasks & links).
 type Definition struct {
 	typeID   int

@@ -2,16 +2,16 @@ package core_test
 
 import (
 	"github.com/TIBCOSoftware/flogo-lib/core/ext/model"
-	"github.com/TIBCOSoftware/flogo-lib/core/process"
+	"github.com/TIBCOSoftware/flogo-lib/core/flow"
 )
 
 func init() {
 	model.Register(NewTestModel())
 }
 
-func NewTestModel() *model.ProcessModel {
+func NewTestModel() *model.FlowModel {
 	m := model.New("test")
-	m.RegisterProcessBehavior(1, &SimpleProcessBehavior{})
+	m.RegisterFlowBehavior(1, &SimpleFlowBehavior{})
 	m.RegisterTaskBehavior(1, &SimpleTaskBehavior{})
 	m.RegisterLinkBehavior(1, &SimpleLinkBehavior{})
 
@@ -19,29 +19,29 @@ func NewTestModel() *model.ProcessModel {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-// SimpleProcess
+// SimpleFlow
 
-type SimpleProcessBehavior struct {
+type SimpleFlowBehavior struct {
 }
 
-func (b *SimpleProcessBehavior) Start(context model.ProcessContext, data interface{}) (start bool, evalCode int) {
+func (b *SimpleFlowBehavior) Start(context model.FlowContext, data interface{}) (start bool, evalCode int) {
 
 	//just schedule the root task
 	return true, 0
 }
 
-func (b *SimpleProcessBehavior) Resume(context model.ProcessContext, data interface{}) bool {
+func (b *SimpleFlowBehavior) Resume(context model.FlowContext, data interface{}) bool {
 
 	return true
 }
 
-func (b *SimpleProcessBehavior) TasksDone(context model.ProcessContext, doneCode int) {
-	log.Debugf("Process TasksDone\n")
+func (b *SimpleFlowBehavior) TasksDone(context model.FlowContext, doneCode int) {
+	log.Debugf("Flow TasksDone\n")
 
 }
 
-func (b *SimpleProcessBehavior) Done(context model.ProcessContext) {
-	log.Debugf("Process Done\n")
+func (b *SimpleFlowBehavior) Done(context model.FlowContext) {
+	log.Debugf("Flow Done\n")
 
 }
 
@@ -169,7 +169,7 @@ func (b *SimpleTaskBehavior) Done(context model.TaskContext, doneCode int) (noti
 	return true, 0, nil
 }
 
-func (b *SimpleTaskBehavior) ChildDone(context model.TaskContext, childTask *process.Task, childDoneCode int) (done bool, doneCode int) {
+func (b *SimpleTaskBehavior) ChildDone(context model.TaskContext, childTask *flow.Task, childDoneCode int) (done bool, doneCode int) {
 	log.Debugf("Task ChildDone\n")
 
 	return true, 0

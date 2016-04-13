@@ -1,10 +1,10 @@
-package process
+package flow
 
 import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
-// DefinitionRep is a serialiable represention of a process Definition
+// DefinitionRep is a serialiable represention of a flow Definition
 type DefinitionRep struct {
 	TypeID        int               `json:"type"`
 	Name          string            `json:"name"`
@@ -14,7 +14,7 @@ type DefinitionRep struct {
 	RootTask      *TaskRep          `json:"rootTask"`
 }
 
-// TaskRep is a serialiable represention of a process Task
+// TaskRep is a serialiable represention of a flow Task
 type TaskRep struct {
 	ID             int               `json:"id"`
 	TypeID         int               `json:"type"`
@@ -27,7 +27,7 @@ type TaskRep struct {
 	Links          []*LinkRep        `json:"links,omitempty"`
 }
 
-// LinkRep is a serialiable represention of a process Link
+// LinkRep is a serialiable represention of a flow Link
 type LinkRep struct {
 	ID     int    `json:"id"`
 	Type   int    `json:"type"`
@@ -37,7 +37,7 @@ type LinkRep struct {
 	Value  string `json:"value"`
 }
 
-// NewDefinition creates a process Definition from a serialiable
+// NewDefinition creates a flow Definition from a serialiable
 // definition representation
 func NewDefinition(rep *DefinitionRep) *Definition {
 
@@ -63,13 +63,13 @@ func NewDefinition(rep *DefinitionRep) *Definition {
 	def.tasks = make(map[int]*Task)
 	def.links = make(map[int]*Link)
 
-	processTask(def, def.rootTask, rep.RootTask)
-	processTaskLinks(def, def.rootTask, rep.RootTask)
+	flowTask(def, def.rootTask, rep.RootTask)
+	flowTaskLinks(def, def.rootTask, rep.RootTask)
 
 	return def
 }
 
-func processTask(def *Definition, task *Task, rep *TaskRep) {
+func flowTask(def *Definition, task *Task, rep *TaskRep) {
 
 	task.id = rep.ID
 	task.activityType = rep.ActivityType
@@ -95,7 +95,7 @@ func processTask(def *Definition, task *Task, rep *TaskRep) {
 	def.tasks[task.id] = task
 	numTasks := len(rep.Tasks)
 
-	// process child tasks
+	// flow child tasks
 	if numTasks > 0 {
 
 		for _, childTaskRep := range rep.Tasks {
@@ -103,14 +103,14 @@ func processTask(def *Definition, task *Task, rep *TaskRep) {
 			childTask := &Task{}
 			//childTask.Parent = task
 			task.tasks = append(task.tasks, childTask)
-			processTask(def, childTask, childTaskRep)
+			flowTask(def, childTask, childTaskRep)
 		}
 	}
 }
 
-// processTaskLinks processes a task's links.  Done seperately so it can
+// flowTaskLinks flowes a task's links.  Done seperately so it can
 // properly handle cross-boundry links
-func processTaskLinks(def *Definition, task *Task, rep *TaskRep) {
+func flowTaskLinks(def *Definition, task *Task, rep *TaskRep) {
 
 	numLinks := len(rep.Links)
 

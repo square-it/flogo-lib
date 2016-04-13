@@ -1,7 +1,7 @@
 package engine
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/core/processinst"
+	"github.com/TIBCOSoftware/flogo-lib/core/flowinst"
 	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
 	"github.com/TIBCOSoftware/flogo-lib/service"
 	"github.com/TIBCOSoftware/flogo-lib/util"
@@ -9,7 +9,7 @@ import (
 
 // Environment defines the environment in which the engine will run
 type Environment struct {
-	processProvider      service.ProcessProviderService
+	flowProvider         service.FlowProviderService
 	stateRecorder        service.StateRecorderService
 	stateRecorderEnabled bool
 	engineTester         service.EngineTesterService
@@ -20,16 +20,16 @@ type Environment struct {
 }
 
 // NewEnvironment creates a new engine Environment from the provided configuration and the specified
-// StateRecorder and ProcessProvider
-func NewEnvironment(processProvider service.ProcessProviderService, stateRecorder service.StateRecorderService, engineTester service.EngineTesterService, config *Config) *Environment {
+// StateRecorder and FlowProvider
+func NewEnvironment(flowProvider service.FlowProviderService, stateRecorder service.StateRecorderService, engineTester service.EngineTesterService, config *Config) *Environment {
 
 	var engineEnv Environment
 
-	if processProvider == nil {
-		panic("Engine Environment: ProcessProvider Service cannot be nil")
+	if flowProvider == nil {
+		panic("Engine Environment: FlowProvider Service cannot be nil")
 	}
 
-	engineEnv.processProvider = processProvider
+	engineEnv.flowProvider = flowProvider
 	engineEnv.stateRecorder = stateRecorder
 	engineEnv.engineTester = engineTester
 	engineEnv.engineConfig = config
@@ -37,12 +37,12 @@ func NewEnvironment(processProvider service.ProcessProviderService, stateRecorde
 	return &engineEnv
 }
 
-// ProcessProviderService returns the process.Provider service associated with the EngineEnv
-func (e *Environment) ProcessProviderService() service.ProcessProviderService {
-	return e.processProvider
+// FlowProviderService returns the flow.Provider service associated with the EngineEnv
+func (e *Environment) FlowProviderService() service.FlowProviderService {
+	return e.flowProvider
 }
 
-// StateRecorderService returns the processinst.StateRecorder service associated with the EngineEnv
+// StateRecorderService returns the flowinst.StateRecorder service associated with the EngineEnv
 func (e *Environment) StateRecorderService() (stateRecorder service.StateRecorderService, enabled bool) {
 
 	return e.stateRecorder, e.stateRecorderEnabled
@@ -65,10 +65,10 @@ func (e *Environment) EngineConfig() *Config {
 }
 
 // Init is used to initialize the engine environment
-func (e *Environment) Init(instManager *processinst.Manager, defaultRunner runner.Runner) {
+func (e *Environment) Init(instManager *flowinst.Manager, defaultRunner runner.Runner) {
 
-	settings, enabled := getServiceSettings(e.engineConfig, service.ServiceProcessProvider)
-	e.processProvider.Init(settings, e.embeddedFlowManger)
+	settings, enabled := getServiceSettings(e.engineConfig, service.ServiceFlowProvider)
+	e.flowProvider.Init(settings, e.embeddedFlowManger)
 
 	settings, enabled = getServiceSettings(e.engineConfig, service.ServiceStateRecorder)
 

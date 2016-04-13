@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/ext/trigger"
-	"github.com/TIBCOSoftware/flogo-lib/core/processinst"
+	"github.com/TIBCOSoftware/flogo-lib/core/flowinst"
 	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
 	"github.com/TIBCOSoftware/flogo-lib/util"
 	"github.com/op/go-logging"
@@ -12,12 +12,12 @@ import (
 
 var log = logging.MustGetLogger("engine")
 
-// Engine creates and executes ProcessInstances.
+// Engine creates and executes FlowInstances.
 type Engine struct {
 	generator   *util.Generator
 	runner      runner.Runner
 	env         *Environment
-	instManager *processinst.Manager
+	instManager *flowinst.Manager
 }
 
 // NewEngine create a new Engine
@@ -40,7 +40,7 @@ func NewEngine(env *Environment) *Engine {
 		log.Debugf("Engine Configuration:\n%s\n", string(cfgJSON))
 	}
 
-	engine.instManager = processinst.NewManager(env.ProcessProviderService(), &engine)
+	engine.instManager = flowinst.NewManager(env.FlowProviderService(), &engine)
 
 	return &engine
 }
@@ -64,9 +64,9 @@ func (e *Engine) Start() {
 		trigger.Init(nil, triggerConfig)
 	}
 
-	// start the process provider service
-	processProvider := e.env.ProcessProviderService()
-	startManaged("ProcessProvider Service", processProvider)
+	// start the flow provider service
+	flowProvider := e.env.FlowProviderService()
+	startManaged("FlowProvider Service", flowProvider)
 
 	// start the state recorder service if enabled
 	stateRecorder, enabled := e.env.StateRecorderService()
@@ -74,7 +74,7 @@ func (e *Engine) Start() {
 		startManaged("StateRecorder Service", stateRecorder)
 	}
 
-	startManaged("ProcessRunner Service", e.runner)
+	startManaged("FlowRunner Service", e.runner)
 
 	// start triggers
 	for _, trigger := range triggers {
@@ -108,9 +108,9 @@ func (e *Engine) Stop() {
 		stopManaged("EngineTester Service", engineTester)
 	}
 
-	stopManaged("Process Runner", e.runner)
+	stopManaged("Flow Runner", e.runner)
 
-	stopManaged("ProcessProvider Service", e.env.ProcessProviderService())
+	stopManaged("FlowProvider Service", e.env.FlowProviderService())
 
 	stateRecorder, enabled := e.env.StateRecorderService()
 
@@ -121,17 +121,17 @@ func (e *Engine) Stop() {
 	log.Info("Engine: Stopped")
 }
 
-// NewProcessInstanceID implements processinst.IdGenerator.NewProcessInstanceID
-func (e *Engine) NewProcessInstanceID() string {
+// NewFlowInstanceID implements flowinst.IdGenerator.NewFlowInstanceID
+func (e *Engine) NewFlowInstanceID() string {
 	return e.generator.NextAsString()
 }
 
-// StartProcessInstance implements processinst.IdGenerator.NewProcessInstanceID
-func (e *Engine) StartProcessInstance(processURI string, startData map[string]string, replyHandler processinst.ReplyHandler, execOptions *processinst.ExecOptions) string {
+// StartFlowInstance implements flowinst.IdGenerator.NewFlowInstanceID
+func (e *Engine) StartFlowInstance(flowURI string, startData map[string]string, replyHandler flowinst.ReplyHandler, execOptions *flowinst.ExecOptions) string {
 
 	//todo fix for synchronous execution (DirectRunner)
 
-	instance := e.instManager.StartInstance(processURI, startData, replyHandler, execOptions)
+	instance := e.instManager.StartInstance(flowURI, startData, replyHandler, execOptions)
 	e.runner.RunInstance(instance)
 
 	return instance.ID()

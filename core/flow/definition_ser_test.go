@@ -1,4 +1,4 @@
-package process
+package flow
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 const defJSON = `
 {
     "type": 1,
-    "name": "Demo Process",
+    "name": "Demo Flow",
     "model": "simple",
     "attributes": [
       { "name": "petInfo", "type": "string", "value": "" }
@@ -26,8 +26,8 @@ const defJSON = `
           "activityType": "log",
           "name": "Log Start",
           "attributes": [
-            { "type": "string", "name": "message", "value": "Find Pet Process Started!"},
-            { "type": "boolean", "name": "processInfo", "value": "true"}
+            { "type": "string", "name": "message", "value": "Find Pet Flow Started!"},
+            { "type": "boolean", "name": "flowInfo", "value": "true"}
           ]
         },
         {
@@ -55,7 +55,7 @@ const defJSON = `
           "name": "Log Results",
           "attributes": [
             { "type": "string", "name": "message", "value": "REST results" },
-            { "type": "boolean", "name": "processInfo", "value": "true" }
+            { "type": "boolean", "name": "flowInfo", "value": "true" }
           ],
           "inputMappings": [
             { "type": 1, "value": "petInfo", "result": "message" }
@@ -70,7 +70,7 @@ const defJSON = `
   }
 `
 
-func TestRestartWithProcessData(t *testing.T) {
+func TestRestartWithFlowData(t *testing.T) {
 
 	defRep := &DefinitionRep{}
 

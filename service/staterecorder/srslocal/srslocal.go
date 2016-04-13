@@ -1,7 +1,7 @@
 package srslocal
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/core/processinst"
+	"github.com/TIBCOSoftware/flogo-lib/core/flowinst"
 	"github.com/op/go-logging"
 )
 
@@ -34,12 +34,12 @@ func (srs *LocalStateRecorder) Init(settings map[string]string) {
 	//srs.host = settings["host"]
 }
 
-// RecordSnapshot implements processinst.StateRecorder.RecordSnapshot
-func (srs *LocalStateRecorder) RecordSnapshot(instance *processinst.Instance) {
+// RecordSnapshot implements flowinst.StateRecorder.RecordSnapshot
+func (srs *LocalStateRecorder) RecordSnapshot(instance *flowinst.Instance) {
 
 }
 
-// RecordStep implements processinst.StateRecorder.RecordStep
-func (srs *LocalStateRecorder) RecordStep(instance *processinst.Instance) {
+// RecordStep implements flowinst.StateRecorder.RecordStep
+func (srs *LocalStateRecorder) RecordStep(instance *flowinst.Instance) {
 
 }

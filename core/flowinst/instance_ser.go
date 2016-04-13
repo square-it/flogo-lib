@@ -1,4 +1,4 @@
-package processinst
+package flowinst
 
 import (
 	"encoding/json"
@@ -8,19 +8,19 @@ import (
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Process Instance Serialization
+// Flow Instance Serialization
 
 type serInstance struct {
 	ID          string            `json:"id"`
 	Status      Status            `json:"status"`
 	State       int               `json:"state"`
-	ProcessURI  string            `json:"processUri"`
+	FlowURI     string            `json:"flowUri"`
 	Attrs       []*data.Attribute `json:"attrs"`
 	WorkQueue   []*WorkItem       `json:"workQueue"`
 	RootTaskEnv *TaskEnv          `json:"rootTaskEnv"`
 }
 
-// MarshalJSON overrides the default MarshalJSON for ProcessInstance
+// MarshalJSON overrides the default MarshalJSON for FlowInstance
 func (pi *Instance) MarshalJSON() ([]byte, error) {
 
 	queue := make([]*WorkItem, pi.WorkItemQueue.List.Len())
@@ -40,17 +40,17 @@ func (pi *Instance) MarshalJSON() ([]byte, error) {
 		Status:      pi.status,
 		State:       pi.state,
 		Attrs:       attrs,
-		ProcessURI:  pi.ProcessURI,
+		FlowURI:     pi.FlowURI,
 		WorkQueue:   queue,
 		RootTaskEnv: pi.RootTaskEnv,
 	})
 }
 
-// UnmarshalJSON overrides the default UnmarshalJSON for ProcessInstance
+// UnmarshalJSON overrides the default UnmarshalJSON for FlowInstance
 func (pi *Instance) UnmarshalJSON(d []byte) error {
 
-	//if pi.processProvider == nil {
-	//	panic("process.Provider not specified, required for unmarshalling")
+	//if pi.flowProvider == nil {
+	//	panic("flow.Provider not specified, required for unmarshalling")
 	//}
 
 	ser := &serInstance{}
@@ -62,9 +62,9 @@ func (pi *Instance) UnmarshalJSON(d []byte) error {
 	pi.status = ser.Status
 	pi.state = ser.State
 
-	pi.ProcessURI = ser.ProcessURI
-	//pi.Process = pi.processProvider.GetProcess(pi.ProcessURI)
-	//pi.ProcessModel = processmodel.Get(pi.Process.ModelID())
+	pi.FlowURI = ser.FlowURI
+	//pi.Flow = pi.flowProvider.GetFlow(pi.FlowURI)
+	//pi.FlowModel = flowmodel.Get(pi.Flow.ModelID())
 
 	pi.Attrs = make(map[string]*data.Attribute)
 
@@ -75,7 +75,7 @@ func (pi *Instance) UnmarshalJSON(d []byte) error {
 	pi.RootTaskEnv = ser.RootTaskEnv
 	//pi.RootTaskEnv.init(pi)
 
-	pi.WorkItemQueue = util.NewQueue()
+	pi.WorkItemQueue = util.NewSyncQueue()
 
 	for _, workItem := range ser.WorkQueue {
 		workItem.TaskData = pi.RootTaskEnv.TaskDatas[workItem.TaskID]
@@ -195,7 +195,7 @@ func (td *TaskData) UnmarshalJSON(d []byte) error {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Process Instance Changes Serialization
+// Flow Instance Changes Serialization
 
 // MarshalJSON overrides the default MarshalJSON for InstanceChangeTracker
 func (ict *InstanceChangeTracker) MarshalJSON() ([]byte, error) {

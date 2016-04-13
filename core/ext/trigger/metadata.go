@@ -8,10 +8,10 @@ import (
 
 // Metadata is the metadata for a Trigger
 type Metadata struct {
-	ID                string            `json:"name"`
-	Settings          []*data.Attribute `json:"settings"`
-	Outputs           []*data.Attribute `json:"outputs"`
-	Endpoint          EndpointMetadata  `json:"endpoint"`
+	ID       string            `json:"name"`
+	Settings []*data.Attribute `json:"settings"`
+	Outputs  []*data.Attribute `json:"outputs"`
+	Endpoint EndpointMetadata  `json:"endpoint"`
 }
 
 // EndpointMetadata is the metadata for a Trigger Endpoint

@@ -1,4 +1,4 @@
-package processinst
+package flowinst
 
 import (
 	"sync"
@@ -6,53 +6,53 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/ext/activity"
 	"github.com/TIBCOSoftware/flogo-lib/core/ext/model"
-	"github.com/TIBCOSoftware/flogo-lib/core/process"
+	"github.com/TIBCOSoftware/flogo-lib/core/flow"
 	"github.com/TIBCOSoftware/flogo-lib/util"
 	"github.com/op/go-logging"
 )
 
 var log = logging.MustGetLogger("instance")
 
-// Instance is a structure for representing an instance of a Process
+// Instance is a structure for representing an instance of a Flow
 type Instance struct {
-	id           string
-	stepID       int
-	lock         sync.Mutex
-	status       Status
-	state        int
-	ProcessURI   string
-	Process      *process.Definition
-	RootTaskEnv  *TaskEnv
-	ProcessModel *model.ProcessModel
-	Attrs        map[string]*data.Attribute
-	Patch        *process.Patch
-	Interceptor  *process.Interceptor
+	id          string
+	stepID      int
+	lock        sync.Mutex
+	status      Status
+	state       int
+	FlowURI     string
+	Flow        *flow.Definition
+	RootTaskEnv *TaskEnv
+	FlowModel   *model.FlowModel
+	Attrs       map[string]*data.Attribute
+	Patch       *flow.Patch
+	Interceptor *flow.Interceptor
 
 	WorkItemQueue *util.SyncQueue //todo: change to faster non-threadsafe queue
 
 	wiCounter     int
 	ChangeTracker *InstanceChangeTracker `json:"-"`
 
-	processProvider process.Provider
+	flowProvider flow.Provider
 }
 
-// NewProcessInstance creates a new Process Instance from the specified Process
-func NewProcessInstance(instanceID string, processURI string, process *process.Definition) *Instance {
+// NewFlowInstance creates a new Flow Instance from the specified Flow
+func NewFlowInstance(instanceID string, flowURI string, flow *flow.Definition) *Instance {
 
 	var instance Instance
 	instance.id = instanceID
 	instance.stepID = 0
-	instance.ProcessURI = processURI
-	instance.Process = process
-	instance.ProcessModel = model.Get(process.ModelID())
+	instance.FlowURI = flowURI
+	instance.Flow = flow
+	instance.FlowModel = model.Get(flow.ModelID())
 	instance.status = StatusNotStarted
-	instance.WorkItemQueue = util.NewQueue()
+	instance.WorkItemQueue = util.NewSyncQueue()
 	instance.ChangeTracker = NewInstanceChangeTracker()
 
 	var taskEnv TaskEnv
 	taskEnv.ID = 1
-	taskEnv.Task = process.RootTask()
-	taskEnv.taskID = process.RootTask().ID()
+	taskEnv.Task = flow.RootTask()
+	taskEnv.taskID = flow.RootTask().ID()
 	taskEnv.Instance = &instance
 	taskEnv.TaskDatas = make(map[int]*TaskData)
 	taskEnv.LinkDatas = make(map[int]*LinkData)
@@ -62,36 +62,36 @@ func NewProcessInstance(instanceID string, processURI string, process *process.D
 	return &instance
 }
 
-// SetProcessProvider sets the proces.Provider that the instance should use
-func (pi *Instance) SetProcessProvider(provider process.Provider) {
-	pi.processProvider = provider
+// SetFlowProvider sets the proces.Provider that the instance should use
+func (pi *Instance) SetFlowProvider(provider flow.Provider) {
+	pi.flowProvider = provider
 }
 
-// Restart indicates that this ProcessInstance was restarted
-func (pi *Instance) Restart(id string, provider process.Provider) {
+// Restart indicates that this FlowInstance was restarted
+func (pi *Instance) Restart(id string, provider flow.Provider) {
 	pi.id = id
-	pi.processProvider = provider
-	pi.Process = pi.processProvider.GetProcess(pi.ProcessURI)
-	pi.ProcessModel = model.Get(pi.Process.ModelID())
+	pi.flowProvider = provider
+	pi.Flow = pi.flowProvider.GetFlow(pi.FlowURI)
+	pi.FlowModel = model.Get(pi.Flow.ModelID())
 	pi.RootTaskEnv.init(pi)
 }
 
-// ID returns the ID of the Process Instance
+// ID returns the ID of the Flow Instance
 func (pi *Instance) ID() string {
 	return pi.id
 }
 
-// ProcessDefinition returns the Process that the instance is of
-func (pi *Instance) ProcessDefinition() *process.Definition {
-	return pi.Process
+// FlowDefinition returns the Flow that the instance is of
+func (pi *Instance) FlowDefinition() *flow.Definition {
+	return pi.Flow
 }
 
-// StepID returns the current step ID of the Process Instance
+// StepID returns the current step ID of the Flow Instance
 func (pi *Instance) StepID() int {
 	return pi.stepID
 }
 
-// Status returns the current status of the Process Instance
+// Status returns the current status of the Flow Instance
 func (pi *Instance) Status() Status {
 	return pi.status
 }
@@ -102,23 +102,23 @@ func (pi *Instance) setStatus(status Status) {
 	pi.ChangeTracker.SetStatus(status)
 }
 
-// State returns the state indicator of the Process Instance
+// State returns the state indicator of the Flow Instance
 func (pi *Instance) State() int {
 	return pi.state
 }
 
-// SetState sets the state indicator of the Process Instance
+// SetState sets the state indicator of the Flow Instance
 func (pi *Instance) SetState(state int) {
 	pi.state = state
 	pi.ChangeTracker.SetState(state)
 }
 
-// UpdateAttrs updates the attributes of the Process Instance
+// UpdateAttrs updates the attributes of the Flow Instance
 func (pi *Instance) UpdateAttrs(update interface{}) {
 
 	if update != nil {
 
-		log.Debugf("Updating process attrs: %v", update)
+		log.Debugf("Updating flow attrs: %v", update)
 
 		m := update.(map[string]string)
 
@@ -132,20 +132,20 @@ func (pi *Instance) UpdateAttrs(update interface{}) {
 	}
 }
 
-// Start will start the Process Instance, returns a boolean indicating
+// Start will start the Flow Instance, returns a boolean indicating
 // if it was able to start
 func (pi *Instance) Start(data interface{}) bool {
 
 	pi.setStatus(StatusActive)
 	pi.UpdateAttrs(data)
 
-	log.Infof("ProcessInstance Process: %v", pi.ProcessModel)
-	model := pi.ProcessModel.GetProcessBehavior(pi.Process.TypeID())
+	log.Infof("FlowInstance Flow: %v", pi.FlowModel)
+	model := pi.FlowModel.GetFlowBehavior(pi.Flow.TypeID())
 
 	ok, evalCode := model.Start(pi, data)
 
 	if ok {
-		rootTaskData := pi.RootTaskEnv.NewTaskData(pi.Process.RootTask())
+		rootTaskData := pi.RootTaskEnv.NewTaskData(pi.Flow.RootTask())
 
 		pi.scheduleEval(rootTaskData, evalCode)
 	}
@@ -153,15 +153,15 @@ func (pi *Instance) Start(data interface{}) bool {
 	return ok
 }
 
-//Resume resumes a Process Instance
+//Resume resumes a Flow Instance
 func (pi *Instance) Resume(data interface{}) bool {
 
-	model := pi.ProcessModel.GetProcessBehavior(pi.Process.TypeID())
+	model := pi.FlowModel.GetFlowBehavior(pi.Flow.TypeID())
 
 	return model.Resume(pi, data)
 }
 
-// DoStep performs a single execution 'step' of the Process Instance
+// DoStep performs a single execution 'step' of the Flow Instance
 func (pi *Instance) DoStep() bool {
 
 	hasNext := false
@@ -218,10 +218,10 @@ func (pi *Instance) scheduleEval(taskData *TaskData, evalCode int) {
 	pi.ChangeTracker.trackWorkItem(&WorkItemQueueChange{ChgType: CtAdd, ID: workItem.ID, WorkItem: workItem})
 }
 
-// execTask executes the specified Work Item of the Process Instance
+// execTask executes the specified Work Item of the Flow Instance
 func (pi *Instance) execTask(workItem *WorkItem) {
 
-	taskBehavior := pi.ProcessModel.GetTaskBehavior(workItem.TaskData.task.TypeID())
+	taskBehavior := pi.FlowModel.GetTaskBehavior(workItem.TaskData.task.TypeID())
 
 	var done bool
 	var doneCode int
@@ -314,7 +314,7 @@ func (pi *Instance) execTask(workItem *WorkItem) {
 	}
 }
 
-// handleTaskDone handles the compeletion of a task in the Process Instance
+// handleTaskDone handles the compeletion of a task in the Flow Instance
 func (pi *Instance) handleTaskDone(taskBehavior model.TaskBehavior, taskData *TaskData, doneCode int) {
 
 	notifyParent, childDoneCode, taskEntries := taskBehavior.Done(taskData, doneCode)
@@ -327,7 +327,7 @@ func (pi *Instance) handleTaskDone(taskBehavior model.TaskBehavior, taskData *Ta
 
 		if parentTask != nil {
 			parentTaskData := taskData.taskEnv.TaskDatas[parentTask.ID()]
-			parentBehavior := pi.ProcessModel.GetTaskBehavior(parentTask.TypeID())
+			parentBehavior := pi.FlowModel.GetTaskBehavior(parentTask.TypeID())
 			parentDone, parentDoneCode := parentBehavior.ChildDone(parentTaskData, task, childDoneCode)
 
 			if parentDone {
@@ -335,10 +335,10 @@ func (pi *Instance) handleTaskDone(taskBehavior model.TaskBehavior, taskData *Ta
 			}
 
 		} else {
-			//Root Task is Done, so notify Process
-			processBehavior := pi.ProcessModel.GetProcessBehavior(pi.Process.TypeID())
-			processBehavior.TasksDone(pi, childDoneCode)
-			processBehavior.Done(pi)
+			//Root Task is Done, so notify Flow
+			flowBehavior := pi.FlowModel.GetFlowBehavior(pi.Flow.TypeID())
+			flowBehavior.TasksDone(pi, childDoneCode)
+			flowBehavior.Done(pi)
 
 			pi.setStatus(StatusCompleted)
 		}
@@ -349,7 +349,7 @@ func (pi *Instance) handleTaskDone(taskBehavior model.TaskBehavior, taskData *Ta
 		for _, taskEntry := range taskEntries {
 
 			log.Debugf("execTask - TaskEntry: %v\n", taskEntry)
-			taskToEnterBehavior := pi.ProcessModel.GetTaskBehavior(taskEntry.Task.TypeID())
+			taskToEnterBehavior := pi.FlowModel.GetTaskBehavior(taskEntry.Task.TypeID())
 
 			enterTaskData, _ := taskData.taskEnv.FindOrCreateTaskData(taskEntry.Task)
 
@@ -374,7 +374,7 @@ func (pi *Instance) GetAttrType(attrName string) (attrType string, exists bool) 
 		}
 	}
 
-	attr, found := pi.Process.GetAttr(attrName)
+	attr, found := pi.Flow.GetAttr(attrName)
 	if found {
 		return attr.Type, true
 	}
@@ -392,7 +392,7 @@ func (pi *Instance) GetAttrValue(attrName string) (value string, exists bool) {
 		}
 	}
 
-	attr, found := pi.Process.GetAttr(attrName)
+	attr, found := pi.Flow.GetAttr(attrName)
 	if found {
 		return attr.Value, true
 	}
@@ -420,7 +420,7 @@ func (pi *Instance) SetAttrValue(attrName string, value string) {
 // TaskEnv is a structure that describes the execution enviroment for a set of tasks
 type TaskEnv struct {
 	ID        int
-	Task      *process.Task
+	Task      *flow.Task
 	Instance  *Instance
 	ParentEnv *TaskEnv
 
@@ -431,28 +431,28 @@ type TaskEnv struct {
 }
 
 // init initializes the Task Environment, typically called on deserialization
-func (te *TaskEnv) init(processInst *Instance) {
+func (te *TaskEnv) init(flowInst *Instance) {
 
 	if te.Instance == nil {
 
-		te.Instance = processInst
-		te.Task = processInst.Process.GetTask(te.taskID)
+		te.Instance = flowInst
+		te.Task = flowInst.Flow.GetTask(te.taskID)
 
 		for _, v := range te.TaskDatas {
 			v.taskEnv = te
-			v.task = processInst.Process.GetTask(v.taskID)
+			v.task = flowInst.Flow.GetTask(v.taskID)
 		}
 
 		for _, v := range te.LinkDatas {
 			v.taskEnv = te
-			v.link = processInst.Process.GetLink(v.linkID)
+			v.link = flowInst.Flow.GetLink(v.linkID)
 		}
 	}
 }
 
 // FindOrCreateTaskData finds an existing TaskData or creates ones if not found for the
 // specified task the task enviroment
-func (te *TaskEnv) FindOrCreateTaskData(task *process.Task) (taskData *TaskData, created bool) {
+func (te *TaskEnv) FindOrCreateTaskData(task *flow.Task) (taskData *TaskData, created bool) {
 
 	taskData, ok := te.TaskDatas[task.ID()]
 
@@ -470,7 +470,7 @@ func (te *TaskEnv) FindOrCreateTaskData(task *process.Task) (taskData *TaskData,
 }
 
 // NewTaskData creates a new TaskData object
-func (te *TaskEnv) NewTaskData(task *process.Task) *TaskData {
+func (te *TaskEnv) NewTaskData(task *flow.Task) *TaskData {
 
 	taskData := NewTaskData(te, task)
 	te.TaskDatas[task.ID()] = taskData
@@ -481,7 +481,7 @@ func (te *TaskEnv) NewTaskData(task *process.Task) *TaskData {
 
 // FindOrCreateLinkData finds an existing LinkData or creates ones if not found for the
 // specified link the task enviroment
-func (te *TaskEnv) FindOrCreateLinkData(link *process.Link) (linkData *LinkData, created bool) {
+func (te *TaskEnv) FindOrCreateLinkData(link *flow.Link) (linkData *LinkData, created bool) {
 
 	linkData, ok := te.LinkDatas[link.ID()]
 	created = false
@@ -498,7 +498,7 @@ func (te *TaskEnv) FindOrCreateLinkData(link *process.Link) (linkData *LinkData,
 
 // releaseTask cleans up TaskData in the task environment any of its dependencies.
 // This is called when a task is completed and can be discarded
-func (te *TaskEnv) releaseTask(task *process.Task) {
+func (te *TaskEnv) releaseTask(task *flow.Task) {
 	delete(te.TaskDatas, task.ID())
 	te.Instance.ChangeTracker.trackTaskData(&TaskDataChange{ChgType: CtDel, ID: task.ID()})
 
@@ -523,7 +523,7 @@ func (te *TaskEnv) releaseTask(task *process.Task) {
 // TaskData represents data associated with an instance of a Task
 type TaskData struct {
 	taskEnv *TaskEnv
-	task    *process.Task
+	task    *flow.Task
 	state   int
 	done    bool
 	attrs   map[string]*data.Attribute
@@ -535,7 +535,7 @@ type TaskData struct {
 
 // NewTaskData creates a TaskData for the specified task in the specified task
 // environment
-func NewTaskData(taskEnv *TaskEnv, task *process.Task) *TaskData {
+func NewTaskData(taskEnv *TaskEnv, task *flow.Task) *TaskData {
 	var taskData TaskData
 
 	taskData.taskEnv = taskEnv
@@ -548,12 +548,12 @@ func NewTaskData(taskEnv *TaskEnv, task *process.Task) *TaskData {
 /////////////////////////////////////////
 // TaskData - TaskContext Implementation
 
-// State implements process.TaskContext.GetState
+// State implements flow.TaskContext.GetState
 func (td *TaskData) State() int {
 	return td.state
 }
 
-// SetState implements process.TaskContext.SetState
+// SetState implements flow.TaskContext.SetState
 func (td *TaskData) SetState(state int) {
 	td.state = state
 	td.taskEnv.Instance.ChangeTracker.trackTaskData(&TaskDataChange{ChgType: CtUpd, ID: td.task.ID(), TaskData: td})
@@ -561,7 +561,7 @@ func (td *TaskData) SetState(state int) {
 
 // Task implements model.TaskContext.Task, by returning the Task associated with this
 // TaskData object
-func (td *TaskData) Task() *process.Task {
+func (td *TaskData) Task() *flow.Task {
 	return td.task
 }
 
@@ -605,7 +605,7 @@ func (td *TaskData) EnterChildren(taskEntries []*model.TaskEntry) {
 		for _, task := range td.task.ChildTasks() {
 
 			taskData, _ := td.taskEnv.FindOrCreateTaskData(task)
-			taskBehavior := td.taskEnv.Instance.ProcessModel.GetTaskBehavior(task.TypeID())
+			taskBehavior := td.taskEnv.Instance.FlowModel.GetTaskBehavior(task.TypeID())
 
 			eval, evalCode := taskBehavior.Enter(taskData, enterCode)
 
@@ -620,7 +620,7 @@ func (td *TaskData) EnterChildren(taskEntries []*model.TaskEntry) {
 			//todo validate if specified task is child? or trust model
 
 			taskData, _ := td.taskEnv.FindOrCreateTaskData(taskEntry.Task)
-			taskBehavior := td.taskEnv.Instance.ProcessModel.GetTaskBehavior(taskEntry.Task.TypeID())
+			taskBehavior := td.taskEnv.Instance.FlowModel.GetTaskBehavior(taskEntry.Task.TypeID())
 
 			eval, evalCode := taskBehavior.Enter(taskData, taskEntry.EnterCode)
 
@@ -632,11 +632,11 @@ func (td *TaskData) EnterChildren(taskEntries []*model.TaskEntry) {
 }
 
 // EvalLink implements activity.ActivityContext.EvalLink method
-func (td *TaskData) EvalLink(link *process.Link, evalCode int) model.LinkContext {
+func (td *TaskData) EvalLink(link *flow.Link, evalCode int) model.LinkContext {
 
 	linkData, _ := td.taskEnv.FindOrCreateLinkData(link)
 
-	//linkBehavior := td.taskEnv.Instance.ProcessModel.GetLinkBehavior(link.)
+	//linkBehavior := td.taskEnv.Instance.FlowModel.GetLinkBehavior(link.)
 	//linkBehavior.Eval(linkData, evalCode)
 	linkData.SetState(2)
 
@@ -653,15 +653,15 @@ func (td *TaskData) Activity() (act activity.Activity, context activity.Context)
 	return act, td
 }
 
-// ProcessInstanceID implements activity.Context.ProcessInstanceID method
-func (td *TaskData) ProcessInstanceID() string {
+// FlowInstanceID implements activity.Context.FlowInstanceID method
+func (td *TaskData) FlowInstanceID() string {
 
 	return td.taskEnv.Instance.id
 }
 
-// ProcessName implements activity.Context.ProcessName method
-func (td *TaskData) ProcessName() string {
-	return td.taskEnv.Instance.Process.Name()
+// FlowName implements activity.Context.FlowName method
+func (td *TaskData) FlowName() string {
+	return td.taskEnv.Instance.Flow.Name()
 }
 
 // TaskName implements activity.Context.TaskName method
@@ -722,7 +722,7 @@ func (td *TaskData) SetAttrValue(attrName string, value string) {
 // LinkData represents data associated with an instance of a Link
 type LinkData struct {
 	taskEnv *TaskEnv
-	link    *process.Link
+	link    *flow.Link
 	state   int
 	attrs   map[string]string
 
@@ -733,7 +733,7 @@ type LinkData struct {
 
 // NewLinkData creates a LinkData for the specified link in the specified task
 // environment
-func NewLinkData(taskEnv *TaskEnv, link *process.Link) *LinkData {
+func NewLinkData(taskEnv *TaskEnv, link *flow.Link) *LinkData {
 	var linkData LinkData
 
 	linkData.taskEnv = taskEnv
@@ -755,7 +755,7 @@ func (ld *LinkData) SetState(state int) {
 }
 
 // Link returns the Link associated with ld context
-func (ld *LinkData) Link() *process.Link {
+func (ld *LinkData) Link() *flow.Link {
 
 	return ld.link
 }

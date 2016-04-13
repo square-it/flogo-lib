@@ -1,105 +1,58 @@
 package util
 
 import (
-	"container/heap"
 	"container/list"
 	"sync"
 )
 
-//todo make type specific Queue to avoid casting
-
-// An Item is something we manage in a priority queue.
-type Item struct {
-	Value    string // The value of the item; arbitrary.
-	Priority int    // The priority of the item in the queue.
-	// The index is needed by update and is maintained by the heap.Interface methods.
-	index int // The index of the item in the heap.
-}
-
-// A PriorityQueue implements heap.Interface and holds Items.
-type PriorityQueue []*Item
-
-func (pq PriorityQueue) Len() int {
-	return len(pq)
-}
-
-func (pq PriorityQueue) Less(i, j int) bool {
-	// We want Pop to give us the highest, not lowest, priority so we use greater than here.
-	return pq[i].Priority > pq[j].Priority
-}
-
-func (pq PriorityQueue) Swap(i, j int) {
-	pq[i], pq[j] = pq[j], pq[i]
-	pq[i].index = i
-	pq[j].index = j
-}
-
-func (pq *PriorityQueue) Push(x interface{}) {
-	n := len(*pq)
-	item := x.(*Item)
-	item.index = n
-	*pq = append(*pq, item)
-}
-
-func (pq *PriorityQueue) Pop() interface{} {
-	old := *pq
-	n := len(old)
-	item := old[n-1]
-	item.index = -1 // for safety
-	*pq = old[0 : n-1]
-	return item
-}
-
-// update modifies the priority and value of an Item in the queue.
-func (pq *PriorityQueue) update(item *Item, value string, priority int) {
-	item.Value = value
-	item.Priority = priority
-	heap.Fix(pq, item.index)
-}
-
-// Define Queue class
+// SyncQueue is a List backed queue
 type SyncQueue struct {
 	List *list.List
 	lock sync.Mutex
 }
 
-func NewQueue() *SyncQueue {
-	return &SyncQueue{list.New(), sync.Mutex{}}
+//NewSyncQueue creates a new SyncQueue
+func NewSyncQueue() *SyncQueue {
+	return &SyncQueue{List: list.New(), lock: sync.Mutex{}}
 }
 
-func (this *SyncQueue) Push(elem interface{}) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+// Push push item on to queue
+func (sq *SyncQueue) Push(item interface{}) {
+	sq.lock.Lock()
+	defer sq.lock.Unlock()
 
-	this.List.PushFront(elem)
+	sq.List.PushFront(item)
 }
 
-func (this *SyncQueue) Pop() (interface{}, bool) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+// Pop pop item off of queue
+func (sq *SyncQueue) Pop() (interface{}, bool) {
+	sq.lock.Lock()
+	defer sq.lock.Unlock()
 
-	if this.List.Len() == 0 {
+	if sq.List.Len() == 0 {
 		return nil, false
 	}
 
-	element := this.List.Front()
-	this.List.Remove(element)
+	item := sq.List.Front()
+	sq.List.Remove(item)
 
-	return element.Value, true
+	return item.Value, true
 }
 
-func (this *SyncQueue) Size() int {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+// Size get the size of the queue
+func (sq *SyncQueue) Size() int {
+	sq.lock.Lock()
+	defer sq.lock.Unlock()
 
-	return this.List.Len()
+	return sq.List.Len()
 }
 
-func (this *SyncQueue) IsEmpty() bool {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+// IsEmpty indicates if the queue is empty
+func (sq *SyncQueue) IsEmpty() bool {
+	sq.lock.Lock()
+	defer sq.lock.Unlock()
 
-	return (this.List.Len() == 0)
+	return (sq.List.Len() == 0)
 }
 
 /*
@@ -120,14 +73,14 @@ type Queue struct {
 	head, tail, count int
 }
 
-// New constructs and returns a new Queue.
-func New() *Queue {
+// NewQueue constructs and returns a new Queue.
+func NewQueue() *Queue {
 	return &Queue{
 		buf: make([]interface{}, minQueueLen),
 	}
 }
 
-// Length returns the number of elements currently stored in the queue.
+// Length returns the number of items currently stored in the queue.
 func (q *Queue) Length() int {
 	return q.count
 }
@@ -149,18 +102,18 @@ func (q *Queue) resize() {
 	q.buf = newBuf
 }
 
-// Add puts an element on the end of the queue.
-func (q *Queue) Add(elem interface{}) {
+// Add puts an item on the end of the queue.
+func (q *Queue) Add(item interface{}) {
 	if q.count == len(q.buf) {
 		q.resize()
 	}
 
-	q.buf[q.tail] = elem
+	q.buf[q.tail] = item
 	q.tail = (q.tail + 1) % len(q.buf)
 	q.count++
 }
 
-// Peek returns the element at the head of the queue. This call panics
+// Peek returns the item at the head of the queue. This call panics
 // if the queue is empty.
 func (q *Queue) Peek() interface{} {
 	if q.count <= 0 {
@@ -169,7 +122,7 @@ func (q *Queue) Peek() interface{} {
 	return q.buf[q.head]
 }
 
-// Get returns the element at index i in the queue. If the index is
+// Get returns the item at index i in the queue. If the index is
 // invalid, the call will panic.
 func (q *Queue) Get(i int) interface{} {
 	if i < 0 || i >= q.count {
@@ -178,8 +131,8 @@ func (q *Queue) Get(i int) interface{} {
 	return q.buf[(q.head+i)%len(q.buf)]
 }
 
-// Remove removes the element from the front of the queue. If you actually
-// want the element, call Peek first. This call panics if the queue is empty.
+// Remove removes the item from the front of the queue. If you actually
+// want the item, call Peek first. This call panics if the queue is empty.
 func (q *Queue) Remove() {
 	if q.count <= 0 {
 		panic("queue: Remove() called on empty queue")

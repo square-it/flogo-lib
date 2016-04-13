@@ -6,11 +6,11 @@ import (
 
 var (
 	modelsMu sync.RWMutex
-	models   = make(map[string]*ProcessModel)
+	models   = make(map[string]*FlowModel)
 )
 
-// Register registers the specified process model
-func Register(model *ProcessModel) {
+// Register registers the specified flow model
+func Register(model *FlowModel) {
 	modelsMu.Lock()
 	defer modelsMu.Unlock()
 
@@ -24,18 +24,18 @@ func Register(model *ProcessModel) {
 		panic("model.Register: model " + id + " already registered")
 	}
 
-	log.Debugf("Registering ProcessModel: [%s]-%v\n", id, model)
+	log.Debugf("Registering FlowModel: [%s]-%v\n", id, model)
 
 	models[id] = model
 }
 
-// Registered gets all the registered process models
-func Registered() []*ProcessModel {
+// Registered gets all the registered flow models
+func Registered() []*FlowModel {
 
 	modelsMu.RLock()
 	defer modelsMu.RUnlock()
 
-	list := make([]*ProcessModel, 0, len(models))
+	list := make([]*FlowModel, 0, len(models))
 
 	for _, value := range models {
 		list = append(list, value)
@@ -44,7 +44,7 @@ func Registered() []*ProcessModel {
 	return list
 }
 
-// Get gets specified ProcessModel
-func Get(id string) *ProcessModel {
+// Get gets specified FlowModel
+func Get(id string) *FlowModel {
 	return models[id]
 }

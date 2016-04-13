@@ -1,4 +1,4 @@
-package processinst
+package flowinst
 
 // ChgType denotes the type of change for an object in an instance
 type ChgType int

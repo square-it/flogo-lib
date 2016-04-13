@@ -1,16 +1,16 @@
-package process
+package flow
 
 import "github.com/TIBCOSoftware/flogo-lib/core/data"
 
-// Patch contains a set of task patches for a ProcessPatch, this
-// can be used to override the default data and mappings of a Process
+// Patch contains a set of task patches for a Flow Patch, this
+// can be used to override the default data and mappings of a Flow
 type Patch struct {
 	TaskPatches []*TaskPatch `json:"tasks"` //put in mapper object
 
 	taskPatchMap map[int]*TaskPatch
 }
 
-// Init initializes the ProcessPatch, usually called afer deserialization
+// Init initializes the FlowPatch, usually called afer deserialization
 func (pp *Patch) Init() {
 
 	numAttrs := len(pp.TaskPatches)

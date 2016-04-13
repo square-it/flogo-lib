@@ -1,10 +1,10 @@
-package process
+package flow
 
 import "github.com/TIBCOSoftware/flogo-lib/core/data"
 
 // Interceptor contains a set of task interceptor, this can be used to override
-// runtime data of an instance of the corresponding Process.  This can be used to
-// modify runtime execution of a process or in test/debug for implemeting mocks
+// runtime data of an instance of the corresponding Flow.  This can be used to
+// modify runtime execution of a flow or in test/debug for implemeting mocks
 // for tasks
 type Interceptor struct {
 	TaskInterceptors []*TaskInterceptor `json:"tasks"`
@@ -12,7 +12,7 @@ type Interceptor struct {
 	taskInterceptorMap map[int]*TaskInterceptor
 }
 
-// Init initializes the ProcessInterceptor, usually called afer deserialization
+// Init initializes the FlowInterceptor, usually called afer deserialization
 func (pi *Interceptor) Init() {
 
 	numAttrs := len(pi.TaskInterceptors)

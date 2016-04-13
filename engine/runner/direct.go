@@ -1,18 +1,18 @@
 package runner
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/core/processinst"
+	"github.com/TIBCOSoftware/flogo-lib/core/flowinst"
 	"github.com/op/go-logging"
 )
 
 var log = logging.MustGetLogger("runner")
 
-// DirectRunner is a process runner that executes a process directly on the same
+// DirectRunner is a flow runner that executes a flow directly on the same
 // thread
-// todo: rename to SyncProcessRunner?
+// todo: rename to SyncFlowRunner?
 type DirectRunner struct {
 	maxStepCount  int
-	stateRecorder processinst.StateRecorder
+	stateRecorder flowinst.StateRecorder
 	record        bool
 }
 
@@ -22,7 +22,7 @@ type DirectConfig struct {
 }
 
 // NewDirectRunner create a new DirectRunner
-func NewDirectRunner(stateRecorder processinst.StateRecorder, maxStepCount int) *DirectRunner {
+func NewDirectRunner(stateRecorder flowinst.StateRecorder, maxStepCount int) *DirectRunner {
 
 	var directRunner DirectRunner
 	directRunner.stateRecorder = stateRecorder
@@ -40,25 +40,25 @@ func NewDirectRunner(stateRecorder processinst.StateRecorder, maxStepCount int) 
 // Start will start the engine, by starting all of its workers
 func (runner *DirectRunner) Start() {
 	//op-op
-	log.Debug("Started Direct Process Instance Runner")
+	log.Debug("Started Direct Flow Instance Runner")
 }
 
 // Stop will stop the engine, by stopping all of its workers
 func (runner *DirectRunner) Stop() {
 	//no-op
-	log.Debug("Stopped Direct Process Instance Runner")
+	log.Debug("Stopped Direct Flow Instance Runner")
 }
 
-// RunInstance runs the specified Process Instance until it is complete
+// RunInstance runs the specified Flow Instance until it is complete
 // or it no longer has any tasks to execute
-func (runner *DirectRunner) RunInstance(instance *processinst.Instance) bool {
+func (runner *DirectRunner) RunInstance(instance *flowinst.Instance) bool {
 
 	log.Debugf("Executing Instance: %s\n", instance.ID())
 
 	stepCount := 0
 	hasWork := true
 
-	for hasWork && instance.Status() < processinst.StatusCompleted && stepCount < runner.maxStepCount {
+	for hasWork && instance.Status() < flowinst.StatusCompleted && stepCount < runner.maxStepCount {
 		stepCount++
 		log.Debugf("Step: %d\n", stepCount)
 		hasWork = instance.DoStep()
@@ -71,8 +71,8 @@ func (runner *DirectRunner) RunInstance(instance *processinst.Instance) bool {
 
 	log.Debugf("Done Executing Instance: %s\n", instance.ID())
 
-	if instance.Status() == processinst.StatusCompleted {
-		log.Infof("Process [%s] Completed", instance.ID())
+	if instance.Status() == flowinst.StatusCompleted {
+		log.Infof("Flow [%s] Completed", instance.ID())
 		return true
 	}
 

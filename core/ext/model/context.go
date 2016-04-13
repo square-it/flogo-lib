@@ -2,20 +2,20 @@ package model
 
 import (
 	"github.com/TIBCOSoftware/flogo-lib/core/ext/activity"
-	"github.com/TIBCOSoftware/flogo-lib/core/process"
+	"github.com/TIBCOSoftware/flogo-lib/core/flow"
 )
 
-// ProcessContext is the execution context of the Process when executing
-// a Process Behavior fuction
-type ProcessContext interface {
+// FlowContext is the execution context of the Flow when executing
+// a Flow Behavior fuction
+type FlowContext interface {
 
-	// ProcessDefinition returns the Process definition associated with this context
-	ProcessDefinition() *process.Definition
+	// FlowDefinition returns the Flow definition associated with this context
+	FlowDefinition() *flow.Definition
 
-	//State gets the state of the Process instance
+	//State gets the state of the Flow instance
 	State() int
 
-	//SetState sets the state of the Process instance
+	//SetState sets the state of the Flow instance
 	SetState(state int)
 }
 
@@ -30,7 +30,7 @@ type TaskContext interface {
 	SetState(state int)
 
 	// Task returns the Task associated with this context
-	Task() *process.Task
+	Task() *flow.Task
 
 	// FromLinks returns the set of predecessor Links of the current
 	// task.
@@ -48,7 +48,7 @@ type TaskContext interface {
 
 	// EvalLink evalutes the specified link, returning the resulting
 	// LinkContext
-	EvalLink(link *process.Link, code int) LinkContext
+	EvalLink(link *flow.Link, code int) LinkContext
 
 	//EvalLink(link *Link, code int) bool
 
@@ -62,7 +62,7 @@ type TaskContext interface {
 type LinkContext interface {
 
 	// Link returns the Link associated with this context
-	Link() *process.Link
+	Link() *flow.Link
 
 	// State gets the state of the Link instance
 	State() int

@@ -1,11 +1,11 @@
 package trigger
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/core/processinst"
+	"github.com/TIBCOSoftware/flogo-lib/core/flowinst"
 	"github.com/TIBCOSoftware/flogo-lib/util"
 )
 
-// Trigger is object that triggers/starts process instances and
+// Trigger is object that triggers/starts flow instances and
 // is managed by an engine
 type Trigger interface {
 	util.Managed
@@ -14,5 +14,5 @@ type Trigger interface {
 	Metadata() *Metadata
 
 	// Init sets up the trigger, it is called before Start()
-	Init(starter processinst.Starter, config *Config)
+	Init(starter flowinst.Starter, config *Config)
 }

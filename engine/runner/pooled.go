@@ -1,11 +1,11 @@
 package runner
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/core/processinst"
+	"github.com/TIBCOSoftware/flogo-lib/core/flowinst"
 )
 
-// PooledRunner is a process runner that queues and runs a process in a worker pool
-// todo: rename to AsyncProcessRunner?
+// PooledRunner is a flow runner that queues and runs a flow in a worker pool
+// todo: rename to AsyncFlowRunner?
 type PooledRunner struct {
 	workerQueue chan chan WorkRequest
 	workQueue   chan WorkRequest
@@ -24,7 +24,7 @@ type PooledConfig struct {
 }
 
 // NewPooledRunner create a new pooled
-func NewPooledRunner(config *PooledConfig, stateRecorder processinst.StateRecorder) *PooledRunner {
+func NewPooledRunner(config *PooledConfig, stateRecorder flowinst.StateRecorder) *PooledRunner {
 
 	var pooledRunner PooledRunner
 	pooledRunner.directRunner = NewDirectRunner(stateRecorder, config.MaxStepCount)
@@ -85,16 +85,16 @@ func (runner *PooledRunner) Stop() {
 	}
 }
 
-// RunInstance runs the specified Process Instance until it is complete
+// RunInstance runs the specified Flow Instance until it is complete
 // or it no longer has any tasks to execute
-func (runner *PooledRunner) RunInstance(instance *processinst.Instance) bool {
+func (runner *PooledRunner) RunInstance(instance *flowinst.Instance) bool {
 
 	if runner.active {
 
 		work := WorkRequest{ReqType: RtRun, Request: instance}
 
 		runner.workQueue <- work
-		log.Debugf("Run Process '%s' queued", instance.ID())
+		log.Debugf("Run Flow '%s' queued", instance.ID())
 
 		return false
 	}
