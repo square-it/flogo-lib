@@ -54,6 +54,9 @@ func (e *Engine) Start() {
 
 	engineConfig := e.env.engineConfig
 
+	// initialize engine environment
+	e.env.Init(e.instManager, e.runner)
+
 	// initialize triggers
 	for _, trigger := range triggers {
 
@@ -61,32 +64,27 @@ func (e *Engine) Start() {
 		trigger.Init(nil, triggerConfig)
 	}
 
-	settings, enabled := e.env.ProcessProviderServiceSettings()
+	// start the process provider service
+	processProvider := e.env.ProcessProviderService()
+	startManaged("ProcessProvider Service", processProvider)
 
-	// init & start the process provider service
-	e.env.processProvider.Init(settings)
-	startManaged("ProcessProvider Service", e.env.ProcessProviderService())
-
-	settings, enabled = e.env.StateRecorderServiceSettings()
-
-	// init & start the state recorder service if available
+	// start the state recorder service if enabled
+	stateRecorder, enabled := e.env.StateRecorderService()
 	if enabled {
-		e.env.StateRecorderService().Init(settings)
-		startManaged("StateRecorder Service", e.env.StateRecorderService())
+		startManaged("StateRecorder Service", stateRecorder)
 	}
 
 	startManaged("ProcessRunner Service", e.runner)
 
 	// start triggers
 	for _, trigger := range triggers {
-		startManaged("Trigger [ " + trigger.Metadata().ID + " ]", trigger)
+		startManaged("Trigger [ "+trigger.Metadata().ID+" ]", trigger)
 	}
 
-	settings, enabled = e.env.EngineTesterServiceSettings()
-
+	// start the engineTester service if enabled
+	engineTester, enabled := e.env.EngineTesterService()
 	if enabled {
-		e.env.EngineTesterService().Init(e.instManager, e.runner, settings)
-		startManaged("EngineTester Service", e.env.EngineTesterService())
+		startManaged("EngineTester Service", engineTester)
 	}
 
 	log.Info("Engine: Started")
@@ -101,23 +99,23 @@ func (e *Engine) Stop() {
 
 	// stop triggers
 	for _, trigger := range triggers {
-		stopManaged("Trigger [ " + trigger.Metadata().ID + " ]", trigger)
+		stopManaged("Trigger [ "+trigger.Metadata().ID+" ]", trigger)
 	}
 
-	_, enabled := e.env.EngineTesterServiceSettings()
+	engineTester, enabled := e.env.EngineTesterService()
 
 	if enabled {
-		stopManaged("EngineTester Service", e.env.EngineTesterService())
+		stopManaged("EngineTester Service", engineTester)
 	}
 
 	stopManaged("Process Runner", e.runner)
 
 	stopManaged("ProcessProvider Service", e.env.ProcessProviderService())
 
-	_, enabled = e.env.StateRecorderServiceSettings()
+	stateRecorder, enabled := e.env.StateRecorderService()
 
 	if enabled {
-		stopManaged("StateRecorder Service", e.env.StateRecorderService())
+		stopManaged("StateRecorder Service", stateRecorder)
 	}
 
 	log.Info("Engine: Stopped")

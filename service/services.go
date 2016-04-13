@@ -31,7 +31,7 @@ type ProcessProviderService interface {
 	util.Managed
 	process.Provider
 
-	Init(settings map[string]string)
+	Init(settings map[string]string, embeddedFlowMgr *util.EmbeddedFlowManager)
 }
 
 // EngineTesterService is an engine service to assist in testing processes
@@ -39,6 +39,5 @@ type EngineTesterService interface {
 	util.Managed
 
 	//Init initializes the EngineTester
-	Init(instManager *processinst.Manager, runner runner.Runner, settings map[string]string)
+	Init(settings map[string]string, instManager *processinst.Manager, runner runner.Runner)
 }
-

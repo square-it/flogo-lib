@@ -22,7 +22,7 @@ func NewRestEngineTester() *RestEngineTester {
 }
 
 // Init implements engine.EngineTester.Init
-func (et *RestEngineTester) Init(instManager *processinst.Manager, runner runner.Runner, config map[string]string) {
+func (et *RestEngineTester) Init(settings map[string]string, instManager *processinst.Manager, runner runner.Runner) {
 
 	et.reqProcessor = NewRequestProcessor(instManager)
 	et.runner = runner
@@ -37,7 +37,7 @@ func (et *RestEngineTester) Init(instManager *processinst.Manager, runner runner
 	router.OPTIONS("/process/resume", handleOption)
 	router.POST("/process/resume", et.ResumeProcess)
 
-	addr := ":" + config["port"]
+	addr := ":" + settings["port"]
 	et.server = NewServer(addr, router)
 }
 

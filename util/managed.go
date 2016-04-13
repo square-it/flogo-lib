@@ -13,13 +13,14 @@ type Managed interface {
 	Stop()
 }
 
+// StopManaged stops a "Managed" object
 func StopManaged(managed Managed) error {
 
 	defer func() error {
 		if r := recover(); r != nil {
 			err, ok := r.(error)
 			if !ok {
-				err = fmt.Errorf("%v",r)
+				err = fmt.Errorf("%v", r)
 			}
 
 			return err

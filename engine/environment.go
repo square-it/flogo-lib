@@ -1,15 +1,22 @@
 package engine
 
-import "github.com/TIBCOSoftware/flogo-lib/service"
+import (
+	"github.com/TIBCOSoftware/flogo-lib/core/processinst"
+	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
+	"github.com/TIBCOSoftware/flogo-lib/service"
+	"github.com/TIBCOSoftware/flogo-lib/util"
+)
 
 // Environment defines the environment in which the engine will run
 type Environment struct {
-	processProvider         service.ProcessProviderService
-	stateRecorder           service.StateRecorderService
-	engineTester            service.EngineTesterService
-	engineConfig            *Config
-	embeddedFlowsCompressed bool
-	embeddedFlows           map[string]string
+	processProvider      service.ProcessProviderService
+	stateRecorder        service.StateRecorderService
+	stateRecorderEnabled bool
+	engineTester         service.EngineTesterService
+	engineTesterEnabled  bool
+
+	engineConfig       *Config
+	embeddedFlowManger *util.EmbeddedFlowManager
 }
 
 // NewEnvironment creates a new engine Environment from the provided configuration and the specified
@@ -35,48 +42,46 @@ func (e *Environment) ProcessProviderService() service.ProcessProviderService {
 	return e.processProvider
 }
 
-// ProcessProviderServiceSettings returns the process.Provider service settings
-func (e *Environment) ProcessProviderServiceSettings() (settings map[string]string, enabled bool) {
-	settings, enabled = getServiceSettings(e.engineConfig, service.ServiceProcessProvider)
-	return settings, enabled && e.processProvider != nil
-}
-
 // StateRecorderService returns the processinst.StateRecorder service associated with the EngineEnv
-func (e *Environment) StateRecorderService() service.StateRecorderService {
-	return e.stateRecorder
-}
+func (e *Environment) StateRecorderService() (stateRecorder service.StateRecorderService, enabled bool) {
 
-// StateRecorderServiceSettings returns the pprocessinst.StateRecorder service settings
-func (e *Environment) StateRecorderServiceSettings() (settings map[string]string, enabled bool) {
-	settings, enabled = getServiceSettings(e.engineConfig, service.ServiceStateRecorder)
-	return settings, enabled && e.stateRecorder != nil
+	return e.stateRecorder, e.stateRecorderEnabled
 }
 
 // EngineTesterService returns the EngineTester service associated with the EngineEnv
-func (e *Environment) EngineTesterService() service.EngineTesterService {
-	return e.engineTester
-}
+func (e *Environment) EngineTesterService() (engineTester service.EngineTesterService, enabled bool) {
 
-// EngineTesterServiceSettings returns the EngineTester service settings
-func (e *Environment) EngineTesterServiceSettings() (settings map[string]string, enabled bool) {
-	settings, enabled = getServiceSettings(e.engineConfig, service.ServiceEngineTester)
-	return settings, enabled && e.engineTester != nil
+	return e.engineTester, e.engineTesterEnabled
 }
 
 // SetEmbeddedJSONFlows sets the embedded flows (in JSON) for the engine
 func (e *Environment) SetEmbeddedJSONFlows(compressed bool, jsonFlows map[string]string) {
-	e.embeddedFlowsCompressed = compressed
-	e.embeddedFlows = jsonFlows
-}
-
-// EmbeddedJSONFlows gets the embedded flows (in JSON) for the engine
-func (e *Environment) EmbeddedJSONFlows() (compressed bool, jsonFlows map[string]string) {
-	return e.embeddedFlowsCompressed, e.embeddedFlows
+	e.embeddedFlowManger = util.NewEmbeddedFlowManager(compressed, jsonFlows)
 }
 
 // EngineConfig returns the Engine Config for the Engine Environment
 func (e *Environment) EngineConfig() *Config {
 	return e.engineConfig
+}
+
+// Init is used to initialize the engine environment
+func (e *Environment) Init(instManager *processinst.Manager, defaultRunner runner.Runner) {
+
+	settings, enabled := getServiceSettings(e.engineConfig, service.ServiceProcessProvider)
+	e.processProvider.Init(settings, e.embeddedFlowManger)
+
+	settings, enabled = getServiceSettings(e.engineConfig, service.ServiceStateRecorder)
+
+	if enabled {
+		e.stateRecorderEnabled = true
+		e.stateRecorder.Init(settings)
+	}
+
+	settings, enabled = getServiceSettings(e.engineConfig, service.ServiceEngineTester)
+	if enabled {
+		e.engineTesterEnabled = true
+		e.engineTester.Init(settings, instManager, defaultRunner)
+	}
 }
 
 func getServiceSettings(engineConfig *Config, serviceName string) (settings map[string]string, enabled bool) {
