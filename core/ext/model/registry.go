@@ -24,8 +24,6 @@ func Register(model *FlowModel) {
 		panic("model.Register: model " + id + " already registered")
 	}
 
-	log.Debugf("Registering FlowModel: [%s]-%v\n", id, model)
-
 	models[id] = model
 }
 

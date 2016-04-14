@@ -35,7 +35,6 @@ func (pm *FlowModel) Name() string {
 // RegisterFlowBehavior registers the specified FlowBehavior with the Model
 func (pm *FlowModel) RegisterFlowBehavior(id int, flowBehavior FlowBehavior) {
 
-	log.Debugf("Registering Flow Behavior: [%d]-%v\n", id, flowBehavior)
 	pm.flowBehaviors[id] = flowBehavior
 }
 
@@ -46,8 +45,6 @@ func (pm *FlowModel) GetFlowBehavior(id int) FlowBehavior {
 
 // RegisterTaskBehavior registers the specified TaskBehavior with the Model
 func (pm *FlowModel) RegisterTaskBehavior(id int, taskBehavior TaskBehavior) {
-
-	log.Debugf("Registering Task Behavior: [%d]-%v\n", id, taskBehavior)
 	pm.taskBehaviors[id] = taskBehavior
 }
 
@@ -58,8 +55,6 @@ func (pm *FlowModel) GetTaskBehavior(id int) TaskBehavior {
 
 // RegisterLinkBehavior registers the specified LinkBehavior with the Model
 func (pm *FlowModel) RegisterLinkBehavior(id int, linkBehavior LinkBehavior) {
-
-	log.Debugf("Registering Link Behavior: [%d]-%v\n", id, linkBehavior)
 	pm.linkBehaviors[id] = linkBehavior
 }
 
