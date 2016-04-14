@@ -308,6 +308,17 @@ func (pi *Instance) execTask(workItem *WorkItem) {
 		if outputMapper != nil {
 			log.Debug("Applying OutputMapper")
 			outputMapper.Apply(workItem.TaskData, pi)
+		} else {
+			log.Debug("Applying Default Output Mapping")
+			activity, _ := workItem.TaskData.Activity()
+
+			attrNS := "T" + string(workItem.TaskData.task.ID()) + "."
+
+			for _, attr := range activity.Metadata().Outputs {
+
+				attrValue, _ := workItem.TaskData.GetAttrValue(attr.Name)
+				pi.AddAttr(attrNS + attr.Name, attr.Type, attrValue)
+			}
 		}
 
 		pi.handleTaskDone(taskBehavior, workItem.TaskData, doneCode)
@@ -412,6 +423,21 @@ func (pi *Instance) SetAttrValue(attrName string, value string) {
 		pi.Attrs[attrName] = &data.Attribute{Name: attrName, Type: attrType, Value: value}
 	}
 	// else what do we do if its a completely new attr
+}
+
+// AddAttrValue add a new attribute to the instance
+func (pi *Instance) AddAttr(attrName string, attrType string, value string) {
+	if pi.Attrs == nil {
+		pi.Attrs = make(map[string]*data.Attribute)
+	}
+
+	_, exists := pi.GetAttrType(attrName)
+
+	if exists {
+		// what should we do?
+	} else {
+		pi.Attrs[attrName] = &data.Attribute{Name: attrName, Type: attrType, Value: value}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
