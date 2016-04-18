@@ -114,19 +114,17 @@ func (pi *Instance) SetState(state int) {
 }
 
 // UpdateAttrs updates the attributes of the Flow Instance
-func (pi *Instance) UpdateAttrs(update interface{}) {
+func (pi *Instance) UpdateAttrs(update map[string]interface{}) {
 
 	if update != nil {
 
 		log.Debugf("Updating flow attrs: %v", update)
 
-		m := update.(map[string]string)
-
 		if pi.Attrs == nil {
-			pi.Attrs = make(map[string]*data.Attribute, len(m))
+			pi.Attrs = make(map[string]*data.Attribute, len(update))
 		}
 
-		for k, v := range m {
+		for k, v := range update {
 			pi.Attrs[k] = &data.Attribute{Name: k, Type: "string", Value: v}
 		}
 	}
@@ -134,15 +132,17 @@ func (pi *Instance) UpdateAttrs(update interface{}) {
 
 // Start will start the Flow Instance, returns a boolean indicating
 // if it was able to start
-func (pi *Instance) Start(data interface{}) bool {
+func (pi *Instance) Start(flowData map[string]interface{}) bool {
 
 	pi.setStatus(StatusActive)
-	pi.UpdateAttrs(data)
+	pi.UpdateAttrs(flowData)
 
 	log.Infof("FlowInstance Flow: %v", pi.FlowModel)
 	model := pi.FlowModel.GetFlowBehavior(pi.Flow.TypeID())
 
-	ok, evalCode := model.Start(pi, data)
+	//todo: error if model not found
+
+	ok, evalCode := model.Start(pi)
 
 	if ok {
 		rootTaskData := pi.RootTaskEnv.NewTaskData(pi.Flow.RootTask())
@@ -154,11 +154,14 @@ func (pi *Instance) Start(data interface{}) bool {
 }
 
 //Resume resumes a Flow Instance
-func (pi *Instance) Resume(data interface{}) bool {
+func (pi *Instance) Resume(flowData map[string]interface{}) bool {
 
 	model := pi.FlowModel.GetFlowBehavior(pi.Flow.TypeID())
 
-	return model.Resume(pi, data)
+	pi.setStatus(StatusActive)
+	pi.UpdateAttrs(flowData)
+
+	return model.Resume(pi)
 }
 
 // DoStep performs a single execution 'step' of the Flow Instance
@@ -221,107 +224,57 @@ func (pi *Instance) scheduleEval(taskData *TaskData, evalCode int) {
 // execTask executes the specified Work Item of the Flow Instance
 func (pi *Instance) execTask(workItem *WorkItem) {
 
-	taskBehavior := pi.FlowModel.GetTaskBehavior(workItem.TaskData.task.TypeID())
+	taskData := workItem.TaskData
+
+	taskBehavior := pi.FlowModel.GetTaskBehavior(taskData.task.TypeID())
 
 	var done bool
 	var doneCode int
 
+	//todo: should validate process activities
+
 	if workItem.ExecType == EtEval {
-
-		// get the input mapper
-		inputMapper := workItem.TaskData.task.InputMapper()
-
-		if pi.Patch != nil {
-			// check if the patch has a overriding mapper
-			mapper := pi.Patch.GetInputMapper(workItem.TaskData.task.ID())
-			if mapper != nil {
-				inputMapper = mapper
-			}
-		}
-
-		if inputMapper != nil {
-			log.Debug("Applying InputMapper")
-			inputMapper.Apply(pi, workItem.TaskData)
-		}
 
 		eval := true
 
-		if pi.Interceptor != nil {
-			// check if this task as an interceptor
-			taskInterceptor := pi.Interceptor.GetTaskInterceptor(workItem.TaskData.task.ID())
+		if (taskData.HasAttrs()){
 
-			if taskInterceptor != nil {
-
-				log.Debug("Applying Interceptor")
-
-				if len(taskInterceptor.Inputs) > 0 {
-					// override input attributes
-					for _, attribute := range taskInterceptor.Inputs {
-
-						log.Debugf("Overriding Attr: %s = %s", attribute.Name, attribute.Value)
-
-						//todo: validation
-						workItem.TaskData.SetAttrValue(attribute.Name, attribute.Value)
-					}
-				}
-
-				// check if we should not evaluate the task
-				eval = !taskInterceptor.Skip
-			}
+			applyInputMapper(pi, taskData)
+			eval = applyInputInterceptor(pi, taskData)
 		}
 
 		if eval {
-			done, doneCode = taskBehavior.Eval(workItem.TaskData, workItem.EvalCode)
+			done, doneCode = taskBehavior.Eval(taskData, workItem.EvalCode)
 		} else {
 			done = true
 		}
 	} else {
-		done, doneCode = taskBehavior.PostEval(workItem.TaskData, workItem.EvalCode, nil)
+		done, doneCode = taskBehavior.PostEval(taskData, workItem.EvalCode, nil)
 	}
 
 	if done {
 
-		if pi.Interceptor != nil {
-			// check if this task as an interceptor and overrides ouputs
-			taskInterceptor := pi.Interceptor.GetTaskInterceptor(workItem.TaskData.task.ID())
-			if taskInterceptor != nil && len(taskInterceptor.Outputs) > 0 {
-				// override output attributes
-				for _, attribute := range taskInterceptor.Outputs {
+		if (taskData.HasAttrs()) {
+			applyOutputInterceptor(pi, taskData)
 
-					//todo: validation
-					workItem.TaskData.SetAttrValue(attribute.Name, attribute.Value)
+			appliedMapper := applyOutputMapper(pi, taskData)
+
+			if !appliedMapper && !taskData.task.IsScope() {
+
+				log.Debug("Applying Default Output Mapping")
+				activity, _ := taskData.Activity()
+
+				attrNS := "T" + string(taskData.task.ID()) + "."
+
+				for _, attr := range activity.Metadata().Outputs {
+
+					attrValue, _ := taskData.OutputScope().GetAttrValue(attr.Name)
+					pi.AddAttr(attrNS + attr.Name, attr.Type, attrValue)
 				}
 			}
 		}
 
-		// get the Output Mapper for the Task if one exists
-		outputMapper := workItem.TaskData.task.OutputMapper()
-
-		if pi.Patch != nil {
-			// check if the patch overrides the Output Mapper
-			mapper := pi.Patch.GetOutputMapper(workItem.TaskData.task.ID())
-			if mapper != nil {
-				outputMapper = mapper
-			}
-		}
-
-		if outputMapper != nil {
-			log.Debug("Applying OutputMapper")
-			outputMapper.Apply(workItem.TaskData, pi)
-		} else {
-			log.Debug("Applying Default Output Mapping")
-			activity, _ := workItem.TaskData.Activity()
-
-			attrNS := "T" + string(workItem.TaskData.task.ID()) + "."
-
-			for _, attr := range activity.Metadata().Outputs {
-
-				attrValue, _ := workItem.TaskData.GetAttrValue(attr.Name)
-				pi.AddAttr(attrNS + attr.Name, attr.Type, attrValue)
-			}
-		}
-
-		pi.handleTaskDone(taskBehavior, workItem.TaskData, doneCode)
+		pi.handleTaskDone(taskBehavior, taskData, doneCode)
 	}
 }
 
@@ -394,7 +347,7 @@ func (pi *Instance) GetAttrType(attrName string) (attrType string, exists bool) 
 }
 
 // GetAttrValue implements api.Scope.GetAttrValue
-func (pi *Instance) GetAttrValue(attrName string) (value string, exists bool) {
+func (pi *Instance) GetAttrValue(attrName string) (value interface{}, exists bool) {
 
 	if pi.Attrs != nil {
 		attr, found := pi.Attrs[attrName]
@@ -412,7 +365,7 @@ func (pi *Instance) GetAttrValue(attrName string) (value string, exists bool) {
 }
 
 // SetAttrValue implements api.Scope.SetAttrValue
-func (pi *Instance) SetAttrValue(attrName string, value string) {
+func (pi *Instance) SetAttrValue(attrName string, value interface{}) {
 	if pi.Attrs == nil {
 		pi.Attrs = make(map[string]*data.Attribute)
 	}
@@ -426,7 +379,7 @@ func (pi *Instance) SetAttrValue(attrName string, value string) {
 }
 
 // AddAttrValue add a new attribute to the instance
-func (pi *Instance) AddAttr(attrName string, attrType string, value string) {
+func (pi *Instance) AddAttr(attrName string, attrType string, value interface{}) {
 	if pi.Attrs == nil {
 		pi.Attrs = make(map[string]*data.Attribute)
 	}
@@ -554,6 +507,9 @@ type TaskData struct {
 	done    bool
 	attrs   map[string]*data.Attribute
 
+	inScope  data.Scope
+	outScope data.Scope
+
 	changes int
 
 	taskID int //needed for serialization
@@ -566,9 +522,16 @@ func NewTaskData(taskEnv *TaskEnv, task *flow.Task) *TaskData {
 
 	taskData.taskEnv = taskEnv
 	taskData.task = task
+
+
+
 	//taskData.TaskID = task.ID
 
 	return &taskData
+}
+
+func (td *TaskData) HasAttrs() bool {
+	return 	len(td.task.ActivityType()) > 0 || td.task.IsScope()
 }
 
 /////////////////////////////////////////
@@ -695,54 +658,61 @@ func (td *TaskData) TaskName() string {
 	return td.task.Name()
 }
 
-// GetAttrType implements api.Scope.GetAttrType
-func (td *TaskData) GetAttrType(attrName string) (attrType string, exists bool) {
+// TaskName implements activity.Context.TaskName method
+func (td *TaskData) InputScope() data.Scope {
 
-	if td.attrs != nil {
-		attr, found := td.attrs[attrName]
-		if found {
-			return attr.Type, true
-		}
+	if td.inScope != nil {
+		return td.inScope
 	}
 
-	attr, found := td.task.GetAttr(attrName)
-	if found {
-		return attr.Type, true
+	if len(td.task.ActivityType()) > 0 {
+
+		act := activity.Get(td.task.ActivityType())
+		td.inScope = NewFixedTaskScope(act.Metadata().Inputs, td.task)
+
+	} else if td.task.IsScope() {
+
+		//add flow scope
 	}
 
-	return "", false
+	return td.inScope
 }
 
-// GetAttrValue implements api.Scope.GetAttrValue
-func (td *TaskData) GetAttrValue(attrName string) (value string, exists bool) {
-	if td.attrs != nil {
-		attr, found := td.attrs[attrName]
-		if found {
-			return attr.Value, true
-		}
+// TaskName implements activity.Context.TaskName method
+func (td *TaskData) OutputScope() data.Scope {
+
+	if td.outScope != nil {
+		return td.outScope
 	}
 
-	attr, found := td.task.GetAttr(attrName)
-	if found {
-		return attr.Value, true
+	if len(td.task.ActivityType()) > 0 {
+
+		act := activity.Get(td.task.ActivityType())
+		td.outScope =  NewFixedTaskScope(act.Metadata().Outputs, nil)
+
+	} else if td.task.IsScope() {
+
+		//add flow scope
 	}
 
-	return "", false
+	return td.inScope
 }
 
-// SetAttrValue implements api.Scope.SetAttrValue
-func (td *TaskData) SetAttrValue(attrName string, value string) {
+// SetAttrValue implements data.Scope.SetAttrValue
+func (td *TaskData) GetInput(name string) interface{} {
 
-	if td.attrs == nil {
-		td.attrs = make(map[string]*data.Attribute)
+	val, found := td.InputScope().GetAttrValue(name)
+	if found {
+		return val
 	}
 
-	attrType, exists := td.GetAttrType(attrName)
+	return nil
+}
 
-	if exists {
-		td.attrs[attrName] = &data.Attribute{Name: attrName, Type: attrType, Value: value}
-	}
-	// todo: else what do we do if its a completely new attr, how should we infer the type
+// SetAttrValue implements data.Scope.SetAttrValue
+func (td *TaskData) SetOutput(name string, value interface{}) {
+
+	td.OutputScope().SetAttrValue(name, value)
 }
 
 // LinkData represents data associated with an instance of a Link

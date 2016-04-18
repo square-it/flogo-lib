@@ -7,8 +7,7 @@ import "github.com/TIBCOSoftware/flogo-lib/core/flow"
 type Starter interface {
 
 	// StartFlowInstance starts a flow instance using the provided information
-	// todo: make data map[string]interface{}
-	StartFlowInstance(flowURI string, startData map[string]string, replyHandler ReplyHandler, execOptions *ExecOptions) string
+	StartFlowInstance(flowURI string, startData map[string]interface{}, replyHandler ReplyHandler, execOptions *ExecOptions) string
 }
 
 // ReplyHandler is used to reply back to whoever started the flow instance

@@ -53,6 +53,8 @@ func (runner *DirectRunner) Stop() {
 // or it no longer has any tasks to execute
 func (runner *DirectRunner) RunInstance(instance *flowinst.Instance) bool {
 
+	//todo: catch panic
+
 	log.Debugf("Executing Instance: %s\n", instance.ID())
 
 	stepCount := 0

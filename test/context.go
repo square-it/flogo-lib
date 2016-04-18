@@ -2,6 +2,7 @@ package test
 
 import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/TIBCOSoftware/flogo-lib/core/ext/activity"
 )
 
 // TestActivityContext is a dummy AcitivityContext to assist in testing
@@ -10,15 +11,28 @@ type TestActivityContext struct {
 	FlowNameVal string
 	TaskNameVal string
 	Attrs       map[string]*data.Attribute
+
+	metadta      *activity.Metadata
+	inputs       map[string]*data.Attribute
+	outputs      map[string]*data.Attribute
 }
 
 // NewTestActivityContext creates a new TestActivityContext
-func NewTestActivityContext() *TestActivityContext {
+func NewTestActivityContext(metadata *activity.Metadata) *TestActivityContext {
 	tc := &TestActivityContext{
 		FlowIDVal:   "1",
 		FlowNameVal: "Test Flow",
 		TaskNameVal: "Test Task",
 		Attrs:       make(map[string]*data.Attribute),
+		inputs: make(map[string]*data.Attribute, len(metadata.Inputs)),
+		outputs: make(map[string]*data.Attribute, len(metadata.Outputs)),
+	}
+
+	for _,element := range metadata.Inputs {
+		tc.inputs[element.Name] = &data.Attribute{Name:element.Name, Type:element.Type}
+	}
+	for _,element := range metadata.Outputs {
+		tc.outputs[element.Name] = &data.Attribute{Name:element.Name, Type:element.Type}
 	}
 
 	return tc
@@ -57,7 +71,7 @@ func (c *TestActivityContext) GetAttrValue(attrName string) (value string, exist
 	attr, found := c.Attrs[attrName]
 
 	if found {
-		return attr.Value, true
+		return attr.Value.(string), true
 	}
 
 	return "", false
@@ -71,4 +85,52 @@ func (c *TestActivityContext) SetAttrValue(attrName string, value string) {
 	if found {
 		attr.Value = value
 	}
+}
+
+// SetAttrValue implements data.Scope.SetAttrValue
+func (c *TestActivityContext) SetInput(name string, value interface{}) {
+
+	attr, found := c.inputs[name]
+
+	if found {
+		attr.Value = value
+	} else {
+		//error?
+	}
+}
+
+// SetAttrValue implements data.Scope.SetAttrValue
+func (c *TestActivityContext) GetInput(name string) interface{} {
+
+	attr, found := c.inputs[name]
+
+	if found {
+		return attr.Value
+	}
+
+	return nil
+}
+
+// SetAttrValue implements data.Scope.SetAttrValue
+func (c *TestActivityContext) SetOutput(name string, value interface{}) {
+
+	attr, found := c.outputs[name]
+
+	if found {
+		attr.Value = value
+	} else {
+		//error?
+	}
+}
+
+// SetAttrValue implements data.Scope.SetAttrValue
+func (c *TestActivityContext) GetOutput(name string) interface{} {
+
+	attr, found := c.outputs[name]
+
+	if found {
+		return attr.Value
+	}
+
+	return nil
 }

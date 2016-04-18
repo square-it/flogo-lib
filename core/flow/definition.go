@@ -83,6 +83,7 @@ type Task struct {
 	name         string
 	tasks        []*Task
 	links        []*Link
+	isScope      bool
 
 	definition *Definition
 	parent     *Task
@@ -160,6 +161,10 @@ func (task *Task) OutputMapper() *data.Mapper {
 
 func (task *Task) String() string {
 	return fmt.Sprintf("Task[%d]:'%s'", task.id, task.name)
+}
+
+func (task *Task) IsScope() bool {
+	return task.isScope
 }
 
 ////////////////////////////////////////////////////////////////////////////

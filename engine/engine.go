@@ -29,10 +29,16 @@ func NewEngine(env *Environment) *Engine {
 
 	runnerConfig := engine.env.engineConfig.RunnerConfig
 
+	stateRecorder, enabled := env.StateRecorderService()
+
+	if !enabled {
+		stateRecorder = nil
+	}
+
 	if runnerConfig.Type == "direct" {
-		engine.runner = runner.NewDirectRunner(env.stateRecorder, runnerConfig.Direct.MaxStepCount)
+		engine.runner = runner.NewDirectRunner(stateRecorder, runnerConfig.Direct.MaxStepCount)
 	} else {
-		engine.runner = runner.NewPooledRunner(runnerConfig.Pooled, env.stateRecorder)
+		engine.runner = runner.NewPooledRunner(runnerConfig.Pooled, stateRecorder)
 	}
 
 	if log.IsEnabledFor(logging.DEBUG) {
@@ -127,7 +133,7 @@ func (e *Engine) NewFlowInstanceID() string {
 }
 
 // StartFlowInstance implements flowinst.IdGenerator.NewFlowInstanceID
-func (e *Engine) StartFlowInstance(flowURI string, startData map[string]string, replyHandler flowinst.ReplyHandler, execOptions *flowinst.ExecOptions) string {
+func (e *Engine) StartFlowInstance(flowURI string, startData map[string]interface{}, replyHandler flowinst.ReplyHandler, execOptions *flowinst.ExecOptions) string {
 
 	//todo fix for synchronous execution (DirectRunner)
 

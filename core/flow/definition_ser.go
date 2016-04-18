@@ -63,13 +63,13 @@ func NewDefinition(rep *DefinitionRep) *Definition {
 	def.tasks = make(map[int]*Task)
 	def.links = make(map[int]*Link)
 
-	flowTask(def, def.rootTask, rep.RootTask)
-	flowTaskLinks(def, def.rootTask, rep.RootTask)
+	addTask(def, def.rootTask, rep.RootTask)
+	addLinks(def, def.rootTask, rep.RootTask)
 
 	return def
 }
 
-func flowTask(def *Definition, task *Task, rep *TaskRep) {
+func addTask(def *Definition, task *Task, rep *TaskRep) {
 
 	task.id = rep.ID
 	task.activityType = rep.ActivityType
@@ -103,14 +103,14 @@ func flowTask(def *Definition, task *Task, rep *TaskRep) {
 			childTask := &Task{}
 			//childTask.Parent = task
 			task.tasks = append(task.tasks, childTask)
-			flowTask(def, childTask, childTaskRep)
+			addTask(def, childTask, childTaskRep)
 		}
 	}
 }
 
 // flowTaskLinks flowes a task's links.  Done seperately so it can
 // properly handle cross-boundry links
-func flowTaskLinks(def *Definition, task *Task, rep *TaskRep) {
+func addLinks(def *Definition, task *Task, rep *TaskRep) {
 
 	numLinks := len(rep.Links)
 

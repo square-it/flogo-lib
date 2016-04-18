@@ -53,7 +53,7 @@ func (pp *Patch) GetOutputMapper(taskID int) *data.Mapper {
 
 // TaskPatch contains patching information for a Task, such has attributes,
 // input mappings, output mappings.  This is used to override the corresponding
-// settings for a Task in the Proces
+// settings for a Task in the Process
 type TaskPatch struct {
 	ID             int               `json:"id"`
 	Attributes     []*data.Attribute `json:"attributes"`

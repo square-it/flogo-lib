@@ -20,7 +20,7 @@ func NewManager(flowProvider flow.Provider, idGenerator IDGenerator) *Manager {
 }
 
 // StartInstance creates a new FlowInstance and prepares it to be executed
-func (mgr *Manager) StartInstance(flowURI string, flowData map[string]string, replyHandler ReplyHandler, execOptions *ExecOptions) *Instance {
+func (mgr *Manager) StartInstance(flowURI string, flowData map[string]interface{}, replyHandler ReplyHandler, execOptions *ExecOptions) *Instance {
 
 	flow := mgr.flowProvider.GetFlow(flowURI)
 
@@ -45,7 +45,7 @@ func (mgr *Manager) StartInstance(flowURI string, flowData map[string]string, re
 
 // RestartInstance creates a FlowInstance from an initial state and prepares
 // it to be executed
-func (mgr *Manager) RestartInstance(initialState *Instance, flowData map[string]string, replyHandler ReplyHandler, execOptions *ExecOptions) *Instance {
+func (mgr *Manager) RestartInstance(initialState *Instance, flowData map[string]interface{}, replyHandler ReplyHandler, execOptions *ExecOptions) *Instance {
 
 	//todo: handle flow not found
 	instance := initialState
@@ -62,7 +62,7 @@ func (mgr *Manager) RestartInstance(initialState *Instance, flowData map[string]
 }
 
 // ResumeInstance reconstitutes and prepares a FlowInstance to be resumed
-func (mgr *Manager) ResumeInstance(initialState *Instance, flowData map[string]string, replyHandler ReplyHandler, execOptions *ExecOptions) *Instance {
+func (mgr *Manager) ResumeInstance(initialState *Instance, flowData map[string]interface{}, replyHandler ReplyHandler, execOptions *ExecOptions) *Instance {
 
 	//todo: handle flow not found
 	instance := initialState

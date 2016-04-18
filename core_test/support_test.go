@@ -24,13 +24,13 @@ func NewTestModel() *model.FlowModel {
 type SimpleFlowBehavior struct {
 }
 
-func (b *SimpleFlowBehavior) Start(context model.FlowContext, data interface{}) (start bool, evalCode int) {
+func (b *SimpleFlowBehavior) Start(context model.FlowContext) (start bool, evalCode int) {
 
 	//just schedule the root task
 	return true, 0
 }
 
-func (b *SimpleFlowBehavior) Resume(context model.FlowContext, data interface{}) bool {
+func (b *SimpleFlowBehavior) Resume(context model.FlowContext) bool {
 
 	return true
 }

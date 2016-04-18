@@ -1,5 +1,10 @@
 package data
 
+import (
+	"strings"
+	"fmt"
+)
+
 // MappingType is an enum for possible Mapping Types
 type MappingType int
 
@@ -57,8 +62,43 @@ func (m *Mapper) Apply(inputScope Scope, outputScope Scope) {
 		switch mapping.Type {
 		case MtAssign:
 			attrValue, exists := inputScope.GetAttrValue(mapping.Value)
+
+			//todo implement type conversion
 			if exists {
-				outputScope.SetAttrValue(mapping.MapTo, attrValue)
+
+				idx := strings.Index(mapping.MapTo,".")
+
+				if idx > -1 {
+					attrName := mapping.MapTo[:idx]
+					mapAttrName := mapping.MapTo[idx+1:]
+
+					//assigning to map value
+					toType, oe := outputScope.GetAttrType(attrName)
+
+					if oe {
+						if toType == "map" {
+							val, _ := outputScope.GetAttrValue(attrName)
+							var valMap map[string]string
+							if val == nil {
+								valMap = make(map[string]string)
+							} else {
+								valMap = val.(map[string]string)
+							}
+							valMap[mapAttrName] = attrValue.(string)
+
+							outputScope.SetAttrValue(attrName, valMap)
+
+						} else {
+
+							//error, not a map (or object?)
+						}
+					} else {
+						fmt.Printf("Attr %s not found in output scope\n", attrName)
+					}
+
+				} else {
+					outputScope.SetAttrValue(mapping.MapTo, attrValue)
+				}
 			}
 		//todo: should we ignore if DNE - if we have to add dynamically what type do we use
 		case MtLiteral:

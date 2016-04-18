@@ -18,12 +18,12 @@ type FlowBehavior interface {
 	// flow can start and eval will be scheduled on the Root Task.
 	// Return false indicates that the flow could not be started
 	// at this time.
-	Start(context FlowContext, data interface{}) (start bool, evalCode int)
+	Start(context FlowContext) (start bool, evalCode int)
 
 	// Resume the flow instance.  Returning true indicates that the
 	// flow can resume.  Return false indicates that the flow
 	// could not be resumed at this time.
-	Resume(context FlowContext, data interface{}) bool //<---
+	Resume(context FlowContext) bool //<---
 
 	//do we need the following two
 
