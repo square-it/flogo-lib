@@ -9,6 +9,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/flow"
 	"github.com/TIBCOSoftware/flogo-lib/util"
 	"github.com/op/go-logging"
+	"strconv"
 )
 
 var log = logging.MustGetLogger("instance")
@@ -264,12 +265,12 @@ func (pi *Instance) execTask(workItem *WorkItem) {
 				log.Debug("Applying Default Output Mapping")
 				activity, _ := taskData.Activity()
 
-				attrNS := "T" + string(taskData.task.ID()) + "."
+				attrNS := "[T" + strconv.Itoa(taskData.task.ID()) + "."
 
 				for _, attr := range activity.Metadata().Outputs {
 
 					attrValue, _ := taskData.OutputScope().GetAttrValue(attr.Name)
-					pi.AddAttr(attrNS + attr.Name, attr.Type, attrValue)
+					pi.AddAttr(attrNS + attr.Name +"]", attr.Type, attrValue)
 				}
 			}
 		}
@@ -349,8 +350,14 @@ func (pi *Instance) GetAttrType(attrName string) (attrType string, exists bool) 
 // GetAttrValue implements api.Scope.GetAttrValue
 func (pi *Instance) GetAttrValue(attrName string) (value interface{}, exists bool) {
 
+	log.Debugf("fi.GetAttrValue: %v", pi.Attrs)
+	log.Debugf("fi.AttrName: %s", attrName)
+
 	if pi.Attrs != nil {
 		attr, found := pi.Attrs[attrName]
+
+		log.Debugf("fi.Attr: %v", attr)
+
 		if found {
 			return attr.Value, true
 		}
@@ -384,6 +391,8 @@ func (pi *Instance) AddAttr(attrName string, attrType string, value interface{})
 		pi.Attrs = make(map[string]*data.Attribute)
 	}
 
+	log.Debugf("AddAttr name: %s, type: %s, value:%v\n", attrName, attrType, value)
+
 	_, exists := pi.GetAttrType(attrName)
 
 	if exists {
@@ -391,6 +400,8 @@ func (pi *Instance) AddAttr(attrName string, attrType string, value interface{})
 	} else {
 		pi.Attrs[attrName] = &data.Attribute{Name: attrName, Type: attrType, Value: value}
 	}
+
+	log.Debugf("flow attrs: %v\n", pi.Attrs)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -690,12 +701,13 @@ func (td *TaskData) OutputScope() data.Scope {
 		act := activity.Get(td.task.ActivityType())
 		td.outScope =  NewFixedTaskScope(act.Metadata().Outputs, nil)
 
+		log.Debugf("OutputScope: %v\n", td.outScope)
 	} else if td.task.IsScope() {
 
 		//add flow scope
 	}
 
-	return td.inScope
+	return td.outScope
 }
 
 // SetAttrValue implements data.Scope.SetAttrValue
@@ -712,6 +724,7 @@ func (td *TaskData) GetInput(name string) interface{} {
 // SetAttrValue implements data.Scope.SetAttrValue
 func (td *TaskData) SetOutput(name string, value interface{}) {
 
+	log.Debugf("SET OUTPUT: %s = %v\n", name, value)
 	td.OutputScope().SetAttrValue(name, value)
 }
 

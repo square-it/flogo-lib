@@ -1,5 +1,7 @@
 package data
 
+import "encoding/json"
+
 // Attribute is a simple structure used to define a data Attribute/property
 type Attribute struct {
 	Name  string `json:"name"`
@@ -7,8 +9,35 @@ type Attribute struct {
 	Value interface{} `json:"value"`
 }
 
-type ProtoAttr struct {
-	Attribute
+type TypedValue struct {
+	Type  Type `json:"type"`
+	Value interface{} `json:"value"`
+}
 
-	valueSet bool
+func (tv *TypedValue) MarshalJSON() ([]byte, error) {
+
+	return json.Marshal(&struct {
+		Type  string      `json:"type"`
+		Value interface{} `json:"value"`
+	}{
+		Type: tv.Type.String(),
+		Value: tv.Value,
+	})
+}
+
+func (tv *TypedValue) UnmarshalJSON(data []byte) error {
+
+	ser := &struct {
+		Type  string      `json:"type"`
+		Value interface{} `json:"value"`
+	}{}
+
+	if err := json.Unmarshal(data, ser); err != nil {
+		return err
+	}
+
+	tv.Type, _ = ToType(ser.Type)
+	tv.Value = ser.Value
+
+	return nil
 }

@@ -61,7 +61,37 @@ func (m *Mapper) Apply(inputScope Scope, outputScope Scope) {
 
 		switch mapping.Type {
 		case MtAssign:
-			attrValue, exists := inputScope.GetAttrValue(mapping.Value)
+
+			var attrValue interface{}
+			var exists bool
+
+			inAttrName := mapping.Value
+
+			//todo move this code
+			if inAttrName[0] == '[' {
+
+				if inAttrName[len(inAttrName)-1] != ']' {
+					idx := strings.Index(inAttrName,"]")
+
+					mapAttrName := inAttrName[idx+2:]
+
+					fmt.Printf("AttrName: %s\n", inAttrName[:idx+1])
+					fmt.Printf("MapAttrName: %s\n", mapAttrName)
+
+					val, attrExists := inputScope.GetAttrValue(inAttrName[:idx+1])
+					fmt.Printf("val: %v\n", val)
+
+					if (attrExists) {
+
+						valMap := val.(map[string]interface{})
+						attrValue, exists = valMap[mapAttrName]
+					}
+				}
+			} else {
+				attrValue, exists = inputScope.GetAttrValue(mapping.Value)
+			}
+
+			//idx := strings.Index(mapping.MapTo,".")
 
 			//todo implement type conversion
 			if exists {
@@ -84,7 +114,8 @@ func (m *Mapper) Apply(inputScope Scope, outputScope Scope) {
 							} else {
 								valMap = val.(map[string]string)
 							}
-							valMap[mapAttrName] = attrValue.(string)
+							strVal,_ := CoerceToString(attrValue)
+							valMap[mapAttrName] = strVal
 
 							outputScope.SetAttrValue(attrName, valMap)
 

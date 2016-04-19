@@ -154,15 +154,28 @@ func (s *FixedTaskScope) SetAttrValue(attrName string, value interface{}) {
 		s.attrs = make(map[string]*data.Attribute)
 	}
 
+	log.Debugf("SetAttr: %s = %v\n", attrName, value)
+
 	attr, found := s.attrs[attrName]
 
 	if found {
-		attr.Value = value
+		log.Debugf("SetAttr: Attr %s found\n", attrName)
+		//todo handle errors
+		dt, _ := data.ToType(attr.Type)
+		coercedVal, _ := data.CoerceToValue(value,dt)
+		attr.Value = coercedVal
 	} else {
+		log.Debugf("SetAttr: Attr %s not found\n", attrName)
 		// look up reference for type
 		attr, found = s.refAttrs[attrName]
+		log.Debugf("SetAttr: ref %v\n", attr)
 		if found {
-			s.attrs[attrName] = &data.Attribute{Name:attrName, Type:attr.Type, Value:value}
+			dt, _ := data.ToType(attr.Type)
+			coercedVal, _ := data.CoerceToValue(value,dt)
+			s.attrs[attrName] = &data.Attribute{Name:attrName, Type:attr.Type, Value:coercedVal}
+		} else {
+			log.Debugf("SetAttr: Attr %s ref not found\n", attrName)
+			log.Debugf("SetAttr: refs %v\n", s.refAttrs)
 		}
 		//todo: else error
 	}
