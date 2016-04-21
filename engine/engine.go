@@ -57,8 +57,7 @@ func (e *Engine) Start() {
 	log.Info("Engine: Starting...")
 
 	triggers := trigger.Triggers()
-
-	engineConfig := e.env.engineConfig
+	triggersConfig := e.env.TriggersConfig()
 
 	// initialize engine environment
 	e.env.Init(e.instManager, e.runner)
@@ -66,7 +65,7 @@ func (e *Engine) Start() {
 	// initialize triggers
 	for _, trigger := range triggers {
 
-		triggerConfig := engineConfig.Triggers[trigger.Metadata().ID]
+		triggerConfig := triggersConfig.Triggers[trigger.Metadata().ID]
 		trigger.Init(nil, triggerConfig)
 	}
 

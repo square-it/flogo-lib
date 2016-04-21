@@ -35,8 +35,8 @@ func CoerceToValue(value interface{}, dataType Type) (interface{}, error) {
 		coerced, err = CoerceToObject(value)
 	case ARRAY:
 		coerced, err = CoerceToArray(value)
-	case MAP:
-		coerced, err = CoerceToMap(value)
+	case PARAMS:
+		coerced, err = CoerceToParams(value)
 	}
 
 	if err != nil {
@@ -170,7 +170,7 @@ func CoerceToArray(val interface{}) ([]interface{}, error) {
 	}
 }
 
-func CoerceToMap(val interface{}) (map[string]string, error) {
+func CoerceToParams(val interface{}) (map[string]string, error) {
 
 	switch t := val.(type) {
 	case map[string]string:

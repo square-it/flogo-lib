@@ -11,10 +11,17 @@ import (
 
 // Config is the configuration for the engine
 type Config struct {
-	LogLevel     string                     `json:"loglevel"`
-	RunnerConfig *RunnerConfig              `json:"flowRunner"`
-	Triggers     map[string]*trigger.Config `json:"triggers"`
-	Services     map[string]*service.Config `json:"services"`
+	LogLevel     string
+	RunnerConfig *RunnerConfig
+	Triggers     map[string]*trigger.Config
+	Services     map[string]*service.Config
+}
+
+type serEngineConfig struct {
+	LogLevel     string            `json:"loglevel"`
+	RunnerConfig *RunnerConfig     `json:"flowRunner"`
+	Triggers     []*trigger.Config `json:"triggers"`
+	Services     []*service.Config `json:"services"`
 }
 
 // RunnerConfig is the configuration for the engine level runner
@@ -24,11 +31,13 @@ type RunnerConfig struct {
 	Direct *runner.DirectConfig `json:"direct,omitempty"`
 }
 
-type serEngineConfig struct {
-	LogLevel     string            `json:"loglevel"`
-	RunnerConfig *RunnerConfig     `json:"flowRunner"`
+// TriggersConfig is the triggers configuration for the engine
+type TriggersConfig struct {
+	Triggers     map[string]*trigger.Config
+}
+
+type serTriggersConfig struct {
 	Triggers     []*trigger.Config `json:"triggers"`
-	Services     []*service.Config `json:"services"`
 }
 
 // DefaultConfig returns the default engine configuration
@@ -42,6 +51,15 @@ func DefaultConfig() *Config {
 	engineConfig.Services = service.DefaultServicesConfig()
 
 	return &engineConfig
+}
+
+// DefaultConfig returns the default engine configuration
+func DefaultTriggersConfig() *TriggersConfig {
+
+	var triggersConfig TriggersConfig
+	triggersConfig.Triggers = make(map[string]*trigger.Config)
+
+	return &triggersConfig
 }
 
 // MarshalJSON marshals the EngineConfig to JSON
@@ -102,6 +120,37 @@ func (ec *Config) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// MarshalJSON marshals the EngineConfig to JSON
+func (tc *TriggersConfig) MarshalJSON() ([]byte, error) {
+
+	var triggers []*trigger.Config
+
+	for _, value := range tc.Triggers {
+		triggers = append(triggers, value)
+	}
+
+	return json.Marshal(&serTriggersConfig{
+		Triggers:     triggers,
+	})
+}
+
+// UnmarshalJSON unmarshals EngineConfog from JSON
+func (tc *TriggersConfig) UnmarshalJSON(data []byte) error {
+
+	ser := &serTriggersConfig{}
+	if err := json.Unmarshal(data, ser); err != nil {
+		return err
+	}
+
+	tc.Triggers = make(map[string]*trigger.Config)
+
+	for _, value := range ser.Triggers {
+		tc.Triggers[value.Name] = value
+	}
+
+	return nil
+}
+
 // LoadConfigFromFile loads the engine Config from the specified JSON file
 func LoadConfigFromFile(fileName string) *Config {
 
@@ -137,6 +186,43 @@ func LoadConfigFromJSON(configJSON string) *Config {
 	}
 
 	return engineConfig
+}
+
+// LoadTriggersConfigFromFile loads the triggers Config from the specified JSON file
+func LoadTriggersConfigFromFile(fileName string) *TriggersConfig {
+
+	if len(fileName) == 0 {
+		panic("file name cannot be empty")
+	}
+
+	configFile, _ := os.Open(fileName)
+
+	if configFile != nil {
+
+		triggersConfig := &TriggersConfig{}
+
+		decoder := json.NewDecoder(configFile)
+		decodeErr := decoder.Decode(triggersConfig)
+		if decodeErr != nil {
+			log.Error("error:", decodeErr)
+		}
+
+		return triggersConfig
+	}
+
+	return nil
+}
+
+// LoadTriggersConfigFromJSON loads the engine Config from the specified JSON file
+func LoadTriggersConfigFromJSON(configJSON string) *TriggersConfig {
+
+	triggersConfig := &TriggersConfig{}
+	decodeErr := json.Unmarshal([]byte(configJSON), triggersConfig)
+	if decodeErr != nil {
+		log.Error("error:", decodeErr)
+	}
+
+	return triggersConfig
 }
 
 func defaultRunnerConfig() *RunnerConfig {

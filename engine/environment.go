@@ -16,12 +16,13 @@ type Environment struct {
 	engineTesterEnabled  bool
 
 	engineConfig       *Config
+	triggersConfig     *TriggersConfig
 	embeddedFlowManger *util.EmbeddedFlowManager
 }
 
 // NewEnvironment creates a new engine Environment from the provided configuration and the specified
 // StateRecorder and FlowProvider
-func NewEnvironment(flowProvider service.FlowProviderService, stateRecorder service.StateRecorderService, engineTester service.EngineTesterService, config *Config) *Environment {
+func NewEnvironment(flowProvider service.FlowProviderService, stateRecorder service.StateRecorderService, engineTester service.EngineTesterService, config *Config, triggersConfig *TriggersConfig) *Environment {
 
 	var engineEnv Environment
 
@@ -33,6 +34,14 @@ func NewEnvironment(flowProvider service.FlowProviderService, stateRecorder serv
 	engineEnv.stateRecorder = stateRecorder
 	engineEnv.engineTester = engineTester
 	engineEnv.engineConfig = config
+
+	if len(triggersConfig.Triggers) == 0 { //temporary
+		engineEnv.triggersConfig.Triggers = config.Triggers
+	} else {
+		engineEnv.triggersConfig = triggersConfig
+	}
+
+
 
 	return &engineEnv
 }
@@ -62,6 +71,11 @@ func (e *Environment) SetEmbeddedJSONFlows(compressed bool, jsonFlows map[string
 // EngineConfig returns the Engine Config for the Engine Environment
 func (e *Environment) EngineConfig() *Config {
 	return e.engineConfig
+}
+
+// TriggersConfig returns the Triggers Config for the Engine Environment
+func (e *Environment) TriggersConfig() *TriggersConfig {
+	return e.triggersConfig
 }
 
 // Init is used to initialize the engine environment
