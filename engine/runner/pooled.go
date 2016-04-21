@@ -37,7 +37,7 @@ func NewPooledRunner(config *PooledConfig, stateRecorder flowinst.StateRecorder)
 }
 
 // Start will start the engine, by starting all of its workers
-func (runner *PooledRunner) Start() {
+func (runner *PooledRunner) Start() error {
 
 	if !runner.active {
 
@@ -69,6 +69,8 @@ func (runner *PooledRunner) Start() {
 
 		runner.active = true
 	}
+
+	return nil
 }
 
 // Stop will stop the engine, by stopping all of its workers

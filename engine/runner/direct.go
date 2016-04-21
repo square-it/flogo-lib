@@ -38,9 +38,10 @@ func NewDirectRunner(stateRecorder flowinst.StateRecorder, maxStepCount int) *Di
 }
 
 // Start will start the engine, by starting all of its workers
-func (runner *DirectRunner) Start() {
+func (runner *DirectRunner) Start() error {
 	//op-op
 	log.Debug("Started Direct Flow Instance Runner")
+	return nil
 }
 
 // Stop will stop the engine, by stopping all of its workers

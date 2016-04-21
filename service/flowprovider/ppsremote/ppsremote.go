@@ -31,8 +31,9 @@ func NewRemoteFlowProvider() *RemoteFlowProvider {
 }
 
 // Start implements util.Managed.Start()
-func (pps *RemoteFlowProvider) Start() {
+func (pps *RemoteFlowProvider) Start() error {
 	// no-op
+	return nil
 }
 
 // Stop implements util.Managed.Stop()

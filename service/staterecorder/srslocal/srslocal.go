@@ -20,8 +20,9 @@ func NewLocalStateRecorder() *LocalStateRecorder {
 }
 
 // Start implements util.Managed.Start()
-func (srs *LocalStateRecorder) Start() {
+func (srs *LocalStateRecorder) Start() error {
 	// no-op
+	return nil
 }
 
 // Stop implements util.Managed.Stop()

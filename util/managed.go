@@ -7,7 +7,7 @@ import "fmt"
 type Managed interface {
 
 	// Start starts the managed object
-	Start()
+	Start() error
 
 	// Stop stops the manged object
 	Stop()

@@ -29,8 +29,9 @@ func NewLocalFlowProvider() *LocalFlowProvider {
 }
 
 // Start implements util.Managed.Start()
-func (pps *LocalFlowProvider) Start() {
+func (pps *LocalFlowProvider) Start() error {
 	// no-op
+	return nil
 }
 
 // Stop implements util.Managed.Stop()

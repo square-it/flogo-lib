@@ -147,7 +147,13 @@ func (e *Engine) StartFlowInstance(flowURI string, startData map[string]interfac
 func startManaged(name string, managed util.Managed) {
 
 	log.Debugf("%s: Starting...", name)
-	managed.Start()
+	err := managed.Start()
+
+	if err != nil {
+		log.Errorf("%s: Error Starting", name)
+		panic(err)
+	}
+
 	log.Debugf("%s: Started", name)
 }
 

@@ -42,8 +42,9 @@ func (et *RestEngineTester) Init(settings map[string]string, instManager *flowin
 }
 
 // Start implements engine.EngineTester.Start
-func (et *RestEngineTester) Start() {
-	et.server.Start()
+func (et *RestEngineTester) Start() error {
+	err := et.server.Start()
+	return err
 }
 
 // Stop implements engine.EngineTester.Stop

@@ -25,8 +25,9 @@ func NewRemoteStateRecorder() *RemoteStateRecorder {
 }
 
 // Start implements util.Managed.Start()
-func (srs *RemoteStateRecorder) Start() {
+func (srs *RemoteStateRecorder) Start() error {
 	// no-op
+	return nil
 }
 
 // Stop implements util.Managed.Stop()
