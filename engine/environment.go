@@ -35,7 +35,9 @@ func NewEnvironment(flowProvider service.FlowProviderService, stateRecorder serv
 	engineEnv.engineTester = engineTester
 	engineEnv.engineConfig = config
 
-	if len(triggersConfig.Triggers) == 0 { //temporary
+	if triggersConfig == nil {
+		engineEnv.triggersConfig = &TriggersConfig{Triggers:config.Triggers}
+	} else if len(triggersConfig.Triggers) == 0 { //temporary
 		engineEnv.triggersConfig.Triggers = config.Triggers
 	} else {
 		engineEnv.triggersConfig = triggersConfig
