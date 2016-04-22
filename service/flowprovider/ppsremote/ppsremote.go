@@ -62,7 +62,7 @@ func (pps *RemoteFlowProvider) GetFlow(flowURI string) *flow.Definition {
 	if strings.Index(flowURI, "local://") == 0 {
 
 		log.Debugf("Loading Embedded Flow: %s\n", flowURI)
-		flowJSON = pps.embeddedMgr.GetEmbeddedFlowJSON(flowURI[8:])
+		flowJSON = pps.embeddedMgr.GetEmbeddedFlowJSON(flowURI)
 
 	} else {
 
