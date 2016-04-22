@@ -47,6 +47,11 @@ func NewEngine(env *Environment) *Engine {
 		log.Debugf("Engine Configuration:\n%s\n", string(cfgJSON))
 	}
 
+	if log.IsEnabledFor(logging.DEBUG) {
+		cfgJSON, _ := json.MarshalIndent(env.triggersConfig, "", "  ")
+		log.Debugf("Triggers Configuration:\n%s\n", string(cfgJSON))
+	}
+
 	engine.instManager = flowinst.NewManager(env.FlowProviderService(), &engine)
 
 	return &engine
