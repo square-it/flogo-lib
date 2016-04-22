@@ -6,7 +6,7 @@ type Error struct {
 	errorStr string
 }
 
-func NewError(errorText string) error {
+func NewError(errorText string) *Error {
 	return &Error{errorStr:errorText}
 }
 

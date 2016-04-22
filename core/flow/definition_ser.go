@@ -74,6 +74,7 @@ func addTask(def *Definition, task *Task, rep *TaskRep) {
 	task.id = rep.ID
 	task.activityType = rep.ActivityType
 	task.typeID = rep.TypeID
+	task.name = rep.Name
 	//task.Definition = def
 
 	if rep.InputMappings != nil {
