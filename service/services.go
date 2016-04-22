@@ -39,5 +39,8 @@ type EngineTesterService interface {
 	util.Managed
 
 	//Init initializes the EngineTester
-	Init(settings map[string]string, instManager *flowinst.Manager, runner runner.Runner)
+	Init(settings map[string]string)
+
+	//SetupInstanceSupport sets up the support for instance execution
+	SetupInstanceSupport(instManager *flowinst.Manager, runner runner.Runner)
 }

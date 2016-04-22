@@ -28,13 +28,16 @@ func NewEngine(env *Environment) *Engine {
 	engine.generator, _ = util.NewGenerator()
 	engine.env = env
 
-	runnerConfig := engine.env.engineConfig.RunnerConfig
+	// initialize engine environment
+	engine.env.Init()
 
 	stateRecorder, enabled := env.StateRecorderService()
 
 	if !enabled {
 		stateRecorder = nil
 	}
+
+	runnerConfig := engine.env.engineConfig.RunnerConfig
 
 	if runnerConfig.Type == "direct" {
 		engine.runner = runner.NewDirectRunner(stateRecorder, runnerConfig.Direct.MaxStepCount)
@@ -64,9 +67,6 @@ func (e *Engine) Start() {
 
 	triggers := trigger.Triggers()
 	triggersConfig := e.env.TriggersConfig()
-
-	// initialize engine environment
-	e.env.Init(e.instManager, e.runner)
 
 	// initialize triggers
 	for _, trigger := range triggers {
@@ -100,6 +100,7 @@ func (e *Engine) Start() {
 	// start the engineTester service if enabled
 	engineTester, enabled := e.env.EngineTesterService()
 	if enabled {
+		engineTester.SetupInstanceSupport(e.instManager, e.runner)
 		startManaged("EngineTester Service", engineTester)
 	}
 

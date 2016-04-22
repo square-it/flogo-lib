@@ -22,10 +22,7 @@ func NewRestEngineTester() *RestEngineTester {
 }
 
 // Init implements engine.EngineTester.Init
-func (et *RestEngineTester) Init(settings map[string]string, instManager *flowinst.Manager, runner runner.Runner) {
-
-	et.reqProcessor = NewRequestProcessor(instManager)
-	et.runner = runner
+func (et *RestEngineTester) Init(settings map[string]string) {
 
 	router := httprouter.New()
 	router.OPTIONS("/flow/start", handleOption)
@@ -39,6 +36,13 @@ func (et *RestEngineTester) Init(settings map[string]string, instManager *flowin
 
 	addr := ":" + settings["port"]
 	et.server = NewServer(addr, router)
+}
+
+// Init implements engine.EngineTester.SetupInstanceSupport
+func (et *RestEngineTester) SetupInstanceSupport(instManager *flowinst.Manager, runner runner.Runner) {
+
+	et.reqProcessor = NewRequestProcessor(instManager)
+	et.runner = runner
 }
 
 // Start implements engine.EngineTester.Start

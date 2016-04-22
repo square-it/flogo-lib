@@ -1,8 +1,6 @@
 package engine
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/core/flowinst"
-	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
 	"github.com/TIBCOSoftware/flogo-lib/service"
 	"github.com/TIBCOSoftware/flogo-lib/util"
 	"github.com/TIBCOSoftware/flogo-lib/core/ext/trigger"
@@ -78,7 +76,7 @@ func (e *Environment) TriggersConfig() *TriggersConfig {
 }
 
 // Init is used to initialize the engine environment
-func (e *Environment) Init(instManager *flowinst.Manager, defaultRunner runner.Runner) {
+func (e *Environment) Init() {
 
 	settings, enabled := getServiceSettings(e.engineConfig, service.ServiceFlowProvider)
 
@@ -98,7 +96,7 @@ func (e *Environment) Init(instManager *flowinst.Manager, defaultRunner runner.R
 	settings, enabled = getServiceSettings(e.engineConfig, service.ServiceEngineTester)
 	if enabled {
 		e.engineTesterEnabled = true
-		e.engineTester.Init(settings, instManager, defaultRunner)
+		e.engineTester.Init(settings)
 	}
 }
 
