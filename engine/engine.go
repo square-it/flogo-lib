@@ -8,6 +8,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
 	"github.com/TIBCOSoftware/flogo-lib/util"
 	"github.com/op/go-logging"
+	"fmt"
 )
 
 var log = logging.MustGetLogger("engine")
@@ -65,8 +66,13 @@ func (e *Engine) Start() {
 	// initialize triggers
 	for _, trigger := range triggers {
 
-		triggerConfig := triggersConfig.Triggers[trigger.Metadata().ID]
-		trigger.Init(nil, triggerConfig)
+		triggerConfig, found := triggersConfig.Triggers[trigger.Metadata().ID]
+
+		if !found {
+			panic(fmt.Errorf("Trigger configuration for '%s' not provided", trigger.Metadata().ID))
+		}
+
+		trigger.Init(e, triggerConfig)
 	}
 
 	// start the flow provider service
