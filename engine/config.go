@@ -13,14 +13,12 @@ import (
 type Config struct {
 	LogLevel     string
 	RunnerConfig *RunnerConfig
-	Triggers     map[string]*trigger.Config
 	Services     map[string]*service.Config
 }
 
 type serEngineConfig struct {
 	LogLevel     string            `json:"loglevel"`
 	RunnerConfig *RunnerConfig     `json:"flowRunner"`
-	Triggers     []*trigger.Config `json:"triggers"`
 	Services     []*service.Config `json:"services"`
 }
 
@@ -46,7 +44,6 @@ func DefaultConfig() *Config {
 	var engineConfig Config
 
 	engineConfig.LogLevel = "DEBUG"
-	engineConfig.Triggers = make(map[string]*trigger.Config)
 	engineConfig.RunnerConfig = defaultRunnerConfig()
 	engineConfig.Services = service.DefaultServicesConfig()
 
@@ -65,12 +62,6 @@ func DefaultTriggersConfig() *TriggersConfig {
 // MarshalJSON marshals the EngineConfig to JSON
 func (ec *Config) MarshalJSON() ([]byte, error) {
 
-	var triggers []*trigger.Config
-
-	for _, value := range ec.Triggers {
-		triggers = append(triggers, value)
-	}
-
 	var services []*service.Config
 
 	for _, value := range ec.Services {
@@ -80,7 +71,6 @@ func (ec *Config) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&serEngineConfig{
 		LogLevel:     ec.LogLevel,
 		RunnerConfig: ec.RunnerConfig,
-		Triggers:     triggers,
 		Services:     services,
 	})
 }
@@ -109,12 +99,6 @@ func (ec *Config) UnmarshalJSON(data []byte) error {
 		}
 	} else {
 		ec.Services = service.DefaultServicesConfig()
-	}
-
-	ec.Triggers = make(map[string]*trigger.Config)
-
-	for _, value := range ser.Triggers {
-		ec.Triggers[value.Name] = value
 	}
 
 	return nil
