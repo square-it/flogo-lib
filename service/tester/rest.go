@@ -11,9 +11,9 @@ import (
 
 // RestEngineTester is default REST implementation of the EngineTester
 type RestEngineTester struct {
-	reqFlowor *RequestFlowor
-	server    *Server
-	runner    runner.Runner
+	reqProcessor *RequestProcessor
+	server       *Server
+	runner       runner.Runner
 }
 
 // NewRestEngineTester creates a new REST EngineTester
@@ -24,7 +24,7 @@ func NewRestEngineTester() *RestEngineTester {
 // Init implements engine.EngineTester.Init
 func (et *RestEngineTester) Init(settings map[string]string, instManager *flowinst.Manager, runner runner.Runner) {
 
-	et.reqFlowor = NewRequestFlowor(instManager)
+	et.reqProcessor = NewRequestProcessor(instManager)
 	et.runner = runner
 
 	router := httprouter.New()
@@ -83,10 +83,12 @@ func (et *RestEngineTester) StartFlow(w http.ResponseWriter, r *http.Request, _ 
 		return
 	}
 
-	instance := et.reqFlowor.StartFlow(req, nil) //nil replyHandler
+	instance, err := et.reqProcessor.StartFlow(req, nil) //nil replyHandler
 
-	// If we didn't find it, 404
-	//w.WriteHeader(http.StatusNotFound)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	resp := &IDResponse{ID: instance.ID()}
 
@@ -121,7 +123,7 @@ func (et *RestEngineTester) RestartFlow(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	instance := et.reqFlowor.RestartFlow(req, nil) //nil replyHandler
+	instance := et.reqProcessor.RestartFlow(req, nil) //nil replyHandler
 
 	// If we didn'et find it, 404
 	//w.WriteHeader(http.StatusNotFound)
@@ -157,7 +159,7 @@ func (et *RestEngineTester) ResumeFlow(w http.ResponseWriter, r *http.Request, _
 		return
 	}
 
-	instance := et.reqFlowor.ResumeFlow(req, nil) //nil replyHandler
+	instance := et.reqProcessor.ResumeFlow(req, nil) //nil replyHandler
 	et.runner.RunInstance(instance)
 
 	w.WriteHeader(http.StatusOK)

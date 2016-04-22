@@ -5,7 +5,11 @@ import (
 	"compress/gzip"
 	"encoding/base64"
 	"io/ioutil"
+
+	"github.com/op/go-logging"
 )
+
+var log = logging.MustGetLogger("util")
 
 // EmbeddedFlowManager is a simple manager for embedded flows
 type EmbeddedFlowManager struct {
@@ -15,7 +19,14 @@ type EmbeddedFlowManager struct {
 
 // NewEmbeddedFlowManager creates a new EmbeddedFlowManager
 func NewEmbeddedFlowManager(compressed bool, embeddedFlows map[string]string) *EmbeddedFlowManager {
-	return &EmbeddedFlowManager{flowsAreCompressed: compressed, embeddedFlows: embeddedFlows}
+
+	flows := embeddedFlows
+
+	if embeddedFlows == nil {
+		flows = make(map[string]string)
+	}
+
+	return &EmbeddedFlowManager{flowsAreCompressed: compressed, embeddedFlows: flows}
 }
 
 // GetEmbeddedFlowJSON gets the specified embedded flow

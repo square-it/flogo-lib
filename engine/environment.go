@@ -81,6 +81,11 @@ func (e *Environment) TriggersConfig() *TriggersConfig {
 func (e *Environment) Init(instManager *flowinst.Manager, defaultRunner runner.Runner) {
 
 	settings, enabled := getServiceSettings(e.engineConfig, service.ServiceFlowProvider)
+
+	if e.embeddedFlowManger == nil {
+		e.embeddedFlowManger = util.NewEmbeddedFlowManager(false, nil)
+	}
+
 	e.flowProvider.Init(settings, e.embeddedFlowManger)
 
 	settings, enabled = getServiceSettings(e.engineConfig, service.ServiceStateRecorder)

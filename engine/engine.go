@@ -143,14 +143,18 @@ func (e *Engine) NewFlowInstanceID() string {
 }
 
 // StartFlowInstance implements flowinst.IdGenerator.NewFlowInstanceID
-func (e *Engine) StartFlowInstance(flowURI string, startData map[string]interface{}, replyHandler flowinst.ReplyHandler, execOptions *flowinst.ExecOptions) string {
+func (e *Engine) StartFlowInstance(flowURI string, startData map[string]interface{}, replyHandler flowinst.ReplyHandler, execOptions *flowinst.ExecOptions) (instanceID string, startError error) {
 
 	//todo fix for synchronous execution (DirectRunner)
 
-	instance := e.instManager.StartInstance(flowURI, startData, replyHandler, execOptions)
-	e.runner.RunInstance(instance)
+	instance, startError := e.instManager.StartInstance(flowURI, startData, replyHandler, execOptions)
 
-	return instance.ID()
+	if startError != nil {
+		return "", startError
+	}
+
+	e.runner.RunInstance(instance)
+	return instance.ID(), nil
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////

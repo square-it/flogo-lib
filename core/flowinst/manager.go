@@ -2,6 +2,7 @@ package flowinst
 
 import (
 	"github.com/TIBCOSoftware/flogo-lib/core/flow"
+	"fmt"
 )
 
 // Manager is used to create or prepare flow instance for start, restart or resume
@@ -20,13 +21,13 @@ func NewManager(flowProvider flow.Provider, idGenerator IDGenerator) *Manager {
 }
 
 // StartInstance creates a new FlowInstance and prepares it to be executed
-func (mgr *Manager) StartInstance(flowURI string, flowData map[string]interface{}, replyHandler ReplyHandler, execOptions *ExecOptions) *Instance {
+func (mgr *Manager) StartInstance(flowURI string, flowData map[string]interface{}, replyHandler ReplyHandler, execOptions *ExecOptions) (*Instance, error) {
 
 	flow := mgr.flowProvider.GetFlow(flowURI)
 
 	if flow == nil {
-		log.Errorf("Flow [%s] not found", flowURI)
-		return nil
+		err := fmt.Errorf("Flow [%s] not found", flowURI)
+		return nil, err
 	}
 
 	instanceID := mgr.idGenerator.NewFlowInstanceID()
@@ -40,7 +41,7 @@ func (mgr *Manager) StartInstance(flowURI string, flowData map[string]interface{
 
 	instance.Start(flowData)
 
-	return instance
+	return instance, nil
 }
 
 // RestartInstance creates a FlowInstance from an initial state and prepares

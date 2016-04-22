@@ -3,6 +3,7 @@ package engine
 import (
 	"encoding/json"
 	"os"
+	"fmt"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/ext/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
@@ -151,7 +152,8 @@ func LoadConfigFromFile(fileName string) *Config {
 		decoder := json.NewDecoder(configFile)
 		decodeErr := decoder.Decode(engineConfig)
 		if decodeErr != nil {
-			log.Error("error:", decodeErr)
+			err := fmt.Errorf("Error decoding %s - %s", fileName, decodeErr.Error())
+			panic(err)
 		}
 
 		return engineConfig
@@ -166,7 +168,8 @@ func LoadConfigFromJSON(configJSON string) *Config {
 	engineConfig := &Config{}
 	decodeErr := json.Unmarshal([]byte(configJSON), engineConfig)
 	if decodeErr != nil {
-		log.Error("error:", decodeErr)
+		err := fmt.Errorf("Error decoding %s - %s", "engineConfig", decodeErr.Error())
+		panic(err)
 	}
 
 	return engineConfig
@@ -188,7 +191,8 @@ func LoadTriggersConfigFromFile(fileName string) *TriggersConfig {
 		decoder := json.NewDecoder(configFile)
 		decodeErr := decoder.Decode(triggersConfig)
 		if decodeErr != nil {
-			log.Error("error:", decodeErr)
+			err := fmt.Errorf("Error decoding %s - %s", fileName, decodeErr.Error())
+			panic(err)
 		}
 
 		return triggersConfig
@@ -203,7 +207,8 @@ func LoadTriggersConfigFromJSON(configJSON string) *TriggersConfig {
 	triggersConfig := &TriggersConfig{}
 	decodeErr := json.Unmarshal([]byte(configJSON), triggersConfig)
 	if decodeErr != nil {
-		log.Error("error:", decodeErr)
+		err := fmt.Errorf("Error decoding %s - %s", "triggersConfig", decodeErr.Error())
+		panic(err)
 	}
 
 	return triggersConfig

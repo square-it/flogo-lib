@@ -10,14 +10,14 @@ var log = logging.MustGetLogger("tester")
 
 // RequestFlowor flowes request objects and invokes the corresponding
 // flow Manager methods
-type RequestFlowor struct {
+type RequestProcessor struct {
 	instManager *flowinst.Manager
 }
 
 // NewRequestFlowor creates a new Request Flowor
-func NewRequestFlowor(instManager *flowinst.Manager) *RequestFlowor {
+func NewRequestProcessor(instManager *flowinst.Manager) *RequestProcessor {
 
-	var rp RequestFlowor
+	var rp RequestProcessor
 	rp.instManager = instManager
 
 	return &rp
@@ -25,17 +25,17 @@ func NewRequestFlowor(instManager *flowinst.Manager) *RequestFlowor {
 
 // StartFlow handles a StartRequest for a FlowInstance.  This will
 // generate an ID for the new FlowInstance and queue a StartRequest.
-func (rp *RequestFlowor) StartFlow(startRequest *StartRequest, replyHandler flowinst.ReplyHandler) *flowinst.Instance {
+func (rp *RequestProcessor) StartFlow(startRequest *StartRequest, replyHandler flowinst.ReplyHandler) (*flowinst.Instance, error) {
 
 	execOptions := &flowinst.ExecOptions{Interceptor: startRequest.Interceptor, Patch: startRequest.Patch}
-	instance := rp.instManager.StartInstance(startRequest.FlowURI, startRequest.Data, replyHandler, execOptions)
+	instance, err := rp.instManager.StartInstance(startRequest.FlowURI, startRequest.Data, replyHandler, execOptions)
 
-	return instance
+	return instance, err
 }
 
 // RestartFlow handles a RestartRequest for a FlowInstance.  This will
 // generate an ID for the new FlowInstance and queue a RestartRequest.
-func (rp *RequestFlowor) RestartFlow(restartRequest *RestartRequest, replyHandler flowinst.ReplyHandler) *flowinst.Instance {
+func (rp *RequestProcessor) RestartFlow(restartRequest *RestartRequest, replyHandler flowinst.ReplyHandler) *flowinst.Instance {
 
 	execOptions := &flowinst.ExecOptions{Interceptor: restartRequest.Interceptor, Patch: restartRequest.Patch}
 	instance := rp.instManager.RestartInstance(restartRequest.IntialState, restartRequest.Data, replyHandler, execOptions)
@@ -45,7 +45,7 @@ func (rp *RequestFlowor) RestartFlow(restartRequest *RestartRequest, replyHandle
 
 // ResumeFlow handles a ResumeRequest for a FlowInstance.  This will
 // queue a RestartRequest.
-func (rp *RequestFlowor) ResumeFlow(resumeRequest *ResumeRequest, replyHandler flowinst.ReplyHandler) *flowinst.Instance {
+func (rp *RequestProcessor) ResumeFlow(resumeRequest *ResumeRequest, replyHandler flowinst.ReplyHandler) *flowinst.Instance {
 
 	execOptions := &flowinst.ExecOptions{Interceptor: resumeRequest.Interceptor, Patch: resumeRequest.Patch}
 	instance := rp.instManager.ResumeInstance(resumeRequest.State, resumeRequest.Data, replyHandler, execOptions)
