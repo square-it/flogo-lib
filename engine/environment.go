@@ -5,6 +5,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
 	"github.com/TIBCOSoftware/flogo-lib/service"
 	"github.com/TIBCOSoftware/flogo-lib/util"
+	"github.com/TIBCOSoftware/flogo-lib/core/ext/trigger"
 )
 
 // Environment defines the environment in which the engine will run
@@ -36,14 +37,10 @@ func NewEnvironment(flowProvider service.FlowProviderService, stateRecorder serv
 	engineEnv.engineConfig = config
 
 	if triggersConfig == nil {
-		engineEnv.triggersConfig = &TriggersConfig{Triggers:config.Triggers}
-	} else if len(triggersConfig.Triggers) == 0 { //temporary
-		engineEnv.triggersConfig.Triggers = config.Triggers
+		engineEnv.triggersConfig = &TriggersConfig{Triggers:make(map[string]*trigger.Config)}
 	} else {
 		engineEnv.triggersConfig = triggersConfig
 	}
-
-
 
 	return &engineEnv
 }
