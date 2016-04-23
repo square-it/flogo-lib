@@ -89,7 +89,14 @@ func (pps *RemoteFlowProvider) GetFlow(flowURI string) *flow.Definition {
 		var defRep flow.DefinitionRep
 		json.Unmarshal(flowJSON, &defRep)
 
-		def := flow.NewDefinition(&defRep)
+		def, err := flow.NewDefinition(&defRep)
+
+		if err != nil {
+			log.Errorf("Error unmarshalling flow: %s", err.Error())
+			log.Debugf("Failed to unmarshal: %s", string(flowJSON))
+
+			return nil
+		}
 
 		pps.flowCache[flowURI] = def
 

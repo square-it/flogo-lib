@@ -48,7 +48,7 @@ func TestFullSerialization(t *testing.T) {
 
 	log.Infof("Def Rep: %v", defRep)
 
-	def := flow.NewDefinition(defRep)
+	def,_ := flow.NewDefinition(defRep)
 
 	idGen, _ := util.NewGenerator()
 	id := idGen.NextAsString()
@@ -75,7 +75,7 @@ func TestIncrementalSerialization(t *testing.T) {
 	idGen, _ := util.NewGenerator()
 	id := idGen.NextAsString()
 
-	def := flow.NewDefinition(defRep)
+	def,_ := flow.NewDefinition(defRep)
 
 	instance := flowinst.NewFlowInstance(id, "uri2", def)
 

@@ -76,7 +76,7 @@ func TestRestartWithFlowData(t *testing.T) {
 
 	json.Unmarshal([]byte(defJSON), defRep)
 
-	def := NewDefinition(defRep)
+	def, _ := NewDefinition(defRep)
 
 	fmt.Printf("Definition: %v", def)
 }

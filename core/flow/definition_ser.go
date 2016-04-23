@@ -2,6 +2,7 @@ package flow
 
 import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/TIBCOSoftware/flogo-lib/util"
 )
 
 // DefinitionRep is a serialiable represention of a flow Definition
@@ -39,9 +40,11 @@ type LinkRep struct {
 
 // NewDefinition creates a flow Definition from a serialiable
 // definition representation
-func NewDefinition(rep *DefinitionRep) *Definition {
+func NewDefinition(rep *DefinitionRep) (def *Definition, err error) {
 
-	def := &Definition{}
+	defer util.HandlePanic("NewDefinition", &err)
+
+	def = &Definition{}
 	def.typeID = rep.TypeID
 	def.name = rep.Name
 	def.modelID = rep.ModelID
@@ -66,7 +69,7 @@ func NewDefinition(rep *DefinitionRep) *Definition {
 	addTask(def, def.rootTask, rep.RootTask)
 	addLinks(def, def.rootTask, rep.RootTask)
 
-	return def
+	return def, nil
 }
 
 func addTask(def *Definition, task *Task, rep *TaskRep) {
