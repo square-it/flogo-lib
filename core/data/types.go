@@ -1,5 +1,6 @@
 package data
 
+// Type denotes a data type
 type Type int
 
 const (
@@ -12,7 +13,7 @@ const (
 	PARAMS
 )
 
-var types = [...]string {
+var types = [...]string{
 	"string",
 	"integer",
 	"number",
@@ -23,21 +24,22 @@ var types = [...]string {
 }
 
 var typeMap = map[string]Type{
-	"string": STRING,
+	"string":  STRING,
 	"integer": INTEGER,
-	"number": NUMBER,
+	"number":  NUMBER,
 	"boolean": BOOLEAN,
-	"object": OBJECT,
-	"array": ARRAY,
-	"params": PARAMS,
+	"object":  OBJECT,
+	"array":   ARRAY,
+	"params":  PARAMS,
 }
 
 func (t Type) String() string {
 	return types[t]
 }
 
+// ToType get the data type that corresponds to the specified name
 func ToType(typeStr string) (Type, bool) {
-	dataType, found :=  typeMap[typeStr]
+	dataType, found := typeMap[typeStr]
 
 	return dataType, found
 }

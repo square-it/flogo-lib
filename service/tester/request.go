@@ -8,13 +8,13 @@ import (
 
 var log = logging.MustGetLogger("tester")
 
-// RequestFlowor flowes request objects and invokes the corresponding
+// RequestProcessor processes request objects and invokes the corresponding
 // flow Manager methods
 type RequestProcessor struct {
 	instManager *flowinst.Manager
 }
 
-// NewRequestFlowor creates a new Request Flowor
+// NewRequestProcessor creates a new RequestProcessor
 func NewRequestProcessor(instManager *flowinst.Manager) *RequestProcessor {
 
 	var rp RequestProcessor
@@ -65,17 +65,17 @@ type StartRequest struct {
 // RestartRequest describes a request for restarting a FlowInstance
 // todo: can be merged into StartRequest
 type RestartRequest struct {
-	IntialState *flowinst.Instance      `json:"initialState"`
-	Data        map[string]interface{}  `json:"data"`
-	Interceptor *flow.Interceptor       `json:"interceptor"`
-	Patch       *flow.Patch             `json:"patch"`
+	IntialState *flowinst.Instance     `json:"initialState"`
+	Data        map[string]interface{} `json:"data"`
+	Interceptor *flow.Interceptor      `json:"interceptor"`
+	Patch       *flow.Patch            `json:"patch"`
 }
 
 // ResumeRequest describes a request for resuming a FlowInstance
 //todo: Data for resume request should be directed to wating task
 type ResumeRequest struct {
-	State       *flowinst.Instance      `json:"state"`
-	Data        map[string]interface{}  `json:"data"`
-	Interceptor *flow.Interceptor       `json:"interceptor"`
-	Patch       *flow.Patch             `json:"patch"`
+	State       *flowinst.Instance     `json:"state"`
+	Data        map[string]interface{} `json:"data"`
+	Interceptor *flow.Interceptor      `json:"interceptor"`
+	Patch       *flow.Patch            `json:"patch"`
 }

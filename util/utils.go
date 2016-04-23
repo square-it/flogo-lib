@@ -3,9 +3,11 @@ package util
 import (
 	"fmt"
 	"runtime/debug"
+
 	"github.com/op/go-logging"
 )
 
+// HandlePanic helper method to handl panics
 func HandlePanic(name string, err *error) {
 	if r := recover(); r != nil {
 

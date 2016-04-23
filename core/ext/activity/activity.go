@@ -1,6 +1,5 @@
 package activity
 
-
 // Activity is an interface for defining a custom Task Execution
 type Activity interface {
 

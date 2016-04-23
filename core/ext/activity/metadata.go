@@ -24,7 +24,6 @@ func NewMetadata(jsonMetadata string) *Metadata {
 	return md
 }
 
-
 // MarshalJSON overrides the default MarshalJSON for TaskEnv
 func (md *Metadata) MarshalJSON() ([]byte, error) {
 
@@ -51,7 +50,7 @@ func (md *Metadata) MarshalJSON() ([]byte, error) {
 	})
 }
 
-// Unmarshal JSON overrides the default UnmarshalJSON for TaskEnv
+// UnmarshalJSON overrides the default UnmarshalJSON for TaskEnv
 func (md *Metadata) UnmarshalJSON(b []byte) error {
 
 	ser := &struct {

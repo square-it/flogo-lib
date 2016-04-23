@@ -2,8 +2,8 @@ package engine
 
 import (
 	"encoding/json"
-	"os"
 	"fmt"
+	"os"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/ext/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
@@ -32,11 +32,11 @@ type RunnerConfig struct {
 
 // TriggersConfig is the triggers configuration for the engine
 type TriggersConfig struct {
-	Triggers     map[string]*trigger.Config
+	Triggers map[string]*trigger.Config
 }
 
 type serTriggersConfig struct {
-	Triggers     []*trigger.Config `json:"triggers"`
+	Triggers []*trigger.Config `json:"triggers"`
 }
 
 // DefaultConfig returns the default engine configuration
@@ -51,7 +51,7 @@ func DefaultConfig() *Config {
 	return &engineConfig
 }
 
-// DefaultConfig returns the default engine configuration
+// DefaultTriggersConfig returns the default triggers configuration
 func DefaultTriggersConfig() *TriggersConfig {
 
 	var triggersConfig TriggersConfig
@@ -115,7 +115,7 @@ func (tc *TriggersConfig) MarshalJSON() ([]byte, error) {
 	}
 
 	return json.Marshal(&serTriggersConfig{
-		Triggers:     triggers,
+		Triggers: triggers,
 	})
 }
 

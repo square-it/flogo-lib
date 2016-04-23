@@ -13,20 +13,21 @@ type Scope interface {
 	SetAttrValue(attrName string, value interface{})
 }
 
-
+// SimpleScope is a basic implementation of a scope
 type SimpleScope struct {
 	parentScope Scope
-	attrs map[string]*Attribute
+	attrs       map[string]*Attribute
 }
 
+// NewSimpleScope creates a new SimpleScope
 func NewSimpleScope(attrs []*Attribute, parentScope Scope) {
 
 	scope := &SimpleScope{
 		parentScope: parentScope,
-		attrs: make(map[string]*Attribute),
+		attrs:       make(map[string]*Attribute),
 	}
 
-	for _,attr := range attrs {
+	for _, attr := range attrs {
 		scope.attrs[attr.Name] = attr
 	}
 }

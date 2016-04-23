@@ -1,4 +1,4 @@
-package srslocal
+package srlocal
 
 import (
 	"github.com/TIBCOSoftware/flogo-lib/core/flowinst"
@@ -20,27 +20,27 @@ func NewLocalStateRecorder() *LocalStateRecorder {
 }
 
 // Start implements util.Managed.Start()
-func (srs *LocalStateRecorder) Start() error {
+func (sr *LocalStateRecorder) Start() error {
 	// no-op
 	return nil
 }
 
 // Stop implements util.Managed.Stop()
-func (srs *LocalStateRecorder) Stop() {
+func (sr *LocalStateRecorder) Stop() {
 	// no-op
 }
 
 // Init implements services.StateRecorderService.Init()
-func (srs *LocalStateRecorder) Init(settings map[string]string) {
-	//srs.host = settings["host"]
+func (sr *LocalStateRecorder) Init(settings map[string]string) {
+	//sr.host = settings["host"]
 }
 
 // RecordSnapshot implements flowinst.StateRecorder.RecordSnapshot
-func (srs *LocalStateRecorder) RecordSnapshot(instance *flowinst.Instance) {
+func (sr *LocalStateRecorder) RecordSnapshot(instance *flowinst.Instance) {
 
 }
 
 // RecordStep implements flowinst.StateRecorder.RecordStep
-func (srs *LocalStateRecorder) RecordStep(instance *flowinst.Instance) {
+func (sr *LocalStateRecorder) RecordStep(instance *flowinst.Instance) {
 
 }

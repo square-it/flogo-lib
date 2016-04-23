@@ -163,6 +163,7 @@ func (task *Task) String() string {
 	return fmt.Sprintf("Task[%d]:'%s'", task.id, task.name)
 }
 
+// IsScope returns flag indicating if the Task is a scope task (a container of attributes)
 func (task *Task) IsScope() bool {
 	return task.isScope
 }

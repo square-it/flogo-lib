@@ -2,13 +2,13 @@ package engine
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/ext/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/core/flowinst"
 	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
 	"github.com/TIBCOSoftware/flogo-lib/util"
 	"github.com/op/go-logging"
-	"fmt"
 )
 
 var log = logging.MustGetLogger("engine")

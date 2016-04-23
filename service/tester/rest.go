@@ -38,7 +38,7 @@ func (et *RestEngineTester) Init(settings map[string]string) {
 	et.server = NewServer(addr, router)
 }
 
-// Init implements engine.EngineTester.SetupInstanceSupport
+// SetupInstanceSupport implements engine.EngineTester.SetupInstanceSupport
 func (et *RestEngineTester) SetupInstanceSupport(instManager *flowinst.Manager, runner runner.Runner) {
 
 	et.reqProcessor = NewRequestProcessor(instManager)

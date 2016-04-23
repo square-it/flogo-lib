@@ -1,11 +1,12 @@
 package data
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
-	"encoding/json"
 )
 
+// CoerceToTypedValue coerce a value into a TypedValue
 func CoerceToTypedValue(value interface{}, dataType Type) (*TypedValue, error) {
 
 	coerced, err := CoerceToValue(value, dataType)
@@ -14,9 +15,10 @@ func CoerceToTypedValue(value interface{}, dataType Type) (*TypedValue, error) {
 		return nil, err
 	}
 
-	return &TypedValue{Type:dataType, Value:coerced}, nil
+	return &TypedValue{Type: dataType, Value: coerced}, nil
 }
 
+// CoerceToValue coerce a value to the specified type
 func CoerceToValue(value interface{}, dataType Type) (interface{}, error) {
 
 	var coerced interface{}
@@ -48,6 +50,7 @@ func CoerceToValue(value interface{}, dataType Type) (interface{}, error) {
 
 //todo check int64,float64 on raspberry pi
 
+// CoerceToString coerce a value to a string
 func CoerceToString(val interface{}) (string, error) {
 	switch t := val.(type) {
 	case string:
@@ -57,13 +60,13 @@ func CoerceToString(val interface{}) (string, error) {
 	case float64:
 		return strconv.FormatFloat(t, 'f', -1, 64), nil
 	case json.Number:
-		return t.String(),nil
+		return t.String(), nil
 	case bool:
 		return strconv.FormatBool(t), nil
 	case nil:
 		return "", nil
 	case map[string]interface{}:
-		b,err := json.Marshal(t)
+		b, err := json.Marshal(t)
 		if err != nil {
 			return "", err
 		}
@@ -73,6 +76,7 @@ func CoerceToString(val interface{}) (string, error) {
 	}
 }
 
+// CoerceToInteger coerce a value to an integer
 func CoerceToInteger(val interface{}) (int, error) {
 	switch t := val.(type) {
 	case int:
@@ -82,8 +86,8 @@ func CoerceToInteger(val interface{}) (int, error) {
 	case float64:
 		return int(t), nil
 	case json.Number:
-		 i, err := t.Int64()
-		 return int(i),err
+		i, err := t.Int64()
+		return int(i), err
 	case string:
 		return strconv.Atoi(t)
 	case bool:
@@ -98,6 +102,7 @@ func CoerceToInteger(val interface{}) (int, error) {
 	}
 }
 
+// CoerceToNumber coerce a value to a number
 func CoerceToNumber(val interface{}) (float64, error) {
 	switch t := val.(type) {
 	case int:
@@ -109,7 +114,7 @@ func CoerceToNumber(val interface{}) (float64, error) {
 	case json.Number:
 		return t.Float64()
 	case string:
-		return  strconv.ParseFloat(t, 64)
+		return strconv.ParseFloat(t, 64)
 	case bool:
 		if t {
 			return 1.0, nil
@@ -122,6 +127,7 @@ func CoerceToNumber(val interface{}) (float64, error) {
 	}
 }
 
+// CoerceToBoolean coerce a value to a boolean
 func CoerceToBoolean(val interface{}) (bool, error) {
 	switch t := val.(type) {
 	case bool:
@@ -144,6 +150,7 @@ func CoerceToBoolean(val interface{}) (bool, error) {
 	}
 }
 
+// CoerceToObject coerce a value to an object
 func CoerceToObject(val interface{}) (map[string]interface{}, error) {
 
 	switch t := val.(type) {
@@ -154,6 +161,7 @@ func CoerceToObject(val interface{}) (map[string]interface{}, error) {
 	}
 }
 
+// CoerceToArray coerce a value to an array
 func CoerceToArray(val interface{}) ([]interface{}, error) {
 
 	switch t := val.(type) {
@@ -170,6 +178,7 @@ func CoerceToArray(val interface{}) ([]interface{}, error) {
 	}
 }
 
+// CoerceToParams coerce a value to params
 func CoerceToParams(val interface{}) (map[string]string, error) {
 
 	switch t := val.(type) {
@@ -192,7 +201,7 @@ func CoerceToParams(val interface{}) (map[string]string, error) {
 		var m = make(map[string]string, len(t))
 		for k, v := range t {
 
-			mKey , err := CoerceToString(k)
+			mKey, err := CoerceToString(k)
 			if err != nil {
 				return nil, err
 			}
@@ -204,7 +213,7 @@ func CoerceToParams(val interface{}) (map[string]string, error) {
 		var m = make(map[string]string, len(t))
 		for k, v := range t {
 
-			mKey , err := CoerceToString(k)
+			mKey, err := CoerceToString(k)
 			if err != nil {
 				return nil, err
 			}
@@ -220,4 +229,3 @@ func CoerceToParams(val interface{}) (map[string]string, error) {
 		return nil, fmt.Errorf("Unable to coerce %#v to map[string]string", val)
 	}
 }
-

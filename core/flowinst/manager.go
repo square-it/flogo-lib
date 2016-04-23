@@ -1,8 +1,9 @@
 package flowinst
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/core/flow"
 	"fmt"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/flow"
 )
 
 // Manager is used to create or prepare flow instance for start, restart or resume

@@ -1,21 +1,21 @@
 package data
 
 import (
-	"strings"
 	"fmt"
+	"strings"
 )
 
 // MappingType is an enum for possible Mapping Types
 type MappingType int
 
 const (
-	// AssignMT denotes an attribute to attribute assignment
+	// MtAssign denotes an attribute to attribute assignment
 	MtAssign MappingType = 1
 
-	// LiteralMT denotes a literal to attribute assignment
+	// MtLiteral denotes a literal to attribute assignment
 	MtLiteral MappingType = 2
 
-	// ExpressionMT denotes a expression execution to perform mapping
+	// MtExpression denotes a expression execution to perform mapping
 	MtExpression MappingType = 3
 )
 
@@ -71,7 +71,7 @@ func (m *Mapper) Apply(inputScope Scope, outputScope Scope) {
 			if inAttrName[0] == '[' {
 
 				if inAttrName[len(inAttrName)-1] != ']' {
-					idx := strings.Index(inAttrName,"]")
+					idx := strings.Index(inAttrName, "]")
 
 					mapAttrName := inAttrName[idx+2:]
 
@@ -81,7 +81,7 @@ func (m *Mapper) Apply(inputScope Scope, outputScope Scope) {
 					val, attrExists := inputScope.GetAttrValue(inAttrName[:idx+1])
 					fmt.Printf("val: %v\n", val)
 
-					if (attrExists) {
+					if attrExists {
 
 						valMap := val.(map[string]interface{})
 						attrValue, exists = valMap[mapAttrName]
@@ -96,7 +96,7 @@ func (m *Mapper) Apply(inputScope Scope, outputScope Scope) {
 			//todo implement type conversion
 			if exists {
 
-				idx := strings.Index(mapping.MapTo,".")
+				idx := strings.Index(mapping.MapTo, ".")
 
 				if idx > -1 {
 					attrName := mapping.MapTo[:idx]
@@ -114,7 +114,7 @@ func (m *Mapper) Apply(inputScope Scope, outputScope Scope) {
 							} else {
 								valMap = val.(map[string]string)
 							}
-							strVal,_ := CoerceToString(attrValue)
+							strVal, _ := CoerceToString(attrValue)
 							valMap[mapAttrName] = strVal
 
 							outputScope.SetAttrValue(attrName, valMap)

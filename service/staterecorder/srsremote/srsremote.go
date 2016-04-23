@@ -25,18 +25,18 @@ func NewRemoteStateRecorder() *RemoteStateRecorder {
 }
 
 // Start implements util.Managed.Start()
-func (srs *RemoteStateRecorder) Start() error {
+func (sr *RemoteStateRecorder) Start() error {
 	// no-op
 	return nil
 }
 
 // Stop implements util.Managed.Stop()
-func (srs *RemoteStateRecorder) Stop() {
+func (sr *RemoteStateRecorder) Stop() {
 	// no-op
 }
 
 // Init implements services.StateRecorderService.Init()
-func (srs *RemoteStateRecorder) Init(settings map[string]string) {
+func (sr *RemoteStateRecorder) Init(settings map[string]string) {
 
 	host, set := settings["host"]
 	port, set := settings["port"]
@@ -46,16 +46,16 @@ func (srs *RemoteStateRecorder) Init(settings map[string]string) {
 	}
 
 	if strings.Index(host, "http") != 0 {
-		srs.host = "http://" + host + ":" + port
+		sr.host = "http://" + host + ":" + port
 	} else {
-		srs.host = host + ":" + port
+		sr.host = host + ":" + port
 	}
 
-	log.Debugf("RemoteStateRecorder: StateRecoder Server = %s", srs.host)
+	log.Debugf("RemoteStateRecorder: StateRecoder Server = %s", sr.host)
 }
 
 // RecordSnapshot implements flowinst.StateRecorder.RecordSnapshot
-func (srs *RemoteStateRecorder) RecordSnapshot(instance *flowinst.Instance) {
+func (sr *RemoteStateRecorder) RecordSnapshot(instance *flowinst.Instance) {
 
 	storeReq := &RecordSnapshotReq{
 		ID:           instance.StepID(),
@@ -65,7 +65,7 @@ func (srs *RemoteStateRecorder) RecordSnapshot(instance *flowinst.Instance) {
 		SnapshotData: instance,
 	}
 
-	uri := srs.host + "/instances/snapshot"
+	uri := sr.host + "/instances/snapshot"
 
 	log.Debugf("POST Snapshot: %s\n", uri)
 
@@ -91,7 +91,7 @@ func (srs *RemoteStateRecorder) RecordSnapshot(instance *flowinst.Instance) {
 }
 
 // RecordStep implements flowinst.StateRecorder.RecordStep
-func (ss *RemoteStateRecorder) RecordStep(instance *flowinst.Instance) {
+func (sr *RemoteStateRecorder) RecordStep(instance *flowinst.Instance) {
 
 	storeReq := &RecordStepReq{
 		ID:       instance.StepID(),
@@ -101,7 +101,7 @@ func (ss *RemoteStateRecorder) RecordStep(instance *flowinst.Instance) {
 		StepData: instance.ChangeTracker,
 	}
 
-	uri := ss.host + "/instances/steps"
+	uri := sr.host + "/instances/steps"
 
 	log.Debugf("POST Snapshot: %s\n", uri)
 

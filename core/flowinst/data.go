@@ -89,24 +89,25 @@ func applyOutputMapper(pi *Instance, taskData *TaskData) bool {
 	if outputMapper != nil {
 		log.Debug("Applying OutputMapper")
 		outputMapper.Apply(taskData.OutputScope(), pi)
-		return  true
+		return true
 	}
 
 	return false
 }
 
-
+// FixedTaskScope is scope restricted by the set of reference attrs and backed by the specfied Task
 type FixedTaskScope struct {
-	attrs map[string]*data.Attribute
+	attrs    map[string]*data.Attribute
 	refAttrs map[string]*data.Attribute
-	task *flow.Task
+	task     *flow.Task
 }
 
+// NewFixedTaskScope creates a FixedTaskScope
 func NewFixedTaskScope(refAttrs map[string]*data.Attribute, task *flow.Task) data.Scope {
 
 	scope := &FixedTaskScope{
 		refAttrs: refAttrs,
-		task: task,
+		task:     task,
 	}
 
 	return scope
@@ -162,7 +163,7 @@ func (s *FixedTaskScope) SetAttrValue(attrName string, value interface{}) {
 		log.Debugf("SetAttr: Attr %s found\n", attrName)
 		//todo handle errors
 		dt, _ := data.ToType(attr.Type)
-		coercedVal, _ := data.CoerceToValue(value,dt)
+		coercedVal, _ := data.CoerceToValue(value, dt)
 		attr.Value = coercedVal
 	} else {
 		log.Debugf("SetAttr: Attr %s not found\n", attrName)
@@ -171,8 +172,8 @@ func (s *FixedTaskScope) SetAttrValue(attrName string, value interface{}) {
 		log.Debugf("SetAttr: ref %v\n", attr)
 		if found {
 			dt, _ := data.ToType(attr.Type)
-			coercedVal, _ := data.CoerceToValue(value,dt)
-			s.attrs[attrName] = &data.Attribute{Name:attrName, Type:attr.Type, Value:coercedVal}
+			coercedVal, _ := data.CoerceToValue(value, dt)
+			s.attrs[attrName] = &data.Attribute{Name: attrName, Type: attr.Type, Value: coercedVal}
 		} else {
 			log.Debugf("SetAttr: Attr %s ref not found\n", attrName)
 			log.Debugf("SetAttr: refs %v\n", s.refAttrs)

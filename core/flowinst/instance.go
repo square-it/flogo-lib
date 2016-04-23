@@ -1,6 +1,7 @@
 package flowinst
 
 import (
+	"strconv"
 	"sync"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
@@ -9,7 +10,6 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/flow"
 	"github.com/TIBCOSoftware/flogo-lib/util"
 	"github.com/op/go-logging"
-	"strconv"
 )
 
 var log = logging.MustGetLogger("instance")
@@ -238,7 +238,7 @@ func (pi *Instance) execTask(workItem *WorkItem) {
 
 		eval := true
 
-		if (taskData.HasAttrs()){
+		if taskData.HasAttrs() {
 
 			applyInputMapper(pi, taskData)
 			eval = applyInputInterceptor(pi, taskData)
@@ -255,7 +255,7 @@ func (pi *Instance) execTask(workItem *WorkItem) {
 
 	if done {
 
-		if (taskData.HasAttrs()) {
+		if taskData.HasAttrs() {
 			applyOutputInterceptor(pi, taskData)
 
 			appliedMapper := applyOutputMapper(pi, taskData)
@@ -270,7 +270,7 @@ func (pi *Instance) execTask(workItem *WorkItem) {
 				for _, attr := range activity.Metadata().Outputs {
 
 					attrValue, _ := taskData.OutputScope().GetAttrValue(attr.Name)
-					pi.AddAttr(attrNS + attr.Name +"]", attr.Type, attrValue)
+					pi.AddAttr(attrNS+attr.Name+"]", attr.Type, attrValue)
 				}
 			}
 		}
@@ -385,7 +385,7 @@ func (pi *Instance) SetAttrValue(attrName string, value interface{}) {
 	// else what do we do if its a completely new attr
 }
 
-// AddAttrValue add a new attribute to the instance
+// AddAttr add a new attribute to the instance
 func (pi *Instance) AddAttr(attrName string, attrType string, value interface{}) {
 	if pi.Attrs == nil {
 		pi.Attrs = make(map[string]*data.Attribute)
@@ -534,15 +534,14 @@ func NewTaskData(taskEnv *TaskEnv, task *flow.Task) *TaskData {
 	taskData.taskEnv = taskEnv
 	taskData.task = task
 
-
-
 	//taskData.TaskID = task.ID
 
 	return &taskData
 }
 
+// HasAttrs indicates if the task has attributes
 func (td *TaskData) HasAttrs() bool {
-	return 	len(td.task.ActivityType()) > 0 || td.task.IsScope()
+	return len(td.task.ActivityType()) > 0 || td.task.IsScope()
 }
 
 /////////////////////////////////////////
@@ -669,7 +668,7 @@ func (td *TaskData) TaskName() string {
 	return td.task.Name()
 }
 
-// TaskName implements activity.Context.TaskName method
+// InputScope get the InputScope of the task instance
 func (td *TaskData) InputScope() data.Scope {
 
 	if td.inScope != nil {
@@ -689,7 +688,7 @@ func (td *TaskData) InputScope() data.Scope {
 	return td.inScope
 }
 
-// TaskName implements activity.Context.TaskName method
+// OutputScope get the InputScope of the task instance
 func (td *TaskData) OutputScope() data.Scope {
 
 	if td.outScope != nil {
@@ -699,7 +698,7 @@ func (td *TaskData) OutputScope() data.Scope {
 	if len(td.task.ActivityType()) > 0 {
 
 		act := activity.Get(td.task.ActivityType())
-		td.outScope =  NewFixedTaskScope(act.Metadata().Outputs, nil)
+		td.outScope = NewFixedTaskScope(act.Metadata().Outputs, nil)
 
 		log.Debugf("OutputScope: %v\n", td.outScope)
 	} else if td.task.IsScope() {
@@ -710,7 +709,7 @@ func (td *TaskData) OutputScope() data.Scope {
 	return td.outScope
 }
 
-// SetAttrValue implements data.Scope.SetAttrValue
+// GetInput implements activity.Context.GetInput
 func (td *TaskData) GetInput(name string) interface{} {
 
 	val, found := td.InputScope().GetAttrValue(name)
@@ -721,7 +720,7 @@ func (td *TaskData) GetInput(name string) interface{} {
 	return nil
 }
 
-// SetAttrValue implements data.Scope.SetAttrValue
+// SetOutput implements activity.Context.SetOutput
 func (td *TaskData) SetOutput(name string, value interface{}) {
 
 	log.Debugf("SET OUTPUT: %s = %v\n", name, value)

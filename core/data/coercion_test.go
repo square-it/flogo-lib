@@ -2,6 +2,7 @@ package data
 
 import (
 	"testing"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,7 +24,7 @@ func TestCoerceToString(t *testing.T) {
 	cval, _ = CoerceToString(valFloat)
 	assert.Equal(t, "1.23", cval, "not equal")
 
-	var valNil interface{} = nil
+	var valNil interface{} // = nil
 	cval, _ = CoerceToString(valNil)
 	assert.Equal(t, "", cval, "not equal")
 }
@@ -46,7 +47,7 @@ func TestCoerceToInteger(t *testing.T) {
 	cval, _ = CoerceToInteger(valFloat)
 	assert.Equal(t, 1, cval, "not equal")
 
-	var valNil interface{} = nil
+	var valNil interface{} //= nil
 	cval, _ = CoerceToInteger(valNil)
 	assert.Equal(t, 0, cval, "not equal")
 }
@@ -69,7 +70,7 @@ func TestCoerceToNumber(t *testing.T) {
 	cval, _ = CoerceToNumber(valFloat)
 	assert.Equal(t, 1.23, cval, "not equal")
 
-	var valNil interface{} = nil
+	var valNil interface{} //= nil
 	cval, _ = CoerceToNumber(valNil)
 	assert.Equal(t, 0.0, cval, "not equal")
 }
@@ -92,7 +93,7 @@ func TestCoerceToBoolean(t *testing.T) {
 	cval, _ = CoerceToBoolean(valFloat)
 	assert.Equal(t, true, cval, "not equal")
 
-	var valNil interface{} = nil
+	var valNil interface{} //= nil
 	cval, _ = CoerceToBoolean(valNil)
 	assert.Equal(t, false, cval, "not equal")
 }
