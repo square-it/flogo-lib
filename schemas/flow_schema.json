@@ -7,33 +7,31 @@
       "type": "object",
       "properties": {
         "name" : { "type": "string" },
-        "type" : { "type": "string" },
-        "value": { "type": "string" }
+        "type" : { "enum": [ "string", "integer", "number", "boolean", "object", "array", "params" ] },
+        "value": { "type": [ "string", "integer", "number", "boolean", "object", "array" ] }
       },
       "required": ["name", "type", "value"]
     },
     "mapping": {
-      "title": "attribute",
+      "title": "mapping",
       "type": "object",
       "properties": {
         "type" : { "type": "string" },
         "value": { "type": "string" },
         "mapTo":  { "type": "string" }
       },
-      "required": ["type", "value"]
+      "required": ["type", "value", "mapTo"]
     },
     "link": {
       "title": "link",
       "type": "object",
       "properties": {
-        "name": { "name": "string"},
-        "id"  : { "type": "integer" },
-        "from": { "type": "integer" },
-        "to"  : { "type": "integer" },
-        "attributes": {
-          "type": "array",
-          "items": { "$ref": "#/definitions/attribute" }
-        }
+        "name" : { "name": "string"},
+        "id"   : { "type": "integer" },
+        "from" : { "type": "integer" },
+        "to"   : { "type": "integer" },
+        "type" : { "type": "integer" },
+        "value": { "type": "string" }
       },
       "required": ["id", "from", "to"]
     },
@@ -86,5 +84,5 @@
     },
     "rootTask": {  "title": "rootTask", "$ref": "#/definitions/task" }
   },
-  "required": ["id", "model", "type", "rootTask"]
+  "required": ["model", "type", "rootTask"]
 }
