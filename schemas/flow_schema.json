@@ -16,7 +16,7 @@
       "title": "mapping",
       "type": "object",
       "properties": {
-        "type" : { "type": "string" },
+        "type" : { "type": "integer" },
         "value": { "type": "string" },
         "mapTo":  { "type": "string" }
       },
