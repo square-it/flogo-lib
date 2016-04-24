@@ -5,6 +5,9 @@ import (
 	"runtime/debug"
 
 	"github.com/op/go-logging"
+	"strings"
+	"path/filepath"
+	"runtime"
 )
 
 // HandlePanic helper method to handl panics
@@ -22,4 +25,26 @@ func HandlePanic(name string, err *error) {
 			*err = fmt.Errorf("%v", r)
 		}
 	}
+}
+
+// ToFilePath convert fileURL to file path
+func URLStringToFilePath(fileURL string) (string, bool) {
+
+	if strings.HasPrefix(fileURL, "file://") {
+
+		filePath := fileURL[7:]
+
+		if runtime.GOOS == "windows" {
+			if strings.HasPrefix(filePath, "/") {
+				filePath = filePath[1:]
+			}
+			filePath = filepath.FromSlash(filePath)
+		}
+
+		filePath = strings.Replace(filePath, "%20", " ", -1)
+
+		return filePath, true
+	}
+
+	return "", false
 }

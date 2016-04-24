@@ -13,6 +13,11 @@ import (
 
 var log = logging.MustGetLogger("flowprovider")
 
+const (
+	uriSchemeFile = "file://"
+	uriSchemeEmbedded = "embedded://"
+)
+
 // RemoteFlowProvider is an implementation of FlowProvider service
 // that can access flowes via URI
 type RemoteFlowProvider struct {
@@ -59,12 +64,21 @@ func (pps *RemoteFlowProvider) GetFlow(flowURI string) *flow.Definition {
 
 	var flowJSON []byte
 
-	if strings.Index(flowURI, "local://") == 0 {
+	if strings.HasPrefix(flowURI, uriSchemeEmbedded){
 
 		log.Debugf("Loading Embedded Flow: %s\n", flowURI)
 		flowJSON = pps.embeddedMgr.GetEmbeddedFlowJSON(flowURI)
 
+	} else if strings.HasPrefix(flowURI, uriSchemeFile){
+
+		log.Debugf("Loading Local Flow: %s\n", flowURI)
+		flowFilePath, _ := util.URLStringToFilePath(flowURI)
+
+		flowJSON, _ = ioutil.ReadFile(flowFilePath)
+
 	} else {
+
+		log.Debugf("Loading Remote Flow: %s\n", flowURI)
 
 		req, err := http.NewRequest("GET", flowURI, nil)
 		client := &http.Client{}

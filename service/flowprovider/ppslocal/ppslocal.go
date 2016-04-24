@@ -7,9 +7,15 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/flow"
 	"github.com/TIBCOSoftware/flogo-lib/util"
 	"github.com/op/go-logging"
+	"io/ioutil"
 )
 
 var log = logging.MustGetLogger("flowprovider")
+
+const (
+	uriSchemeFile = "file://"
+	uriSchemeEmbedded = "embedded://"
+)
 
 // LocalFlowProvider is an implementation of FlowProvider service
 // that can access flowes via URI
@@ -57,13 +63,18 @@ func (pps *LocalFlowProvider) GetFlow(flowURI string) *flow.Definition {
 
 	var flowJSON []byte
 
-	if strings.Index(flowURI, "local://") == 0 {
+	if strings.HasPrefix(flowURI, uriSchemeEmbedded){
 
-		flowJSON = pps.embeddedMgr.GetEmbeddedFlowJSON(flowURI[8:])
-
-	} else {
-
+		log.Debugf("Loading Embedded Flow: %s\n", flowURI)
 		flowJSON = pps.embeddedMgr.GetEmbeddedFlowJSON(flowURI)
+
+	} else if strings.HasPrefix(flowURI, uriSchemeFile){
+
+		log.Debugf("Loading Local Flow: %s\n", flowURI)
+		flowFilePath, _ := util.URLStringToFilePath(flowURI)
+
+		flowJSON, _ = ioutil.ReadFile(flowFilePath)
+
 	}
 
 	if flowJSON != nil {
