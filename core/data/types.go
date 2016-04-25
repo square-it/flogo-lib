@@ -39,7 +39,7 @@ var typeMap = map[string]Type{
 }
 
 func (t Type) String() string {
-	return types[t]
+	return types[t-1]
 }
 
 // ToTypeEnum get the data type that corresponds to the specified name

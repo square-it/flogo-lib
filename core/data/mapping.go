@@ -86,6 +86,8 @@ func (m *Mapper) Apply(inputScope Scope, outputScope Scope) {
 						valMap := val.(map[string]interface{})
 						attrValue, exists = valMap[mapAttrName]
 					}
+				} else {
+					attrValue, exists = inputScope.GetAttrValue(mapping.Value)
 				}
 			} else {
 				attrValue, exists = inputScope.GetAttrValue(mapping.Value)
