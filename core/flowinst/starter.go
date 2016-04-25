@@ -1,13 +1,16 @@
 package flowinst
 
-import "github.com/TIBCOSoftware/flogo-lib/core/flow"
+import (
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/TIBCOSoftware/flogo-lib/core/flow"
+)
 
 // Starter interface is used to start flow instances, used by Triggers
 // to start instances
 type Starter interface {
 
 	// StartFlowInstance starts a flow instance using the provided information
-	StartFlowInstance(flowURI string, startData map[string]interface{}, replyHandler ReplyHandler, execOptions *ExecOptions) (instanceID string, startError error)
+	StartFlowInstance(flowURI string, startAttrs []*data.Attribute, replyHandler ReplyHandler, execOptions *ExecOptions) (instanceID string, startError error)
 }
 
 // ReplyHandler is used to reply back to whoever started the flow instance

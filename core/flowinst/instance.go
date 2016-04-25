@@ -1,7 +1,6 @@
 package flowinst
 
 import (
-	"strconv"
 	"sync"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
@@ -133,10 +132,12 @@ func (pi *Instance) UpdateAttrs(update map[string]interface{}) {
 
 // Start will start the Flow Instance, returns a boolean indicating
 // if it was able to start
-func (pi *Instance) Start(flowData map[string]interface{}) bool {
+func (pi *Instance) Start(startAttrs []*data.Attribute) bool {
 
 	pi.setStatus(StatusActive)
-	pi.UpdateAttrs(flowData)
+
+	//apply inputMapper if we have one, otherwise do default mappings
+	applyDefaultInstanceInputMappings(pi, startAttrs)
 
 	log.Infof("FlowInstance Flow: %v", pi.FlowModel)
 	model := pi.FlowModel.GetFlowBehavior(pi.Flow.TypeID())
@@ -263,15 +264,7 @@ func (pi *Instance) execTask(workItem *WorkItem) {
 			if !appliedMapper && !taskData.task.IsScope() {
 
 				log.Debug("Applying Default Output Mapping")
-				activity, _ := taskData.Activity()
-
-				attrNS := "[T" + strconv.Itoa(taskData.task.ID()) + "."
-
-				for _, attr := range activity.Metadata().Outputs {
-
-					attrValue, _ := taskData.OutputScope().GetAttrValue(attr.Name)
-					pi.AddAttr(attrNS+attr.Name+"]", attr.Type, attrValue)
-				}
+				applyDefaultActivityOutputMappings(pi, taskData)
 			}
 		}
 

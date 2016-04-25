@@ -1,6 +1,7 @@
 package tester
 
 import (
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/flow"
 	"github.com/TIBCOSoftware/flogo-lib/core/flowinst"
 	"github.com/op/go-logging"
@@ -28,7 +29,24 @@ func NewRequestProcessor(instManager *flowinst.Manager) *RequestProcessor {
 func (rp *RequestProcessor) StartFlow(startRequest *StartRequest, replyHandler flowinst.ReplyHandler) (*flowinst.Instance, error) {
 
 	execOptions := &flowinst.ExecOptions{Interceptor: startRequest.Interceptor, Patch: startRequest.Patch}
-	instance, err := rp.instManager.StartInstance(startRequest.FlowURI, startRequest.Data, replyHandler, execOptions)
+
+	attrs := startRequest.Attrs
+
+	dataLen := len(startRequest.Data)
+
+	// attrs, not supplied so attempt to create attrs from Data
+	if attrs == nil && dataLen > 0 {
+		attrs = make([]*data.Attribute, 0, dataLen)
+
+		for k, v := range startRequest.Data {
+
+			//todo handle error
+			t, _ := data.GetType(v)
+			attrs = append(attrs, &data.Attribute{Name: k, Type: t.String(), Value: v})
+		}
+	}
+
+	instance, err := rp.instManager.StartInstance(startRequest.FlowURI, attrs, replyHandler, execOptions)
 
 	return instance, err
 }
@@ -57,6 +75,7 @@ func (rp *RequestProcessor) ResumeFlow(resumeRequest *ResumeRequest, replyHandle
 type StartRequest struct {
 	FlowURI     string                 `json:"flowUri"`
 	Data        map[string]interface{} `json:"data"`
+	Attrs       []*data.Attribute      `json:"attrs"`
 	Interceptor *flow.Interceptor      `json:"interceptor"`
 	Patch       *flow.Patch            `json:"patch"`
 	ReplyTo     string                 `json:"replyTo"`

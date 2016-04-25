@@ -14,7 +14,7 @@ import (
 var log = logging.MustGetLogger("flowprovider")
 
 const (
-	uriSchemeFile = "file://"
+	uriSchemeFile     = "file://"
 	uriSchemeEmbedded = "embedded://"
 )
 
@@ -64,12 +64,12 @@ func (pps *RemoteFlowProvider) GetFlow(flowURI string) *flow.Definition {
 
 	var flowJSON []byte
 
-	if strings.HasPrefix(flowURI, uriSchemeEmbedded){
+	if strings.HasPrefix(flowURI, uriSchemeEmbedded) {
 
 		log.Debugf("Loading Embedded Flow: %s\n", flowURI)
 		flowJSON = pps.embeddedMgr.GetEmbeddedFlowJSON(flowURI)
 
-	} else if strings.HasPrefix(flowURI, uriSchemeFile){
+	} else if strings.HasPrefix(flowURI, uriSchemeFile) {
 
 		log.Debugf("Loading Local Flow: %s\n", flowURI)
 		flowFilePath, _ := util.URLStringToFilePath(flowURI)

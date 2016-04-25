@@ -39,7 +39,7 @@ func (tv *TypedValue) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	tv.Type, _ = ToType(ser.Type)
+	tv.Type, _ = ToTypeEnum(ser.Type)
 	tv.Value = ser.Value
 
 	return nil

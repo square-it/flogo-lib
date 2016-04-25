@@ -3,6 +3,7 @@ package flowinst
 import (
 	"fmt"
 
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/flow"
 )
 
@@ -22,7 +23,7 @@ func NewManager(flowProvider flow.Provider, idGenerator IDGenerator) *Manager {
 }
 
 // StartInstance creates a new FlowInstance and prepares it to be executed
-func (mgr *Manager) StartInstance(flowURI string, flowData map[string]interface{}, replyHandler ReplyHandler, execOptions *ExecOptions) (*Instance, error) {
+func (mgr *Manager) StartInstance(flowURI string, startAttrs []*data.Attribute, replyHandler ReplyHandler, execOptions *ExecOptions) (*Instance, error) {
 
 	flow := mgr.flowProvider.GetFlow(flowURI)
 
@@ -40,7 +41,7 @@ func (mgr *Manager) StartInstance(flowURI string, flowData map[string]interface{
 
 	log.Info("Starting Instance: ", instanceID)
 
-	instance.Start(flowData)
+	instance.Start(startAttrs)
 
 	return instance, nil
 }

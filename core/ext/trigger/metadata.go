@@ -8,10 +8,10 @@ import (
 
 // Metadata is the metadata for a Trigger
 type Metadata struct {
-	ID       string            `json:"name"`
-	Settings []*data.Attribute `json:"settings"`
-	Outputs  []*data.Attribute `json:"outputs"`
-	Endpoint EndpointMetadata  `json:"endpoint"`
+	ID       string
+	Endpoint EndpointMetadata
+	Settings map[string]*data.Attribute
+	Outputs  map[string]*data.Attribute
 }
 
 // EndpointMetadata is the metadata for a Trigger Endpoint
@@ -28,4 +28,85 @@ func NewMetadata(jsonMetadata string) *Metadata {
 	}
 
 	return md
+}
+
+// MarshalJSON overrides the default MarshalJSON for TaskEnv
+func (md *Metadata) MarshalJSON() ([]byte, error) {
+
+	settings := make([]*data.Attribute, 0, len(md.Settings))
+
+	for _, value := range md.Settings {
+		settings = append(settings, value)
+	}
+
+	outputs := make([]*data.Attribute, 0, len(md.Outputs))
+
+	for _, value := range md.Outputs {
+		outputs = append(outputs, value)
+	}
+
+	return json.Marshal(&struct {
+		Name     string            `json:"name"`
+		Endpoint EndpointMetadata  `json:"endpoint"`
+		Settings []*data.Attribute `json:"settings"`
+		Outputs  []*data.Attribute `json:"outputs"`
+	}{
+		Name:     md.ID,
+		Endpoint: md.Endpoint,
+		Settings: settings,
+		Outputs:  outputs,
+	})
+}
+
+// UnmarshalJSON overrides the default UnmarshalJSON for TaskEnv
+func (md *Metadata) UnmarshalJSON(b []byte) error {
+
+	ser := &struct {
+		Name     string            `json:"name"`
+		Endpoint EndpointMetadata  `json:"endpoint"`
+		Settings []*data.Attribute `json:"settings"`
+		Outputs  []*data.Attribute `json:"outputs"`
+	}{}
+
+	if err := json.Unmarshal(b, ser); err != nil {
+		return err
+	}
+
+	md.ID = ser.Name
+	md.Settings = make(map[string]*data.Attribute, len(ser.Settings))
+	md.Outputs = make(map[string]*data.Attribute, len(ser.Outputs))
+
+	for _, attr := range ser.Settings {
+		md.Settings[attr.Name] = attr
+	}
+
+	for _, attr := range ser.Outputs {
+		md.Outputs[attr.Name] = attr
+	}
+
+	return nil
+}
+
+// OutputsToAttrs converts the supplied output data to attributes
+func (md *Metadata) OutputsToAttrs(outputData map[string]interface{}, coerce bool) ([]*data.Attribute, error) {
+
+	attrs := make([]*data.Attribute, len(md.Outputs))
+
+	for k, a := range md.Outputs {
+		v, _ := outputData[k]
+
+		if coerce {
+			var err error
+			t, _ := data.ToTypeEnum(a.Type)
+			v, err = data.CoerceToValue(v, t)
+
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		attrs = append(attrs, &data.Attribute{Name: a.Name, Type: a.Type, Value: v})
+	}
+
+	return attrs, nil
 }

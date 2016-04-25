@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"runtime/debug"
 
-	"github.com/op/go-logging"
-	"strings"
 	"path/filepath"
 	"runtime"
+	"strings"
+
+	"github.com/op/go-logging"
 )
 
 // HandlePanic helper method to handl panics
@@ -27,7 +28,7 @@ func HandlePanic(name string, err *error) {
 	}
 }
 
-// ToFilePath convert fileURL to file path
+// URLStringToFilePath convert fileURL to file path
 func URLStringToFilePath(fileURL string) (string, bool) {
 
 	if strings.HasPrefix(fileURL, "file://") {

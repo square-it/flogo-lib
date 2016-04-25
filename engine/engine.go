@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/ext/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/core/flowinst"
 	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
@@ -143,12 +144,12 @@ func (e *Engine) NewFlowInstanceID() string {
 	return e.generator.NextAsString()
 }
 
-// StartFlowInstance implements flowinst.IdGenerator.NewFlowInstanceID
-func (e *Engine) StartFlowInstance(flowURI string, startData map[string]interface{}, replyHandler flowinst.ReplyHandler, execOptions *flowinst.ExecOptions) (instanceID string, startError error) {
+// StartFlowInstance implements flowinst.Starter.StartFlowInstance
+func (e *Engine) StartFlowInstance(flowURI string, startAttrs []*data.Attribute, replyHandler flowinst.ReplyHandler, execOptions *flowinst.ExecOptions) (instanceID string, startError error) {
 
 	//todo fix for synchronous execution (DirectRunner)
 
-	instance, startError := e.instManager.StartInstance(flowURI, startData, replyHandler, execOptions)
+	instance, startError := e.instManager.StartInstance(flowURI, startAttrs, replyHandler, execOptions)
 
 	if startError != nil {
 		return "", startError

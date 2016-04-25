@@ -1,6 +1,8 @@
 package flowinst
 
 import (
+	"strconv"
+
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/flow"
 )
@@ -95,6 +97,32 @@ func applyOutputMapper(pi *Instance, taskData *TaskData) bool {
 	return false
 }
 
+func applyDefaultActivityOutputMappings(pi *Instance, taskData *TaskData) {
+
+	activity, _ := taskData.Activity()
+
+	attrNS := "[A" + strconv.Itoa(taskData.task.ID()) + "."
+
+	for _, attr := range activity.Metadata().Outputs {
+
+		attrValue, _ := taskData.OutputScope().GetAttrValue(attr.Name)
+		pi.AddAttr(attrNS+attr.Name+"]", attr.Type, attrValue)
+	}
+}
+
+func applyDefaultInstanceInputMappings(pi *Instance, attrs []*data.Attribute) {
+
+	if len(attrs) == 0 {
+		return
+	}
+
+	for _, attr := range attrs {
+
+		attrName := "[T." + attr.Name + "]"
+		pi.AddAttr(attrName, attr.Type, attr.Value)
+	}
+}
+
 // FixedTaskScope is scope restricted by the set of reference attrs and backed by the specfied Task
 type FixedTaskScope struct {
 	attrs    map[string]*data.Attribute
@@ -162,7 +190,7 @@ func (s *FixedTaskScope) SetAttrValue(attrName string, value interface{}) {
 	if found {
 		log.Debugf("SetAttr: Attr %s found\n", attrName)
 		//todo handle errors
-		dt, _ := data.ToType(attr.Type)
+		dt, _ := data.ToTypeEnum(attr.Type)
 		coercedVal, _ := data.CoerceToValue(value, dt)
 		attr.Value = coercedVal
 	} else {
@@ -171,7 +199,7 @@ func (s *FixedTaskScope) SetAttrValue(attrName string, value interface{}) {
 		attr, found = s.refAttrs[attrName]
 		log.Debugf("SetAttr: ref %v\n", attr)
 		if found {
-			dt, _ := data.ToType(attr.Type)
+			dt, _ := data.ToTypeEnum(attr.Type)
 			coercedVal, _ := data.CoerceToValue(value, dt)
 			s.attrs[attrName] = &data.Attribute{Name: attrName, Type: attr.Type, Value: coercedVal}
 		} else {
