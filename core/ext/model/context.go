@@ -54,6 +54,9 @@ type TaskContext interface {
 
 	// Activity gets the Activity associated with the Task
 	Activity() (activity activity.Activity, activityContext activity.Context)
+
+	// EvalActivity evaluates the Activity associated with the Task
+	EvalActivity() (done bool, evalError *activity.Error)
 }
 
 // LinkContext is the execution context of the Task when executing

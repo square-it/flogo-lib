@@ -9,6 +9,8 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/flow"
 	"github.com/TIBCOSoftware/flogo-lib/util"
 	"github.com/op/go-logging"
+	"runtime/debug"
+	"fmt"
 )
 
 var log = logging.MustGetLogger("instance")
@@ -644,6 +646,34 @@ func (td *TaskData) Activity() (act activity.Activity, context activity.Context)
 
 	return act, td
 }
+
+func (td *TaskData) EvalActivity() (done bool, evalErr *activity.Error) {
+
+	act := activity.Get(td.task.ActivityType())
+
+	//todo: if act == nil, return TaskDoesntHaveActivity error or something like that
+
+	defer func() {
+		if r := recover(); r != nil {
+			log.Warningf("Unhandled Error executing activity '%s' : %v\n", td.task.Name(), r)
+
+			// todo: useful for debugging
+			if log.IsEnabledFor(logging.DEBUG) {
+				log.Debugf("StackTrace: %s", debug.Stack())
+			}
+
+			if evalErr != nil {
+				evalErr = activity.NewError(fmt.Sprintf("%v", r))
+			}
+		}
+	}()
+
+	done, evalErr = act.Eval(td)
+
+	return done, evalErr
+}
+
+
 
 // FlowInstanceID implements activity.Context.FlowInstanceID method
 func (td *TaskData) FlowInstanceID() string {

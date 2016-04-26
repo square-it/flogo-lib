@@ -23,6 +23,8 @@ type Definition struct {
 	inputMapper *data.Mapper
 	links       map[int]*Link
 	tasks       map[int]*Task
+
+	linkExprMgr LinkExprManager
 }
 
 // Name returns the name of the definition
@@ -68,6 +70,16 @@ func (pd *Definition) GetTask(taskID int) *Task {
 func (pd *Definition) GetLink(linkID int) *Link {
 	task := pd.links[linkID]
 	return task
+}
+
+// todo revisit
+
+func (pd *Definition) SetLinkExprManager(mgr LinkExprManager) {
+	pd.linkExprMgr = mgr
+}
+
+func (pd *Definition) GetLinkExprManager() LinkExprManager{
+	return pd.linkExprMgr
 }
 
 ////////////////////////////////////////////////////////////////////////////
