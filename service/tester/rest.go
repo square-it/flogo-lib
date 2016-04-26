@@ -34,6 +34,9 @@ func (et *RestEngineTester) Init(settings map[string]string) {
 	router.OPTIONS("/flow/resume", handleOption)
 	router.POST("/flow/resume", et.ResumeFlow)
 
+	router.OPTIONS("/status", handleOption)
+	router.GET("/status", et.Status)
+
 	addr := ":" + settings["port"]
 	et.server = NewServer(addr, router)
 }
@@ -167,4 +170,12 @@ func (et *RestEngineTester) ResumeFlow(w http.ResponseWriter, r *http.Request, _
 	et.runner.RunInstance(instance)
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func (et *RestEngineTester) Status(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+
+	w.Write([]byte(`{"status":"ok"}`))
+	//w.WriteHeader(http.StatusOK)
 }
