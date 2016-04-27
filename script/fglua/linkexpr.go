@@ -9,7 +9,10 @@ import (
 	"strings"
 	"bytes"
 	"strconv"
+	"github.com/op/go-logging"
 )
+
+var log = logging.MustGetLogger("fglua")
 
 type LuaLinkExprManager struct {
 	Values map[int][]string
@@ -23,26 +26,28 @@ func NewLuaLinkExprManager(def *flow.Definition) *LuaLinkExprManager{
 
 	links := flow.GetExpressionLinks(def)
 
-	fmt.Printf("links: %v", links)
-
 	var buffer bytes.Buffer
 
 	for _, link := range links {
-		attrs, expr := transExpr(link.Value())
 
-		mgr.Values[link.ID()] = attrs
+		if len(strings.TrimSpace(link.Value())) > 0 {
+			attrs, expr := transExpr(link.Value())
 
-		buffer.WriteString("l")
-		buffer.WriteString(strconv.Itoa(link.ID()))
-		buffer.WriteString(" = function (v) \n return ")
-		buffer.WriteString(expr)
-		buffer.WriteString("\nend\n")
+			mgr.Values[link.ID()] = attrs
 
-		fmt.Println(expr)
+			buffer.WriteString("l")
+			buffer.WriteString(strconv.Itoa(link.ID()))
+			buffer.WriteString(" = function (v) \n return ")
+			buffer.WriteString(expr)
+			buffer.WriteString("\nend\n")
 
+			log.Debugf("Link[%d] Lua Expression: %s", link.ID(), expr)
+			fmt.Println(expr)
+		}
 	}
 
 	script := buffer.String()
+	log.Debugf("Definition [%s] Lua Expressions Script:\n %s\n", def.Name(), script)
 
 	fmt.Println(script)
 
@@ -87,13 +92,31 @@ func (em *LuaLinkExprManager) EvalLinkExpr(link *flow.Link, scope data.Scope) bo
 		return true
 	}
 
-	attrs := em.Values[link.ID()]
+	attrs, ok := em.Values[link.ID()]
+
+	if !ok {
+		return false
+	}
 
 	vals := make(map[string]interface{})
 
 	for _, attr := range attrs {
-		val,_ := scope.GetAttrValue(attr)
-		vals[attr] = val
+
+		var attrValue interface{}
+		var exists bool
+
+		attrName, attrPath := data.GetAttrPath(attr)
+
+		attrValue, exists = scope.GetAttrValue(attrName)
+
+		if exists && len(attrPath) > 0 {
+			//for now assume if we have a path, attr is "object" and only one level
+			valMap := attrValue.(map[string]interface{})
+			attrValue, exists = valMap[attrPath]
+		}
+
+
+		vals[attr] = attrValue
 	}
 
 	em.L.Global("l"+strconv.Itoa(link.ID()))

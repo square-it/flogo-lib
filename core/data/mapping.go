@@ -65,35 +65,15 @@ func (m *Mapper) Apply(inputScope Scope, outputScope Scope) {
 			var attrValue interface{}
 			var exists bool
 
-			inAttrName := mapping.Value
+			attrName, attrPath := GetAttrPath(mapping.Value)
 
-			//todo move this code
-			if inAttrName[0] == '[' {
+			attrValue, exists = inputScope.GetAttrValue(attrName)
 
-				if inAttrName[len(inAttrName)-1] != ']' {
-					idx := strings.Index(inAttrName, "]")
-
-					mapAttrName := inAttrName[idx+2:]
-
-					fmt.Printf("AttrName: %s\n", inAttrName[:idx+1])
-					fmt.Printf("MapAttrName: %s\n", mapAttrName)
-
-					val, attrExists := inputScope.GetAttrValue(inAttrName[:idx+1])
-					fmt.Printf("val: %v\n", val)
-
-					if attrExists {
-
-						valMap := val.(map[string]interface{})
-						attrValue, exists = valMap[mapAttrName]
-					}
-				} else {
-					attrValue, exists = inputScope.GetAttrValue(mapping.Value)
-				}
-			} else {
-				attrValue, exists = inputScope.GetAttrValue(mapping.Value)
+			if exists && len(attrPath) > 0 {
+				//for now assume if we have a path, attr is "object"
+				valMap := attrValue.(map[string]interface{})
+				attrValue, exists = valMap[attrPath]
 			}
-
-			//idx := strings.Index(mapping.MapTo,".")
 
 			//todo implement type conversion
 			if exists {
