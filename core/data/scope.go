@@ -20,7 +20,7 @@ type SimpleScope struct {
 }
 
 // NewSimpleScope creates a new SimpleScope
-func NewSimpleScope(attrs []*Attribute, parentScope Scope) {
+func NewSimpleScope(attrs []*Attribute, parentScope Scope) *SimpleScope{
 
 	scope := &SimpleScope{
 		parentScope: parentScope,
@@ -30,6 +30,8 @@ func NewSimpleScope(attrs []*Attribute, parentScope Scope) {
 	for _, attr := range attrs {
 		scope.attrs[attr.Name] = attr
 	}
+
+	return scope
 }
 
 // GetAttrType implements Scope.GetAttrType

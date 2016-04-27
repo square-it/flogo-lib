@@ -138,6 +138,11 @@ func (task *Task) ChildTasks() []*Task {
 	return task.tasks
 }
 
+// ChildLinks gets the child tasks of the task
+func (task *Task) ChildLinks() []*Link {
+	return task.links
+}
+
 // GetAttr gets the specified attribute
 func (task *Task) GetAttr(attrName string) (attr *data.Attribute, exists bool) {
 
@@ -214,6 +219,16 @@ type Link struct {
 // ID gets the id of the link
 func (link *Link) ID() int {
 	return link.id
+}
+
+// Type gets the link type
+func (link *Link) Type() LinkType {
+	return link.linkType
+}
+
+// Value gets the "value" of the link
+func (link *Link) Value() string {
+	return link.value
 }
 
 // FromTask returns the task the link is coming from
