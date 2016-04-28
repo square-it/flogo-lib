@@ -67,5 +67,5 @@ type TaskBehavior interface {
 type LinkBehavior interface {
 
 	// Eval is called when a Link is being evaluated.
-	Eval(context LinkContext, evalCode int)
+	Eval(context LinkInst, evalCode int)
 }

@@ -2,6 +2,7 @@ package flow
 
 import "github.com/TIBCOSoftware/flogo-lib/core/data"
 
+// LinkExprManager interface that defines a Link Expression Manager
 //todo rename
 type LinkExprManager interface {
 
@@ -9,17 +10,18 @@ type LinkExprManager interface {
 	EvalLinkExpr(link *Link, scope data.Scope) bool
 }
 
+// GetExpressionLinks get the links of the definition that are of type LtExpression
 func GetExpressionLinks(def *Definition) []*Link {
 
 	var links []*Link
-	getExpressionLinks(def.RootTask(), &links);
+	getExpressionLinks(def.RootTask(), &links)
 
-	return links;
+	return links
 }
 
 func getExpressionLinks(task *Task, links *[]*Link) {
 
-	for _, link := range  task.ChildLinks() {
+	for _, link := range task.ChildLinks() {
 
 		if link.Type() == LtExpression {
 			*links = append(*links, link)
@@ -30,4 +32,3 @@ func getExpressionLinks(task *Task, links *[]*Link) {
 		getExpressionLinks(childTask, links)
 	}
 }
-

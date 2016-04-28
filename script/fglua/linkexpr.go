@@ -1,25 +1,28 @@
 package fglua
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/core/flow"
-	"github.com/TIBCOSoftware/flogo-lib/core/data"
-	"github.com/Shopify/go-lua"
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"strings"
-	"bytes"
 	"strconv"
+	"strings"
+
+	"github.com/Shopify/go-lua"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/TIBCOSoftware/flogo-lib/core/flow"
 	"github.com/op/go-logging"
 )
 
 var log = logging.MustGetLogger("fglua")
 
+// LuaLinkExprManager is the Lua Implementation of a Link Expression Manager
 type LuaLinkExprManager struct {
 	Values map[int][]string
 	L      *lua.State
 }
 
-func NewLuaLinkExprManager(def *flow.Definition) *LuaLinkExprManager{
+// NewLuaLinkExprManager creates a new LuaLinkExprManager
+func NewLuaLinkExprManager(def *flow.Definition) *LuaLinkExprManager {
 
 	mgr := &LuaLinkExprManager{}
 	mgr.Values = make(map[int][]string)
@@ -57,7 +60,6 @@ func NewLuaLinkExprManager(def *flow.Definition) *LuaLinkExprManager{
 	return mgr
 }
 
-
 func transExpr(s string) ([]string, string) {
 
 	var attrs []string
@@ -73,9 +75,9 @@ func transExpr(s string) ([]string, string) {
 					break
 				}
 			}
-			attrs = append(attrs, s[i + 1:j])
+			attrs = append(attrs, s[i+1:j])
 			rattrs = append(rattrs, s[i:j])
-			rattrs = append(rattrs, `v["` + s[i + 1:j] + `"]`)
+			rattrs = append(rattrs, `v["`+s[i+1:j]+`"]`)
 			i = j
 		}
 	}
@@ -85,6 +87,7 @@ func transExpr(s string) ([]string, string) {
 	return attrs, replacer.Replace(s)
 }
 
+// EvalLinkExpr implements LinkExprManager.EvalLinkExpr
 func (em *LuaLinkExprManager) EvalLinkExpr(link *flow.Link, scope data.Scope) bool {
 
 	if link.Type() == flow.LtDependency {
@@ -112,14 +115,14 @@ func (em *LuaLinkExprManager) EvalLinkExpr(link *flow.Link, scope data.Scope) bo
 		if exists && len(attrPath) > 0 {
 			//for now assume if we have a path, attr is "object" and only one level
 			valMap := attrValue.(map[string]interface{})
-			attrValue, exists = valMap[attrPath]
+			//todo what if the value does not exists
+			attrValue, _ = valMap[attrPath]
 		}
-
 
 		vals[attr] = attrValue
 	}
 
-	em.L.Global("l"+strconv.Itoa(link.ID()))
+	em.L.Global("l" + strconv.Itoa(link.ID()))
 	PushMap(em.L, vals)
 	em.L.Call(1, 1)
 	ret := em.L.ToValue(-1)
@@ -127,6 +130,7 @@ func (em *LuaLinkExprManager) EvalLinkExpr(link *flow.Link, scope data.Scope) bo
 	return ret.(bool)
 }
 
+// PushVal pushes a value onto the Lua vm's stack
 func PushVal(L *lua.State, val interface{}) {
 	switch t := val.(type) {
 	case string:
@@ -149,6 +153,7 @@ func PushVal(L *lua.State, val interface{}) {
 	}
 }
 
+// PushMap pushes a map onto the Lua vm's stack
 func PushMap(L *lua.State, mapVal map[string]interface{}) int {
 
 	if len(mapVal) > 0 {
@@ -166,4 +171,3 @@ func PushMap(L *lua.State, mapVal map[string]interface{}) int {
 	}
 	return 1
 }
-

@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/TIBCOSoftware/flogo-lib/core/ext/activity"
 	"github.com/TIBCOSoftware/flogo-lib/core/flow"
 )
 
@@ -99,7 +100,7 @@ func applyOutputMapper(pi *Instance, taskData *TaskData) bool {
 
 func applyDefaultActivityOutputMappings(pi *Instance, taskData *TaskData) {
 
-	activity, _ := taskData.Activity()
+	activity := activity.Get(taskData.task.ActivityType())
 
 	attrNS := "[A" + strconv.Itoa(taskData.task.ID()) + "."
 

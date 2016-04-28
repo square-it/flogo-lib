@@ -39,7 +39,7 @@ const defJSON = `
       }
     ],
     "links": [
-      { "id": 1, "type": 1,  "name": "", "to": 3,  "from": 2, "value":"$sensorData.temp > 50" },
+      { "id": 1, "type": 1,  "name": "", "to": 3,  "from": 2, "value":"$[A1.sensor].petId > 50" },
       { "id": 2, "type": 1, "name": "", "to": 4, "from": 2, "value":"$petId > 5" }
     ]
   }

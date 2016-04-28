@@ -72,13 +72,14 @@ func (pd *Definition) GetLink(linkID int) *Link {
 	return task
 }
 
-// todo revisit
-
+// SetLinkExprManager sets the Link Expression Manager for the definition
 func (pd *Definition) SetLinkExprManager(mgr LinkExprManager) {
+	// todo revisit
 	pd.linkExprMgr = mgr
 }
 
-func (pd *Definition) GetLinkExprManager() LinkExprManager{
+// GetLinkExprManager gets the Link Expression Manager for the definition
+func (pd *Definition) GetLinkExprManager() LinkExprManager {
 	return pd.linkExprMgr
 }
 

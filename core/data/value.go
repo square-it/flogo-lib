@@ -4,6 +4,7 @@ import (
 	"strings"
 )
 
+// GetAttrPath splits the supplied attribute with path to its name and object path
 func GetAttrPath(inAttrName string) (attrName string, attrPath string) {
 
 	//todo handle bad attr names
@@ -16,8 +17,8 @@ func GetAttrPath(inAttrName string) (attrName string, attrPath string) {
 		if idx == len(inAttrName)-1 {
 			attrName = inAttrName
 		} else {
-			attrName = inAttrName[:idx + 1]
-			attrPath = inAttrName[idx + 2:]
+			attrName = inAttrName[:idx+1]
+			attrPath = inAttrName[idx+2:]
 		}
 	} else {
 		idx := strings.Index(inAttrName, ".")
@@ -26,7 +27,7 @@ func GetAttrPath(inAttrName string) (attrName string, attrPath string) {
 			attrName = inAttrName
 		} else {
 			attrName = inAttrName[:idx]
-			attrPath = inAttrName[idx + 1:]
+			attrPath = inAttrName[idx+1:]
 		}
 	}
 

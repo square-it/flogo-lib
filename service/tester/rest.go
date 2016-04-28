@@ -172,6 +172,7 @@ func (et *RestEngineTester) ResumeFlow(w http.ResponseWriter, r *http.Request, _
 	w.WriteHeader(http.StatusOK)
 }
 
+// Status is a basic health check for the server to determine if it is up
 func (et *RestEngineTester) Status(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	w.Header().Add("Access-Control-Allow-Origin", "*")

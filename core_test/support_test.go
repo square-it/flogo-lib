@@ -59,7 +59,7 @@ func (b *SimpleTaskBehavior) Enter(context model.TaskContext, enterCode int) (ev
 
 	context.SetState(STATE_ENTERED)
 
-	linkContexts := context.FromLinks()
+	linkContexts := context.FromInstLinks()
 
 	ready := true
 
@@ -109,7 +109,7 @@ func (b *SimpleTaskBehavior) Eval(context model.TaskContext, evalCode int) (done
 	if activity != nil {
 
 		//log.Debug("Evaluating Activity: ", activity.GetType())
-		done := activity.Eval(activityContext)
+		done,_ := activity.Eval(activityContext)
 		return done, 0
 	}
 
@@ -181,7 +181,7 @@ func (b *SimpleTaskBehavior) ChildDone(context model.TaskContext, childTask *flo
 type SimpleLinkBehavior struct {
 }
 
-func (b *SimpleLinkBehavior) Eval(context model.LinkContext, evalCode int) {
+func (b *SimpleLinkBehavior) Eval(context model.LinkInst, evalCode int) {
 
 	log.Debugf("Link Eval\n")
 

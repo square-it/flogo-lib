@@ -20,7 +20,7 @@ type SimpleScope struct {
 }
 
 // NewSimpleScope creates a new SimpleScope
-func NewSimpleScope(attrs []*Attribute, parentScope Scope) *SimpleScope{
+func NewSimpleScope(attrs []*Attribute, parentScope Scope) *SimpleScope {
 
 	scope := &SimpleScope{
 		parentScope: parentScope,

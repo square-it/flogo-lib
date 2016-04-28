@@ -3,14 +3,15 @@ package flowinst
 import (
 	"sync"
 
+	"fmt"
+	"runtime/debug"
+
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/ext/activity"
 	"github.com/TIBCOSoftware/flogo-lib/core/ext/model"
 	"github.com/TIBCOSoftware/flogo-lib/core/flow"
 	"github.com/TIBCOSoftware/flogo-lib/util"
 	"github.com/op/go-logging"
-	"runtime/debug"
-	"fmt"
 )
 
 var log = logging.MustGetLogger("instance")
@@ -559,18 +560,38 @@ func (td *TaskData) Task() *flow.Task {
 	return td.task
 }
 
-// FromLinks implements model.TaskContext.GetFromLinks, by returning the set of predecessor
-// Links of the current task.
-func (td *TaskData) FromLinks() []model.LinkContext {
+// FromInstLinks implements model.TaskContext.FromInstLinks
+func (td *TaskData) FromInstLinks() []model.LinkInst {
 
-	log.Debugf("GetFromLinks: task=%v\n", td.Task)
+	log.Debugf("FromInstLinks: task=%v\n", td.Task)
 
 	links := td.task.FromLinks()
 
 	numLinks := len(links)
 
 	if numLinks > 0 {
-		linkCtxs := make([]model.LinkContext, numLinks)
+		linkCtxs := make([]model.LinkInst, numLinks)
+
+		for i, link := range links {
+			linkCtxs[i], _ = td.taskEnv.FindOrCreateLinkData(link)
+		}
+		return linkCtxs
+	}
+
+	return nil
+}
+
+// ToInstLinks implements model.TaskContext.ToInstLinks,
+func (td *TaskData) ToInstLinks() []model.LinkInst {
+
+	log.Debugf("ToInstLinks: task=%v\n", td.Task)
+
+	links := td.task.ToLinks()
+
+	numLinks := len(links)
+
+	if numLinks > 0 {
+		linkCtxs := make([]model.LinkInst, numLinks)
 
 		for i, link := range links {
 			linkCtxs[i], _ = td.taskEnv.FindOrCreateLinkData(link)
@@ -626,27 +647,41 @@ func (td *TaskData) EnterChildren(taskEntries []*model.TaskEntry) {
 }
 
 // EvalLink implements activity.ActivityContext.EvalLink method
-func (td *TaskData) EvalLink(link *flow.Link, evalCode int) model.LinkContext {
+func (td *TaskData) EvalLink(link *flow.Link) (result bool, err error) {
 
-	linkData, _ := td.taskEnv.FindOrCreateLinkData(link)
+	log.Debugf("TaskContext.EvalLink: %s\n", link.ID())
 
-	//linkBehavior := td.taskEnv.Instance.FlowModel.GetLinkBehavior(link.)
-	//linkBehavior.Eval(linkData, evalCode)
-	linkData.SetState(2)
+	defer func() {
+		if r := recover(); r != nil {
+			log.Warningf("Unhandled Error evaluating link '%s' : %v\n", link.ID(), r)
 
-	log.Debugf("TaskContext.EvalLink: State = %d\n", linkData.State())
+			// todo: useful for debugging
+			if log.IsEnabledFor(logging.DEBUG) {
+				log.Debugf("StackTrace: %s", debug.Stack())
+			}
 
-	return linkData
+			if err != nil {
+				err = fmt.Errorf("%v", r)
+			}
+		}
+	}()
+
+	mgr := td.taskEnv.Instance.Flow.GetLinkExprManager()
+
+	if mgr != nil {
+		result = mgr.EvalLinkExpr(link, td.taskEnv.Instance)
+		return result, nil
+	}
+
+	return true, nil
 }
 
-// Activity implements activity.Context.Activity method
-func (td *TaskData) Activity() (act activity.Activity, context activity.Context) {
-
-	act = activity.Get(td.task.ActivityType())
-
-	return act, td
+// HasActivity implements activity.ActivityContext.HasActivity method
+func (td *TaskData) HasActivity() bool {
+	return activity.Get(td.task.ActivityType()) != nil
 }
 
+// EvalActivity implements activity.ActivityContext.EvalActivity method
 func (td *TaskData) EvalActivity() (done bool, evalErr *activity.Error) {
 
 	act := activity.Get(td.task.ActivityType())
@@ -672,8 +707,6 @@ func (td *TaskData) EvalActivity() (done bool, evalErr *activity.Error) {
 
 	return done, evalErr
 }
-
-
 
 // FlowInstanceID implements activity.Context.FlowInstanceID method
 func (td *TaskData) FlowInstanceID() string {
@@ -755,7 +788,6 @@ type LinkData struct {
 	taskEnv *TaskEnv
 	link    *flow.Link
 	state   int
-	attrs   map[string]string
 
 	changes int
 
@@ -769,7 +801,6 @@ func NewLinkData(taskEnv *TaskEnv, link *flow.Link) *LinkData {
 
 	linkData.taskEnv = taskEnv
 	linkData.link = link
-	//linkData.LinkID = link.ID
 
 	return &linkData
 }
@@ -787,7 +818,6 @@ func (ld *LinkData) SetState(state int) {
 
 // Link returns the Link associated with ld context
 func (ld *LinkData) Link() *flow.Link {
-
 	return ld.link
 }
 

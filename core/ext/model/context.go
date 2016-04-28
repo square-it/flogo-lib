@@ -6,9 +6,8 @@ import (
 )
 
 // FlowContext is the execution context of the Flow when executing
-// a Flow Behavior fuction
+// a Flow Behavior function
 type FlowContext interface {
-
 	// FlowDefinition returns the Flow definition associated with this context
 	FlowDefinition() *flow.Definition
 
@@ -20,7 +19,7 @@ type FlowContext interface {
 }
 
 // TaskContext is the execution context of the Task when executing
-// a Task Behavior fuction
+// a Task Behavior function
 type TaskContext interface {
 
 	// State gets the state of the Task instance
@@ -32,9 +31,13 @@ type TaskContext interface {
 	// Task returns the Task associated with this context
 	Task() *flow.Task
 
-	// FromLinks returns the set of predecessor Links of the current
+	// FromInstLinks returns the intstances of predecessor Links of the current
 	// task.
-	FromLinks() []LinkContext
+	FromInstLinks() []LinkInst
+
+	// ToInstLinks returns the instances of successor Links of the current
+	// task.
+	ToInstLinks() []LinkInst
 
 	// EnterLeadingChildren enters the set of child Tasks that
 	// do not have any incoming links.
@@ -46,23 +49,18 @@ type TaskContext interface {
 	// all the child tasks are entered with the specified code.
 	EnterChildren(taskEntries []*TaskEntry)
 
-	// EvalLink evalutes the specified link, returning the resulting
-	// LinkContext
-	EvalLink(link *flow.Link, code int) LinkContext
+	// EvalLink evalutes the specified link
+	EvalLink(link *flow.Link) (bool, error)
 
-	//EvalLink(link *Link, code int) bool
-
-	// Activity gets the Activity associated with the Task
-	Activity() (activity activity.Activity, activityContext activity.Context)
+	// HasActivity flag indicating if the task has an Activity
+	HasActivity() bool
 
 	// EvalActivity evaluates the Activity associated with the Task
 	EvalActivity() (done bool, evalError *activity.Error)
 }
 
-// LinkContext is the execution context of the Task when executing
-// a Link
-// todo remove
-type LinkContext interface {
+// LinkInst is the instance of a link
+type LinkInst interface {
 
 	// Link returns the Link associated with this context
 	Link() *flow.Link
