@@ -42,7 +42,7 @@ func (rp *RequestProcessor) StartFlow(startRequest *StartRequest, replyHandler f
 
 			//todo handle error
 			t, _ := data.GetType(v)
-			attrs = append(attrs, &data.Attribute{Name: k, Type: t.String(), Value: v})
+			attrs = append(attrs, data.NewAttribute(k, t, v))
 		}
 	}
 

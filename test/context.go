@@ -29,10 +29,10 @@ func NewTestActivityContext(metadata *activity.Metadata) *TestActivityContext {
 	}
 
 	for _,element := range metadata.Inputs {
-		tc.inputs[element.Name] = &data.Attribute{Name:element.Name, Type:element.Type}
+		tc.inputs[element.Name] = data.NewAttribute(element.Name, element.Type, nil)
 	}
 	for _,element := range metadata.Outputs {
-		tc.outputs[element.Name] = &data.Attribute{Name:element.Name, Type:element.Type}
+		tc.outputs[element.Name] = data.NewAttribute(element.Name, element.Type, nil)
 	}
 
 	return tc
@@ -54,7 +54,7 @@ func (c *TestActivityContext) TaskName() string {
 }
 
 // GetAttrType implements data.Scope.GetAttrType
-func (c *TestActivityContext) GetAttrType(attrName string) (attrType string, exists bool) {
+func (c *TestActivityContext) GetAttrType(attrName string) (attrType data.Type, exists bool) {
 
 	attr, found := c.Attrs[attrName]
 
@@ -62,7 +62,7 @@ func (c *TestActivityContext) GetAttrType(attrName string) (attrType string, exi
 		return attr.Type, true
 	}
 
-	return "", false
+	return 0, false
 }
 
 // GetAttrValue implements data.Scope.GetAttrValue

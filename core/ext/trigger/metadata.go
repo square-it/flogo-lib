@@ -97,15 +97,14 @@ func (md *Metadata) OutputsToAttrs(outputData map[string]interface{}, coerce boo
 
 		if coerce {
 			var err error
-			t, _ := data.ToTypeEnum(a.Type)
-			v, err = data.CoerceToValue(v, t)
+			v, err = data.CoerceToValue(v, a.Type)
 
 			if err != nil {
 				return nil, err
 			}
 		}
 
-		attrs = append(attrs, &data.Attribute{Name: a.Name, Type: a.Type, Value: v})
+		attrs = append(attrs, data.NewAttribute(a.Name, a.Type, v))
 	}
 
 	return attrs, nil

@@ -88,7 +88,7 @@ func (m *Mapper) Apply(inputScope Scope, outputScope Scope) {
 					toType, oe := outputScope.GetAttrType(attrName)
 
 					if oe {
-						if toType == PARAMS.String() {
+						if toType == PARAMS {
 							val, _ := outputScope.GetAttrValue(attrName)
 							var valMap map[string]string
 							if val == nil {

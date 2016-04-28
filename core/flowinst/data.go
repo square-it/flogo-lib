@@ -143,7 +143,7 @@ func NewFixedTaskScope(refAttrs map[string]*data.Attribute, task *flow.Task) dat
 }
 
 // GetAttrType implements Scope.GetAttrType
-func (s *FixedTaskScope) GetAttrType(attrName string) (attrType string, exists bool) {
+func (s *FixedTaskScope) GetAttrType(attrName string) (attrType data.Type, exists bool) {
 
 	attr, found := s.refAttrs[attrName]
 
@@ -151,7 +151,7 @@ func (s *FixedTaskScope) GetAttrType(attrName string) (attrType string, exists b
 		return attr.Type, true
 	}
 
-	return "", false
+	return 0, false
 }
 
 // GetAttrValue implements Scope.GetAttrValue
@@ -191,8 +191,7 @@ func (s *FixedTaskScope) SetAttrValue(attrName string, value interface{}) {
 	if found {
 		log.Debugf("SetAttr: Attr %s found\n", attrName)
 		//todo handle errors
-		dt, _ := data.ToTypeEnum(attr.Type)
-		coercedVal, _ := data.CoerceToValue(value, dt)
+		coercedVal, _ := data.CoerceToValue(value, attr.Type)
 		attr.Value = coercedVal
 	} else {
 		log.Debugf("SetAttr: Attr %s not found\n", attrName)
@@ -200,9 +199,8 @@ func (s *FixedTaskScope) SetAttrValue(attrName string, value interface{}) {
 		attr, found = s.refAttrs[attrName]
 		log.Debugf("SetAttr: ref %v\n", attr)
 		if found {
-			dt, _ := data.ToTypeEnum(attr.Type)
-			coercedVal, _ := data.CoerceToValue(value, dt)
-			s.attrs[attrName] = &data.Attribute{Name: attrName, Type: attr.Type, Value: coercedVal}
+			coercedVal, _ := data.CoerceToValue(value, attr.Type)
+			s.attrs[attrName] = data.NewAttribute(attrName, attr.Type, coercedVal)
 		} else {
 			log.Debugf("SetAttr: Attr %s ref not found\n", attrName)
 			log.Debugf("SetAttr: refs %v\n", s.refAttrs)

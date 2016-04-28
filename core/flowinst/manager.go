@@ -5,6 +5,7 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/flow"
+	"github.com/op/go-logging"
 )
 
 // Manager is used to create or prepare flow instance for start, restart or resume
@@ -33,13 +34,19 @@ func (mgr *Manager) StartInstance(flowURI string, startAttrs []*data.Attribute, 
 	}
 
 	instanceID := mgr.idGenerator.NewFlowInstanceID()
-	log.Info("Creating Instance: ", instanceID)
+	log.Debug("Creating Instance: ", instanceID)
 
 	instance := NewFlowInstance(instanceID, flowURI, flow)
 
 	applyExecOptions(instance, execOptions)
 
 	log.Info("Starting Instance: ", instanceID)
+
+	if log.IsEnabledFor(logging.DEBUG) {
+		for _, attr := range startAttrs {
+			log.Debugf(" Attr:%s, Type:%s, Value:%v", attr.Name, attr.Type.String(), attr.Value)
+		}
+	}
 
 	instance.Start(startAttrs)
 

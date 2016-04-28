@@ -128,7 +128,7 @@ func (pi *Instance) UpdateAttrs(update map[string]interface{}) {
 		}
 
 		for k, v := range update {
-			pi.Attrs[k] = &data.Attribute{Name: k, Type: "string", Value: v}
+			pi.Attrs[k] = data.NewAttribute(k, data.STRING, v)
 		}
 	}
 }
@@ -326,7 +326,7 @@ func (pi *Instance) handleTaskDone(taskBehavior model.TaskBehavior, taskData *Ta
 }
 
 // GetAttrType implements api.Scope.GetAttrType
-func (pi *Instance) GetAttrType(attrName string) (attrType string, exists bool) {
+func (pi *Instance) GetAttrType(attrName string) (attrType data.Type, exists bool) {
 
 	if pi.Attrs != nil {
 		attr, found := pi.Attrs[attrName]
@@ -340,7 +340,7 @@ func (pi *Instance) GetAttrType(attrName string) (attrType string, exists bool) 
 		return attr.Type, true
 	}
 
-	return "", false
+	return 0, false
 }
 
 // GetAttrValue implements api.Scope.GetAttrValue
@@ -376,13 +376,13 @@ func (pi *Instance) SetAttrValue(attrName string, value interface{}) {
 	attrType, exists := pi.GetAttrType(attrName)
 
 	if exists {
-		pi.Attrs[attrName] = &data.Attribute{Name: attrName, Type: attrType, Value: value}
+		pi.Attrs[attrName] = data.NewAttribute(attrName, attrType, value)
 	}
 	// else what do we do if its a completely new attr
 }
 
 // AddAttr add a new attribute to the instance
-func (pi *Instance) AddAttr(attrName string, attrType string, value interface{}) {
+func (pi *Instance) AddAttr(attrName string, attrType data.Type, value interface{}) {
 	if pi.Attrs == nil {
 		pi.Attrs = make(map[string]*data.Attribute)
 	}
@@ -394,7 +394,7 @@ func (pi *Instance) AddAttr(attrName string, attrType string, value interface{})
 	if exists {
 		// what should we do?
 	} else {
-		pi.Attrs[attrName] = &data.Attribute{Name: attrName, Type: attrType, Value: value}
+		pi.Attrs[attrName] = data.NewAttribute(attrName, attrType, value)
 	}
 
 	log.Debugf("flow attrs: %v\n", pi.Attrs)
@@ -690,7 +690,7 @@ func (td *TaskData) EvalActivity() (done bool, evalErr *activity.Error) {
 
 	defer func() {
 		if r := recover(); r != nil {
-			log.Warningf("Unhandled Error executing activity '%s' : %v\n", td.task.Name(), r)
+			log.Warningf("Unhandled Error executing activity '%s'[%s] : %v\n", td.task.Name(), td.task.ActivityType(), r)
 
 			// todo: useful for debugging
 			if log.IsEnabledFor(logging.DEBUG) {

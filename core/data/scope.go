@@ -4,7 +4,7 @@ package data
 type Scope interface {
 
 	// GetAttrType gets the type of the specified attribute
-	GetAttrType(attrName string) (attrType string, exists bool)
+	GetAttrType(attrName string) (attrType Type, exists bool)
 
 	// GetAttrValue gets the value of the specified attribute
 	GetAttrValue(attrName string) (value interface{}, exists bool)
@@ -35,7 +35,7 @@ func NewSimpleScope(attrs []*Attribute, parentScope Scope) *SimpleScope {
 }
 
 // GetAttrType implements Scope.GetAttrType
-func (s *SimpleScope) GetAttrType(attrName string) (attrType string, exists bool) {
+func (s *SimpleScope) GetAttrType(attrName string) (attrType Type, exists bool) {
 
 	attr, found := s.attrs[attrName]
 
@@ -47,7 +47,7 @@ func (s *SimpleScope) GetAttrType(attrName string) (attrType string, exists bool
 		return s.parentScope.GetAttrType(attrName)
 	}
 
-	return "", false
+	return 0, false
 }
 
 // GetAttrValue implements Scope.GetAttrValue
