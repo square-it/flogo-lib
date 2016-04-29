@@ -70,9 +70,16 @@ func (m *Mapper) Apply(inputScope Scope, outputScope Scope) {
 			attrValue, exists = inputScope.GetAttrValue(attrName)
 
 			if exists && len(attrPath) > 0 {
-				//for now assume if we have a path, attr is "object"
-				valMap := attrValue.(map[string]interface{})
-				attrValue, exists = valMap[attrPath]
+				attrType,_ := inputScope.GetAttrType(attrName)
+				if attrType == PARAMS {
+					valMap := attrValue.(map[string]string)
+					attrValue, exists = valMap[attrPath]
+				} else {
+					//for now assume if we have a path, attr is "object"
+					valMap := attrValue.(map[string]interface{})
+					attrValue, exists = valMap[attrPath]
+				}
+
 			}
 
 			//todo implement type conversion
@@ -81,6 +88,8 @@ func (m *Mapper) Apply(inputScope Scope, outputScope Scope) {
 				idx := strings.Index(mapping.MapTo, ".")
 
 				if idx > -1 {
+					// attrName, attrPath := GetAttrPath(mapping.Value)
+
 					attrName := mapping.MapTo[:idx]
 					mapAttrName := mapping.MapTo[idx+1:]
 
@@ -102,7 +111,6 @@ func (m *Mapper) Apply(inputScope Scope, outputScope Scope) {
 							outputScope.SetAttrValue(attrName, valMap)
 
 						} else {
-
 							//error, not a map (or object?)
 						}
 					} else {
