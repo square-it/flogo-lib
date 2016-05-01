@@ -90,7 +90,7 @@ func (md *Metadata) UnmarshalJSON(b []byte) error {
 // OutputsToAttrs converts the supplied output data to attributes
 func (md *Metadata) OutputsToAttrs(outputData map[string]interface{}, coerce bool) ([]*data.Attribute, error) {
 
-	attrs := make([]*data.Attribute, len(md.Outputs))
+	attrs := make([]*data.Attribute, 0, len(md.Outputs))
 
 	for k, a := range md.Outputs {
 		v, _ := outputData[k]

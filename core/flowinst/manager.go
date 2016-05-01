@@ -43,8 +43,10 @@ func (mgr *Manager) StartInstance(flowURI string, startAttrs []*data.Attribute, 
 	log.Info("Starting Instance: ", instanceID)
 
 	if log.IsEnabledFor(logging.DEBUG) {
-		for _, attr := range startAttrs {
-			log.Debugf(" Attr:%s, Type:%s, Value:%v", attr.Name, attr.Type.String(), attr.Value)
+		if len(startAttrs) > 0 {
+			for _, attr := range startAttrs {
+				log.Debugf(" Attr:%s, Type:%s, Value:%v", attr.Name, attr.Type.String(), attr.Value)
+			}
 		}
 	}
 
