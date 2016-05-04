@@ -9,6 +9,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/flow"
 	"github.com/TIBCOSoftware/flogo-lib/util"
 	"github.com/op/go-logging"
+	"github.com/TIBCOSoftware/flogo-lib/script/fglua"
 )
 
 var log = logging.MustGetLogger("flowprovider")
@@ -111,6 +112,10 @@ func (pps *RemoteFlowProvider) GetFlow(flowURI string) *flow.Definition {
 
 			return nil
 		}
+
+		//todo optimize this - not needed if flow doesn't have expressions
+		//todo have a registry for this?
+		def.SetLinkExprManager(fglua.NewLuaLinkExprManager(def))
 
 		pps.flowCache[flowURI] = def
 

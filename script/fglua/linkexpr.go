@@ -2,7 +2,6 @@ package fglua
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -17,8 +16,9 @@ var log = logging.MustGetLogger("fglua")
 
 // LuaLinkExprManager is the Lua Implementation of a Link Expression Manager
 type LuaLinkExprManager struct {
-	Values map[int][]string
-	L      *lua.State
+	Values  map[int][]string
+	script  string
+	luaPool *LuaStatePool
 }
 
 // NewLuaLinkExprManager creates a new LuaLinkExprManager
@@ -49,13 +49,10 @@ func NewLuaLinkExprManager(def *flow.Definition) *LuaLinkExprManager {
 		}
 	}
 
-	script := buffer.String()
-	log.Debugf("Definition [%s] Lua Expressions Script:\n %s\n", def.Name(), script)
+	mgr.script = buffer.String()
+	log.Debugf("Definition [%s] Lua Expressions Script:\n %s\n", def.Name(), mgr.script)
 
-	fmt.Println(script)
-
-	mgr.L = lua.NewState()
-	lua.DoString(mgr.L, script)
+	mgr.luaPool = &LuaStatePool{saved: make([]*lua.State, 0, 5),}
 
 	return mgr
 }
@@ -122,52 +119,17 @@ func (em *LuaLinkExprManager) EvalLinkExpr(link *flow.Link, scope data.Scope) bo
 		vals[attr] = attrValue
 	}
 
-	em.L.Global("l" + strconv.Itoa(link.ID()))
-	PushMap(em.L, vals)
-	em.L.Call(1, 1)
-	ret := em.L.ToValue(-1)
+	L, isNew := em.luaPool.Get()
+	defer em.luaPool.Release(L)
+
+	if isNew {
+		lua.DoString(L, em.script)
+	}
+
+	L.Global("l" + strconv.Itoa(link.ID()))
+	PushMap(L, vals)
+	L.Call(1, 1)
+	ret := L.ToValue(-1)
 
 	return ret.(bool)
-}
-
-// PushVal pushes a value onto the Lua vm's stack
-func PushVal(L *lua.State, val interface{}) {
-	switch t := val.(type) {
-	case string:
-		L.PushString(t)
-	case int:
-		L.PushInteger(t)
-	case float64:
-		L.PushNumber(t)
-	case json.Number:
-		f, _ := t.Float64()
-		L.PushNumber(f)
-	case bool:
-		L.PushBoolean(t)
-	case nil:
-		L.PushNil()
-	case map[string]interface{}:
-		PushMap(L, t)
-	default:
-		L.PushUserData(t)
-	}
-}
-
-// PushMap pushes a map onto the Lua vm's stack
-func PushMap(L *lua.State, mapVal map[string]interface{}) int {
-
-	if len(mapVal) > 0 {
-		L.CreateTable(0, len(mapVal))
-
-		for k, v := range mapVal {
-
-			PushVal(L, k)
-			PushVal(L, v)
-			L.SetTable(-3)
-		}
-
-	} else {
-		L.PushNil()
-	}
-	return 1
 }

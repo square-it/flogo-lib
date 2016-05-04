@@ -61,11 +61,3 @@ type TaskBehavior interface {
 	// is done.
 	ChildDone(context TaskContext, childTask *flow.Task, childDoneCode int) (done bool, doneCode int)
 }
-
-// LinkBehavior is the execution behavior of a Link.
-// todo: remove, link do not need behaviors
-type LinkBehavior interface {
-
-	// Eval is called when a Link is being evaluated.
-	Eval(context LinkInst, evalCode int)
-}

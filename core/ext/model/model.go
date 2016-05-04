@@ -12,7 +12,6 @@ type FlowModel struct {
 	name          string
 	flowBehaviors map[int]FlowBehavior
 	taskBehaviors map[int]TaskBehavior
-	linkBehaviors map[int]LinkBehavior
 }
 
 // New creates a new FlowModel from the specified Behaviors
@@ -22,7 +21,6 @@ func New(name string) *FlowModel {
 	flowModel.name = name
 	flowModel.flowBehaviors = make(map[int]FlowBehavior)
 	flowModel.taskBehaviors = make(map[int]TaskBehavior)
-	flowModel.linkBehaviors = make(map[int]LinkBehavior)
 
 	return &flowModel
 }
@@ -51,14 +49,4 @@ func (pm *FlowModel) RegisterTaskBehavior(id int, taskBehavior TaskBehavior) {
 // GetTaskBehavior returns TaskBehavior with the specified ID in he FlowModel
 func (pm *FlowModel) GetTaskBehavior(id int) TaskBehavior {
 	return pm.taskBehaviors[id]
-}
-
-// RegisterLinkBehavior registers the specified LinkBehavior with the Model
-func (pm *FlowModel) RegisterLinkBehavior(id int, linkBehavior LinkBehavior) {
-	pm.linkBehaviors[id] = linkBehavior
-}
-
-// GetLinkBehavior returns LinkBehavior with the specified ID in the FlowModel
-func (pm *FlowModel) GetLinkBehavior(id int) LinkBehavior {
-	return pm.linkBehaviors[id]
 }

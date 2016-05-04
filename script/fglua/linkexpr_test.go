@@ -13,6 +13,9 @@ const defJSON = `
   "type": 1,
   "name": "Demo Flow",
   "model": "simple",
+  "attributes": [
+    { "name": "petMax", "type": "integer", "value": 5 }
+  ],
   "rootTask": {
     "id": 1,
     "type": 1,
@@ -39,8 +42,8 @@ const defJSON = `
       }
     ],
     "links": [
-      { "id": 1, "type": 1,  "name": "", "to": 3,  "from": 2, "value":"$[A1.sensor].petId > 50" },
-      { "id": 2, "type": 1, "name": "", "to": 4, "from": 2, "value":"$petId > 5" }
+      { "id": 1, "type": 1, "name": "",  "from": 2, "to": 3, "value":"$sensorData.temp > 50" },
+      { "id": 2, "type": 1, "name": "", "from": 2, "to": 4, "value":"$petId <= $petMax" }
     ]
   }
 }
@@ -62,8 +65,9 @@ func TestLuaLinkExprManager_EvalLinkExpr(t *testing.T) {
 	sensorData["temp"] = 55
 
 	attrs := []*data.Attribute{
-		&data.Attribute{Name:"petId", Type:"integer", Value:3},
-		&data.Attribute{Name:"sensorData", Type:"object", Value:sensorData},
+		data.NewAttribute("petMax", data.INTEGER, 4),
+		data.NewAttribute("petId", data.INTEGER, 3),
+		data.NewAttribute("sensorData", data.OBJECT, sensorData),
 	}
 
 	scope := data.NewSimpleScope(attrs, nil)

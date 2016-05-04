@@ -229,8 +229,20 @@ func (pi *Instance) scheduleEval(taskData *TaskData, evalCode int) {
 // execTask executes the specified Work Item of the Flow Instance
 func (pi *Instance) execTask(workItem *WorkItem) {
 
-	taskData := workItem.TaskData
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error("Unhandled Error executing task '%s' : %v\n",  workItem.TaskData.task.Name(), r)
 
+			// todo: useful for debugging
+			if log.IsEnabledFor(logging.DEBUG) {
+				log.Debugf("StackTrace: %s", debug.Stack())
+			}
+
+			//todo handle error
+		}
+	}()
+
+	taskData := workItem.TaskData
 	taskBehavior := pi.FlowModel.GetTaskBehavior(taskData.task.TypeID())
 
 	var done bool
