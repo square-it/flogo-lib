@@ -85,7 +85,7 @@ func (pps *RemoteFlowProvider) GetFlow(flowURI string) *flow.Definition {
 		client := &http.Client{}
 		resp, err := client.Do(req)
 		if err != nil {
-			panic(err)
+			panic(err) //todo probably shouldn't panic
 		}
 		defer resp.Body.Close()
 

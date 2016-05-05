@@ -49,6 +49,10 @@ type TaskContext interface {
 	// all the child tasks are entered with the specified code.
 	EnterChildren(taskEntries []*TaskEntry)
 
+	// ChildTaskInsts gets all the instances of child tasks of the
+	// current task
+	ChildTaskInsts() (taskInsts []TaskInst, hasChildTasks bool)
+
 	// EvalLink evalutes the specified link
 	EvalLink(link *flow.Link) (bool, error)
 
@@ -62,7 +66,7 @@ type TaskContext interface {
 // LinkInst is the instance of a link
 type LinkInst interface {
 
-	// Link returns the Link associated with this context
+	// Link returns the Link associated with this Link Instance
 	Link() *flow.Link
 
 	// State gets the state of the Link instance
@@ -70,4 +74,13 @@ type LinkInst interface {
 
 	// SetState sets the state of the Link instance
 	SetState(state int)
+}
+
+type TaskInst interface {
+
+	// Task returns the Task associated with this Task Instance
+	Task() *flow.Task
+
+	// State gets the state of the Task instance
+	State() int
 }

@@ -105,7 +105,7 @@ func addTask(def *Definition, task *Task, rep *TaskRep) {
 		for _, childTaskRep := range rep.Tasks {
 
 			childTask := &Task{}
-			//childTask.Parent = task
+			childTask.parent = task
 			task.tasks = append(task.tasks, childTask)
 			addTask(def, childTask, childTaskRep)
 		}

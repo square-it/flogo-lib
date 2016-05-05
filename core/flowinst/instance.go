@@ -614,6 +614,27 @@ func (td *TaskData) ToInstLinks() []model.LinkInst {
 	return nil
 }
 
+// ChildTaskInsts implements activity.ActivityContext.ChildTaskInsts method
+func (td *TaskData) ChildTaskInsts() (taskInsts []model.TaskInst, hasChildTasks bool) {
+
+	if len(td.task.ChildTasks()) == 0 {
+		return nil, false
+	}
+
+	taskInsts = make([]model.TaskInst, 0)
+
+	for _, task := range td.task.ChildTasks() {
+
+		taskData, ok := td.taskEnv.TaskDatas[task.ID()]
+
+		if ok {
+			taskInsts = append(taskInsts, taskData)
+		}
+	}
+
+	return taskInsts, true
+}
+
 // EnterChildren implements activity.ActivityContext.EnterChildren method
 func (td *TaskData) EnterChildren(taskEntries []*model.TaskEntry) {
 
