@@ -7,6 +7,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/flow"
 	"github.com/op/go-logging"
 	"github.com/japm/goScript"
+	"encoding/json"
 )
 
 var log = logging.MustGetLogger("fggos")
@@ -108,7 +109,8 @@ func (em *GosLinkExprManager) EvalLinkExpr(link *flow.Link, scope data.Scope) bo
 			//for now assume if we have a path, attr is "object" and only one level
 			valMap := attrValue.(map[string]interface{})
 			//todo what if the value does not exists
-			attrValue, _ = valMap[attrPath]
+			val, _ := valMap[attrPath]
+			attrValue = FixUpValue(val)
 		}
 
 		vals[attr] = attrValue
@@ -117,7 +119,30 @@ func (em *GosLinkExprManager) EvalLinkExpr(link *flow.Link, scope data.Scope) bo
 	ctxt := make(map[string]interface{})
 	ctxt["v"] = vals
 
+	log.Debugf("Vals: %v", vals)
+
 	val, _ := expr.Eval(ctxt)
 	//todo handle error
 	return val.(bool)
+}
+
+func FixUpValue(val interface{}) interface{} {
+
+	ret := val
+	var err error
+
+	switch t := val.(type) {
+	case json.Number:
+		if strings.Index(t.String(),".") > -1 {
+			ret, err = t.Float64()
+		} else {
+			ret, err = t.Int64()
+		}
+	}
+
+	if err != nil {
+		ret = val
+	}
+
+	return ret
 }

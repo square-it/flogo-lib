@@ -45,7 +45,9 @@ const defJSON = `
       { "id": 1, "type": 1, "name": "",  "from": 2, "to": 3, "value":"$sensorData.temp > 50" },
       { "id": 2, "type": 1, "name": "", "from": 2, "to": 4, "value":"$petId <= $petMax" },
       { "id": 3, "type": 1, "name": "", "from": 2, "to": 4, "value":"true" },
-      { "id": 4, "type": 1, "name": "", "from": 2, "to": 4, "value":"false" }
+      { "id": 4, "type": 1, "name": "", "from": 2, "to": 4, "value":"false" },
+      { "id": 5, "type": 1, "name": "", "from": 2, "to": 4, "value":"$sensorData.temp == 55" },
+      { "id": 6, "type": 1, "name": "", "from": 2, "to": 4, "value":"$[A3.result].code == 1" }
     ]
   }
 }
@@ -64,14 +66,20 @@ func TestLuaLinkExprManager_EvalLinkExpr(t *testing.T) {
 	link2 := def.GetLink(2)
 	link3 := def.GetLink(3)
 	link4 := def.GetLink(4)
+	link5 := def.GetLink(5)
+	link6 := def.GetLink(6)
 
 	sensorData := make(map[string]interface{})
 	sensorData["temp"] = 55
+
+	a3result := make(map[string]interface{})
+	a3result["code"] = 1
 
 	attrs := []*data.Attribute{
 		data.NewAttribute("petMax", data.INTEGER, 4),
 		data.NewAttribute("petId", data.INTEGER, 3),
 		data.NewAttribute("sensorData", data.OBJECT, sensorData),
+		data.NewAttribute("[A3.result]", data.OBJECT, a3result),
 	}
 
 	scope := data.NewSimpleScope(attrs, nil)
@@ -88,8 +96,16 @@ func TestLuaLinkExprManager_EvalLinkExpr(t *testing.T) {
 	result = mgr.EvalLinkExpr(link4, scope)
 	fmt.Printf("Link 4 Result: %v\n", result)
 
+	result = mgr.EvalLinkExpr(link5, scope)
+	fmt.Printf("Link 5 Result: %v\n", result)
+
+	result = mgr.EvalLinkExpr(link6, scope)
+	fmt.Printf("Link 6 Result: %v\n", result)
+
 	scope.SetAttrValue("petId",6)
 	result = mgr.EvalLinkExpr(link2, scope)
 
 	fmt.Printf("Link2 Result: %v\n", result)
+
+
 }
