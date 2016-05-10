@@ -72,7 +72,7 @@ func (runner *DirectRunner) RunInstance(instance *flowinst.Instance) bool {
 		}
 	}
 
-	log.Debugf("Done Executing Instance: %s\n", instance.ID())
+	log.Debugf("Done Executing Instance [%s] - Status: %d\n", instance.ID(), instance.Status())
 
 	if instance.Status() == flowinst.StatusCompleted {
 		log.Infof("Flow [%s] Completed", instance.ID())

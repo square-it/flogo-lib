@@ -641,7 +641,7 @@ func (td *TaskData) EnterLeadingChildren(enterCode int) {
 	//todo optimize
 	for _, task := range td.task.ChildTasks() {
 
-		if len(task.FromLinks()) > 0 {
+		if len(task.FromLinks()) == 0 {
 			taskData, _ := td.taskEnv.FindOrCreateTaskData(task)
 			taskBehavior := td.taskEnv.Instance.FlowModel.GetTaskBehavior(task.TypeID())
 
