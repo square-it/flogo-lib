@@ -66,9 +66,16 @@ func transExpr(s string) ([]string, string) {
 
 	for i := 0; i < strLen; i++ {
 		if s[i] == '$' {
+
+			ignoreBrackets := s[i+1] == '['
+			var partOfName bool
+
 			var j int
 			for j = i + 1; j < strLen; j++ {
-				if s[j] == ' ' {
+
+				partOfName, ignoreBrackets = isPartOfName(s[j], ignoreBrackets)
+
+				if !partOfName {
 					break
 				}
 			}
@@ -82,6 +89,23 @@ func transExpr(s string) ([]string, string) {
 	replacer := strings.NewReplacer(rattrs...)
 
 	return attrs, replacer.Replace(s)
+}
+
+func isPartOfName(char byte, ignoreBrackets bool) (bool, bool) {
+
+	if (char < '0' || char > '9') && (char < 'a' || char > 'z') && (char < 'A' || char > 'Z') && char != '.' {
+
+		if  ignoreBrackets && char == '[' {
+			return true, true
+		} else if ignoreBrackets && char ==']' {
+			return true, false
+		}
+
+		return false, ignoreBrackets
+
+	}
+
+	return true, ignoreBrackets
 }
 
 // EvalLinkExpr implements LinkExprManager.EvalLinkExpr
