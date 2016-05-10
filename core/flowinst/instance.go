@@ -635,6 +635,25 @@ func (td *TaskData) ChildTaskInsts() (taskInsts []model.TaskInst, hasChildTasks 
 	return taskInsts, true
 }
 
+// EnterLeadingChildren implements activity.ActivityContext.EnterLeadingChildren method
+func (td *TaskData) EnterLeadingChildren(enterCode int) {
+
+	//todo optimize
+	for _, task := range td.task.ChildTasks() {
+
+		if len(task.FromLinks()) > 0 {
+			taskData, _ := td.taskEnv.FindOrCreateTaskData(task)
+			taskBehavior := td.taskEnv.Instance.FlowModel.GetTaskBehavior(task.TypeID())
+
+			eval, evalCode := taskBehavior.Enter(taskData, enterCode)
+
+			if eval {
+				td.taskEnv.Instance.scheduleEval(taskData, evalCode)
+			}
+		}
+	}
+}
+
 // EnterChildren implements activity.ActivityContext.EnterChildren method
 func (td *TaskData) EnterChildren(taskEntries []*model.TaskEntry) {
 

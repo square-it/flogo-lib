@@ -42,7 +42,7 @@ type TaskContext interface {
 	// EnterLeadingChildren enters the set of child Tasks that
 	// do not have any incoming links.
 	// todo: should we allow cross-boundary links?
-	//EnterLeadingChildren(int enterCode)
+	EnterLeadingChildren(enterCode int)
 
 	// EnterChildren enters the set of child Tasks specified,
 	// If single TaskEntry with nil Task is supplied,
