@@ -12,6 +12,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/flow"
 	"github.com/TIBCOSoftware/flogo-lib/util"
 	"github.com/op/go-logging"
+	"strconv"
 )
 
 var log = logging.MustGetLogger("instance")
@@ -758,6 +759,13 @@ func (td *TaskData) EvalActivity() (done bool, evalErr *activity.Error) {
 	done, evalErr = act.Eval(td)
 
 	return done, evalErr
+}
+
+// Failed marks the Activity as failed
+func (td *TaskData) Failed(err *activity.Error) {
+
+	errorMsgAttr := "[A" + strconv.Itoa(td.task.ID()) + "._errorMsg"
+	td.taskEnv.Instance.AddAttr(errorMsgAttr, data.STRING, err.Error())
 }
 
 // FlowInstanceID implements activity.Context.FlowInstanceID method

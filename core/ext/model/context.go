@@ -61,6 +61,9 @@ type TaskContext interface {
 
 	// EvalActivity evaluates the Activity associated with the Task
 	EvalActivity() (done bool, evalError *activity.Error)
+
+	// Failed marks the Activity as failed
+	Failed(err *activity.Error)
 }
 
 // LinkInst is the instance of a link
