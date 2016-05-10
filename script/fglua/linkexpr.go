@@ -93,7 +93,7 @@ func transExpr(s string) ([]string, string) {
 
 func isPartOfName(char byte, ignoreBrackets bool) (bool, bool) {
 
-	if (char < '0' || char > '9') && (char < 'a' || char > 'z') && (char < 'A' || char > 'Z') && char != '.' {
+	if (char < '0' || char > '9') && (char < 'a' || char > 'z') && (char < 'A' || char > 'Z') && char != '.' && char != '_' {
 
 		if  ignoreBrackets && char == '[' {
 			return true, true
