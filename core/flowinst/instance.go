@@ -232,14 +232,17 @@ func (pi *Instance) execTask(workItem *WorkItem) {
 
 	defer func() {
 		if r := recover(); r != nil {
-			log.Error("Unhandled Error executing task '%s' : %v\n",  workItem.TaskData.task.Name(), r)
+
+			err := fmt.Errorf("Unhandled Error executing task '%s' : %v\n",  workItem.TaskData.task.Name(), r)
+			log.Error(err)
 
 			// todo: useful for debugging
 			if log.IsEnabledFor(logging.DEBUG) {
 				log.Debugf("StackTrace: %s", debug.Stack())
 			}
 
-			//todo handle error
+			errorMsgAttr := "[A" + strconv.Itoa(workItem.TaskData.task.ID()) + "._errorMsg"
+			pi.AddAttr(errorMsgAttr, data.STRING, err.Error())
 		}
 	}()
 
