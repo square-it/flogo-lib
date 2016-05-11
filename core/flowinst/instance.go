@@ -753,8 +753,9 @@ func (td *TaskData) EvalActivity() (done bool, evalErr *activity.Error) {
 				log.Debugf("StackTrace: %s", debug.Stack())
 			}
 
-			if evalErr != nil {
+			if evalErr == nil {
 				evalErr = activity.NewError(fmt.Sprintf("%v", r))
+				done = false
 			}
 		}
 	}()
