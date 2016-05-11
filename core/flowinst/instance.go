@@ -241,7 +241,7 @@ func (pi *Instance) execTask(workItem *WorkItem) {
 				log.Debugf("StackTrace: %s", debug.Stack())
 			}
 
-			errorMsgAttr := "[A" + strconv.Itoa(workItem.TaskData.task.ID()) + "._errorMsg"
+			errorMsgAttr := "[A" + strconv.Itoa(workItem.TaskData.task.ID()) + "._errorMsg]"
 			pi.AddAttr(errorMsgAttr, data.STRING, err.Error())
 		}
 	}()
@@ -767,7 +767,7 @@ func (td *TaskData) EvalActivity() (done bool, evalErr *activity.Error) {
 // Failed marks the Activity as failed
 func (td *TaskData) Failed(err *activity.Error) {
 
-	errorMsgAttr := "[A" + strconv.Itoa(td.task.ID()) + "._errorMsg"
+	errorMsgAttr := "[A" + strconv.Itoa(td.task.ID()) + "._errorMsg]"
 	td.taskEnv.Instance.AddAttr(errorMsgAttr, data.STRING, err.Error())
 }
 
