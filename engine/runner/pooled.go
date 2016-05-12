@@ -57,6 +57,8 @@ func (runner *PooledRunner) Start() error {
 				select {
 				case work := <-runner.workQueue:
 					log.Debug("Received work requeust")
+
+					//todo fix, this creates unbounded go func blocked waiting for worker queue
 					go func() {
 						worker := <-runner.workerQueue
 
