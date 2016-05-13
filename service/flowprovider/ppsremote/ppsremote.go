@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/flow"
 	"github.com/TIBCOSoftware/flogo-lib/util"
@@ -23,6 +24,7 @@ const (
 // that can access flowes via URI
 type RemoteFlowProvider struct {
 	//todo: switch to LRU cache
+	mutex       *sync.Mutex
 	flowCache   map[string]*flow.Definition
 	embeddedMgr *util.EmbeddedFlowManager
 }
@@ -32,7 +34,7 @@ func NewRemoteFlowProvider() *RemoteFlowProvider {
 
 	var service RemoteFlowProvider
 	service.flowCache = make(map[string]*flow.Definition)
-
+	service.mutex = &sync.Mutex{}
 	return &service
 }
 
@@ -54,6 +56,8 @@ func (pps *RemoteFlowProvider) Init(settings map[string]string, embeddedFlowMgr 
 
 // GetFlow implements flow.Provider.GetFlow
 func (pps *RemoteFlowProvider) GetFlow(flowURI string) *flow.Definition {
+
+	//handle panic
 
 	// todo turn pps.flowCache to real cache
 	if flow, ok := pps.flowCache[flowURI]; ok {
@@ -118,7 +122,10 @@ func (pps *RemoteFlowProvider) GetFlow(flowURI string) *flow.Definition {
 		def.SetLinkExprManager(fggos.NewGosLinkExprManager(def))
 		//def.SetLinkExprManager(fglua.NewLuaLinkExprManager(def))
 
+		//synchronize
+		pps.mutex.Lock()
 		pps.flowCache[flowURI] = def
+		pps.mutex.Unlock()
 
 		return def
 	}

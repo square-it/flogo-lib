@@ -38,6 +38,7 @@ type Instance struct {
 	ChangeTracker *InstanceChangeTracker `json:"-"`
 
 	flowProvider flow.Provider
+	replyHandler ReplyHandler
 }
 
 // NewFlowInstance creates a new Flow Instance from the specified Flow
@@ -78,6 +79,14 @@ func (pi *Instance) Restart(id string, provider flow.Provider) {
 	pi.Flow = pi.flowProvider.GetFlow(pi.FlowURI)
 	pi.FlowModel = model.Get(pi.Flow.ModelID())
 	pi.RootTaskEnv.init(pi)
+}
+
+func (pi *Instance) SetReplyHandler(replyHandler ReplyHandler) {
+	pi.replyHandler = replyHandler
+}
+
+func (pi *Instance) ReplyHandler() ReplyHandler {
+	return pi.replyHandler
 }
 
 // ID returns the ID of the Flow Instance

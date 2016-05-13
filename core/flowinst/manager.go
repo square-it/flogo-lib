@@ -37,6 +37,9 @@ func (mgr *Manager) StartInstance(flowURI string, startAttrs []*data.Attribute, 
 	log.Debug("Creating Instance: ", instanceID)
 
 	instance := NewFlowInstance(instanceID, flowURI, flow)
+	if replyHandler != nil {
+		instance.SetReplyHandler(replyHandler)
+	}
 
 	applyExecOptions(instance, execOptions)
 
