@@ -8,21 +8,27 @@ import (
 	"github.com/op/go-logging"
 	"github.com/japm/goScript"
 	"encoding/json"
+	"strconv"
 )
 
 var log = logging.MustGetLogger("fggos")
 
 // LuaLinkExprManager is the Lua Implementation of a Link Expression Manager
 type GosLinkExprManager struct {
-	values map[int][]string
+	values map[int][]*varInfo
 	exprs  map[int]*goScript.Expr
+}
+
+type varInfo struct {
+	name string
+	isd  int
 }
 
 // NewGosLinkExprManager creates a new LuaLinkExprManager
 func NewGosLinkExprManager(def *flow.Definition) *GosLinkExprManager {
 
 	mgr := &GosLinkExprManager{}
-	mgr.values = make(map[int][]string)
+	mgr.values = make(map[int][]*varInfo)
 	mgr.exprs = make(map[int]*goScript.Expr)
 
 	links := flow.GetExpressionLinks(def)
@@ -30,9 +36,9 @@ func NewGosLinkExprManager(def *flow.Definition) *GosLinkExprManager {
 	for _, link := range links {
 
 		if len(strings.TrimSpace(link.Value())) > 0 {
-			attrs, exprStr := transExpr(link.Value())
+			vars, exprStr := transExpr(link.Value())
 
-			mgr.values[link.ID()] = attrs
+			mgr.values[link.ID()] = vars
 
 			log.Debugf("expr: %v\n", exprStr)
 
@@ -50,15 +56,23 @@ func NewGosLinkExprManager(def *flow.Definition) *GosLinkExprManager {
 	return mgr
 }
 
-func transExpr(s string) ([]string, string) {
+func transExpr(s string) ([]*varInfo, string) {
 
-	var attrs []string
-	var rattrs []string
+	var vars []*varInfo
+	var rvars []string
 
 	strLen := len(s)
 
+	isd := 0
+
 	for i := 0; i < strLen; i++ {
 		if s[i] == '$' {
+
+			isdefcheck := false
+
+			if strings.HasSuffix(s[0:i], "isDefined(") {
+				isdefcheck = true
+			}
 
 			ignoreBrackets := s[i+1] == '['
 			var partOfName bool
@@ -72,16 +86,25 @@ func transExpr(s string) ([]string, string) {
 					break
 				}
 			}
-			attrs = append(attrs, s[i+1:j])
-			rattrs = append(rattrs, s[i:j])
-			rattrs = append(rattrs, `v["`+s[i+1:j]+`"]`)
-			i = j
+
+			if isdefcheck {
+				isd++
+				vars = append(vars, &varInfo{isd:isd, name:s[i+1:j]})
+				rvars = append(rvars, s[i-10:j+1])
+				rvars = append(rvars, "isd" + strconv.Itoa(isd))
+				i = j + 1
+			} else {
+				vars = append(vars, &varInfo{name:s[i+1:j]})
+				rvars = append(rvars, s[i:j])
+				rvars = append(rvars, `v["`+s[i+1:j]+`"]`)
+				i = j
+			}
 		}
 	}
 
-	replacer := strings.NewReplacer(rattrs...)
+	replacer := strings.NewReplacer(rvars...)
 
-	return attrs, replacer.Replace(s)
+	return vars, replacer.Replace(s)
 }
 
 func isPartOfName(char byte, ignoreBrackets bool) (bool, bool) {
@@ -110,7 +133,7 @@ func (em *GosLinkExprManager) EvalLinkExpr(link *flow.Link, scope data.Scope) bo
 		return true
 	}
 
-	attrs, attrsOK := em.values[link.ID()]
+	vars, attrsOK := em.values[link.ID()]
 	expr, exprOK := em.exprs[link.ID()]
 
 	if !attrsOK || !exprOK {
@@ -119,35 +142,54 @@ func (em *GosLinkExprManager) EvalLinkExpr(link *flow.Link, scope data.Scope) bo
 		return false
 	}
 
+	ctxt := make(map[string]interface{})
 	vals := make(map[string]interface{})
 
-	for _, attr := range attrs {
+	for _, varInfo := range vars {
 
 		var attrValue interface{}
 		var exists bool
 
-		attrName, attrPath := data.GetAttrPath(attr)
-
+		attrName, attrPath := data.GetAttrPath(varInfo.name)
 		attrValue, exists = scope.GetAttrValue(attrName)
 
-		if exists && len(attrPath) > 0 {
-			//for now assume if we have a path, attr is "object" and only one level
-			valMap := attrValue.(map[string]interface{})
-			//todo what if the value does not exists
-			val, _ := valMap[attrPath]
-			attrValue = FixUpValue(val)
-		}
+		if varInfo.isd > 0 {
 
-		vals[attr] = attrValue
+			if exists && len(attrPath) > 0 {
+
+				//for now assume if we have a path, attr is "object" and only one level
+				valMap := attrValue.(map[string]interface{})
+				//todo what if the value does not exists
+				_, exists = valMap[attrPath]
+			}
+
+			ctxt["isd" + strconv.Itoa(varInfo.isd)] = exists
+
+		} else {
+
+			if exists && len(attrPath) > 0 {
+				//for now assume if we have a path, attr is "object" and only one level
+				valMap := attrValue.(map[string]interface{})
+				//todo what if the value does not exists
+				val, _ := valMap[attrPath]
+				attrValue = FixUpValue(val)
+			}
+
+			vals[varInfo.name] = attrValue
+		}
 	}
 
-	ctxt := make(map[string]interface{})
 	ctxt["v"] = vals
 
 	log.Debugf("Vals: %v", vals)
 
-	val, _ := expr.Eval(ctxt)
+	val, err := expr.Eval(ctxt)
+
 	//todo handle error
+	if err != nil {
+		log.Error(err)
+	}
+
 	return val.(bool)
 }
 

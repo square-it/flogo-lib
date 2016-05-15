@@ -53,7 +53,7 @@ func (m *Mapper) Mappings() []*Mapping {
 // Apply executes the mappings using the values from the input scope
 // and puts the results in the output scope
 //
-// todo: does the engine have to facilitate type conversion?
+// return error
 func (m *Mapper) Apply(inputScope Scope, outputScope Scope) {
 
 	//todo validate types
