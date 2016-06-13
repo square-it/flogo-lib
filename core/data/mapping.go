@@ -2,7 +2,7 @@ package data
 
 import (
 	"fmt"
-	"strings"
+	"strconv"
 )
 
 // MappingType is an enum for possible Mapping Types
@@ -22,7 +22,7 @@ const (
 // Mapping is a simple structure that defines a mapping
 type Mapping struct {
 	//Type the mapping type
-	Type MappingType `json:"type"`
+	Type  MappingType `json:"type"`
 
 	//Value the mapping value to execute to determine the result (lhs)
 	Value string `json:"value"`
@@ -65,67 +65,95 @@ func (m *Mapper) Apply(inputScope Scope, outputScope Scope) {
 			var attrValue interface{}
 			var exists bool
 
-			attrName, attrPath := GetAttrPath(mapping.Value)
+			attrName, attrPath, pathType := GetAttrPath(mapping.Value)
 
 			attrValue, exists = inputScope.GetAttrValue(attrName)
 
 			if exists && len(attrPath) > 0 {
-				attrType,_ := inputScope.GetAttrType(attrName)
+				attrType, _ := inputScope.GetAttrType(attrName)
 				if attrType == PARAMS {
 					valMap := attrValue.(map[string]string)
 					attrValue, exists = valMap[attrPath]
+				} else if attrType == ARRAY && pathType == PT_ARRAY {
+					//assigning part of array
+					idx, _ := strconv.Atoi(attrPath)
+					//todo handle err
+					valArray := attrValue.([]interface{})
+					attrValue = valArray[idx]
 				} else {
 					//for now assume if we have a path, attr is "object"
 					valMap := attrValue.(map[string]interface{})
 					attrValue, exists = valMap[attrPath]
 				}
-
 			}
 
 			//todo implement type conversion
 			if exists {
 
-				idx := strings.Index(mapping.MapTo, ".")
+				attrName, attrPath, pathType := GetAttrPath(mapping.MapTo)
+				toType, oe := outputScope.GetAttrType(attrName)
 
-				if idx > -1 {
-					// attrName, attrPath := GetAttrPath(mapping.Value)
+				if !oe {
+					//todo handle attr dne
+					fmt.Printf("Attr %s not found in output scope\n", attrName)
+					return
+				}
 
-					attrName := mapping.MapTo[:idx]
-					mapAttrName := mapping.MapTo[idx+1:]
-
-					//assigning to map value
-					toType, oe := outputScope.GetAttrType(attrName)
-
-					if oe {
-						if toType == PARAMS {
-							val, _ := outputScope.GetAttrValue(attrName)
-							var valMap map[string]string
-							if val == nil {
-								valMap = make(map[string]string)
-							} else {
-								valMap = val.(map[string]string)
-							}
-							strVal, _ := CoerceToString(attrValue)
-							valMap[mapAttrName] = strVal
-
-							outputScope.SetAttrValue(attrName, valMap)
-
-						} else {
-							//error, not a map (or object?)
-						}
-					} else {
-						fmt.Printf("Attr %s not found in output scope\n", attrName)
-					}
-
-				} else {
+				switch pathType {
+				case PT_SIMPLE:
 					outputScope.SetAttrValue(mapping.MapTo, attrValue)
+				case PT_ARRAY:
+					val, _ := outputScope.GetAttrValue(attrName)
+					if toType == ARRAY {
+						var valArray []interface{}
+						if val == nil {
+							//what should we do in this case, construct the array?
+							//valArray = make(map[string]string)
+						} else {
+							valArray = val.([]interface{})
+						}
+
+						idx, _ := strconv.Atoi(attrPath)
+						//todo handle err
+						valArray[idx] = attrValue
+
+						outputScope.SetAttrValue(attrName, valArray)
+					} else {
+						//todo throw error.. not an ARRAY
+					}
+				case PT_MAP:
+					val, _ := outputScope.GetAttrValue(attrName)
+					if toType == PARAMS {
+						var valMap map[string]string
+						if val == nil {
+							valMap = make(map[string]string)
+						} else {
+							valMap = val.(map[string]string)
+						}
+						strVal, _ := CoerceToString(attrValue)
+						valMap[attrPath] = strVal
+
+						outputScope.SetAttrValue(attrName, valMap)
+					} else if toType == OBJECT {
+						var valMap map[string]interface{}
+						if val == nil {
+							valMap = make(map[string]interface{})
+						} else {
+							valMap = val.(map[string]interface{})
+						}
+						valMap[attrPath] = attrValue
+
+						outputScope.SetAttrValue(attrName, valMap)
+					} else {
+						//todo throw error.. not a OBJECT or PARAMS
+					}
 				}
 			}
 		//todo: should we ignore if DNE - if we have to add dynamically what type do we use
 		case MtLiteral:
 			outputScope.SetAttrValue(mapping.MapTo, mapping.Value)
 		case MtExpression:
-			//todo implement script mapping
+		//todo implement script mapping
 		}
 	}
 }
