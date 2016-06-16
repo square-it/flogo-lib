@@ -90,8 +90,10 @@ func (ctx *appContext) AddAttr(attrName string, attrType data.Type, value interf
 	if found {
 		// add type is the same
 		attr.Value = value
+
+	} else {
+		ctx.attrs[attrName] = data.NewAttribute(attrName, attrType, value)
 	}
-	//todo return error? how do we determine type
 }
 
 
