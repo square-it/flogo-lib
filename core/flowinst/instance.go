@@ -714,7 +714,7 @@ func (td *TaskData) EnterChildren(taskEntries []*model.TaskEntry) {
 // EvalLink implements activity.ActivityContext.EvalLink method
 func (td *TaskData) EvalLink(link *flow.Link) (result bool, err error) {
 
-	log.Debugf("TaskContext.EvalLink: %s\n", link.ID())
+	log.Debugf("TaskContext.EvalLink: %d\n", link.ID())
 
 	defer func() {
 		if r := recover(); r != nil {

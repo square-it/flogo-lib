@@ -102,12 +102,12 @@ func applyDefaultActivityOutputMappings(pi *Instance, taskData *TaskData) {
 
 	activity := activity.Get(taskData.task.ActivityType())
 
-	attrNS := "[A" + strconv.Itoa(taskData.task.ID()) + "."
+	attrNS := "{A" + strconv.Itoa(taskData.task.ID()) + "."
 
 	for _, attr := range activity.Metadata().Outputs {
 
 		attrValue, _ := taskData.OutputScope().GetAttrValue(attr.Name)
-		pi.AddAttr(attrNS+attr.Name+"]", attr.Type, attrValue)
+		pi.AddAttr(attrNS+attr.Name+"}", attr.Type, attrValue)
 	}
 }
 
@@ -119,7 +119,7 @@ func applyDefaultInstanceInputMappings(pi *Instance, attrs []*data.Attribute) {
 
 	for _, attr := range attrs {
 
-		attrName := "[T." + attr.Name + "]"
+		attrName := "{T." + attr.Name + "}"
 		pi.AddAttr(attrName, attr.Type, attr.Value)
 	}
 }

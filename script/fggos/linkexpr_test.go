@@ -47,18 +47,18 @@ const defJSON = `
       { "id": 3, "type": 1, "name": "", "from": 2, "to": 4, "value":"true" },
       { "id": 4, "type": 1, "name": "", "from": 2, "to": 4, "value":"isDefined($sensorData.ff)" },
       { "id": 5, "type": 1, "name": "", "from": 2, "to": 4, "value":"$sensorData.temp == 55" },
-      { "id": 6, "type": 1, "name": "", "from": 2, "to": 4, "value":"$[A3.result].code == 1" }
+      { "id": 6, "type": 1, "name": "", "from": 2, "to": 4, "value":"${A3.result}.code == 1" }
     ]
   }
 }
 `
 func TestLuaLinkExprManager_TestTransExpr(t *testing.T) {
 
-	expr := "$[A3.result].code == 1"
+	expr := "${A3.result}.code == 1"
 	_, tExpr := transExpr(expr)
 	fmt.Println(tExpr)
 
-	expr = "$[A3.result].code==1"
+	expr = "${A3.result}.code==1"
 	_, tExpr = transExpr(expr)
 	fmt.Println(tExpr)
 
@@ -118,7 +118,7 @@ func TestLuaLinkExprManager_EvalLinkExpr(t *testing.T) {
 		data.NewAttribute("petMax", data.INTEGER, 4),
 		data.NewAttribute("petId", data.INTEGER, 3),
 		data.NewAttribute("sensorData", data.OBJECT, sensorData),
-		data.NewAttribute("[A3.result]", data.OBJECT, a3result),
+		data.NewAttribute("{A3.result}", data.OBJECT, a3result),
 	}
 
 	scope := data.NewSimpleScope(attrs, nil)

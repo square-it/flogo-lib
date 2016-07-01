@@ -74,13 +74,13 @@ func transExpr(s string) ([]*varInfo, string) {
 				isdefcheck = true
 			}
 
-			ignoreBrackets := s[i+1] == '['
+			ignoreBraces := s[i+1] == '{'
 			var partOfName bool
 
 			var j int
 			for j = i + 1; j < strLen; j++ {
 
-				partOfName, ignoreBrackets = isPartOfName(s[j], ignoreBrackets)
+				partOfName, ignoreBraces = isPartOfName(s[j], ignoreBraces)
 
 				if !partOfName {
 					break
@@ -107,21 +107,21 @@ func transExpr(s string) ([]*varInfo, string) {
 	return vars, replacer.Replace(s)
 }
 
-func isPartOfName(char byte, ignoreBrackets bool) (bool, bool) {
+func isPartOfName(char byte, ignoreBraces bool) (bool, bool) {
 
 	if (char < '0' || char > '9') && (char < 'a' || char > 'z') && (char < 'A' || char > 'Z') && char != '.' && char != '_' {
 
-		if  ignoreBrackets && char == '[' {
+		if  ignoreBraces && char == '{' {
 			return true, true
-		} else if ignoreBrackets && char ==']' {
+		} else if ignoreBraces && char =='}' {
 			return true, false
 		}
 
-		return false, ignoreBrackets
+		return false, ignoreBraces
 
 	}
 
-	return true, ignoreBrackets
+	return true, ignoreBraces
 }
 
 
@@ -138,7 +138,7 @@ func (em *GosLinkExprManager) EvalLinkExpr(link *flow.Link, scope data.Scope) bo
 
 	if !attrsOK || !exprOK {
 
-		log.Warning("Unable to evaluate expression '%s', did not compile properly\n", link.Value())
+		log.Warningf("Unable to evaluate expression '%s', did not compile properly\n", link.Value())
 		return false
 	}
 
