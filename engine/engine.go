@@ -66,19 +66,26 @@ func (e *Engine) Start() {
 
 	log.Info("Engine: Starting...")
 
+	engineTester, testerEnable := e.env.EngineTesterService()
+
 	triggers := trigger.Triggers()
 	triggersConfig := e.env.TriggersConfig()
+
+	var triggersToStart []trigger.Trigger
 
 	// initialize triggers
 	for _, trigger := range triggers {
 
 		triggerConfig, found := triggersConfig.Triggers[trigger.Metadata().ID]
 
-		if !found {
+		if !found && !testerEnable {
 			panic(fmt.Errorf("Trigger configuration for '%s' not provided", trigger.Metadata().ID))
 		}
 
-		trigger.Init(e, triggerConfig)
+		if found {
+			trigger.Init(e, triggerConfig)
+			triggersToStart = append(triggersToStart, trigger)
+		}
 	}
 
 	// start the flow provider service
@@ -94,13 +101,13 @@ func (e *Engine) Start() {
 	startManaged("FlowRunner Service", e.runner)
 
 	// start triggers
-	for _, trigger := range triggers {
+	for _, trigger := range triggersToStart {
 		startManaged("Trigger [ "+trigger.Metadata().ID+" ]", trigger)
 	}
 
 	// start the engineTester service if enabled
-	engineTester, enabled := e.env.EngineTesterService()
-	if enabled {
+	//engineTester, enabled := e.env.EngineTesterService()
+	if testerEnable {
 		engineTester.SetupInstanceSupport(e.instManager, e.runner)
 		startManaged("EngineTester Service", engineTester)
 	}
