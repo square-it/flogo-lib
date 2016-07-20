@@ -25,7 +25,7 @@ func (pi *Instance) MarshalJSON() ([]byte, error) {
 
 	queue := make([]*WorkItem, pi.WorkItemQueue.List.Len())
 
-	for i, e := 0, pi.WorkItemQueue.List.Front(); e != nil; i, e = i+1, e.Next() {
+	for i, e := 0, pi.WorkItemQueue.List.Front(); e != nil; i, e = i + 1, e.Next() {
 		queue[i], _ = e.Value.(*WorkItem)
 	}
 
@@ -226,14 +226,16 @@ func (ict *InstanceChangeTracker) MarshalJSON() ([]byte, error) {
 	}
 
 	return json.Marshal(&struct {
-		Status    Status                 `json:"status"`
-		State     int                    `json:"state"`
-		WqChanges []*WorkItemQueueChange `json:"wqChanges"`
-		TdChanges []*TaskDataChange      `json:"tdChanges"`
+		Status      Status                 `json:"status"`
+		State       int                    `json:"state"`
+		AttrChanges []*AttributeChange     `json:"attrs"`
+		WqChanges   []*WorkItemQueueChange `json:"wqChanges"`
+		TdChanges   []*TaskDataChange      `json:"tdChanges"`
 	}{
-		Status:    ict.instChange.Status,
-		State:     ict.instChange.State,
-		WqChanges: wqc,
-		TdChanges: tdc,
+		Status:      ict.instChange.Status,
+		State:       ict.instChange.State,
+		AttrChanges: ict.instChange.AttrChanges,
+		WqChanges:   wqc,
+		TdChanges:   tdc,
 	})
 }

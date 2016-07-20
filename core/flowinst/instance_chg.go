@@ -1,5 +1,9 @@
 package flowinst
 
+import (
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
+)
+
 // ChgType denotes the type of change for an object in an instance
 type ChgType int
 
@@ -35,17 +39,23 @@ type LinkDataChange struct {
 
 // InstanceChange represets a change to the instance
 type InstanceChange struct {
-	State   int
-	Status  Status
-	Changes int
+	State       int
+	Status      Status
+	Changes     int
+	AttrChanges []*AttributeChange
+}
+
+type AttributeChange struct {
+	ChgType   ChgType
+	Attribute *data.Attribute
 }
 
 // InstanceChangeTracker is used to track all changes to an instance
 type InstanceChangeTracker struct {
 	wiqChanges map[int]*WorkItemQueueChange
 
-	tdChanges map[int]*TaskDataChange
-	ldChanges map[int]*LinkDataChange
+	tdChanges  map[int]*TaskDataChange
+	ldChanges  map[int]*LinkDataChange
 
 	instChange *InstanceChange
 }
@@ -70,6 +80,27 @@ func (ict *InstanceChangeTracker) SetStatus(status Status) {
 
 	ict.instChange.Status = status
 	//ict.ctxChanges.Changes |= CHG_STATUS
+}
+
+// SetStatus is called to track a status change on an instance
+func (ict *InstanceChangeTracker) AttrChange(chgType ChgType, attribute *data.Attribute) {
+
+	var attrChange AttributeChange
+	attrChange.ChgType = chgType
+
+	var attr data.Attribute
+	attr.Name = attribute.Name
+
+	if chgType == CtAdd {
+		attr.Type = attribute.Type
+		attr.Value = attribute.Value
+	} else if chgType == CtUpd {
+		attr.Value = attribute.Value
+	}
+
+	attrChange.Attribute = &attr
+
+	ict.instChange.AttrChanges = append(ict.instChange.AttrChanges, &attrChange)
 }
 
 // trackWorkItem records a WorkItem Queue change

@@ -401,7 +401,9 @@ func (pi *Instance) SetAttrValue(attrName string, value interface{}) {
 	attrType, exists := pi.GetAttrType(attrName)
 
 	if exists {
-		pi.Attrs[attrName] = data.NewAttribute(attrName, attrType, value)
+		attr := data.NewAttribute(attrName, attrType, value)
+		pi.Attrs[attrName] = attr
+		pi.ChangeTracker.AttrChange(CtUpd, attr)
 	}
 	// else what do we do if its a completely new attr
 }
@@ -419,7 +421,9 @@ func (pi *Instance) AddAttr(attrName string, attrType data.Type, value interface
 	if exists {
 		// what should we do?
 	} else {
-		pi.Attrs[attrName] = data.NewAttribute(attrName, attrType, value)
+		attr := data.NewAttribute(attrName, attrType, value)
+		pi.Attrs[attrName] = attr
+		pi.ChangeTracker.AttrChange(CtAdd, attr)
 	}
 
 	log.Debugf("flow attrs: %v\n", pi.Attrs)

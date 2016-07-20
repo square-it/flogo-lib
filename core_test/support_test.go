@@ -13,7 +13,6 @@ func NewTestModel() *model.FlowModel {
 	m := model.New("test")
 	m.RegisterFlowBehavior(1, &SimpleFlowBehavior{})
 	m.RegisterTaskBehavior(1, &SimpleTaskBehavior{})
-	m.RegisterLinkBehavior(1, &SimpleLinkBehavior{})
 
 	return m
 }
@@ -104,12 +103,10 @@ func (b *SimpleTaskBehavior) Eval(context model.TaskContext, evalCode int) (done
 		return false, 0
 	}
 
-	activity, activityContext := context.Activity()
-
-	if activity != nil {
+	if context.HasActivity() {
 
 		//log.Debug("Evaluating Activity: ", activity.GetType())
-		done,_ := activity.Eval(activityContext)
+		done,_ := context.EvalActivity()
 		return done, 0
 	}
 
@@ -120,10 +117,7 @@ func (b *SimpleTaskBehavior) Eval(context model.TaskContext, evalCode int) (done
 func (b *SimpleTaskBehavior) PostEval(context model.TaskContext, evalCode int, data interface{}) (done bool, doneCode int) {
 	log.Debugf("Task PostEval\n")
 
-	//activity, activityContext := context.Activity()
-	activity, _ := context.Activity()
-
-	if activity != nil { //and is async
+	if context.HasActivity() { //and is async
 
 		//done := activity.PostEval(activityContext, data)
 		done := true
@@ -153,8 +147,8 @@ func (b *SimpleTaskBehavior) Done(context model.TaskContext, doneCode int) (noti
 
 		for _, link := range links {
 
-			linkContext := context.EvalLink(link, 0)
-			if linkContext.State() == STATE_LINK_TRUE {
+			follow, _ := context.EvalLink(link)
+			if follow {
 
 				taskEntry := &model.TaskEntry{Task: link.ToTask(), EnterCode: 0}
 				taskEntries = append(taskEntries, taskEntry)
