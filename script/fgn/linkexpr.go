@@ -44,7 +44,7 @@ func (em *GoLinkExprManager) EvalLinkExpr(link *flow.Link, scope data.Scope) boo
 		var attrValue interface{}
 		var exists bool
 
-		attrName, attrPath := data.GetAttrPath(attr)
+		attrName, attrPath, _ := data.GetAttrPath(attr)
 
 		attrValue, exists = scope.GetAttrValue(attrName)
 
