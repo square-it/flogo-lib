@@ -225,17 +225,31 @@ func (ict *InstanceChangeTracker) MarshalJSON() ([]byte, error) {
 		tdc = nil
 	}
 
+	var ldc []*LinkDataChange
+
+	if ict.ldChanges != nil {
+		ldc = make([]*LinkDataChange, 0, len(ict.ldChanges))
+
+		for _, value := range ict.ldChanges {
+			ldc = append(ldc, value)
+		}
+	} else {
+		ldc = nil
+	}
+
 	return json.Marshal(&struct {
 		Status      Status                 `json:"status"`
 		State       int                    `json:"state"`
 		AttrChanges []*AttributeChange     `json:"attrs"`
 		WqChanges   []*WorkItemQueueChange `json:"wqChanges"`
 		TdChanges   []*TaskDataChange      `json:"tdChanges"`
+		LdChanges   []*LinkDataChange      `json:"ldChanges"`
 	}{
 		Status:      ict.instChange.Status,
 		State:       ict.instChange.State,
 		AttrChanges: ict.instChange.AttrChanges,
 		WqChanges:   wqc,
 		TdChanges:   tdc,
+		LdChanges:   ldc,
 	})
 }
