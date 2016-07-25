@@ -198,7 +198,7 @@ func (td *TaskData) UnmarshalJSON(d []byte) error {
 func (ld *LinkData) MarshalJSON() ([]byte, error) {
 
 	return json.Marshal(&struct {
-		LinkID int               `json:"linkID"`
+		LinkID int               `json:"linkId"`
 		State  int               `json:"state"`
 	}{
 		LinkID: ld.link.ID(),
@@ -209,7 +209,7 @@ func (ld *LinkData) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON overrides the default UnmarshalJSON for LinkData
 func (ld *LinkData) UnmarshalJSON(d []byte) error {
 	ser := &struct {
-		LinkID int               `json:"linkID"`
+		LinkID int               `json:"linkId"`
 		State  int               `json:"state"`
 	}{}
 
