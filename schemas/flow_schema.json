@@ -82,7 +82,8 @@
       "type": "array",
       "items": { "$ref": "#/definitions/mapping" }
     },
-    "rootTask": {  "title": "rootTask", "$ref": "#/definitions/task" }
+    "rootTask": {  "title": "rootTask", "$ref": "#/definitions/task" },
+    "errorHandlerTask": {  "title": "errorHandlerTask", "$ref": "#/definitions/task" }
   },
   "required": ["model", "type", "rootTask"]
 }

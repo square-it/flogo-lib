@@ -17,28 +17,34 @@ import (
 
 var log = logging.MustGetLogger("instance")
 
+const (
+	id_ehTasEnv = 0
+	id_rootTaskEnv = 1
+)
+
 // Instance is a structure for representing an instance of a Flow
 type Instance struct {
-	id          string
-	stepID      int
-	lock        sync.Mutex
-	status      Status
-	state       int
-	FlowURI     string
-	Flow        *flow.Definition
-	RootTaskEnv *TaskEnv
-	FlowModel   *model.FlowModel
-	Attrs       map[string]*data.Attribute
-	Patch       *flow.Patch
-	Interceptor *flow.Interceptor
+	id            string
+	stepID        int
+	lock          sync.Mutex
+	status        Status
+	state         int
+	FlowURI       string
+	Flow          *flow.Definition
+	RootTaskEnv   *TaskEnv
+	EhTaskEnv     *TaskEnv
+	FlowModel     *model.FlowModel
+	Attrs         map[string]*data.Attribute
+	Patch         *flow.Patch
+	Interceptor   *flow.Interceptor
 
 	WorkItemQueue *util.SyncQueue //todo: change to faster non-threadsafe queue
 
 	wiCounter     int
 	ChangeTracker *InstanceChangeTracker `json:"-"`
 
-	flowProvider flow.Provider
-	replyHandler ReplyHandler
+	flowProvider  flow.Provider
+	replyHandler  ReplyHandler
 }
 
 // NewFlowInstance creates a new Flow Instance from the specified Flow
@@ -55,7 +61,7 @@ func NewFlowInstance(instanceID string, flowURI string, flow *flow.Definition) *
 	instance.ChangeTracker = NewInstanceChangeTracker()
 
 	var taskEnv TaskEnv
-	taskEnv.ID = 1
+	taskEnv.ID = id_rootTaskEnv
 	taskEnv.Task = flow.RootTask()
 	taskEnv.taskID = flow.RootTask().ID()
 	taskEnv.Instance = &instance
@@ -242,7 +248,7 @@ func (pi *Instance) execTask(workItem *WorkItem) {
 	defer func() {
 		if r := recover(); r != nil {
 
-			err := fmt.Errorf("Unhandled Error executing task '%s' : %v\n",  workItem.TaskData.task.Name(), r)
+			err := fmt.Errorf("Unhandled Error executing task '%s' : %v\n", workItem.TaskData.task.Name(), r)
 			log.Error(err)
 
 			// todo: useful for debugging
@@ -252,6 +258,10 @@ func (pi *Instance) execTask(workItem *WorkItem) {
 
 			errorMsgAttr := "[A" + strconv.Itoa(workItem.TaskData.task.ID()) + "._errorMsg]"
 			pi.AddAttr(errorMsgAttr, data.STRING, err.Error())
+
+			if workItem.TaskData.taskEnv.ID != id_ehTasEnv {
+				pi.HandleError()
+			}
 		}
 	}()
 
@@ -321,6 +331,9 @@ func (pi *Instance) handleTaskDone(taskBehavior model.TaskBehavior, taskData *Ta
 			}
 
 		} else {
+
+			//todo distinguish between error handler env and rootTaskEnv
+
 			//Root Task is Done, so notify Flow
 			flowBehavior := pi.FlowModel.GetFlowBehavior(pi.Flow.TypeID())
 			flowBehavior.TasksDone(pi, childDoneCode)
@@ -348,6 +361,33 @@ func (pi *Instance) handleTaskDone(taskBehavior model.TaskBehavior, taskData *Ta
 	}
 
 	taskData.taskEnv.releaseTask(task)
+}
+
+func (pi *Instance) HandleError() {
+
+	ehTask := pi.Flow.ErrorHandlerTask();
+
+	if pi.EhTaskEnv == nil {
+		var taskEnv TaskEnv
+		taskEnv.ID = id_ehTasEnv
+		taskEnv.Task = ehTask
+		taskEnv.taskID = ehTask.ID()
+		taskEnv.Instance = pi
+		taskEnv.TaskDatas = make(map[int]*TaskData)
+		taskEnv.LinkDatas = make(map[int]*LinkData)
+
+		pi.EhTaskEnv = &taskEnv
+	}
+
+	ehTaskData := pi.EhTaskEnv.TaskDatas[ehTask.ID()]
+
+	if ehTaskData == nil {
+		ehTaskData = pi.EhTaskEnv.NewTaskData(ehTask)
+	}
+
+	//todo what should we do with the existing workitem queue?
+
+	pi.scheduleEval(ehTaskData, 0)
 }
 
 // GetAttrType implements api.Scope.GetAttrType
@@ -442,7 +482,7 @@ type TaskEnv struct {
 	TaskDatas map[int]*TaskData
 	LinkDatas map[int]*LinkData
 
-	taskID int // for deserialization
+	taskID    int // for deserialization
 }
 
 // init initializes the Task Environment, typically called on deserialization
@@ -537,18 +577,18 @@ func (te *TaskEnv) releaseTask(task *flow.Task) {
 
 // TaskData represents data associated with an instance of a Task
 type TaskData struct {
-	taskEnv *TaskEnv
-	task    *flow.Task
-	state   int
-	done    bool
-	attrs   map[string]*data.Attribute
+	taskEnv  *TaskEnv
+	task     *flow.Task
+	state    int
+	done     bool
+	attrs    map[string]*data.Attribute
 
 	inScope  data.Scope
 	outScope data.Scope
 
-	changes int
+	changes  int
 
-	taskID int //needed for serialization
+	taskID   int //needed for serialization
 }
 
 // NewTaskData creates a TaskData for the specified task in the specified task
@@ -868,7 +908,7 @@ type LinkData struct {
 
 	changes int
 
-	linkID int //needed for serialization
+	linkID  int //needed for serialization
 }
 
 // NewLinkData creates a LinkData for the specified link in the specified task
@@ -916,8 +956,8 @@ type WorkItem struct {
 	ExecType ExecType  `json:"execType"`
 	EvalCode int       `json:"code"`
 
-	TaskID int `json:"taskID"` //for now need for ser
-	//taskCtxID int `json:"taskCtxID"` //not needed for now
+	TaskID   int `json:"taskID"` //for now need for ser
+								 //taskCtxID int `json:"taskCtxID"` //not needed for now
 }
 
 // NewWorkItem constructs a new WorkItem for the specified TaskData

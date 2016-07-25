@@ -13,12 +13,13 @@ var log = logging.MustGetLogger("flow")
 // a flow.  It contains its data (attributes) and
 // structure (tasks & links).
 type Definition struct {
-	typeID   int
-	name     string
-	modelID  string
-	rootTask *Task
+	typeID      int
+	name        string
+	modelID     string
+	rootTask    *Task
+	ehTask      *Task
 
-	attrs map[string]*data.Attribute
+	attrs       map[string]*data.Attribute
 
 	inputMapper *data.Mapper
 	links       map[int]*Link
@@ -45,6 +46,11 @@ func (pd *Definition) ModelID() string {
 // RootTask returns the root task of the definition
 func (pd *Definition) RootTask() *Task {
 	return pd.rootTask
+}
+
+// ErrorHandler returns the error handler task of the definition
+func (pd *Definition) ErrorHandlerTask() *Task {
+	return pd.ehTask
 }
 
 // GetAttr gets the specified attribute
