@@ -194,6 +194,35 @@ func (td *TaskData) UnmarshalJSON(d []byte) error {
 	return nil
 }
 
+// MarshalJSON overrides the default MarshalJSON for LinkData
+func (ld *LinkData) MarshalJSON() ([]byte, error) {
+
+	return json.Marshal(&struct {
+		LinkID int               `json:"linkID"`
+		State  int               `json:"state"`
+	}{
+		LinkID: ld.link.ID(),
+		State:  ld.state,
+	})
+}
+
+// UnmarshalJSON overrides the default UnmarshalJSON for LinkData
+func (ld *LinkData) UnmarshalJSON(d []byte) error {
+	ser := &struct {
+		LinkID int               `json:"linkID"`
+		State  int               `json:"state"`
+	}{}
+
+	if err := json.Unmarshal(d, ser); err != nil {
+		return err
+	}
+
+	ld.state = ser.State
+	ld.linkID = ser.LinkID
+
+	return nil
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Flow Instance Changes Serialization
 
