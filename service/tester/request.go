@@ -5,6 +5,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/flow"
 	"github.com/TIBCOSoftware/flogo-lib/core/flowinst"
 	"github.com/op/go-logging"
+	"github.com/TIBCOSoftware/flogo-lib/core/support"
 )
 
 var log = logging.MustGetLogger("tester")
@@ -26,7 +27,7 @@ func NewRequestProcessor(instManager *flowinst.Manager) *RequestProcessor {
 
 // StartFlow handles a StartRequest for a FlowInstance.  This will
 // generate an ID for the new FlowInstance and queue a StartRequest.
-func (rp *RequestProcessor) StartFlow(startRequest *StartRequest, replyHandler flowinst.ReplyHandler) (*flowinst.Instance, error) {
+func (rp *RequestProcessor) StartFlow(startRequest *StartRequest, replyHandler support.ReplyHandler) (*flowinst.Instance, error) {
 
 	execOptions := &flowinst.ExecOptions{Interceptor: startRequest.Interceptor, Patch: startRequest.Patch}
 
@@ -53,7 +54,7 @@ func (rp *RequestProcessor) StartFlow(startRequest *StartRequest, replyHandler f
 
 // RestartFlow handles a RestartRequest for a FlowInstance.  This will
 // generate an ID for the new FlowInstance and queue a RestartRequest.
-func (rp *RequestProcessor) RestartFlow(restartRequest *RestartRequest, replyHandler flowinst.ReplyHandler) *flowinst.Instance {
+func (rp *RequestProcessor) RestartFlow(restartRequest *RestartRequest, replyHandler support.ReplyHandler) *flowinst.Instance {
 
 	execOptions := &flowinst.ExecOptions{Interceptor: restartRequest.Interceptor, Patch: restartRequest.Patch}
 	instance := rp.instManager.RestartInstance(restartRequest.IntialState, restartRequest.Data, replyHandler, execOptions)
@@ -63,7 +64,7 @@ func (rp *RequestProcessor) RestartFlow(restartRequest *RestartRequest, replyHan
 
 // ResumeFlow handles a ResumeRequest for a FlowInstance.  This will
 // queue a RestartRequest.
-func (rp *RequestProcessor) ResumeFlow(resumeRequest *ResumeRequest, replyHandler flowinst.ReplyHandler) *flowinst.Instance {
+func (rp *RequestProcessor) ResumeFlow(resumeRequest *ResumeRequest, replyHandler support.ReplyHandler) *flowinst.Instance {
 
 	execOptions := &flowinst.ExecOptions{Interceptor: resumeRequest.Interceptor, Patch: resumeRequest.Patch}
 	instance := rp.instManager.ResumeInstance(resumeRequest.State, resumeRequest.Data, replyHandler, execOptions)

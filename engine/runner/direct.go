@@ -80,7 +80,7 @@ func (runner *DirectRunner) RunInstance(instance *flowinst.Instance) bool {
 		if instance.ReplyHandler() != nil {
 			replyData, ok := instance.GetAttrValue("reply")
 			if ok {
-				instance.ReplyHandler().Reply(replyData.(map[string]string))
+				instance.ReplyHandler().Reply(0,replyData)
 			}
 		}
 

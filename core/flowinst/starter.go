@@ -3,6 +3,7 @@ package flowinst
 import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/flow"
+	"github.com/TIBCOSoftware/flogo-lib/core/support"
 )
 
 // Starter interface is used to start flow instances, used by Triggers
@@ -10,14 +11,7 @@ import (
 type Starter interface {
 
 	// StartFlowInstance starts a flow instance using the provided information
-	StartFlowInstance(flowURI string, startAttrs []*data.Attribute, replyHandler ReplyHandler, execOptions *ExecOptions) (instanceID string, startError error)
-}
-
-// ReplyHandler is used to reply back to whoever started the flow instance
-type ReplyHandler interface {
-
-	// Reply is used to reply with the results of the instance execution
-	Reply(replyData map[string]string)
+	StartFlowInstance(flowURI string, startAttrs []*data.Attribute, replyHandler support.ReplyHandler, execOptions *ExecOptions) (instanceID string, startError error)
 }
 
 // ExecOptions are optional Patch & Interceptor to be used during instance execution

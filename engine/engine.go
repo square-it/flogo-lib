@@ -10,6 +10,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
 	"github.com/TIBCOSoftware/flogo-lib/util"
 	"github.com/op/go-logging"
+	"github.com/TIBCOSoftware/flogo-lib/core/support"
 )
 
 var log = logging.MustGetLogger("engine")
@@ -152,7 +153,7 @@ func (e *Engine) NewFlowInstanceID() string {
 }
 
 // StartFlowInstance implements flowinst.Starter.StartFlowInstance
-func (e *Engine) StartFlowInstance(flowURI string, startAttrs []*data.Attribute, replyHandler flowinst.ReplyHandler, execOptions *flowinst.ExecOptions) (instanceID string, startError error) {
+func (e *Engine) StartFlowInstance(flowURI string, startAttrs []*data.Attribute, replyHandler support.ReplyHandler, execOptions *flowinst.ExecOptions) (instanceID string, startError error) {
 
 	//todo fix for synchronous execution (DirectRunner)
 

@@ -3,12 +3,13 @@ package test
 import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/ext/activity"
+	"github.com/TIBCOSoftware/flogo-lib/core/support"
 )
 
 // TestActivityContext is a dummy AcitivityContext to assist in testing
 type TestActivityContext struct {
-	FlowIDVal   string
-	FlowNameVal string
+
+	details     activity.FlowDetails
 	TaskNameVal string
 	Attrs       map[string]*data.Attribute
 
@@ -17,11 +18,22 @@ type TestActivityContext struct {
 	outputs      map[string]*data.Attribute
 }
 
+type TestFlowDetails struct {
+	FlowIDVal   string
+	FlowNameVal string
+
+}
+
 // NewTestActivityContext creates a new TestActivityContext
 func NewTestActivityContext(metadata *activity.Metadata) *TestActivityContext {
-	tc := &TestActivityContext{
+
+	fd := &TestFlowDetails{
 		FlowIDVal:   "1",
 		FlowNameVal: "Test Flow",
+	}
+
+	tc := &TestActivityContext{
+		details: fd,
 		TaskNameVal: "Test Task",
 		Attrs:       make(map[string]*data.Attribute),
 		inputs: make(map[string]*data.Attribute, len(metadata.Inputs)),
@@ -38,14 +50,24 @@ func NewTestActivityContext(metadata *activity.Metadata) *TestActivityContext {
 	return tc
 }
 
-// FlowInstanceID implements activity.Context.FlowInstanceID
-func (c *TestActivityContext) FlowInstanceID() string {
-	return c.FlowIDVal
+// ID implements activity.FlowDetails.ID
+func (fd *TestFlowDetails) ID() string {
+	return fd.FlowIDVal
+}
+
+// Name implements activity.FlowDetails.Name
+func (fd *TestFlowDetails) Name() string {
+	return fd.FlowNameVal
+}
+
+// ReplyHandler implements activity.FlowDetails.ReplyHandler
+func (fd *TestFlowDetails) ReplyHandler() support.ReplyHandler {
+	return nil
 }
 
 // FlowName implements activity.Context.FlowName
-func (c *TestActivityContext) FlowName() string {
-	return c.FlowNameVal
+func (c *TestActivityContext) FlowDetails() activity.FlowDetails {
+	return c.details
 }
 
 // TaskName implements activity.Context.TaskName

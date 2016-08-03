@@ -6,6 +6,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/flow"
 	"github.com/op/go-logging"
+	"github.com/TIBCOSoftware/flogo-lib/core/support"
 )
 
 // Manager is used to create or prepare flow instance for start, restart or resume
@@ -24,7 +25,7 @@ func NewManager(flowProvider flow.Provider, idGenerator IDGenerator) *Manager {
 }
 
 // StartInstance creates a new FlowInstance and prepares it to be executed
-func (mgr *Manager) StartInstance(flowURI string, startAttrs []*data.Attribute, replyHandler ReplyHandler, execOptions *ExecOptions) (*Instance, error) {
+func (mgr *Manager) StartInstance(flowURI string, startAttrs []*data.Attribute, replyHandler support.ReplyHandler, execOptions *ExecOptions) (*Instance, error) {
 
 	flow := mgr.flowProvider.GetFlow(flowURI)
 
@@ -60,7 +61,7 @@ func (mgr *Manager) StartInstance(flowURI string, startAttrs []*data.Attribute, 
 
 // RestartInstance creates a FlowInstance from an initial state and prepares
 // it to be executed
-func (mgr *Manager) RestartInstance(initialState *Instance, flowData map[string]interface{}, replyHandler ReplyHandler, execOptions *ExecOptions) *Instance {
+func (mgr *Manager) RestartInstance(initialState *Instance, flowData map[string]interface{}, replyHandler support.ReplyHandler, execOptions *ExecOptions) *Instance {
 
 	//todo: handle flow not found
 	instance := initialState
@@ -77,7 +78,7 @@ func (mgr *Manager) RestartInstance(initialState *Instance, flowData map[string]
 }
 
 // ResumeInstance reconstitutes and prepares a FlowInstance to be resumed
-func (mgr *Manager) ResumeInstance(initialState *Instance, flowData map[string]interface{}, replyHandler ReplyHandler, execOptions *ExecOptions) *Instance {
+func (mgr *Manager) ResumeInstance(initialState *Instance, flowData map[string]interface{}, replyHandler support.ReplyHandler, execOptions *ExecOptions) *Instance {
 
 	//todo: handle flow not found
 	instance := initialState

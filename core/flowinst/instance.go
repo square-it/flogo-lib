@@ -10,6 +10,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/ext/activity"
 	"github.com/TIBCOSoftware/flogo-lib/core/ext/model"
 	"github.com/TIBCOSoftware/flogo-lib/core/flow"
+	"github.com/TIBCOSoftware/flogo-lib/core/support"
 	"github.com/TIBCOSoftware/flogo-lib/util"
 	"github.com/op/go-logging"
 	"strconv"
@@ -44,7 +45,7 @@ type Instance struct {
 	ChangeTracker *InstanceChangeTracker `json:"-"`
 
 	flowProvider  flow.Provider
-	replyHandler  ReplyHandler
+	replyHandler  support.ReplyHandler
 }
 
 // NewFlowInstance creates a new Flow Instance from the specified Flow
@@ -87,17 +88,24 @@ func (pi *Instance) Restart(id string, provider flow.Provider) {
 	pi.RootTaskEnv.init(pi)
 }
 
-func (pi *Instance) SetReplyHandler(replyHandler ReplyHandler) {
-	pi.replyHandler = replyHandler
-}
-
-func (pi *Instance) ReplyHandler() ReplyHandler {
-	return pi.replyHandler
-}
-
 // ID returns the ID of the Flow Instance
 func (pi *Instance) ID() string {
 	return pi.id
+}
+
+// Name implements activity.FlowDetails.Name method
+func (pi *Instance) Name() string {
+	return pi.Flow.Name()
+}
+
+// ReplyHandler returns the reply handler for the instance
+func (pi *Instance) ReplyHandler() support.ReplyHandler {
+	return pi.replyHandler
+}
+
+// SetReplyHandler sets the reply handler for the instance
+func (pi *Instance) SetReplyHandler(replyHandler support.ReplyHandler) {
+	pi.replyHandler = replyHandler
 }
 
 // FlowDefinition returns the Flow that the instance is of
@@ -825,15 +833,9 @@ func (td *TaskData) Failed(err *activity.Error) {
 	td.taskEnv.Instance.AddAttr(errorMsgAttr, data.STRING, err.Error())
 }
 
-// FlowInstanceID implements activity.Context.FlowInstanceID method
-func (td *TaskData) FlowInstanceID() string {
-
-	return td.taskEnv.Instance.id
-}
-
-// FlowName implements activity.Context.FlowName method
-func (td *TaskData) FlowName() string {
-	return td.taskEnv.Instance.Flow.Name()
+// FlowDetails implements activity.Context.FlowName method
+func (td *TaskData) FlowDetails() activity.FlowDetails {
+	return td.taskEnv.Instance
 }
 
 // TaskName implements activity.Context.TaskName method
