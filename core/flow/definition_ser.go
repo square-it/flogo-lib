@@ -7,12 +7,13 @@ import (
 
 // DefinitionRep is a serialiable represention of a flow Definition
 type DefinitionRep struct {
-	TypeID        int               `json:"type"`
-	Name          string            `json:"name"`
-	ModelID       string            `json:"model"`
-	Attributes    []*data.Attribute `json:"attributes,omitempty"`
-	InputMappings []*data.Mapping   `json:"inputMappings,omitempty"`
-	RootTask      *TaskRep          `json:"rootTask"`
+	TypeID           int               `json:"type"`
+	Name             string            `json:"name"`
+	ModelID          string            `json:"model"`
+	Attributes       []*data.Attribute `json:"attributes,omitempty"`
+	InputMappings    []*data.Mapping   `json:"inputMappings,omitempty"`
+	RootTask         *TaskRep          `json:"rootTask"`
+	ErrorHandlerTask *TaskRep          `json:"errorHandlerTask"`
 }
 
 // TaskRep is a serialiable represention of a flow Task
@@ -68,6 +69,13 @@ func NewDefinition(rep *DefinitionRep) (def *Definition, err error) {
 
 	addTask(def, def.rootTask, rep.RootTask)
 	addLinks(def, def.rootTask, rep.RootTask)
+
+	if rep.ErrorHandlerTask != nil {
+		def.ehTask = &Task{}
+
+		addTask(def, def.ehTask, rep.ErrorHandlerTask)
+		addLinks(def, def.ehTask, rep.ErrorHandlerTask)
+	}
 
 	return def, nil
 }

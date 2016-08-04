@@ -264,12 +264,7 @@ func (pi *Instance) execTask(workItem *WorkItem) {
 				log.Debugf("StackTrace: %s", debug.Stack())
 			}
 
-			errorMsgAttr := "[A" + strconv.Itoa(workItem.TaskData.task.ID()) + "._errorMsg]"
-			pi.AddAttr(errorMsgAttr, data.STRING, err.Error())
-
-			if workItem.TaskData.taskEnv.ID != id_ehTasEnv {
-				pi.HandleError()
-			}
+			pi.handleError(workItem.TaskData, activity.NewError(err.Error()))
 		}
 	}()
 
@@ -278,6 +273,7 @@ func (pi *Instance) execTask(workItem *WorkItem) {
 
 	var done bool
 	var doneCode int
+	var err *activity.Error
 
 	//todo: should validate process activities
 
@@ -292,12 +288,17 @@ func (pi *Instance) execTask(workItem *WorkItem) {
 		}
 
 		if eval {
-			done, doneCode = taskBehavior.Eval(taskData, workItem.EvalCode)
+			done, doneCode, err = taskBehavior.Eval(taskData, workItem.EvalCode)
 		} else {
 			done = true
 		}
 	} else {
-		done, doneCode = taskBehavior.PostEval(taskData, workItem.EvalCode, nil)
+		done, doneCode, err = taskBehavior.PostEval(taskData, workItem.EvalCode, nil)
+	}
+
+	if err != nil {
+		pi.handleError(taskData, err)
+		return
 	}
 
 	if done {
@@ -315,6 +316,20 @@ func (pi *Instance) execTask(workItem *WorkItem) {
 		}
 
 		pi.handleTaskDone(taskBehavior, taskData, doneCode)
+	}
+}
+
+func (pi *Instance) handleError(taskData *TaskData, activityErr *activity.Error) {
+
+	pi.AddAttr("[E.actvitiy]", data.STRING, taskData.TaskName())
+	pi.AddAttr("[E.message]", data.STRING, activityErr.Error())
+
+	if activityErr.Data() != nil {
+		pi.AddAttr("[E.data]", data.OBJECT, activityErr.Data())
+	}
+
+	if taskData.taskEnv.ID != id_ehTasEnv {
+		pi.HandleError()
 	}
 }
 
@@ -373,29 +388,36 @@ func (pi *Instance) handleTaskDone(taskBehavior model.TaskBehavior, taskData *Ta
 
 func (pi *Instance) HandleError() {
 
-	ehTask := pi.Flow.ErrorHandlerTask();
+	if pi.Flow.ErrorHandlerTask() != nil {
 
-	if pi.EhTaskEnv == nil {
-		var taskEnv TaskEnv
-		taskEnv.ID = id_ehTasEnv
-		taskEnv.Task = ehTask
-		taskEnv.taskID = ehTask.ID()
-		taskEnv.Instance = pi
-		taskEnv.TaskDatas = make(map[int]*TaskData)
-		taskEnv.LinkDatas = make(map[int]*LinkData)
+		ehTask := pi.Flow.ErrorHandlerTask();
 
-		pi.EhTaskEnv = &taskEnv
+		if pi.EhTaskEnv == nil {
+			var taskEnv TaskEnv
+			taskEnv.ID = id_ehTasEnv
+			taskEnv.Task = ehTask
+			taskEnv.taskID = ehTask.ID()
+			taskEnv.Instance = pi
+			taskEnv.TaskDatas = make(map[int]*TaskData)
+			taskEnv.LinkDatas = make(map[int]*LinkData)
+
+			pi.EhTaskEnv = &taskEnv
+		}
+
+		ehTaskData := pi.EhTaskEnv.TaskDatas[ehTask.ID()]
+
+		if ehTaskData == nil {
+			ehTaskData = pi.EhTaskEnv.NewTaskData(ehTask)
+		}
+
+		//todo: should we clear out the existing workitem queue?
+
+		pi.scheduleEval(ehTaskData, 0)
+	} else {
+
+		//todo: log error information
+		pi.setStatus(StatusFailed)
 	}
-
-	ehTaskData := pi.EhTaskEnv.TaskDatas[ehTask.ID()]
-
-	if ehTaskData == nil {
-		ehTaskData = pi.EhTaskEnv.NewTaskData(ehTask)
-	}
-
-	//todo what should we do with the existing workitem queue?
-
-	pi.scheduleEval(ehTaskData, 0)
 }
 
 // GetAttrType implements api.Scope.GetAttrType
@@ -419,13 +441,8 @@ func (pi *Instance) GetAttrType(attrName string) (attrType data.Type, exists boo
 // GetAttrValue implements api.Scope.GetAttrValue
 func (pi *Instance) GetAttrValue(attrName string) (value interface{}, exists bool) {
 
-	log.Debugf("fi.GetAttrValue: %v", pi.Attrs)
-	log.Debugf("fi.AttrName: %s", attrName)
-
 	if pi.Attrs != nil {
 		attr, found := pi.Attrs[attrName]
-
-		log.Debugf("fi.Attr: %v", attr)
 
 		if found {
 			return attr.Value, true
@@ -446,14 +463,16 @@ func (pi *Instance) SetAttrValue(attrName string, value interface{}) {
 		pi.Attrs = make(map[string]*data.Attribute)
 	}
 
+	log.Debugf("SetAttr - name: %s, value:%v\n", attrName, value)
+
 	attrType, exists := pi.GetAttrType(attrName)
 
+	//todo: optimize, use existing attr
 	if exists {
 		attr := data.NewAttribute(attrName, attrType, value)
 		pi.Attrs[attrName] = attr
 		pi.ChangeTracker.AttrChange(CtUpd, attr)
 	}
-	// else what do we do if its a completely new attr
 }
 
 // AddAttr add a new attribute to the instance
@@ -462,7 +481,7 @@ func (pi *Instance) AddAttr(attrName string, attrType data.Type, value interface
 		pi.Attrs = make(map[string]*data.Attribute)
 	}
 
-	log.Debugf("AddAttr name: %s, type: %s, value:%v\n", attrName, attrType, value)
+	log.Debugf("AddAttr - name: %s, type: %s, value:%v\n", attrName, attrType, value)
 
 	_, exists := pi.GetAttrType(attrName)
 
