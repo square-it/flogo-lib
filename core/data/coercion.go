@@ -39,6 +39,8 @@ func CoerceToValue(value interface{}, dataType Type) (interface{}, error) {
 		coerced, err = CoerceToArray(value)
 	case PARAMS:
 		coerced, err = CoerceToParams(value)
+	case ANY:
+		coerced, err = value, nil
 	}
 
 	if err != nil {

@@ -16,6 +16,7 @@ const (
 	OBJECT
 	ARRAY
 	PARAMS
+	ANY
 )
 
 var types = [...]string{
@@ -26,6 +27,7 @@ var types = [...]string{
 	"object",
 	"array",
 	"params",
+	"any",
 }
 
 var typeMap = map[string]Type{
@@ -36,6 +38,7 @@ var typeMap = map[string]Type{
 	"object":  OBJECT,
 	"array":   ARRAY,
 	"params":  PARAMS,
+	"any":     ANY,
 }
 
 func (t Type) String() string {
