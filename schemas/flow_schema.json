@@ -7,7 +7,7 @@
       "type": "object",
       "properties": {
         "name" : { "type": "string" },
-        "type" : { "enum": [ "string", "integer", "number", "boolean", "object", "array", "params" ] },
+        "type" : { "enum": [ "string", "integer", "number", "boolean", "object", "array", "params", "any" ] },
         "value": { "type": [ "string", "integer", "number", "boolean", "object", "array", "null" ] }
       },
       "required": ["name", "type", "value"]
