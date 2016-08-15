@@ -74,16 +74,12 @@ func (runner *DirectRunner) RunInstance(instance *flowinst.Instance) bool {
 
 	log.Debugf("Done Executing Instance [%s] - Status: %d\n", instance.ID(), instance.Status())
 
+	if instance.ReplyHandler() != nil {
+		instance.ReplyHandler().Release()
+	}
+
 	if instance.Status() == flowinst.StatusCompleted {
 		log.Infof("Flow [%s] Completed", instance.ID())
-
-		if instance.ReplyHandler() != nil {
-			replyData, ok := instance.GetAttrValue("reply")
-			if ok {
-				instance.ReplyHandler().Reply(0,replyData)
-			}
-		}
-
 		return true
 	}
 
