@@ -61,6 +61,7 @@ func NewFlowAction(flowProvider flowdef.Provider, stateRecorder StateRecorder, o
 // RunOptions the options when running a FlowAction
 type RunOptions struct {
 	Op           int
+	ReturnID     bool
 	InitialState *Instance
 	ExecOptions  *ExecOptions
 }
@@ -156,6 +157,10 @@ func (fa *FlowAction) Run(context context.Context, uri string, options interface
 			}
 		}
 
+		if ao.ReturnID {
+			handler.HandleResult(200,  &IDResponse{ID: instance.ID()}, nil)
+		}
+
 		log.Debugf("Done Executing A.instance [%s] - Status: %d\n", instance.ID(), instance.Status())
 
 		if instance.Status() == StatusCompleted {
@@ -175,4 +180,9 @@ type SimpleReplyHandler struct {
 func (rh *SimpleReplyHandler) Reply(replyCode int, replyData interface{}, err error) {
 
 	rh.resultHandler.HandleResult(replyCode, replyData, err)
+}
+
+// IDResponse is a respone object consists of an ID
+type IDResponse struct {
+	ID string `json:"id"`
 }

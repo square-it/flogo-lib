@@ -51,7 +51,7 @@ func (rp *RequestProcessor) StartFlow(startRequest *StartRequest) (code int, ret
 		}
 	}
 
-	ao := flowinst.RunOptions{Op: flowinst.AoStart, ExecOptions: execOptions}
+	ao := flowinst.RunOptions{Op: flowinst.AoStart, ReturnID: true, ExecOptions: execOptions}
 
 	action := action.Get(flowinst.ActionType)
 	ctx := trigger.NewContext(context.Background(), attrs)

@@ -101,16 +101,14 @@ func (et *RestEngineTester) StartFlow(w http.ResponseWriter, r *http.Request, _ 
 		return
 	}
 
-	//resp := &IDResponse{ID: instance.ID()}
+	idResponse := data.(IDResponse)
 
-	//log.Debugf("Starting Instance [ID:%s] for %s", instance.ID(), req.FlowURI)
-
-	//et.runner.RunInstance(instance)
+	log.Debugf("Starting Instance [ID:%s] for %s", idResponse.ID, req.FlowURI)
 
 	encoder := json.NewEncoder(w)
 	encoder.Encode(data)
 
-	w.WriteHeader(http.StatusOK)
+	//w.WriteHeader(http.StatusOK)
 }
 
 // RestartFlow restarts a Flow Instance (POST "/flow/restart").
