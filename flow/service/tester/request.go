@@ -80,6 +80,9 @@ func (rp *RequestProcessor) RestartFlow(restartRequest *RestartRequest) (code in
 
 	action := action.Get(flowinst.ActionType)
 
+	log.Debugf("Restart Request: %v", restartRequest)
+	log.Debugf("Restart Request state: %v", restartRequest.InitialState)
+
 	ro := &flowinst.RunOptions{Op: flowinst.AoRestart, ReturnID: true, ExecOptions: execOptions}
 	return rp.runner.Run(ctx, action, restartRequest.InitialState.FlowURI, ro)
 }

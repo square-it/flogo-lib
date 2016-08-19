@@ -42,8 +42,6 @@ func (runner *DirectRunner) Run(context context.Context, action action.Action, u
 
 	handler := &SyncResultHandler{done: make(chan bool, 1)}
 
-	log.Debugf("RunOptions : %v\n", options)
-
 	err = action.Run(context, uri, options, handler)
 
 	if err != nil {

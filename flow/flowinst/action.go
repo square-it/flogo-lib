@@ -76,8 +76,6 @@ func (fa *FlowAction) Run(context context.Context, uri string, options interface
 
 	ro, ok := options.(*RunOptions)
 
-	log.Debugf("RunOptions : %v\n", ro)
-
 	if ok {
 		op = ro.Op
 		retID = ro.ReturnID
