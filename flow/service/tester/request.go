@@ -80,10 +80,7 @@ func (rp *RequestProcessor) RestartFlow(restartRequest *RestartRequest) (code in
 
 	action := action.Get(flowinst.ActionType)
 
-	log.Debugf("Restart Request: %v", restartRequest)
-	log.Debugf("Restart Request state: %v", restartRequest.InitialState)
-
-	ro := &flowinst.RunOptions{Op: flowinst.AoRestart, ReturnID: true, ExecOptions: execOptions}
+	ro := &flowinst.RunOptions{Op: flowinst.AoRestart, ReturnID: true, InitialState:restartRequest.InitialState, ExecOptions: execOptions}
 	return rp.runner.Run(ctx, action, restartRequest.InitialState.FlowURI, ro)
 }
 
@@ -109,7 +106,7 @@ func (rp *RequestProcessor) ResumeFlow(resumeRequest *ResumeRequest) (code int, 
 
 	action := action.Get(flowinst.ActionType)
 
-	ro := &flowinst.RunOptions{Op: flowinst.AoResume, ReturnID: true, ExecOptions: execOptions}
+	ro := &flowinst.RunOptions{Op: flowinst.AoResume, ReturnID: true, InitialState: resumeRequest.State, ExecOptions: execOptions}
 	return rp.runner.Run(ctx, action, resumeRequest.State.FlowURI, ro)
 }
 
