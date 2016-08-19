@@ -84,7 +84,7 @@ func (e *Engine) Start() {
 
 		triggerConfig, found := e.triggersConfig.Triggers[trigger.Metadata().ID]
 
-		if !found && !validateTriggers {
+		if !found && validateTriggers {
 			panic(fmt.Errorf("Trigger configuration for '%s' not provided", trigger.Metadata().ID))
 		}
 
