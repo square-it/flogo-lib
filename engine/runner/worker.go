@@ -1,7 +1,9 @@
 package runner
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/core/flowinst"
+	"context"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/action"
 )
 
 // Based off: http://nesv.github.io/golang/2014/02/25/worker-queues-in-go.html
@@ -10,36 +12,52 @@ import (
 type RequestType int
 
 const (
-	// RtRun denotes a run flow instance request
+	// RtRun denotes a run action request
 	RtRun RequestType = 10
 )
 
-// WorkRequest describes a Request that Worker should handle
-type WorkRequest struct {
-	ReqType RequestType
-	ID      string
-	Request interface{}
+// ActionWorkRequest describes a Request that Worker should handle
+type ActionWorkRequest struct {
+	ReqType    RequestType
+	ID         string
+	actionData *ActionData
 }
 
-// A Worker handles WorkRequest, work requests consist of start, restart
+// ActionData action related data to pass along in a ActionWorkRequest
+type ActionData struct {
+	context context.Context
+	action  action.Action
+	uri     string
+	options interface{}
+	rc      chan (*ActionResult)
+}
+
+// ActionResult is a simple struct to hold the results for an Action
+type ActionResult struct {
+	code int
+	data interface{}
+	err  error
+}
+
+// A ActionWorker handles WorkRequest, work requests consist of start, restart
 // and resume of FlowInstances
-type Worker struct {
+type ActionWorker struct {
 	ID          int
 	runner      *DirectRunner
-	Work        chan WorkRequest
-	WorkerQueue chan chan WorkRequest
+	Work        chan ActionWorkRequest
+	WorkerQueue chan chan ActionWorkRequest
 	QuitChan    chan bool
 }
 
 // NewWorker creates, and returns a new Worker object. Its only argument
 // is a channel that the worker can add itself to whenever it is done its
 // work.
-func NewWorker(id int, runner *DirectRunner, workerQueue chan chan WorkRequest) Worker {
+func NewWorker(id int, runner *DirectRunner, workerQueue chan chan ActionWorkRequest) ActionWorker {
 	// Create, and return the worker.
-	worker := Worker{
+	worker := ActionWorker{
 		ID:          id,
 		runner:      runner,
-		Work:        make(chan WorkRequest),
+		Work:        make(chan ActionWorkRequest),
 		WorkerQueue: workerQueue,
 		QuitChan:    make(chan bool)}
 
@@ -48,7 +66,7 @@ func NewWorker(id int, runner *DirectRunner, workerQueue chan chan WorkRequest) 
 
 // Start function "starts" the worker by starting a goroutine, that is
 // an infinite "for-select" loop.  This is where all the request are handled
-func (w Worker) Start() {
+func (w ActionWorker) Start() {
 	go func() {
 		for {
 			// Add ourselves into the worker queue.
@@ -62,10 +80,33 @@ func (w Worker) Start() {
 				switch work.ReqType {
 				case RtRun:
 
-					instance := work.Request.(*flowinst.Instance)
+					actionData := work.actionData
 
-					log.Debugf("worker-%d: Received Run Request: %s - %s\n", w.ID, work.ID, instance.ID())
-					w.runner.RunInstance(instance)
+					handler := &AsyncResultHandler{result: make(chan *ActionResult), done: make(chan bool, 1)}
+
+					err := actionData.action.Run(actionData.context, actionData.uri, actionData.options, handler)
+
+					if err != nil {
+						// error so just return
+						actionData.rc <- &ActionResult{err: err}
+					} else {
+						done := false
+						//wait for reply
+						for !done {
+							select {
+							case result := <-handler.result:
+								log.Debugf("*** Worker recieved result: %v\n", result)
+								actionData.rc <- result
+							case <-handler.done:
+								if !handler.replied {
+									actionData.rc <- &ActionResult{}
+								}
+								done = true
+							}
+						}
+					}
+
+					log.Debugf("worker-%d: Completed Request\n", w.ID)
 				}
 
 			case <-w.QuitChan:
@@ -80,8 +121,26 @@ func (w Worker) Start() {
 // Stop tells the worker to stop listening for work requests.
 //
 // Note that the worker will only stop *after* it has finished its work.
-func (w Worker) Stop() {
+func (w ActionWorker) Stop() {
 	go func() {
 		w.QuitChan <- true
 	}()
+}
+
+// AsyncResultHandler simple ResultHandler to use in the asynchronous case
+type AsyncResultHandler struct {
+	done    chan (bool)
+	result  chan (*ActionResult)
+	replied bool
+}
+
+// HandleResult implements action.ResultHandler.HandleResult
+func (rh *AsyncResultHandler) HandleResult(code int, data interface{}, err error) {
+	rh.replied = true
+	rh.result <- &ActionResult{code: code, data: data, err: err}
+}
+
+// Done implements action.ResultHandler.Done
+func (rh *AsyncResultHandler) Done() {
+	rh.done <- true
 }

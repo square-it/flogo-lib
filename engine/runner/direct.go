@@ -1,87 +1,79 @@
 package runner
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/core/flowinst"
+	"context"
+	"errors"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/op/go-logging"
 )
 
 var log = logging.MustGetLogger("runner")
 
-// DirectRunner is a flow runner that executes a flow directly on the same
-// thread
-// todo: rename to SyncFlowRunner?
+// DirectRunner runs an action synchronously
 type DirectRunner struct {
-	maxStepCount  int
-	stateRecorder flowinst.StateRecorder
-	record        bool
-}
-
-// DirectConfig is the configuration object for a DirectRunner
-type DirectConfig struct {
-	MaxStepCount int `json:"maxStepCount"`
 }
 
 // NewDirectRunner create a new DirectRunner
-func NewDirectRunner(stateRecorder flowinst.StateRecorder, maxStepCount int) *DirectRunner {
+func NewDirectRunner() *DirectRunner {
 
 	var directRunner DirectRunner
-	directRunner.stateRecorder = stateRecorder
-	directRunner.record = stateRecorder != nil
-
-	if maxStepCount < 1 {
-		directRunner.maxStepCount = int(^uint16(0))
-	} else {
-		directRunner.maxStepCount = maxStepCount
-	}
-
 	return &directRunner
 }
 
 // Start will start the engine, by starting all of its workers
 func (runner *DirectRunner) Start() error {
 	//op-op
-	log.Debug("Started Direct Flow Instance Runner")
 	return nil
 }
 
 // Stop will stop the engine, by stopping all of its workers
-func (runner *DirectRunner) Stop() {
+func (runner *DirectRunner) Stop() error {
 	//no-op
-	log.Debug("Stopped Direct Flow Instance Runner")
+	return nil
 }
 
-// RunInstance runs the specified Flow Instance until it is complete
-// or it no longer has any tasks to execute
-func (runner *DirectRunner) RunInstance(instance *flowinst.Instance) bool {
+// Run the specified action
+func (runner *DirectRunner) Run(context context.Context, action action.Action, uri string, options interface{}) (code int, data interface{}, err error) {
 
-	//todo: catch panic
-
-	log.Debugf("Executing Instance: %s\n", instance.ID())
-
-	stepCount := 0
-	hasWork := true
-
-	for hasWork && instance.Status() < flowinst.StatusCompleted && stepCount < runner.maxStepCount {
-		stepCount++
-		log.Debugf("Step: %d\n", stepCount)
-		hasWork = instance.DoStep()
-
-		if runner.record {
-			runner.stateRecorder.RecordSnapshot(instance)
-			runner.stateRecorder.RecordStep(instance)
-		}
+	if action == nil {
+		return 0, nil, errors.New("Action not found")
 	}
 
-	log.Debugf("Done Executing Instance [%s] - Status: %d\n", instance.ID(), instance.Status())
+	handler := &SyncResultHandler{done: make(chan bool, 1)}
 
-	if instance.ReplyHandler() != nil {
-		instance.ReplyHandler().Release()
+	err = action.Run(context, uri, options, handler)
+
+	if err != nil {
+		return 0, nil, err
 	}
 
-	if instance.Status() == flowinst.StatusCompleted {
-		log.Infof("Flow [%s] Completed", instance.ID())
-		return true
-	}
+	<-handler.done
 
-	return false
+	return handler.Result()
+}
+
+// SyncResultHandler simple result handler to use in synchronous case
+type SyncResultHandler struct {
+	done chan (bool)
+	code int
+	data interface{}
+	err  error
+}
+
+// HandleResult implements action.ResultHandler.HandleResult
+func (rh *SyncResultHandler) HandleResult(code int, data interface{}, err error) {
+	rh.code = code
+	rh.data = data
+	rh.err = err
+}
+
+// Done implements action.ResultHandler.Done
+func (rh *SyncResultHandler) Done() {
+	rh.done <- true
+}
+
+// Result returns the latest Result set on the handler
+func (rh *SyncResultHandler) Result() (code int, data interface{}, err error) {
+	return rh.code, rh.data, rh.err
 }

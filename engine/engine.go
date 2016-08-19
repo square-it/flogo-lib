@@ -4,62 +4,57 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/data"
-	"github.com/TIBCOSoftware/flogo-lib/core/ext/trigger"
-	"github.com/TIBCOSoftware/flogo-lib/core/flowinst"
+	"github.com/TIBCOSoftware/flogo-lib/core/action"
+	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
 	"github.com/TIBCOSoftware/flogo-lib/util"
 	"github.com/op/go-logging"
-	"github.com/TIBCOSoftware/flogo-lib/core/support"
 )
 
 var log = logging.MustGetLogger("engine")
 
 // Engine creates and executes FlowInstances.
 type Engine struct {
-	generator   *util.Generator
-	runner      runner.Runner
-	env         *Environment
-	instManager *flowinst.Manager
+	generator      *util.Generator
+	runner         action.Runner
+	serviceManager *util.ServiceManager
+	engineConfig   *Config
+	triggersConfig *TriggersConfig
 }
 
 // NewEngine create a new Engine
-func NewEngine(env *Environment) *Engine {
+func NewEngine(engineConfig *Config, triggersConfig *TriggersConfig) *Engine {
 
 	var engine Engine
 	engine.generator, _ = util.NewGenerator()
-	engine.env = env
+	engine.engineConfig = engineConfig
+	engine.triggersConfig = triggersConfig
+	engine.serviceManager = util.NewServiceManager()
 
-	// initialize engine environment
-	engine.env.Init()
-
-	stateRecorder, enabled := env.StateRecorderService()
-
-	if !enabled {
-		stateRecorder = nil
-	}
-
-	runnerConfig := engine.env.engineConfig.RunnerConfig
+	runnerConfig := engineConfig.RunnerConfig
 
 	if runnerConfig.Type == "direct" {
-		engine.runner = runner.NewDirectRunner(stateRecorder, runnerConfig.Direct.MaxStepCount)
+		engine.runner = runner.NewDirectRunner()
 	} else {
-		engine.runner = runner.NewPooledRunner(runnerConfig.Pooled, stateRecorder)
+		engine.runner = runner.NewPooledRunner(runnerConfig.Pooled)
 	}
 
 	if log.IsEnabledFor(logging.DEBUG) {
-		cfgJSON, _ := json.MarshalIndent(env.engineConfig, "", "  ")
+		cfgJSON, _ := json.MarshalIndent(engineConfig, "", "  ")
 		log.Debugf("Engine Configuration:\n%s\n", string(cfgJSON))
 	}
 
 	if log.IsEnabledFor(logging.DEBUG) {
-		cfgJSON, _ := json.MarshalIndent(env.triggersConfig, "", "  ")
+		cfgJSON, _ := json.MarshalIndent(triggersConfig, "", "  ")
 		log.Debugf("Triggers Configuration:\n%s\n", string(cfgJSON))
 	}
 
-	engine.instManager = flowinst.NewManager(env.FlowProviderService(), &engine)
-
 	return &engine
+}
+
+// RegisterService register a service with the engine
+func (e *Engine) RegisterService(service util.Service) {
+	e.serviceManager.RegisterService(service)
 }
 
 // Start will start the engine, by starting all of its triggers and runner
@@ -67,50 +62,48 @@ func (e *Engine) Start() {
 
 	log.Info("Engine: Starting...")
 
-	engineTester, testerEnable := e.env.EngineTesterService()
+	log.Info("Engine: Starting Services...")
+
+	err := e.serviceManager.Start()
+
+	if err != nil {
+		e.serviceManager.Stop()
+		panic("Engine: Error Starting Services - " + err.Error())
+	}
+
+	log.Info("Engine: Started Services")
+
+	validateTriggers := e.engineConfig.ValidateTriggers
 
 	triggers := trigger.Triggers()
-	triggersConfig := e.env.TriggersConfig()
 
 	var triggersToStart []trigger.Trigger
 
 	// initialize triggers
 	for _, trigger := range triggers {
 
-		triggerConfig, found := triggersConfig.Triggers[trigger.Metadata().ID]
+		triggerConfig, found := e.triggersConfig.Triggers[trigger.Metadata().ID]
 
-		if !found && !testerEnable {
+		if !found && !validateTriggers {
 			panic(fmt.Errorf("Trigger configuration for '%s' not provided", trigger.Metadata().ID))
 		}
 
 		if found {
-			trigger.Init(e, triggerConfig)
+			trigger.Init(triggerConfig, e.runner)
 			triggersToStart = append(triggersToStart, trigger)
 		}
 	}
 
-	// start the flow provider service
-	flowProvider := e.env.FlowProviderService()
-	startManaged("FlowProvider Service", flowProvider)
+	runner := e.runner.(interface{})
+	managedRunner, ok := runner.(util.Managed)
 
-	// start the state recorder service if enabled
-	stateRecorder, enabled := e.env.StateRecorderService()
-	if enabled {
-		startManaged("StateRecorder Service", stateRecorder)
+	if ok {
+		util.StartManaged("ActionRunner Service", managedRunner)
 	}
-
-	startManaged("FlowRunner Service", e.runner)
 
 	// start triggers
 	for _, trigger := range triggersToStart {
-		startManaged("Trigger [ "+trigger.Metadata().ID+" ]", trigger)
-	}
-
-	// start the engineTester service if enabled
-	//engineTester, enabled := e.env.EngineTesterService()
-	if testerEnable {
-		engineTester.SetupInstanceSupport(e.instManager, e.runner)
-		startManaged("EngineTester Service", engineTester)
+		util.StartManaged("Trigger [ "+trigger.Metadata().ID+" ]", trigger)
 	}
 
 	log.Info("Engine: Started")
@@ -125,72 +118,25 @@ func (e *Engine) Stop() {
 
 	// stop triggers
 	for _, trigger := range triggers {
-		stopManaged("Trigger [ "+trigger.Metadata().ID+" ]", trigger)
+		util.StopManaged("Trigger [ "+trigger.Metadata().ID+" ]", trigger)
 	}
 
-	engineTester, enabled := e.env.EngineTesterService()
+	runner := e.runner.(interface{})
+	managedRunner, ok := runner.(util.Managed)
 
-	if enabled {
-		stopManaged("EngineTester Service", engineTester)
+	if ok {
+		util.StopManaged("ActionRunner", managedRunner)
 	}
 
-	stopManaged("Flow Runner", e.runner)
+	log.Info("Engine: Stopping Services...")
 
-	stopManaged("FlowProvider Service", e.env.FlowProviderService())
+	err := e.serviceManager.Stop()
 
-	stateRecorder, enabled := e.env.StateRecorderService()
-
-	if enabled {
-		stopManaged("StateRecorder Service", stateRecorder)
+	if err != nil {
+		log.Error("Engine: Error Stopping Services - " + err.Error())
+	} else {
+		log.Info("Engine: Stopped Services")
 	}
 
 	log.Info("Engine: Stopped")
-}
-
-// NewFlowInstanceID implements flowinst.IdGenerator.NewFlowInstanceID
-func (e *Engine) NewFlowInstanceID() string {
-	return e.generator.NextAsString()
-}
-
-// StartFlowInstance implements flowinst.Starter.StartFlowInstance
-func (e *Engine) StartFlowInstance(flowURI string, startAttrs []*data.Attribute, replyHandler support.ReplyHandler, execOptions *flowinst.ExecOptions) (instanceID string, startError error) {
-
-	//todo fix for synchronous execution (DirectRunner)
-
-	instance, startError := e.instManager.StartInstance(flowURI, startAttrs, replyHandler, execOptions)
-
-	if startError != nil {
-		return "", startError
-	}
-
-	e.runner.RunInstance(instance)
-	return instance.ID(), nil
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-func startManaged(name string, managed util.Managed) {
-
-	log.Debugf("%s: Starting...", name)
-	err := managed.Start()
-
-	if err != nil {
-		log.Errorf("%s: Error Starting", name)
-		panic(err)
-	}
-
-	log.Debugf("%s: Started", name)
-}
-
-func stopManaged(name string, managed util.Managed) {
-
-	log.Debugf("%s: Stopping...", name)
-
-	err := util.StopManaged(managed)
-
-	if err != nil {
-		log.Errorf("Error stopping '%s': %s", name, err.Error())
-	} else {
-		log.Debugf("%s: Stopped", name)
-	}
 }

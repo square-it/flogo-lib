@@ -4,12 +4,13 @@ import (
 	"strings"
 )
 
+// PathType is the attribute value accessor path
 type PathType int
 
 const (
 	PT_SIMPLE PathType = 1
-	PT_MAP PathType = 2
-	PT_ARRAY PathType = 3
+	PT_MAP    PathType = 2
+	PT_ARRAY  PathType = 3
 )
 
 // GetAttrPath splits the supplied attribute with path to its name and object path
@@ -25,17 +26,17 @@ func GetAttrPath(inAttrName string) (attrName string, attrPath string, pathType 
 
 		idx := strings.Index(inAttrName, "}")
 
-		if idx == nameLen - 1 {
+		if idx == nameLen-1 {
 			attrName = inAttrName
 		} else {
-			attrName = inAttrName[:idx + 1]
+			attrName = inAttrName[:idx+1]
 
-			if inAttrName[idx + 1] == '[' {
+			if inAttrName[idx+1] == '[' {
 				pathType = PT_ARRAY
-				attrPath = inAttrName[idx + 2:nameLen - 1]
+				attrPath = inAttrName[idx+2 : nameLen-1]
 			} else {
 				pathType = PT_MAP
-				attrPath = inAttrName[idx + 2:]
+				attrPath = inAttrName[idx+2:]
 			}
 		}
 	} else {
@@ -50,12 +51,12 @@ func GetAttrPath(inAttrName string) (attrName string, attrPath string, pathType 
 			} else {
 				pathType = PT_ARRAY
 				attrName = inAttrName[:idx]
-				attrPath = inAttrName[idx + 1:nameLen - 1]
+				attrPath = inAttrName[idx+1 : nameLen-1]
 			}
 		} else {
 			pathType = PT_MAP
 			attrName = inAttrName[:idx]
-			attrPath = inAttrName[idx + 1:]
+			attrPath = inAttrName[idx+1:]
 		}
 	}
 

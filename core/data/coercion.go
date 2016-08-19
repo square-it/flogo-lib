@@ -6,18 +6,6 @@ import (
 	"strconv"
 )
 
-// CoerceToTypedValue coerce a value into a TypedValue
-func CoerceToTypedValue(value interface{}, dataType Type) (*TypedValue, error) {
-
-	coerced, err := CoerceToValue(value, dataType)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &TypedValue{Type: dataType, Value: coerced}, nil
-}
-
 // CoerceToValue coerce a value to the specified type
 func CoerceToValue(value interface{}, dataType Type) (interface{}, error) {
 

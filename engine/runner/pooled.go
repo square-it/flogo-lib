@@ -1,16 +1,18 @@
 package runner
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/core/flowinst"
+	"context"
+	"errors"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/action"
 )
 
-// PooledRunner is a flow runner that queues and runs a flow in a worker pool
-// todo: rename to AsyncFlowRunner?
+// PooledRunner is a action runner that queues and runs a action in a worker pool
 type PooledRunner struct {
-	workerQueue chan chan WorkRequest
-	workQueue   chan WorkRequest
+	workerQueue chan chan ActionWorkRequest
+	workQueue   chan ActionWorkRequest
 	numWorkers  int
-	workers     []*Worker
+	workers     []*ActionWorker
 	active      bool
 
 	directRunner *DirectRunner
@@ -20,18 +22,17 @@ type PooledRunner struct {
 type PooledConfig struct {
 	NumWorkers    int `json:"numWorkers"`
 	WorkQueueSize int `json:"workQueueSize"`
-	MaxStepCount  int `json:"maxStepCount"`
 }
 
 // NewPooledRunner create a new pooled
-func NewPooledRunner(config *PooledConfig, stateRecorder flowinst.StateRecorder) *PooledRunner {
+func NewPooledRunner(config *PooledConfig) *PooledRunner {
 
 	var pooledRunner PooledRunner
-	pooledRunner.directRunner = NewDirectRunner(stateRecorder, config.MaxStepCount)
+	pooledRunner.directRunner = NewDirectRunner()
 
 	// config via engine config
 	pooledRunner.numWorkers = config.NumWorkers
-	pooledRunner.workQueue = make(chan WorkRequest, config.WorkQueueSize)
+	pooledRunner.workQueue = make(chan ActionWorkRequest, config.WorkQueueSize)
 
 	return &pooledRunner
 }
@@ -41,9 +42,9 @@ func (runner *PooledRunner) Start() error {
 
 	if !runner.active {
 
-		runner.workerQueue = make(chan chan WorkRequest, runner.numWorkers)
+		runner.workerQueue = make(chan chan ActionWorkRequest, runner.numWorkers)
 
-		runner.workers = make([]*Worker, runner.numWorkers)
+		runner.workers = make([]*ActionWorker, runner.numWorkers)
 
 		for i := 0; i < runner.numWorkers; i++ {
 			log.Debug("Starting worker", i+1)
@@ -58,7 +59,7 @@ func (runner *PooledRunner) Start() error {
 				case work := <-runner.workQueue:
 					log.Debug("Received work requeust")
 
-					//todo fix, this creates unbounded go func blocked waiting for worker queue
+					//todo fix, this creates unbounded go routines waitig to be serviced by worker queue
 					go func() {
 						worker := <-runner.workerQueue
 
@@ -76,7 +77,7 @@ func (runner *PooledRunner) Start() error {
 }
 
 // Stop will stop the engine, by stopping all of its workers
-func (runner *PooledRunner) Stop() {
+func (runner *PooledRunner) Stop() error {
 
 	if runner.active {
 
@@ -87,23 +88,31 @@ func (runner *PooledRunner) Stop() {
 			worker.Stop()
 		}
 	}
+
+	return nil
 }
 
-// RunInstance runs the specified Flow Instance until it is complete
-// or it no longer has any tasks to execute
-func (runner *PooledRunner) RunInstance(instance *flowinst.Instance) bool {
+// Run implements action.Runner.Run
+func (runner *PooledRunner) Run(context context.Context, action action.Action, uri string, options interface{}) (code int, data interface{}, err error) {
+
+	if action == nil {
+		return 0, nil, errors.New("Action not found")
+	}
 
 	if runner.active {
 
-		work := WorkRequest{ReqType: RtRun, Request: instance}
+		data := &ActionData{context: context, action: action, uri: uri, options: options, rc: make(chan *ActionResult, 1)}
+		work := ActionWorkRequest{ReqType: RtRun, actionData: data}
 
 		runner.workQueue <- work
-		log.Debugf("Run Flow '%s' queued", instance.ID())
+		log.Debugf("Run Action '%s' queued", uri)
 
-		return false
+		reply := <-data.rc
+		log.Debugf("Run Action '%s' complete", uri)
+
+		return reply.code, reply.data, reply.err
 	}
 
-	//reject start
-
-	return false
+	//Run rejected
+	return 0, nil, errors.New("Runner not active")
 }

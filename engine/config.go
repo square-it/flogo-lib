@@ -5,29 +5,30 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/ext/trigger"
+	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
-	"github.com/TIBCOSoftware/flogo-lib/service"
+	"github.com/TIBCOSoftware/flogo-lib/util"
 )
 
 // Config is the configuration for the engine
 type Config struct {
-	LogLevel     string
-	RunnerConfig *RunnerConfig
-	Services     map[string]*service.Config
+	LogLevel         string
+	RunnerConfig     *RunnerConfig
+	ValidateTriggers bool
+	Services         map[string]*util.ServiceConfig
 }
 
 type serEngineConfig struct {
-	LogLevel     string            `json:"loglevel"`
-	RunnerConfig *RunnerConfig     `json:"flowRunner"`
-	Services     []*service.Config `json:"services"`
+	LogLevel     string                `json:"loglevel"`
+	DtValidation bool                  `json:"disableTriggerValidation"`
+	RunnerConfig *RunnerConfig         `json:"actionRunner"`
+	Services     []*util.ServiceConfig `json:"services"`
 }
 
 // RunnerConfig is the configuration for the engine level runner
 type RunnerConfig struct {
 	Type   string               `json:"type"`
 	Pooled *runner.PooledConfig `json:"pooled,omitempty"`
-	Direct *runner.DirectConfig `json:"direct,omitempty"`
 }
 
 // TriggersConfig is the triggers configuration for the engine
@@ -46,7 +47,7 @@ func DefaultConfig() *Config {
 
 	engineConfig.LogLevel = "DEBUG"
 	engineConfig.RunnerConfig = defaultRunnerConfig()
-	engineConfig.Services = service.DefaultServicesConfig()
+	//engineConfig.Services = service.DefaultServicesConfig()
 
 	return &engineConfig
 }
@@ -63,7 +64,7 @@ func DefaultTriggersConfig() *TriggersConfig {
 // MarshalJSON marshals the EngineConfig to JSON
 func (ec *Config) MarshalJSON() ([]byte, error) {
 
-	var services []*service.Config
+	var services []*util.ServiceConfig
 
 	for _, value := range ec.Services {
 		services = append(services, value)
@@ -85,6 +86,7 @@ func (ec *Config) UnmarshalJSON(data []byte) error {
 	}
 
 	ec.LogLevel = ser.LogLevel
+	ec.ValidateTriggers = !ser.DtValidation
 
 	if ser.RunnerConfig != nil {
 		ec.RunnerConfig = ser.RunnerConfig
@@ -93,13 +95,11 @@ func (ec *Config) UnmarshalJSON(data []byte) error {
 	}
 
 	if ser.Services != nil {
-		ec.Services = make(map[string]*service.Config)
+		ec.Services = make(map[string]*util.ServiceConfig)
 
 		for _, value := range ser.Services {
 			ec.Services[value.Name] = value
 		}
-	} else {
-		ec.Services = service.DefaultServicesConfig()
 	}
 
 	return nil
@@ -215,5 +215,5 @@ func LoadTriggersConfigFromJSON(configJSON string) *TriggersConfig {
 }
 
 func defaultRunnerConfig() *RunnerConfig {
-	return &RunnerConfig{Type: "pooled", Pooled: &runner.PooledConfig{NumWorkers: 5, WorkQueueSize: 50, MaxStepCount: 100}}
+	return &RunnerConfig{Type: "pooled", Pooled: &runner.PooledConfig{NumWorkers: 5, WorkQueueSize: 50}}
 }

@@ -2,16 +2,15 @@ package util
 
 import (
 	"fmt"
-	"runtime/debug"
-
 	"path/filepath"
 	"runtime"
+	"runtime/debug"
 	"strings"
 
 	"github.com/op/go-logging"
 )
 
-// HandlePanic helper method to handl panics
+// HandlePanic helper method to handle panics
 func HandlePanic(name string, err *error) {
 	if r := recover(); r != nil {
 
