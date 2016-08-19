@@ -32,7 +32,7 @@ type FlowAction struct {
 	stateRecorder StateRecorder
 	flowProvider  flowdef.Provider
 	idGenerator   *util.Generator
-	options       *ActionOptions
+	actionOptions *ActionOptions
 }
 
 // NewFlowAction creates a new FlowAction
@@ -53,7 +53,7 @@ func NewFlowAction(flowProvider flowdef.Provider, stateRecorder StateRecorder, o
 
 	options.Record = (stateRecorder != nil) && options.Record
 
-	action.options = options
+	action.actionOptions = options
 
 	return &action
 }
@@ -72,11 +72,15 @@ func (fa *FlowAction) Run(context context.Context, uri string, options interface
 	//todo: catch panic
 
 	op := AoStart
+	retID := false
 
-	ao, ok := options.(*RunOptions)
+	ro, ok := options.(*RunOptions)
+
+	log.Debugf("RunOptions : %v\n", ro)
 
 	if ok {
-		op = ao.Op
+		op = ro.Op
+		retID = ro.ReturnID
 	}
 
 	var instance *Instance
@@ -96,14 +100,14 @@ func (fa *FlowAction) Run(context context.Context, uri string, options interface
 		instance = NewFlowInstance(instanceID, uri, flow)
 	case AoResume:
 		if ok {
-			instance = ao.InitialState
+			instance = ro.InitialState
 			log.Debug("Resuming Instance: ", instance.ID())
 		} else {
 			return errors.New("Unable to resume instance, resume options not provided")
 		}
 	case AoRestart:
 		if ok {
-			instance = ao.InitialState
+			instance = ro.InitialState
 			instanceID := fa.idGenerator.NextAsString()
 			instance.Restart(instanceID, fa.flowProvider)
 
@@ -113,9 +117,9 @@ func (fa *FlowAction) Run(context context.Context, uri string, options interface
 		}
 	}
 
-	if ok && ao.ExecOptions != nil {
+	if ok && ro.ExecOptions != nil {
 		log.Debugf("Applying Exec Options to instance: %s\n", instance.ID())
-		applyExecOptions(instance, ao.ExecOptions)
+		applyExecOptions(instance, ro.ExecOptions)
 	}
 
 	triggerAttrs, ok := trigger.FromContext(context)
@@ -146,19 +150,19 @@ func (fa *FlowAction) Run(context context.Context, uri string, options interface
 
 		defer handler.Done()
 
-		for hasWork && instance.Status() < StatusCompleted && stepCount < fa.options.MaxStepCount {
+		for hasWork && instance.Status() < StatusCompleted && stepCount < fa.actionOptions.MaxStepCount {
 			stepCount++
 			log.Debugf("Step: %d\n", stepCount)
 			hasWork = instance.DoStep()
 
-			if fa.options.Record {
+			if fa.actionOptions.Record {
 				fa.stateRecorder.RecordSnapshot(instance)
 				fa.stateRecorder.RecordStep(instance)
 			}
 		}
 
-		if ao.ReturnID {
-			handler.HandleResult(200,  &IDResponse{ID: instance.ID()}, nil)
+		if retID {
+			handler.HandleResult(200, &IDResponse{ID: instance.ID()}, nil)
 		}
 
 		log.Debugf("Done Executing A.instance [%s] - Status: %d\n", instance.ID(), instance.Status())

@@ -7,6 +7,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/flow/service"
 	"github.com/TIBCOSoftware/flogo-lib/util"
 	"github.com/julienschmidt/httprouter"
+	"github.com/TIBCOSoftware/flogo-lib/flow/flowinst"
 )
 
 // RestEngineTester is default REST implementation of the EngineTester
@@ -74,11 +75,6 @@ func handleOption(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 }
 
-// IDResponse is a respone object consists of an ID
-type IDResponse struct {
-	ID string `json:"id"`
-}
-
 // StartFlow starts a new Flow Instance (POST "/flow/start").
 //
 // To post a start flow, try this at a shell:
@@ -101,14 +97,16 @@ func (et *RestEngineTester) StartFlow(w http.ResponseWriter, r *http.Request, _ 
 		return
 	}
 
-	idResponse := data.(IDResponse)
+	if data != nil {
+		idResponse := data.(*flowinst.IDResponse)
 
-	log.Debugf("Starting Instance [ID:%s] for %s", idResponse.ID, req.FlowURI)
+		log.Debugf("Started Instance [ID:%s] for %s", idResponse.ID, req.FlowURI)
 
-	encoder := json.NewEncoder(w)
-	encoder.Encode(data)
-
-	//w.WriteHeader(http.StatusOK)
+		encoder := json.NewEncoder(w)
+		encoder.Encode(data)
+	} else {
+		w.WriteHeader(http.StatusOK)
+	}
 }
 
 // RestartFlow restarts a Flow Instance (POST "/flow/restart").
@@ -139,12 +137,16 @@ func (et *RestEngineTester) RestartFlow(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	//resp := &IDResponse{ID: instance.ID()}
+	if data != nil {
+		idResponse := data.(*flowinst.IDResponse)
 
-	encoder := json.NewEncoder(w)
-	encoder.Encode(data)
+		log.Debugf("Restarted Instance [ID:%s] for %s", idResponse.ID, req.InitialState.FlowURI)
 
-	w.WriteHeader(http.StatusOK)
+		encoder := json.NewEncoder(w)
+		encoder.Encode(data)
+	} else {
+		w.WriteHeader(http.StatusOK)
+	}
 }
 
 // ResumeFlow resumes a Flow Instance (POST "/flow/resume").
@@ -175,12 +177,16 @@ func (et *RestEngineTester) ResumeFlow(w http.ResponseWriter, r *http.Request, _
 		return
 	}
 
-	//resp := &IDResponse{ID: instance.ID()}
+	if data != nil {
+		idResponse := data.(*flowinst.IDResponse)
 
-	encoder := json.NewEncoder(w)
-	encoder.Encode(data)
+		log.Debugf("Resumed Instance [ID:%s] for %s", idResponse.ID, req.State.FlowURI)
 
-	w.WriteHeader(http.StatusOK)
+		encoder := json.NewEncoder(w)
+		encoder.Encode(data)
+	} else {
+		w.WriteHeader(http.StatusOK)
+	}
 }
 
 // Status is a basic health check for the server to determine if it is up

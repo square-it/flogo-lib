@@ -51,12 +51,11 @@ func (rp *RequestProcessor) StartFlow(startRequest *StartRequest) (code int, ret
 		}
 	}
 
-	ao := flowinst.RunOptions{Op: flowinst.AoStart, ReturnID: true, ExecOptions: execOptions}
-
 	action := action.Get(flowinst.ActionType)
 	ctx := trigger.NewContext(context.Background(), attrs)
 
-	return rp.runner.Run(ctx, action, startRequest.FlowURI, ao)
+	ro := &flowinst.RunOptions{Op: flowinst.AoStart, ReturnID: true, ExecOptions: execOptions}
+	return rp.runner.Run(ctx, action, startRequest.FlowURI, ro)
 }
 
 // RestartFlow handles a RestartRequest for a FlowInstance.  This will
@@ -64,7 +63,6 @@ func (rp *RequestProcessor) StartFlow(startRequest *StartRequest) (code int, ret
 func (rp *RequestProcessor) RestartFlow(restartRequest *RestartRequest) (code int, retData interface{}, err error) {
 
 	execOptions := &flowinst.ExecOptions{Interceptor: restartRequest.Interceptor, Patch: restartRequest.Patch}
-	ao := flowinst.RunOptions{Op: flowinst.AoRestart, InitialState: restartRequest.InitialState, ExecOptions: execOptions}
 
 	ctx := context.Background()
 
@@ -81,7 +79,9 @@ func (rp *RequestProcessor) RestartFlow(restartRequest *RestartRequest) (code in
 	}
 
 	action := action.Get(flowinst.ActionType)
-	return rp.runner.Run(ctx, action, restartRequest.InitialState.FlowURI, ao)
+
+	ro := &flowinst.RunOptions{Op: flowinst.AoRestart, ReturnID: true, ExecOptions: execOptions}
+	return rp.runner.Run(ctx, action, restartRequest.InitialState.FlowURI, ro)
 }
 
 // ResumeFlow handles a ResumeRequest for a FlowInstance.  This will
@@ -89,7 +89,6 @@ func (rp *RequestProcessor) RestartFlow(restartRequest *RestartRequest) (code in
 func (rp *RequestProcessor) ResumeFlow(resumeRequest *ResumeRequest) (code int, retData interface{}, err error) {
 
 	execOptions := &flowinst.ExecOptions{Interceptor: resumeRequest.Interceptor, Patch: resumeRequest.Patch}
-	ao := flowinst.RunOptions{Op: flowinst.AoRestart, InitialState: resumeRequest.State, ExecOptions: execOptions}
 
 	ctx := context.Background()
 
@@ -106,7 +105,9 @@ func (rp *RequestProcessor) ResumeFlow(resumeRequest *ResumeRequest) (code int, 
 	}
 
 	action := action.Get(flowinst.ActionType)
-	return rp.runner.Run(ctx, action, resumeRequest.State.FlowURI, ao)
+
+	ro := &flowinst.RunOptions{Op: flowinst.AoResume, ReturnID: true, ExecOptions: execOptions}
+	return rp.runner.Run(ctx, action, resumeRequest.State.FlowURI, ro)
 }
 
 // StartRequest describes a request for starting a FlowInstance
