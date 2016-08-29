@@ -20,7 +20,7 @@ type Config struct {
 
 type serEngineConfig struct {
 	LogLevel     string                `json:"loglevel"`
-	DtValidation bool                  `json:"disableTriggerValidation"`
+	DtValidation bool                  `json:"disableTriggerValidation,omitempty"`
 	RunnerConfig *RunnerConfig         `json:"actionRunner"`
 	Services     []*util.ServiceConfig `json:"services"`
 }
@@ -72,6 +72,7 @@ func (ec *Config) MarshalJSON() ([]byte, error) {
 
 	return json.Marshal(&serEngineConfig{
 		LogLevel:     ec.LogLevel,
+		DtValidation: !ec.ValidateTriggers,
 		RunnerConfig: ec.RunnerConfig,
 		Services:     services,
 	})
