@@ -1,7 +1,6 @@
 package model
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/flow/activity"
 	"github.com/TIBCOSoftware/flogo-lib/flow/flowdef"
 )
 
@@ -60,10 +59,10 @@ type TaskContext interface {
 	HasActivity() bool
 
 	// EvalActivity evaluates the Activity associated with the Task
-	EvalActivity() (done bool, evalError *activity.Error)
+	EvalActivity() (done bool, err error)
 
 	// Failed marks the Activity as failed
-	Failed(err *activity.Error)
+	Failed(err error)
 }
 
 // LinkInst is the instance of a link

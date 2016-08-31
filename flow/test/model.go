@@ -91,7 +91,7 @@ func (b *SimpleTaskBehavior) Enter(context model.TaskContext, enterCode int) (ev
 	return ready, 0
 }
 
-func (b *SimpleTaskBehavior) Eval(context model.TaskContext, evalCode int) (done bool, doneCode int, err *activity.Error) {
+func (b *SimpleTaskBehavior) Eval(context model.TaskContext, evalCode int) (done bool, doneCode int, err error) {
 
 	task := context.Task()
 	log.Debugf("Task Eval: %s\n", task)
@@ -118,7 +118,7 @@ func (b *SimpleTaskBehavior) Eval(context model.TaskContext, evalCode int) (done
 	return true, 0, nil
 }
 
-func (b *SimpleTaskBehavior) PostEval(context model.TaskContext, evalCode int, data interface{}) (done bool, doneCode int, err *activity.Error) {
+func (b *SimpleTaskBehavior) PostEval(context model.TaskContext, evalCode int, data interface{}) (done bool, doneCode int, err error) {
 	log.Debugf("Task PostEval\n")
 
 	if context.HasActivity() { //and is async

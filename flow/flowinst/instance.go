@@ -272,7 +272,7 @@ func (pi *Instance) execTask(workItem *WorkItem) {
 
 	var done bool
 	var doneCode int
-	var err *activity.Error
+	var err error
 
 	//todo: should validate process activities
 
@@ -318,13 +318,13 @@ func (pi *Instance) execTask(workItem *WorkItem) {
 	}
 }
 
-func (pi *Instance) handleError(taskData *TaskData, activityErr *activity.Error) {
+func (pi *Instance) handleError(taskData *TaskData, err error) {
 
 	pi.AddAttr("[E.actvitiy]", data.STRING, taskData.TaskName())
-	pi.AddAttr("[E.message]", data.STRING, activityErr.Error())
+	pi.AddAttr("[E.message]", data.STRING, err.Error())
 
-	if activityErr.Data() != nil {
-		pi.AddAttr("[E.data]", data.OBJECT, activityErr.Data())
+	if aerr, ok := err.(*activity.Error); ok {
+		pi.AddAttr("[E.data]", data.OBJECT, aerr.Data())
 	}
 
 	if taskData.taskEnv.ID != idEhTasEnv {
@@ -800,7 +800,7 @@ func (td *TaskData) HasActivity() bool {
 }
 
 // EvalActivity implements activity.ActivityContext.EvalActivity method
-func (td *TaskData) EvalActivity() (done bool, evalErr *activity.Error) {
+func (td *TaskData) EvalActivity() (done bool, evalErr error) {
 
 	act := activity.Get(td.task.ActivityType())
 
@@ -828,7 +828,7 @@ func (td *TaskData) EvalActivity() (done bool, evalErr *activity.Error) {
 }
 
 // Failed marks the Activity as failed
-func (td *TaskData) Failed(err *activity.Error) {
+func (td *TaskData) Failed(err error) {
 
 	errorMsgAttr := "[A" + strconv.Itoa(td.task.ID()) + "._errorMsg]"
 	td.taskEnv.Instance.AddAttr(errorMsgAttr, data.STRING, err.Error())

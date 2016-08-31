@@ -1,7 +1,6 @@
 package model
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/flow/activity"
 	"github.com/TIBCOSoftware/flogo-lib/flow/flowdef"
 )
 
@@ -43,15 +42,15 @@ type TaskBehavior interface {
 	Enter(context TaskContext, enterCode int) (eval bool, evalCode int)
 
 	// Eval is called when a Task is being evaluated.  Returning true indicates
-	// that the task is done.  If activityError is set, it indicates that the
+	// that the task is done.  If err is set, it indicates that the
 	// behavior intends for the flow ErrorHandler to handle the error
-	Eval(context TaskContext, evalCode int) (done bool, doneCode int, activityError *activity.Error)
+	Eval(context TaskContext, evalCode int) (done bool, doneCode int, err error)
 
 	// PostEval is called when a task that didn't complete during the Eval
 	// needs to be notified.  Returning true indicates that the task is done.
-	// If activityError is set, it indicates that the  behavior intends for the
+	// If err is set, it indicates that the  behavior intends for the
 	// flow ErrorHandler to handle the error
-	PostEval(context TaskContext, evalCode int, data interface{}) (done bool, doneCode int, activityError *activity.Error)
+	PostEval(context TaskContext, evalCode int, data interface{}) (done bool, doneCode int, err error)
 
 	// Done is called when Eval, PostEval or ChildDone return true, indicating
 	// that the task is done.  This step is used to finalize the task and
