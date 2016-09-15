@@ -29,7 +29,7 @@ type TaskRep struct {
 	Links          []*LinkRep        `json:"links,omitempty"`
 }
 
-// LinkRep is a serialiable represention of a flow Link
+// LinkRep is a serializable representation of a flow Link
 type LinkRep struct {
 	ID     int    `json:"id"`
 	Type   int    `json:"type"`
@@ -39,7 +39,7 @@ type LinkRep struct {
 	Value  string `json:"value"`
 }
 
-// NewDefinition creates a flow Definition from a serialiable
+// NewDefinition creates a flow Definition from a serializable
 // definition representation
 func NewDefinition(rep *DefinitionRep) (def *Definition, err error) {
 
@@ -120,8 +120,6 @@ func addTask(def *Definition, task *Task, rep *TaskRep) {
 	}
 }
 
-// flowTaskLinks flowes a task's links.  Done seperately so it can
-// properly handle cross-boundry links
 func addLinks(def *Definition, task *Task, rep *TaskRep) {
 
 	numLinks := len(rep.Links)

@@ -10,7 +10,7 @@ type Patch struct {
 	taskPatchMap map[int]*TaskPatch
 }
 
-// Init initializes the FlowPatch, usually called afer deserialization
+// Init initializes the FlowPatch, usually called after deserialization
 func (pp *Patch) Init() {
 
 	numAttrs := len(pp.TaskPatches)

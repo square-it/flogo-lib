@@ -12,9 +12,9 @@ type TestActivityContext struct {
 	TaskNameVal string
 	Attrs       map[string]*data.Attribute
 
-	metadta *activity.Metadata
-	inputs  map[string]*data.Attribute
-	outputs map[string]*data.Attribute
+	metadata    *activity.Metadata
+	inputs      map[string]*data.Attribute
+	outputs     map[string]*data.Attribute
 }
 
 // TestFlowDetails simple FlowDetails for use in testing

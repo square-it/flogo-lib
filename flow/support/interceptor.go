@@ -4,7 +4,7 @@ import "github.com/TIBCOSoftware/flogo-lib/core/data"
 
 // Interceptor contains a set of task interceptor, this can be used to override
 // runtime data of an instance of the corresponding Flow.  This can be used to
-// modify runtime execution of a flow or in test/debug for implemeting mocks
+// modify runtime execution of a flow or in test/debug for implementing mocks
 // for tasks
 type Interceptor struct {
 	TaskInterceptors []*TaskInterceptor `json:"tasks"`
@@ -12,7 +12,7 @@ type Interceptor struct {
 	taskInterceptorMap map[int]*TaskInterceptor
 }
 
-// Init initializes the FlowInterceptor, usually called afer deserialization
+// Init initializes the FlowInterceptor, usually called after deserialization
 func (pi *Interceptor) Init() {
 
 	numAttrs := len(pi.TaskInterceptors)
@@ -26,7 +26,7 @@ func (pi *Interceptor) Init() {
 	}
 }
 
-// GetTaskInterceptor get the TaskInterceptor for the specified task (reffered to by ID)
+// GetTaskInterceptor get the TaskInterceptor for the specified task (referred to by ID)
 func (pi *Interceptor) GetTaskInterceptor(taskID int) *TaskInterceptor {
 	return pi.taskInterceptorMap[taskID]
 }

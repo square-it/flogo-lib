@@ -126,18 +126,18 @@ func (sm *ServiceManager) Stop() error {
 
 	if len(sm.started) > 0 {
 
-		var notstopped []Service
+		var notStopped []Service
 
 		for _, service := range sm.started {
 
 			err = StopManaged(service.Name(), service)
 
 			if err != nil {
-				notstopped = append(notstopped, service)
+				notStopped = append(notStopped, service)
 			}
 		}
 
-		sm.started = notstopped
+		sm.started = notStopped
 	}
 
 	return err

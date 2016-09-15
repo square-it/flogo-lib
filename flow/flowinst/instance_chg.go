@@ -16,7 +16,7 @@ const (
 	CtDel ChgType = 3
 )
 
-// WorkItemQueueChange repesents a change in the WorkItem Queue
+// WorkItemQueueChange represents a change in the WorkItem Queue
 type WorkItemQueueChange struct {
 	ChgType  ChgType
 	ID       int
@@ -37,7 +37,7 @@ type LinkDataChange struct {
 	LinkData *LinkData
 }
 
-// InstanceChange represets a change to the instance
+// InstanceChange represents a change to the instance
 type InstanceChange struct {
 	State       int
 	Status      Status

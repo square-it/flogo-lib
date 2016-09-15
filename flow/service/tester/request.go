@@ -130,7 +130,7 @@ type RestartRequest struct {
 }
 
 // ResumeRequest describes a request for resuming a FlowInstance
-//todo: Data for resume request should be directed to wating task
+//todo: Data for resume request should be directed to waiting task
 type ResumeRequest struct {
 	State       *flowinst.Instance     `json:"state"`
 	Data        map[string]interface{} `json:"data"`

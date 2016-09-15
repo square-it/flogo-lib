@@ -30,7 +30,7 @@ type TaskContext interface {
 	// Task returns the Task associated with this context
 	Task() *flowdef.Task
 
-	// FromInstLinks returns the intstances of predecessor Links of the current
+	// FromInstLinks returns the instances of predecessor Links of the current
 	// task.
 	FromInstLinks() []LinkInst
 
@@ -52,7 +52,7 @@ type TaskContext interface {
 	// current task
 	ChildTaskInsts() (taskInsts []TaskInst, hasChildTasks bool)
 
-	// EvalLink evalutes the specified link
+	// EvalLink evaluates the specified link
 	EvalLink(link *flowdef.Link) (bool, error)
 
 	// HasActivity flag indicating if the task has an Activity

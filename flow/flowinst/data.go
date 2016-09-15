@@ -127,7 +127,7 @@ func applyDefaultInstanceInputMappings(pi *Instance, attrs []*data.Attribute) {
 	}
 }
 
-// FixedTaskScope is scope restricted by the set of reference attrs and backed by the specfied Task
+// FixedTaskScope is scope restricted by the set of reference attrs and backed by the specified Task
 type FixedTaskScope struct {
 	attrs    map[string]*data.Attribute
 	refAttrs map[string]*data.Attribute

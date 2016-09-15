@@ -59,7 +59,7 @@ func (runner *PooledRunner) Start() error {
 				case work := <-runner.workQueue:
 					log.Debug("Received work requeust")
 
-					//todo fix, this creates unbounded go routines waitig to be serviced by worker queue
+					//todo fix, this creates unbounded go routines waiting to be serviced by worker queue
 					go func() {
 						worker := <-runner.workerQueue
 

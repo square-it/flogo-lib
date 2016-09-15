@@ -73,7 +73,7 @@ func NewFlowInstance(instanceID string, flowURI string, flow *flowdef.Definition
 	return &instance
 }
 
-// SetFlowProvider sets the proces.Provider that the instance should use
+// SetFlowProvider sets the process.Provider that the instance should use
 func (pi *Instance) SetFlowProvider(provider flowdef.Provider) {
 	pi.flowProvider = provider
 }
@@ -332,7 +332,7 @@ func (pi *Instance) handleError(taskData *TaskData, err error) {
 	}
 }
 
-// handleTaskDone handles the compeletion of a task in the Flow Instance
+// handleTaskDone handles the completion of a task in the Flow Instance
 func (pi *Instance) handleTaskDone(taskBehavior model.TaskBehavior, taskData *TaskData, doneCode int) {
 
 	notifyParent, childDoneCode, taskEntries := taskBehavior.Done(taskData, doneCode)
@@ -481,7 +481,7 @@ func (pi *Instance) AddAttr(attrName string, attrType data.Type, value interface
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Task Environment
 
-// TaskEnv is a structure that describes the execution enviroment for a set of tasks
+// TaskEnv is a structure that describes the execution environment for a set of tasks
 type TaskEnv struct {
 	ID        int
 	Task      *flowdef.Task
@@ -515,7 +515,7 @@ func (te *TaskEnv) init(flowInst *Instance) {
 }
 
 // FindOrCreateTaskData finds an existing TaskData or creates ones if not found for the
-// specified task the task enviroment
+// specified task the task environment
 func (te *TaskEnv) FindOrCreateTaskData(task *flowdef.Task) (taskData *TaskData, created bool) {
 
 	taskData, ok := te.TaskDatas[task.ID()]
@@ -544,7 +544,7 @@ func (te *TaskEnv) NewTaskData(task *flowdef.Task) *TaskData {
 }
 
 // FindOrCreateLinkData finds an existing LinkData or creates ones if not found for the
-// specified link the task enviroment
+// specified link the task environment
 func (te *TaskEnv) FindOrCreateLinkData(link *flowdef.Link) (linkData *LinkData, created bool) {
 
 	linkData, ok := te.LinkDatas[link.ID()]
