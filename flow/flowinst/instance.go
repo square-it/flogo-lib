@@ -320,7 +320,7 @@ func (pi *Instance) execTask(workItem *WorkItem) {
 
 func (pi *Instance) handleError(taskData *TaskData, err error) {
 
-	pi.AddAttr("[E.actvitiy]", data.STRING, taskData.TaskName())
+	pi.AddAttr("[E.activitiy]", data.STRING, taskData.TaskName())
 	pi.AddAttr("[E.message]", data.STRING, err.Error())
 
 	if aerr, ok := err.(*activity.Error); ok {
