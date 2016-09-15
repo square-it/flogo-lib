@@ -13,13 +13,13 @@ var log = logging.MustGetLogger("flow")
 // a flow.  It contains its data (attributes) and
 // structure (tasks & links).
 type Definition struct {
-	typeID   int
-	name     string
-	modelID  string
-	rootTask *Task
-	ehTask   *Task
+	name          string
+	modelID       string
+	explicitReply bool
+	rootTask      *Task
+	ehTask        *Task
 
-	attrs map[string]*data.Attribute
+	attrs       map[string]*data.Attribute
 
 	inputMapper *data.Mapper
 	links       map[int]*Link
@@ -33,11 +33,6 @@ func (pd *Definition) Name() string {
 	return pd.name
 }
 
-// TypeID returns the type ID of the definition
-func (pd *Definition) TypeID() int {
-	return pd.typeID
-}
-
 // ModelID returns the ID of the model the definition uses
 func (pd *Definition) ModelID() string {
 	return pd.modelID
@@ -46,6 +41,10 @@ func (pd *Definition) ModelID() string {
 // RootTask returns the root task of the definition
 func (pd *Definition) RootTask() *Task {
 	return pd.rootTask
+}
+
+func (pd *Definition) ExplicitReply() bool {
+	return pd.explicitReply;
 }
 
 // ErrorHandler returns the error handler task of the definition
@@ -104,15 +103,15 @@ type Task struct {
 	links        []*Link
 	isScope      bool
 
-	definition *Definition
-	parent     *Task
-	attrs      map[string]*data.Attribute
+	definition   *Definition
+	parent       *Task
+	attrs        map[string]*data.Attribute
 
 	inputMapper  *data.Mapper
 	outputMapper *data.Mapper
 
-	toLinks   []*Link
-	fromLinks []*Link
+	toLinks      []*Link
+	fromLinks    []*Link
 }
 
 // ID gets the id of the task
@@ -212,12 +211,12 @@ const (
 // Link is the object that describes the definition of
 // a link.
 type Link struct {
-	id       int
-	name     string
-	fromTask *Task
-	toTask   *Task
-	linkType LinkType
-	value    string //expression or label
+	id         int
+	name       string
+	fromTask   *Task
+	toTask     *Task
+	linkType   LinkType
+	value      string //expression or label
 
 	definition *Definition
 	parent     *Task

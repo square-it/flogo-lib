@@ -166,7 +166,7 @@ func (pi *Instance) Start(startAttrs []*data.Attribute) bool {
 	applyDefaultInstanceInputMappings(pi, startAttrs)
 
 	log.Debugf("FlowInstance Flow: %v", pi.FlowModel)
-	model := pi.FlowModel.GetFlowBehavior(pi.Flow.TypeID())
+	model := pi.FlowModel.GetFlowBehavior()
 
 	//todo: error if model not found
 
@@ -357,7 +357,7 @@ func (pi *Instance) handleTaskDone(taskBehavior model.TaskBehavior, taskData *Ta
 			//todo distinguish between error handler env and rootTaskEnv
 
 			//Root Task is Done, so notify Flow
-			flowBehavior := pi.FlowModel.GetFlowBehavior(pi.Flow.TypeID())
+			flowBehavior := pi.FlowModel.GetFlowBehavior()
 			flowBehavior.TasksDone(pi, childDoneCode)
 			flowBehavior.Done(pi)
 

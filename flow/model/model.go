@@ -7,10 +7,10 @@ import (
 var log = logging.MustGetLogger("model")
 
 // FlowModel defines the execution Model for a Flow.  It contains the
-// execution behaviors for Flowes and Tasks.
+// execution behaviors for Flows and Tasks.
 type FlowModel struct {
 	name          string
-	flowBehaviors map[int]FlowBehavior
+	flowBehavior  FlowBehavior
 	taskBehaviors map[int]TaskBehavior
 }
 
@@ -19,7 +19,6 @@ func New(name string) *FlowModel {
 
 	var flowModel FlowModel
 	flowModel.name = name
-	flowModel.flowBehaviors = make(map[int]FlowBehavior)
 	flowModel.taskBehaviors = make(map[int]TaskBehavior)
 
 	return &flowModel
@@ -31,14 +30,14 @@ func (pm *FlowModel) Name() string {
 }
 
 // RegisterFlowBehavior registers the specified FlowBehavior with the Model
-func (pm *FlowModel) RegisterFlowBehavior(id int, flowBehavior FlowBehavior) {
+func (pm *FlowModel) RegisterFlowBehavior(flowBehavior FlowBehavior) {
 
-	pm.flowBehaviors[id] = flowBehavior
+	pm.flowBehavior = flowBehavior
 }
 
-// GetFlowBehavior returns FlowBehavior with the specified ID in the FlowModel
-func (pm *FlowModel) GetFlowBehavior(id int) FlowBehavior {
-	return pm.flowBehaviors[id]
+// GetFlowBehavior returns FlowBehavior of the FlowModel
+func (pm *FlowModel) GetFlowBehavior() FlowBehavior {
+	return pm.flowBehavior
 }
 
 // RegisterTaskBehavior registers the specified TaskBehavior with the Model

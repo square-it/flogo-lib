@@ -70,6 +70,7 @@ type RunOptions struct {
 func (fa *FlowAction) Run(context context.Context, uri string, options interface{}, handler action.ResultHandler) error {
 
 	//todo: catch panic
+	//todo: consider switch to URI to dictate flow operation (ex. flow://blah/resume)
 
 	op := AoStart
 	retID := false
@@ -148,6 +149,10 @@ func (fa *FlowAction) Run(context context.Context, uri string, options interface
 
 		defer handler.Done()
 
+		if !instance.Flow.ExplicitReply() {
+			handler.HandleResult(200, &IDResponse{ID: instance.ID()}, nil)
+		}
+
 		for hasWork && instance.Status() < StatusCompleted && stepCount < fa.actionOptions.MaxStepCount {
 			stepCount++
 			log.Debugf("Step: %d\n", stepCount)
@@ -184,7 +189,7 @@ func (rh *SimpleReplyHandler) Reply(replyCode int, replyData interface{}, err er
 	rh.resultHandler.HandleResult(replyCode, replyData, err)
 }
 
-// IDResponse is a respone object consists of an ID
+// IDResponse is a response object consists of an ID
 type IDResponse struct {
 	ID string `json:"id"`
 }

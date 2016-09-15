@@ -5,9 +5,9 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/util"
 )
 
-// DefinitionRep is a serialiable represention of a flow Definition
+// DefinitionRep is a serializable representation of a flow Definition
 type DefinitionRep struct {
-	TypeID           int               `json:"type"`
+	ExplicitReply    bool              `json:"explicitReply"`
 	Name             string            `json:"name"`
 	ModelID          string            `json:"model"`
 	Attributes       []*data.Attribute `json:"attributes,omitempty"`
@@ -16,7 +16,7 @@ type DefinitionRep struct {
 	ErrorHandlerTask *TaskRep          `json:"errorHandlerTask"`
 }
 
-// TaskRep is a serialiable represention of a flow Task
+// TaskRep is a serializable representation of a flow Task
 type TaskRep struct {
 	ID             int               `json:"id"`
 	TypeID         int               `json:"type"`
@@ -46,9 +46,9 @@ func NewDefinition(rep *DefinitionRep) (def *Definition, err error) {
 	defer util.HandlePanic("NewDefinition", &err)
 
 	def = &Definition{}
-	def.typeID = rep.TypeID
 	def.name = rep.Name
 	def.modelID = rep.ModelID
+	def.explicitReply = rep.ExplicitReply
 
 	if rep.InputMappings != nil {
 		def.inputMapper = data.NewMapper(rep.InputMappings)
