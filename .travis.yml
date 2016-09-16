@@ -16,13 +16,13 @@ script:
   - touch flogo-lib.tgz
   - tar cvfz flogo-lib.tgz --exclude=flogo-lib.tgz .
   - find . -not -name "flogo-lib.tgz" -not  -name "\." -not -name "\.\."  -print0 | xargs -0 rm -rf --
-  - "git ls-remote --exit-code https://github.com/TIBCOSoftware/flogo-cicd.git ${TRAVIS_BRANCH} 
+  - "git ls-remote --exit-code https://github.com/TIBCOSoftware/flogo-cicd.git ${TRAVIS_BRANCH} ;
     if [ $? -eq 0 ]; then 
-        echo \"Branch ${TRAVIS_BRANCH} found on flogo-cicd\" 
-        git clone https://github.com/TIBCOSoftware/flogo-cicd.git --branch ${TRAVIS_BRANCH} --single-branch flogo-cicd 
+        echo \"Branch ${TRAVIS_BRANCH} found on flogo-cicd\" ;
+        git clone https://github.com/TIBCOSoftware/flogo-cicd.git --branch ${TRAVIS_BRANCH} --single-branch flogo-cicd ;
     else 
-        echo \"Branch ${TRAVIS_BRANCH} not found on flogo-cicd using master\" 
-        git clone https://github.com/TIBCOSoftware/flogo-cicd.git flogo-cicd 
+        echo \"Branch ${TRAVIS_BRANCH} not found on flogo-cicd using master\" ;
+        git clone https://github.com/TIBCOSoftware/flogo-cicd.git flogo-cicd ;
     fi"
   - pushd flogo-cicd/docker/flogo-lib
   - ./build-flogo-lib.sh
