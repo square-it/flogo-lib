@@ -1,0 +1,31 @@
+sudo: required
+services:
+  - docker
+cache:
+  bundler: false
+  directories:
+  - .cache          # images.txt
+# Handle git submodules yourself
+git:
+    submodules: false
+
+# Do a github login using token
+before_install:
+  - echo -e "machine github.com\n  login ${GITHUB_USER_TOKEN}" >> ~/.netrc
+script: 
+  - touch flogo-lib.tgz
+  - tar cvfz flogo-lib.tgz --exclude=flogo-lib.tgz .
+  - find . -not -name "flogo-lib.tgz" -not  -name "\." -not -name "\.\."  -print0 | xargs -0 rm -rf --
+  - git clone https://github.com/TIBCOSoftware/flogo-cicd.git flogo-cicd
+  - pushd flogo-cicd/docker/flogo-lib
+  - ./build-flogo-lib.sh
+  - popd
+after_script:
+  - "[ -f \"${HOME}/.netrc\" ] && rm -f ${HOME}/.netrc"
+
+after_success:
+  - "if [ \"${TRAVIS_BRANCH}\" == \"master\" ]; then
+    docker login -u=\"${DOCKER_USERNAME}\" -p=\"${DOCKER_PASSWORD}\";
+    source ${TRAVIS_BUILD_DIR}/scripts/init.sh ;
+    flogo::module::postbuild flogo-lib ;
+    fi"
