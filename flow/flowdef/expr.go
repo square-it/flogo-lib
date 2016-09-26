@@ -15,7 +15,10 @@ func GetExpressionLinks(def *Definition) []*Link {
 	var links []*Link
 
 	getExpressionLinks(def.RootTask(), &links)
-	getExpressionLinks(def.ErrorHandlerTask(), &links)
+
+	if (def.ErrorHandlerTask() != nil) {
+		getExpressionLinks(def.ErrorHandlerTask(), &links)
+	}
 
 	return links
 }
