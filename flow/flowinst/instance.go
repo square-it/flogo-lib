@@ -320,11 +320,11 @@ func (pi *Instance) execTask(workItem *WorkItem) {
 
 func (pi *Instance) handleError(taskData *TaskData, err error) {
 
-	pi.AddAttr("[E.activity]", data.STRING, taskData.TaskName())
-	pi.AddAttr("[E.message]", data.STRING, err.Error())
+	pi.AddAttr("{E.activity}", data.STRING, taskData.TaskName())
+	pi.AddAttr("{E.message}", data.STRING, err.Error())
 
 	if aerr, ok := err.(*activity.Error); ok {
-		pi.AddAttr("[E.data]", data.OBJECT, aerr.Data())
+		pi.AddAttr("{E.data}", data.OBJECT, aerr.Data())
 	}
 
 	if taskData.taskEnv.ID != idEhTasEnv {
