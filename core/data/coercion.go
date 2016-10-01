@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 // CoerceToValue coerce a value to the specified type
@@ -28,7 +29,7 @@ func CoerceToValue(value interface{}, dataType Type) (interface{}, error) {
 	case PARAMS:
 		coerced, err = CoerceToParams(value)
 	case ANY:
-		coerced, err = value, nil
+		coerced, err = CoerceToAny(value)
 	}
 
 	if err != nil {
@@ -165,6 +166,23 @@ func CoerceToArray(val interface{}) ([]interface{}, error) {
 		return a, nil
 	default:
 		return nil, fmt.Errorf("Unable to coerce %#v to []interface{}", val)
+	}
+}
+
+// CoerceToArray coerce a value to an array
+func CoerceToAny(val interface{}) (interface{}, error) {
+
+	switch t := val.(type) {
+
+	case json.Number:
+
+		if ( strings.Contains(t.String(), ".") ) {
+			return t.Float64();
+		} else {
+			return t.Int64();
+		}
+	default:
+		return val, nil;
 	}
 }
 
