@@ -4,7 +4,6 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/flow/flowdef"
 	"github.com/TIBCOSoftware/flogo-lib/flow/model"
 	"github.com/op/go-logging"
-	"github.com/TIBCOSoftware/flogo-lib/flow/activity"
 )
 
 var log = logging.MustGetLogger("test")
@@ -15,7 +14,7 @@ func init() {
 
 func NewTestModel() *model.FlowModel {
 	m := model.New("test")
-	m.RegisterFlowBehavior(1, &SimpleFlowBehavior{})
+	m.RegisterFlowBehavior(&SimpleFlowBehavior{})
 	m.RegisterTaskBehavior(1, &SimpleTaskBehavior{})
 
 	return m
