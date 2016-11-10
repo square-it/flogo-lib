@@ -24,7 +24,7 @@ type RequestProcessor struct {
 func NewRequestProcessor() *RequestProcessor {
 
 	var rp RequestProcessor
-	rp.runner = runner.NewDirectRunner()
+	rp.runner = runner.NewDirect()
 
 	return &rp
 }
@@ -80,7 +80,7 @@ func (rp *RequestProcessor) RestartFlow(restartRequest *RestartRequest) (code in
 
 	action := action.Get(flowinst.ActionType)
 
-	ro := &flowinst.RunOptions{Op: flowinst.AoRestart, ReturnID: true, InitialState:restartRequest.InitialState, ExecOptions: execOptions}
+	ro := &flowinst.RunOptions{Op: flowinst.AoRestart, ReturnID: true, InitialState: restartRequest.InitialState, ExecOptions: execOptions}
 	return rp.runner.Run(ctx, action, restartRequest.InitialState.FlowURI, ro)
 }
 
