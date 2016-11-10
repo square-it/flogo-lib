@@ -32,33 +32,33 @@ func TestResultOk(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-//Test Start method
-func TestStartOk(t *testing.T) {
-	runner := NewDirectRunner()
+//Test Direct Start method
+func TestDirectStartOk(t *testing.T) {
+	runner := NewDirect()
 	assert.NotNil(t, runner)
 	err := runner.Start()
 	assert.Nil(t, err)
 }
 
 //Test Stop method
-func TestStopOk(t *testing.T) {
-	runner := NewDirectRunner()
+func TestDirectStopOk(t *testing.T) {
+	runner := NewDirect()
 	assert.NotNil(t, runner)
 	err := runner.Stop()
 	assert.Nil(t, err)
 }
 
 //Test Run method with a nil action
-func TestRunNilAction(t *testing.T) {
-	runner := NewDirectRunner()
+func TestDirectRunNilAction(t *testing.T) {
+	runner := NewDirect()
 	assert.NotNil(t, runner)
 	_, _, err := runner.Run(nil, nil, "", nil)
 	assert.NotNil(t, err)
 }
 
 //Test Run method with error running action
-func TestRunErr(t *testing.T) {
-	runner := NewDirectRunner()
+func TestDirectRunErr(t *testing.T) {
+	runner := NewDirect()
 	assert.NotNil(t, runner)
 	// Mock Action
 	mockAction := new(MockAction)
@@ -68,8 +68,8 @@ func TestRunErr(t *testing.T) {
 }
 
 //Test Run method ok
-func TestRunOk(t *testing.T) {
-	runner := NewDirectRunner()
+func TestDirectRunOk(t *testing.T) {
+	runner := NewDirect()
 	assert.NotNil(t, runner)
 	// Mock Action
 	mockAction := new(MockAction)
