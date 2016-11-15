@@ -24,7 +24,7 @@ type RequestProcessor struct {
 func NewRequestProcessor() *RequestProcessor {
 
 	var rp RequestProcessor
-	rp.runner = runner.NewDirectRunner()
+	rp.runner = runner.NewDirect()
 
 	return &rp
 }
