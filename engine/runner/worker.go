@@ -2,6 +2,7 @@ package runner
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 )
@@ -78,6 +79,12 @@ func (w ActionWorker) Start() {
 				log.Debugf("worker-%d: Received Request\n", w.ID)
 
 				switch work.ReqType {
+				default:
+
+					err := fmt.Errorf("Unsupported work request type: '%d'", work.ReqType)
+					actionData := work.actionData
+					actionData.rc <- &ActionResult{err: err}
+
 				case RtRun:
 
 					actionData := work.actionData
