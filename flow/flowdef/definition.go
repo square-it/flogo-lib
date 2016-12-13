@@ -19,7 +19,7 @@ type Definition struct {
 	rootTask      *Task
 	ehTask        *Task
 
-	attrs       map[string]*data.Attribute
+	attrs map[string]*data.Attribute
 
 	inputMapper *data.Mapper
 	links       map[int]*Link
@@ -44,7 +44,7 @@ func (pd *Definition) RootTask() *Task {
 }
 
 func (pd *Definition) ExplicitReply() bool {
-	return pd.explicitReply;
+	return pd.explicitReply
 }
 
 // ErrorHandler returns the error handler task of the definition
@@ -103,15 +103,15 @@ type Task struct {
 	links        []*Link
 	isScope      bool
 
-	definition   *Definition
-	parent       *Task
-	attrs        map[string]*data.Attribute
+	definition *Definition
+	parent     *Task
+	attrs      map[string]*data.Attribute
 
 	inputMapper  *data.Mapper
 	outputMapper *data.Mapper
 
-	toLinks      []*Link
-	fromLinks    []*Link
+	toLinks   []*Link
+	fromLinks []*Link
 }
 
 // ID gets the id of the task
@@ -211,12 +211,12 @@ const (
 // Link is the object that describes the definition of
 // a link.
 type Link struct {
-	id         int
-	name       string
-	fromTask   *Task
-	toTask     *Task
-	linkType   LinkType
-	value      string //expression or label
+	id       int
+	name     string
+	fromTask *Task
+	toTask   *Task
+	linkType LinkType
+	value    string //expression or label
 
 	definition *Definition
 	parent     *Task
