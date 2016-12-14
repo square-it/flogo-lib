@@ -28,6 +28,7 @@ func NewEngine(engineConfig *Config, triggersConfig *TriggersConfig) *Engine {
 	var engine Engine
 	engine.generator, _ = util.NewGenerator()
 	engine.engineConfig = engineConfig
+
 	engine.triggersConfig = triggersConfig
 	engine.serviceManager = util.NewServiceManager()
 
