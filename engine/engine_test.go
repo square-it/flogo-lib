@@ -1,9 +1,7 @@
 package engine
 
 import (
-	"errors"
 	"github.com/TIBCOSoftware/flogo-lib/types"
-	"github.com/TIBCOSoftware/flogo-lib/util"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
