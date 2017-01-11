@@ -2,16 +2,26 @@ package engine
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
+	"github.com/TIBCOSoftware/flogo-lib/config"
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
+	"github.com/TIBCOSoftware/flogo-lib/types"
 	"github.com/TIBCOSoftware/flogo-lib/util"
 	"github.com/op/go-logging"
 )
 
 var log = logging.MustGetLogger("engine")
+
+// Interface for the engine behaviour
+// Todo: rename to Engine once the refactoring is completed
+type IEngine interface {
+	Start()
+	Stop()
+}
 
 // Engine creates and executes FlowInstances.
 type Engine struct {
@@ -20,6 +30,52 @@ type Engine struct {
 	serviceManager *util.ServiceManager
 	engineConfig   *Config
 	triggersConfig *TriggersConfig
+}
+
+// EngineConfig is the type for the Engine Configuration
+type EngineConfig struct {
+	App      *types.App
+	LogLevel string
+	Runner   action.Runner
+}
+
+// New creates a new Engine
+func New(app *types.App) (IEngine, error) {
+	// App is required
+	if app == nil {
+		return nil, errors.New("Error: No App configuration provided")
+	}
+	// Name is required
+	if len(app.Name) == 0 {
+		return nil, errors.New("Error: No App name provided")
+	}
+	// Version is required
+	if len(app.Version) == 0 {
+		return nil, errors.New("Error: No App version provided")
+	}
+
+	logLevel := config.GetLogLevel()
+
+	runnerType := config.GetRunnerType()
+
+	var r action.Runner
+	// Todo document this values for engine configuration
+	if runnerType == "DIRECT" {
+		r = runner.NewDirect()
+	} else {
+		runnerConfig := defaultRunnerConfig()
+		r = runner.NewPooled(runnerConfig.Pooled)
+	}
+
+	return &EngineConfig{App: app, LogLevel: logLevel, Runner: r}, nil
+}
+
+func (e *EngineConfig) Start() {
+	// Todo implement
+}
+
+func (e *EngineConfig) Stop() {
+	// Todo implement
 }
 
 // NewEngine create a new Engine
