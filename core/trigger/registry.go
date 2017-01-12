@@ -1,13 +1,27 @@
 package trigger
 
 import (
+	"reflect"
+	"strings"
 	"sync"
 )
 
 var (
 	triggersMu sync.Mutex
 	triggers   = make(map[string]Trigger)
+	reg        = &registry{}
 )
+
+type Registry interface {
+	TriggerTypes() map[string]reflect.Type
+}
+
+type registry struct {
+}
+
+func GetRegistry() Registry {
+	return reg
+}
 
 // Register registers the specified trigger
 func Register(trigger Trigger) {
@@ -47,6 +61,27 @@ func Triggers() []Trigger {
 	}
 
 	return list
+}
+
+//TriggerTypes returns a map of all the registered Trigger types where key is the pkg name of the type
+func (r *registry) TriggerTypes() map[string]reflect.Type {
+	typesMap := make(map[string]reflect.Type)
+
+	var curTriggers = triggers
+
+	for _, value := range curTriggers {
+		AddTriggerType(typesMap, value)
+	}
+
+	return typesMap
+}
+
+func AddTriggerType(m map[string]reflect.Type, value interface{}) {
+	t := reflect.TypeOf(value)
+	pkgPath := t.Elem().PkgPath()
+	pkgPath = strings.TrimLeft(pkgPath, "vendor/src/")
+	pkgPath = strings.TrimLeft(pkgPath, "vendor/")
+	m[pkgPath] = t
 }
 
 // Get gets specified trigger
