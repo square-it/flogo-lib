@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/TIBCOSoftware/flogo-lib/app"
 	"github.com/TIBCOSoftware/flogo-lib/config"
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
@@ -70,8 +71,16 @@ func New(app *types.App) (IEngine, error) {
 	return &EngineConfig{App: app, LogLevel: logLevel, Runner: r}, nil
 }
 
+//Start starts the Triggers and Actions
 func (e *EngineConfig) Start() {
-	// Todo implement
+	log.Info("Engine: Starting...")
+
+	instanceManager := app.NewInstanceManager(e.App)
+	err := instanceManager.CreateInstances(trigger.GetRegistry())
+	if err != nil {
+		panic(fmt.Sprintf("Engine: Error Creating Trigger Instances - %s", err.Error()))
+	}
+
 }
 
 func (e *EngineConfig) Stop() {
