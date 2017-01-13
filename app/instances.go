@@ -14,24 +14,30 @@ var log = logging.MustGetLogger("app")
 
 //InstanceManager will create and maintain all the trigger and action instances for an app
 type InstanceManager struct {
-	App      *types.App
-	Triggers map[string]*trigger.Trigger
+	App      *types.AppConfig
+	Triggers map[string]*TriggerInstance
+}
+
+//TriggerInstance contains all the information for a Trigger Instance, configuration and interface
+type TriggerInstance struct {
+	Config    *types.TriggerConfig
+	Interface trigger.Trigger2
 }
 
 //NewInstanceManager creates a new instance manager
-func NewInstanceManager(app *types.App) *InstanceManager {
+func NewInstanceManager(app *types.AppConfig) *InstanceManager {
 	return &InstanceManager{App: app}
 }
 
 //CreateInstances creates new instances for triggers and actions in the registry
 func (m *InstanceManager) CreateInstances(triggerRegistry trigger.Registry) error {
 	// Get Registered triggers
-	regTriggers := triggerRegistry.TriggerMap()
+	regTriggers := triggerRegistry.GetTriggers()
 
 	// Get Trigger instances from configuration
 	configTriggers := m.App.Triggers
 
-	m.Triggers = make(map[string]*trigger.Trigger, len(configTriggers))
+	m.Triggers = make(map[string]*TriggerInstance, len(configTriggers))
 
 	for _, configTrigger := range configTriggers {
 		if configTrigger == nil {
@@ -42,7 +48,7 @@ func (m *InstanceManager) CreateInstances(triggerRegistry trigger.Registry) erro
 			return fmt.Errorf("Trigger '%s' not registered", configTrigger.Ref)
 		}
 
-		var newInstance trigger.Trigger
+		var newInterface trigger.Trigger2
 		var network bytes.Buffer
 
 		gob.Register(regTrigger)
@@ -55,12 +61,12 @@ func (m *InstanceManager) CreateInstances(triggerRegistry trigger.Registry) erro
 		}
 
 		dec := gob.NewDecoder(&network)
-		err = dec.Decode(&newInstance)
+		err = dec.Decode(&newInterface)
 		if err != nil {
 			return fmt.Errorf("Trigger instance creation '%s'", err.Error())
 		}
 
-		m.Triggers[configTrigger.Id] = &newInstance
+		m.Triggers[configTrigger.Id] = &TriggerInstance{Config: configTrigger, Interface: newInterface}
 	}
 
 	return nil

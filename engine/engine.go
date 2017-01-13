@@ -35,13 +35,13 @@ type Engine struct {
 
 // EngineConfig is the type for the Engine Configuration
 type EngineConfig struct {
-	App      *types.App
+	App      *types.AppConfig
 	LogLevel string
-	Runner   action.Runner
+	runner   action.Runner
 }
 
 // New creates a new Engine
-func New(app *types.App) (IEngine, error) {
+func New(app *types.AppConfig) (IEngine, error) {
 	// App is required
 	if app == nil {
 		return nil, errors.New("Error: No App configuration provided")
@@ -68,7 +68,7 @@ func New(app *types.App) (IEngine, error) {
 		r = runner.NewPooled(runnerConfig.Pooled)
 	}
 
-	return &EngineConfig{App: app, LogLevel: logLevel, Runner: r}, nil
+	return &EngineConfig{App: app, LogLevel: logLevel, runner: r}, nil
 }
 
 //Start starts the Triggers and Actions
@@ -81,6 +81,28 @@ func (e *EngineConfig) Start() {
 		panic(fmt.Sprintf("Engine: Error Creating Trigger Instances - %s", err.Error()))
 	}
 
+	// Initialize the triggers,
+	for _, value := range instanceManager.Triggers {
+		triggerConfig := value.Config
+		triggerInterface := value.Interface
+
+		triggerInterface.Init(*triggerConfig, e.runner)
+
+	}
+
+	runner := e.runner.(interface{})
+	managedRunner, ok := runner.(util.Managed)
+
+	if ok {
+		util.StartManaged("ActionRunner Service", managedRunner)
+	}
+
+	// start triggers
+	for key, value := range instanceManager.Triggers {
+		util.StartManaged(fmt.Sprintf("Trigger [ '%s' ]", key), value.Interface)
+	}
+
+	log.Info("Engine: Started")
 }
 
 func (e *EngineConfig) Stop() {

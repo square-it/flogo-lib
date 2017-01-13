@@ -1,6 +1,7 @@
 package trigger
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 	"sync"
@@ -13,14 +14,46 @@ var (
 )
 
 type Registry interface {
-	TriggerMap() map[string]interface{}
+	Add(t Trigger2) error
+	GetTriggers() map[string]Trigger2
 }
 
 type registry struct {
+	triggers map[string]Trigger2
 }
 
 func GetRegistry() Registry {
 	return reg
+}
+
+func (r *registry) Add(t Trigger2) error {
+	triggersMu.Lock()
+	defer triggersMu.Unlock()
+
+	if t == nil {
+		return fmt.Errorf("trigger.Register: trigger is nil")
+	}
+
+	if t.Metadata() == nil {
+		return fmt.Errorf("trigger.Register: trigger metadata is nil")
+	}
+	id := t.Metadata().ID
+
+	if _, dup := r.triggers[id]; dup {
+		return fmt.Errorf("trigger.Register: Register called twice for trigger '%s' ", id)
+	}
+
+	// copy on write to avoid synchronization on access
+	newTs := make(map[string]Trigger2, len(r.triggers))
+
+	for k, v := range r.triggers {
+		newTs[k] = v
+	}
+
+	newTs[id] = t
+	r.triggers = newTs
+
+	return nil
 }
 
 // Register registers the specified trigger
@@ -63,11 +96,11 @@ func Triggers() []Trigger {
 	return list
 }
 
-//TriggerTypes returns a map of all the registered Triggers where key is the pkg name of the type
-func (r *registry) TriggerMap() map[string]interface{} {
-	triggerMap := make(map[string]interface{})
+//GetTriggers returns a map of all the registered Triggers where key is the pkg name of the type
+func (r *registry) GetTriggers() map[string]Trigger2 {
+	triggerMap := make(map[string]Trigger2)
 
-	var curTriggers = triggers
+	var curTriggers = r.triggers
 
 	for _, value := range curTriggers {
 		AddTrigger(triggerMap, value)
@@ -76,12 +109,12 @@ func (r *registry) TriggerMap() map[string]interface{} {
 	return triggerMap
 }
 
-func AddTrigger(m map[string]interface{}, value interface{}) {
-	t := reflect.TypeOf(value)
+func AddTrigger(m map[string]Trigger2, trigger Trigger2) {
+	t := reflect.TypeOf(trigger)
 	pkgPath := t.Elem().PkgPath()
 	pkgPath = strings.TrimLeft(pkgPath, "vendor/src/")
 	pkgPath = strings.TrimLeft(pkgPath, "vendor/")
-	m[pkgPath] = value
+	m[pkgPath] = trigger
 }
 
 // Get gets specified trigger
