@@ -1,7 +1,6 @@
 package app
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
@@ -51,9 +50,9 @@ func getMockApp() *types.App {
 type mockTriggerRegistry struct {
 }
 
-func (r *mockTriggerRegistry) TriggerTypes() map[string]reflect.Type {
-	t := make(map[string]reflect.Type, 1)
-	trigger.AddTriggerType(t, &MockTrigger{})
+func (r *mockTriggerRegistry) TriggerMap() map[string]interface{} {
+	t := make(map[string]interface{}, 1)
+	trigger.AddTrigger(t, &MockTrigger{})
 	return t
 }
 

@@ -13,7 +13,7 @@ var (
 )
 
 type Registry interface {
-	TriggerTypes() map[string]reflect.Type
+	TriggerMap() map[string]interface{}
 }
 
 type registry struct {
@@ -63,25 +63,25 @@ func Triggers() []Trigger {
 	return list
 }
 
-//TriggerTypes returns a map of all the registered Trigger types where key is the pkg name of the type
-func (r *registry) TriggerTypes() map[string]reflect.Type {
-	typesMap := make(map[string]reflect.Type)
+//TriggerTypes returns a map of all the registered Triggers where key is the pkg name of the type
+func (r *registry) TriggerMap() map[string]interface{} {
+	triggerMap := make(map[string]interface{})
 
 	var curTriggers = triggers
 
 	for _, value := range curTriggers {
-		AddTriggerType(typesMap, value)
+		AddTrigger(triggerMap, value)
 	}
 
-	return typesMap
+	return triggerMap
 }
 
-func AddTriggerType(m map[string]reflect.Type, value interface{}) {
+func AddTrigger(m map[string]interface{}, value interface{}) {
 	t := reflect.TypeOf(value)
 	pkgPath := t.Elem().PkgPath()
 	pkgPath = strings.TrimLeft(pkgPath, "vendor/src/")
 	pkgPath = strings.TrimLeft(pkgPath, "vendor/")
-	m[pkgPath] = t
+	m[pkgPath] = value
 }
 
 // Get gets specified trigger

@@ -1,12 +1,16 @@
 package app
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
-	"reflect"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/types"
+	"github.com/op/go-logging"
 )
+
+var log = logging.MustGetLogger("app")
 
 //InstanceManager will create and maintain all the trigger and action instances for an app
 type InstanceManager struct {
@@ -21,8 +25,8 @@ func NewInstanceManager(app *types.App) *InstanceManager {
 
 //CreateInstances creates new instances for triggers and actions in the registry
 func (m *InstanceManager) CreateInstances(triggerRegistry trigger.Registry) error {
-	// Get Registered trigger types
-	regTriggers := triggerRegistry.TriggerTypes()
+	// Get Registered triggers
+	regTriggers := triggerRegistry.TriggerMap()
 
 	// Get Trigger instances from configuration
 	configTriggers := m.App.Triggers
@@ -33,17 +37,30 @@ func (m *InstanceManager) CreateInstances(triggerRegistry trigger.Registry) erro
 		if configTrigger == nil {
 			continue
 		}
-		regTriggerType, ok := regTriggers[configTrigger.Ref]
+		regTrigger, ok := regTriggers[configTrigger.Ref]
 		if !ok {
 			return fmt.Errorf("Trigger '%s' not registered", configTrigger.Ref)
 		}
-		instanceValue := reflect.New(regTriggerType)
-		// Cast to Trigger
-		instance, ok := instanceValue.Elem().Interface().(trigger.Trigger)
-		if !ok {
-			return fmt.Errorf("Trigger '%s' does not implement trigger.Trigger interface", configTrigger.Ref)
+
+		var newInstance trigger.Trigger
+		var network bytes.Buffer
+
+		gob.Register(regTrigger)
+
+		enc := gob.NewEncoder(&network)
+
+		err := enc.Encode(&regTrigger)
+		if err != nil {
+			return fmt.Errorf("Trigger instance creation '%s'", err.Error())
 		}
-		m.Triggers[configTrigger.Id] = &instance
+
+		dec := gob.NewDecoder(&network)
+		err = dec.Decode(&newInstance)
+		if err != nil {
+			return fmt.Errorf("Trigger instance creation '%s'", err.Error())
+		}
+
+		m.Triggers[configTrigger.Id] = &newInstance
 	}
 
 	return nil
