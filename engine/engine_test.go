@@ -16,7 +16,7 @@ func TestNewEngineErrorNoApp(t *testing.T) {
 
 //TestNewEngineErrorNoAppName
 func TestNewEngineErrorNoAppName(t *testing.T) {
-	app := &types.App{}
+	app := &types.AppConfig{}
 
 	_, err := New(app)
 
@@ -26,7 +26,7 @@ func TestNewEngineErrorNoAppName(t *testing.T) {
 
 //TestNewEngineErrorNoAppVersion
 func TestNewEngineErrorNoAppVersion(t *testing.T) {
-	app := &types.App{Name: "MyApp"}
+	app := &types.AppConfig{Name: "MyApp"}
 
 	_, err := New(app)
 

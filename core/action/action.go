@@ -10,6 +10,12 @@ type Action interface {
 	Run(context context.Context, uri string, options interface{}, handler ResultHandler) error
 }
 
+// Action is an action to perform as a result of a trigger
+type Action2 interface {
+	// Run this Action
+	Run(context context.Context, uri string, options interface{}, handler ResultHandler) error
+}
+
 // Runner runs actions
 type Runner interface {
 	//Run the specified Action
