@@ -57,13 +57,13 @@ func (m *InstanceManager) CreateInstances(triggerRegistry trigger.Registry) erro
 
 		err := enc.Encode(&regTrigger)
 		if err != nil {
-			return fmt.Errorf("Trigger instance creation '%s'", err.Error())
+			return fmt.Errorf("Trigger instance creation encoding '%s'", err.Error())
 		}
 
 		dec := gob.NewDecoder(&network)
 		err = dec.Decode(&newInterface)
 		if err != nil {
-			return fmt.Errorf("Trigger instance creation '%s'", err.Error())
+			return fmt.Errorf("Trigger instance creation decoding '%s'", err.Error())
 		}
 
 		m.Triggers[configTrigger.Id] = &TriggerInstance{Config: configTrigger, Interface: newInterface}

@@ -27,7 +27,7 @@ type MockTrigger struct {
 func (t *MockTrigger) Metadata() *trigger.Metadata {
 	return nil
 }
-func (t *MockTrigger) Init(config *trigger.Config, actionRunner action.Runner) {
+func (t *MockTrigger) Init(config types.TriggerConfig, actionRunner action.Runner) {
 	//Noop
 }
 func (t *MockTrigger) Start() error {
@@ -38,22 +38,26 @@ func (t *MockTrigger) Stop() error {
 }
 
 //getMockApp returns a mock app
-func getMockApp() *types.App {
-	triggers := make([]*types.Trigger, 1)
+func getMockApp() *types.AppConfig {
+	triggers := make([]*types.TriggerConfig, 1)
 
-	trigger1 := &types.Trigger{Id: "myTrigger1", Ref: "github.com/TIBCOSoftware/flogo-lib/app"}
+	trigger1 := &types.TriggerConfig{Id: "myTrigger1", Ref: "github.com/TIBCOSoftware/flogo-lib/app"}
 	triggers[0] = trigger1
 
-	return &types.App{Name: "MyApp", Version: "1.0.0", Triggers: triggers}
+	return &types.AppConfig{Name: "MyApp", Version: "1.0.0", Triggers: triggers}
 }
 
 type mockTriggerRegistry struct {
 }
 
-func (r *mockTriggerRegistry) TriggerMap() map[string]interface{} {
-	t := make(map[string]interface{}, 1)
+func (r *mockTriggerRegistry) GetTriggers() map[string]trigger.Trigger2 {
+	t := make(map[string]trigger.Trigger2, 1)
 	trigger.AddTrigger(t, &MockTrigger{})
 	return t
+}
+
+func (r *mockTriggerRegistry) Add(t trigger.Trigger2) error {
+	return nil
 }
 
 //getMockTriggerRegistry returns a mock trigger registry

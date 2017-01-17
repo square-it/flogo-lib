@@ -31,16 +31,11 @@ func (r *registry) Add(t Trigger2) error {
 	defer triggersMu.Unlock()
 
 	if t == nil {
-		return fmt.Errorf("trigger.Register: trigger is nil")
+		return fmt.Errorf("registry.Add: trigger is nil")
 	}
 
 	if t.Metadata() == nil {
-		return fmt.Errorf("trigger.Register: trigger metadata is nil")
-	}
-	id := t.Metadata().ID
-
-	if _, dup := r.triggers[id]; dup {
-		return fmt.Errorf("trigger.Register: Register called twice for trigger '%s' ", id)
+		return fmt.Errorf("registry.Add: trigger metadata is nil")
 	}
 
 	// copy on write to avoid synchronization on access
@@ -50,10 +45,15 @@ func (r *registry) Add(t Trigger2) error {
 		newTs[k] = v
 	}
 
-	newTs[id] = t
+	AddTrigger(newTs, t)
 	r.triggers = newTs
 
 	return nil
+}
+
+//GetTriggers returns a map of all the registered Triggers where key is the pkg name of the type
+func (r *registry) GetTriggers() map[string]Trigger2 {
+	return r.triggers
 }
 
 // Register registers the specified trigger
@@ -64,13 +64,11 @@ func Register(trigger Trigger) {
 	if trigger == nil {
 		panic("trigger.Register: trigger is nil")
 	}
-
 	id := trigger.Metadata().ID
 
 	if _, dup := triggers[id]; dup {
 		panic("trigger.Register: Register called twice for trigger " + id)
 	}
-
 	// copy on write to avoid synchronization on access
 	newTriggers := make(map[string]Trigger, len(triggers))
 
@@ -80,6 +78,14 @@ func Register(trigger Trigger) {
 
 	newTriggers[id] = trigger
 	triggers = newTriggers
+}
+
+func AddTrigger(m map[string]Trigger2, trigger Trigger2) {
+	t := reflect.TypeOf(trigger)
+	pkgPath := t.Elem().PkgPath()
+	pkgPath = strings.TrimLeft(pkgPath, "vendor/src/")
+	pkgPath = strings.TrimLeft(pkgPath, "vendor/")
+	m[pkgPath] = trigger
 }
 
 // Triggers gets all the registered triggers
@@ -94,27 +100,6 @@ func Triggers() []Trigger {
 	}
 
 	return list
-}
-
-//GetTriggers returns a map of all the registered Triggers where key is the pkg name of the type
-func (r *registry) GetTriggers() map[string]Trigger2 {
-	triggerMap := make(map[string]Trigger2)
-
-	var curTriggers = r.triggers
-
-	for _, value := range curTriggers {
-		AddTrigger(triggerMap, value)
-	}
-
-	return triggerMap
-}
-
-func AddTrigger(m map[string]Trigger2, trigger Trigger2) {
-	t := reflect.TypeOf(trigger)
-	pkgPath := t.Elem().PkgPath()
-	pkgPath = strings.TrimLeft(pkgPath, "vendor/src/")
-	pkgPath = strings.TrimLeft(pkgPath, "vendor/")
-	m[pkgPath] = trigger
 }
 
 // Get gets specified trigger
