@@ -36,6 +36,9 @@ func (t *MockTrigger) Start() error {
 func (t *MockTrigger) Stop() error {
 	return nil
 }
+func (t *MockTrigger) New(id string) trigger.Trigger2 {
+	return nil
+}
 
 //getMockApp returns a mock app
 func getMockApp() *types.AppConfig {

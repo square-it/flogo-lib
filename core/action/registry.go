@@ -19,6 +19,7 @@ var (
 type Registry interface {
 	Add(t Action2) error
 	GetActions() map[string]Action2
+	GetAction(string) Action2
 }
 
 type registry struct {
@@ -110,4 +111,9 @@ func Actions() []Action {
 // Get gets specified Action
 func Get(actionType string) Action {
 	return actions[actionType]
+}
+
+// Get gets specified Action
+func (r *registry) GetAction(id string) Action2 {
+	return r.actions[id]
 }

@@ -76,7 +76,7 @@ func (e *EngineConfig) Start() {
 	log.Info("Engine: Starting...")
 
 	instanceManager := app.NewInstanceManager(e.App)
-	err := instanceManager.CreateInstances(trigger.GetRegistry())
+	err := instanceManager.CreateInstances(trigger.GetRegistry(), action.GetRegistry())
 	if err != nil {
 		panic(fmt.Sprintf("Engine: Error Creating Trigger Instances - %s", err.Error()))
 	}
@@ -87,6 +87,15 @@ func (e *EngineConfig) Start() {
 		triggerInterface := value.Interface
 
 		triggerInterface.Init(*triggerConfig, e.runner)
+
+	}
+
+	// Initialize the actions,
+	for _, value := range instanceManager.Actions {
+		actionConfig := value.Config
+		actionInterface := value.Interface
+
+		actionInterface.Init(*actionConfig)
 
 	}
 
