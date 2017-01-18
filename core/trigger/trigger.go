@@ -29,4 +29,7 @@ type Trigger2 interface {
 
 	// Init sets up the trigger, it is called before Start()
 	Init(config types.TriggerConfig, actionRunner action.Runner)
+
+	// New is a factory function to create a new instance for an id
+	New(id string) Trigger2
 }
