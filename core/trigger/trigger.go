@@ -32,3 +32,9 @@ type Trigger2 interface {
 	// Init sets up the trigger, it is called before Start()
 	Init(config types.TriggerConfig, actionRunner action.Runner)
 }
+
+//TriggerInstance contains all the information for a Trigger Instance, configuration and interface
+type TriggerInstance struct {
+	Config *types.TriggerConfig
+	Interf Trigger2
+}

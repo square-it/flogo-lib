@@ -19,9 +19,6 @@ type Action2 interface {
 
 	// Init sets up the action
 	Init(config types.ActionConfig)
-
-	// New is a factory function to create a new instance for an id
-	New(id string) Action2
 }
 
 // Runner runs actions
@@ -35,4 +32,15 @@ type ResultHandler interface {
 	HandleResult(code int, data interface{}, err error)
 
 	Done()
+}
+
+// Factory is used to create new instances for an action
+type Factory interface {
+	New(id string) Action2
+}
+
+//ActionInstance contains all the information for an Action Instance, configuration and interface
+type ActionInstance struct {
+	Config *types.ActionConfig
+	Interf Action2
 }
