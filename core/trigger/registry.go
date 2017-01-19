@@ -2,8 +2,6 @@ package trigger
 
 import (
 	"fmt"
-	"reflect"
-	"strings"
 	"sync"
 )
 
@@ -14,46 +12,92 @@ var (
 )
 
 type Registry interface {
-	Add(t Trigger2) error
-	GetTriggers() map[string]Trigger2
+	RegisterFactory(ref string, f Factory) error
+	GetFactories() map[string]Factory
+	RegisterInstance(id string, trigger Trigger2) error
 }
 
 type registry struct {
-	triggers map[string]Trigger2
+	factories map[string]Factory
+	instances map[string]Trigger2
 }
 
 func GetRegistry() Registry {
 	return reg
 }
 
-func (r *registry) Add(t Trigger2) error {
+func (r *registry) RegisterFactory(ref string, f Factory) error {
 	triggersMu.Lock()
 	defer triggersMu.Unlock()
 
-	if t == nil {
-		return fmt.Errorf("registry.Add: trigger is nil")
+	if len(ref) == 0 {
+		return fmt.Errorf("registry.RegisterFactory: ref is empty")
 	}
 
-	if t.Metadata() == nil {
-		return fmt.Errorf("registry.Add: trigger metadata is nil")
+	if f == nil {
+		return fmt.Errorf("registry.RegisterFactory: factory is nil")
 	}
 
 	// copy on write to avoid synchronization on access
-	newTs := make(map[string]Trigger2, len(r.triggers))
+	newFs := make(map[string]Factory, len(r.factories))
 
-	for k, v := range r.triggers {
-		newTs[k] = v
+	for k, v := range r.factories {
+		newFs[k] = v
 	}
 
-	AddTrigger(newTs, t)
-	r.triggers = newTs
+	if newFs[ref] != nil {
+		return fmt.Errorf("registry.RegisterFactory: already registered factory for ref '%s'", ref)
+	}
+
+	newFs[ref] = f
+
+	r.factories = newFs
 
 	return nil
 }
 
-//GetTriggers returns a map of all the registered Triggers where key is the pkg name of the type
-func (r *registry) GetTriggers() map[string]Trigger2 {
-	return r.triggers
+// GetFactories returns a copy of the factories map
+func (r *registry) GetFactories() map[string]Factory {
+
+	newFs := make(map[string]Factory, len(r.factories))
+
+	for k, v := range r.factories {
+		newFs[k] = v
+	}
+
+	return newFs
+}
+
+func (r *registry) RegisterInstance(id string, inst Trigger2) error {
+	triggersMu.Lock()
+	defer triggersMu.Unlock()
+
+	if len(id) == 0 {
+		return fmt.Errorf("registry.RegisterInstance: id is empty")
+	}
+
+	if inst == nil {
+		return fmt.Errorf("registry.RegisterInstance: instance is nil")
+	}
+
+	// copy on write to avoid synchronization on access
+	newInst := make(map[string]Trigger2, len(r.instances))
+
+	for k, v := range r.instances {
+		newInst[k] = v
+	}
+
+	if newInst[id] != nil {
+		return fmt.Errorf("registry.RegisterInstance: already registered instance for id '%s'", id)
+	}
+
+	newInst[id] = inst
+
+	r.instances = newInst
+
+	return nil
+
+	return nil
 }
 
 // Register registers the specified trigger
@@ -78,14 +122,6 @@ func Register(trigger Trigger) {
 
 	newTriggers[id] = trigger
 	triggers = newTriggers
-}
-
-func AddTrigger(m map[string]Trigger2, trigger Trigger2) {
-	t := reflect.TypeOf(trigger)
-	pkgPath := t.Elem().PkgPath()
-	pkgPath = strings.TrimLeft(pkgPath, "vendor/src/")
-	pkgPath = strings.TrimLeft(pkgPath, "vendor/")
-	m[pkgPath] = trigger
 }
 
 // Triggers gets all the registered triggers
