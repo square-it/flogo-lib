@@ -71,7 +71,7 @@ func New(app *types.AppConfig) (IEngine, error) {
 	return &EngineConfig{App: app, LogLevel: logLevel, runner: r}, nil
 }
 
-//Start starts the Triggers and Actions
+//Start initializes and starts the Triggers and initializes the Actions
 func (e *EngineConfig) Start() {
 	log.Info("Engine: Starting...")
 
