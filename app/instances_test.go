@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"testing"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
@@ -9,24 +10,48 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-//TestNewEngineErrorNoApp
-func TestCreateInstancesOk(t *testing.T) {
+//TestCreateTriggersOk
+func TestCreateTriggersOk(t *testing.T) {
 
 	app := getMockApp()
-	instanceManager := NewInstanceManager(app)
 
-	err := instanceManager.CreateInstances(getMockTriggerRegistry())
+	// Create the mock factories
+	tFactories := make(map[string]trigger.Factory, 1)
+	tFactories["github.com/TIBCOSoftware/flogo-lib/app/mocktrigger"] = &MockTriggerFactory{}
+
+	helper := NewInstanceHelper(app, tFactories, nil)
+
+	triggers, err := helper.CreateTriggers()
 
 	assert.Nil(t, err)
+	assert.Equal(t, 1, len(triggers))
+}
+
+//TestCreateActionsOk
+func TestCreateActionsOk(t *testing.T) {
+
+	app := getMockApp()
+
+	// Create the mock factories
+	aFactories := make(map[string]action.Factory, 1)
+	aFactories["github.com/TIBCOSoftware/flogo-lib/app/mockaction"] = &MockActionFactory{}
+
+	helper := NewInstanceHelper(app, nil, aFactories)
+
+	actions, err := helper.CreateActions()
+
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(actions))
+}
+
+//MockTriggerFactory
+type MockTriggerFactory struct {
 }
 
 //MockTrigger
 type MockTrigger struct {
 }
 
-func (t *MockTrigger) Metadata() *trigger.Metadata {
-	return nil
-}
 func (t *MockTrigger) Init(config types.TriggerConfig, actionRunner action.Runner) {
 	//Noop
 }
@@ -36,34 +61,47 @@ func (t *MockTrigger) Start() error {
 func (t *MockTrigger) Stop() error {
 	return nil
 }
-func (t *MockTrigger) New(id string) trigger.Trigger2 {
+func (t *MockTriggerFactory) New(id string) trigger.Trigger2 {
+	return &MockTrigger{}
+}
+
+//MockActionFactory
+type MockActionFactory struct {
+}
+
+//MockAction
+type MockAction struct {
+}
+
+func (t *MockAction) Init(config types.ActionConfig) {
+	//Noop
+}
+func (t *MockAction) Start() error {
 	return nil
+}
+func (t *MockAction) Stop() error {
+	return nil
+}
+
+func (t *MockAction) Run(context context.Context, uri string, options interface{}, handler action.ResultHandler) error {
+	return nil
+}
+
+func (t *MockActionFactory) New(id string) action.Action2 {
+	return &MockAction{}
 }
 
 //getMockApp returns a mock app
 func getMockApp() *types.AppConfig {
 	triggers := make([]*types.TriggerConfig, 1)
 
-	trigger1 := &types.TriggerConfig{Id: "myTrigger1", Ref: "github.com/TIBCOSoftware/flogo-lib/app"}
+	trigger1 := &types.TriggerConfig{Id: "myTrigger1", Ref: "github.com/TIBCOSoftware/flogo-lib/app/mocktrigger"}
 	triggers[0] = trigger1
 
-	return &types.AppConfig{Name: "MyApp", Version: "1.0.0", Triggers: triggers}
-}
+	actions := make([]*types.ActionConfig, 1)
 
-type mockTriggerRegistry struct {
-}
+	action1 := &types.ActionConfig{Id: "myAction1", Ref: "github.com/TIBCOSoftware/flogo-lib/app/mockaction"}
+	actions[0] = action1
 
-func (r *mockTriggerRegistry) GetTriggers() map[string]trigger.Trigger2 {
-	t := make(map[string]trigger.Trigger2, 1)
-	trigger.AddTrigger(t, &MockTrigger{})
-	return t
-}
-
-func (r *mockTriggerRegistry) Add(t trigger.Trigger2) error {
-	return nil
-}
-
-//getMockTriggerRegistry returns a mock trigger registry
-func getMockTriggerRegistry() trigger.Registry {
-	return &mockTriggerRegistry{}
+	return &types.AppConfig{Name: "MyApp", Version: "1.0.0", Triggers: triggers, Actions: actions}
 }
