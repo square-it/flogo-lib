@@ -2,8 +2,6 @@ package action
 
 import (
 	"fmt"
-	"reflect"
-	"strings"
 	"sync"
 
 	"github.com/op/go-logging"
@@ -17,51 +15,91 @@ var (
 )
 
 type Registry interface {
-	Add(t Action2) error
-	GetActions() map[string]Action2
-	GetAction(string) Action2
+	RegisterFactory(ref string, f Factory) error
+	GetFactories() map[string]Factory
+	RegisterInstance(id string, instance *ActionInstance) error
+	GetAction(id string) Action2
 }
 
 type registry struct {
-	actions map[string]Action2
+	factories map[string]Factory
+	instances map[string]*ActionInstance
 }
 
 func GetRegistry() Registry {
 	return reg
 }
 
-func (r *registry) Add(a Action2) error {
+func (r *registry) RegisterFactory(ref string, f Factory) error {
 	actionsMu.Lock()
 	defer actionsMu.Unlock()
 
-	if a == nil {
-		return fmt.Errorf("registry.Add: trigger is nil")
+	if len(ref) == 0 {
+		return fmt.Errorf("registry.RegisterFactory: ref is empty")
+	}
+
+	if f == nil {
+		return fmt.Errorf("registry.RegisterFactory: factory is nil")
 	}
 
 	// copy on write to avoid synchronization on access
-	newAs := make(map[string]Action2, len(r.actions))
+	newFs := make(map[string]Factory, len(r.factories))
 
-	for k, v := range r.actions {
-		newAs[k] = v
+	for k, v := range r.factories {
+		newFs[k] = v
 	}
 
-	AddAction(newAs, a)
-	r.actions = newAs
+	if newFs[ref] != nil {
+		return fmt.Errorf("registry.RegisterFactory: already registered factory for ref '%s'", ref)
+	}
+
+	newFs[ref] = f
+
+	r.factories = newFs
 
 	return nil
 }
 
-func AddAction(m map[string]Action2, action Action2) {
-	t := reflect.TypeOf(action)
-	pkgPath := t.Elem().PkgPath()
-	pkgPath = strings.TrimLeft(pkgPath, "vendor/src/")
-	pkgPath = strings.TrimLeft(pkgPath, "vendor/")
-	m[pkgPath] = action
+// GetFactories returns a copy of the factories map
+func (r *registry) GetFactories() map[string]Factory {
+
+	newFs := make(map[string]Factory, len(r.factories))
+
+	for k, v := range r.factories {
+		newFs[k] = v
+	}
+
+	return newFs
 }
 
-//GetActions returns a map of all the registered Actions where key is the pkg name of the type
-func (r *registry) GetActions() map[string]Action2 {
-	return r.actions
+func (r *registry) RegisterInstance(id string, inst *ActionInstance) error {
+	actionsMu.Lock()
+	defer actionsMu.Unlock()
+
+	if len(id) == 0 {
+		return fmt.Errorf("registry.RegisterInstance: id is empty")
+	}
+
+	if inst == nil {
+		return fmt.Errorf("registry.RegisterInstance: instance is nil")
+	}
+
+	// copy on write to avoid synchronization on access
+	newInst := make(map[string]*ActionInstance, len(r.instances))
+
+	for k, v := range r.instances {
+		newInst[k] = v
+	}
+
+	if newInst[id] != nil {
+		return fmt.Errorf("registry.RegisterInstance: already registered instance for id '%s'", id)
+	}
+
+	newInst[id] = inst
+
+	r.instances = newInst
+
+	return nil
 }
 
 // Register registers the specified action
@@ -115,5 +153,9 @@ func Get(actionType string) Action {
 
 // Get gets specified Action
 func (r *registry) GetAction(id string) Action2 {
-	return r.actions[id]
+	instance := r.instances[id]
+	if instance != nil {
+		return instance.Interf
+	}
+	return nil
 }

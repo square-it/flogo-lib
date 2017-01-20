@@ -11,105 +11,72 @@ import (
 
 var log = logging.MustGetLogger("app")
 
-//InstanceManager will create and register all the trigger and action instances for an app
-type InstanceManager struct {
-	App      *types.AppConfig
-	Triggers map[string]*TriggerInstance
-	Actions  map[string]*ActionInstance
-}
-
-//TriggerInstance contains all the information for a Trigger Instance, configuration and interface
-type TriggerInstance struct {
-	Config    *types.TriggerConfig
-	Interface trigger.Trigger2
-}
-
-//ActionInstance contains all the information for an Action Instance, configuration and interface
-type ActionInstance struct {
-	Config    *types.ActionConfig
-	Interface action.Action2
+//InstanceHelper helps to create the instances for a given id
+type InstanceHelper struct {
+	app        *types.AppConfig
+	tFactories map[string]trigger.Factory
+	aFactories map[string]action.Factory
 }
 
 //NewInstanceManager creates a new instance manager
-func NewInstanceManager(app *types.AppConfig) *InstanceManager {
-	return &InstanceManager{App: app}
+func NewInstanceHelper(app *types.AppConfig, tFactories map[string]trigger.Factory, aFactories map[string]action.Factory) *InstanceHelper {
+	return &InstanceHelper{app: app, tFactories: tFactories, aFactories: aFactories}
 }
 
-//CreateInstances creates new instances for triggers and actions in the registry
-func (m *InstanceManager) CreateInstances(tRegistry trigger.Registry, aRegistry action.Registry) error {
-	// Create Triggers
-	err := m.CreateTriggerInstances(tRegistry)
-	if err != nil {
-		return err
-	}
-
-	// Create Actions
-	err = m.CreateActionInstances(aRegistry)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-//CreateTriggerInstances creates new instances for triggers in the registry
-func (m *InstanceManager) CreateTriggerInstances(tRegistry trigger.Registry) error {
-	// Get Registered trigger factories
-	factories := tRegistry.GetFactories()
+//CreateTriggers creates new instances for triggers in the configuration
+func (h *InstanceHelper) CreateTriggers() (map[string]*trigger.TriggerInstance, error) {
 
 	// Get Trigger instances from configuration
-	triggers := m.App.Triggers
+	tConfigs := h.app.Triggers
 
-	m.Triggers = make(map[string]*TriggerInstance, len(triggers))
+	instances := make(map[string]*trigger.TriggerInstance, len(tConfigs))
 
-	for _, trigger := range triggers {
-		if trigger == nil {
+	for _, tConfig := range tConfigs {
+		if tConfig == nil {
 			continue
 		}
-		factory, ok := factories[trigger.Ref]
+		factory, ok := h.tFactories[tConfig.Ref]
 		if !ok {
-			return fmt.Errorf("Trigger '%s' not registered", trigger.Ref)
+			return nil, fmt.Errorf("Trigger Factory '%s' not registered", tConfig.Ref)
 		}
 
-		newInterface := factory.New(trigger.Id)
+		newInterface := factory.New(tConfig.Id)
 
 		if newInterface == nil {
-			return fmt.Errorf("Cannot create Trigger nil for id '%s'", trigger.Id)
+			return nil, fmt.Errorf("Cannot create Trigger nil for id '%s'", tConfig.Id)
 		}
 
-		m.Triggers[trigger.Id] = &TriggerInstance{Config: trigger, Interface: newInterface}
+		instances[tConfig.Id] = &trigger.TriggerInstance{Config: tConfig, Interf: newInterface}
 	}
 
-	return nil
+	return instances, nil
 }
 
-//CreateActionInstances creates new instances for actions in the registry
-func (m *InstanceManager) CreateActionInstances(aRegistry action.Registry) error {
-	// Get Registered actions
-	regActions := aRegistry.GetActions()
+//CreateActions creates new instances for actions in the configuration
+func (h *InstanceHelper) CreateActions() (map[string]*action.ActionInstance, error) {
 
 	// Get Action instances from configuration
-	configActions := m.App.Actions
+	aConfigs := h.app.Actions
 
-	m.Actions = make(map[string]*ActionInstance, len(configActions))
+	instances := make(map[string]*action.ActionInstance, len(aConfigs))
 
-	for _, configAction := range configActions {
-		if configAction == nil {
+	for _, aConfig := range aConfigs {
+		if aConfig == nil {
 			continue
 		}
-		regAction, ok := regActions[configAction.Ref]
+		factory, ok := h.aFactories[aConfig.Ref]
 		if !ok {
-			return fmt.Errorf("Action '%s' not registered", configAction.Ref)
+			return nil, fmt.Errorf("Action Factory '%s' not registered", aConfig.Ref)
 		}
 
-		newInterface := regAction.New(configAction.Id)
+		newInterface := factory.New(aConfig.Id)
 
 		if newInterface == nil {
-			return fmt.Errorf("Cannot create Action nil for id '%s'", configAction.Id)
+			return nil, fmt.Errorf("Cannot create Action nil for id '%s'", aConfig.Id)
 		}
 
-		m.Actions[configAction.Id] = &ActionInstance{Config: configAction, Interface: newInterface}
+		instances[aConfig.Id] = &action.ActionInstance{Config: aConfig, Interf: newInterface}
 	}
 
-	return nil
+	return instances, nil
 }

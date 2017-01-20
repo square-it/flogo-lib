@@ -75,27 +75,44 @@ func New(app *types.AppConfig) (IEngine, error) {
 func (e *EngineConfig) Start() {
 	log.Info("Engine: Starting...")
 
-	instanceManager := app.NewInstanceManager(e.App)
-	err := instanceManager.CreateInstances(trigger.GetRegistry(), action.GetRegistry())
+	instanceHelper := app.NewInstanceHelper(e.App, trigger.GetRegistry().GetFactories(), action.GetRegistry().GetFactories())
+
+	// Create the trigger instances
+	tInstances, err := instanceHelper.CreateTriggers()
 	if err != nil {
-		panic(fmt.Sprintf("Engine: Error Creating Trigger Instances - %s", err.Error()))
+		errorMsg := fmt.Sprintf("Engine: Error Creating trigger instances - %s", err.Error())
+		log.Error(errorMsg)
+		panic(errorMsg)
 	}
 
-	// Initialize the triggers,
-	for _, value := range instanceManager.Triggers {
+	// Initialize and register the triggers
+	for key, value := range tInstances {
 		triggerConfig := value.Config
-		triggerInterface := value.Interface
+		triggerInterface := value.Interf
 
+		//Init
 		triggerInterface.Init(*triggerConfig, e.runner)
-
+		//Register
+		trigger.GetRegistry().RegisterInstance(key, value)
 	}
 
-	// Initialize the actions,
-	for _, value := range instanceManager.Actions {
-		actionConfig := value.Config
-		actionInterface := value.Interface
+	// Create the action instances
+	aInstances, err := instanceHelper.CreateActions()
+	if err != nil {
+		errorMsg := fmt.Sprintf("Engine: Error Creating action instances - %s", err.Error())
+		log.Error(errorMsg)
+		panic(errorMsg)
+	}
 
+	// Initialize and register the actions,
+	for key, value := range aInstances {
+		actionConfig := value.Config
+		actionInterface := value.Interf
+
+		//Init
 		actionInterface.Init(*actionConfig)
+		//Register
+		action.GetRegistry().RegisterInstance(key, value)
 
 	}
 
@@ -106,9 +123,9 @@ func (e *EngineConfig) Start() {
 		util.StartManaged("ActionRunner Service", managedRunner)
 	}
 
-	// start triggers
-	for key, value := range instanceManager.Triggers {
-		util.StartManaged(fmt.Sprintf("Trigger [ '%s' ]", key), value.Interface)
+	// Start the triggers
+	for key, value := range tInstances {
+		util.StartManaged(fmt.Sprintf("Trigger [ '%s' ]", key), value.Interf)
 	}
 
 	log.Info("Engine: Started")

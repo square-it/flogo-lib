@@ -14,12 +14,12 @@ var (
 type Registry interface {
 	RegisterFactory(ref string, f Factory) error
 	GetFactories() map[string]Factory
-	RegisterInstance(id string, trigger Trigger2) error
+	RegisterInstance(id string, instance *TriggerInstance) error
 }
 
 type registry struct {
 	factories map[string]Factory
-	instances map[string]Trigger2
+	instances map[string]*TriggerInstance
 }
 
 func GetRegistry() Registry {
@@ -68,7 +68,7 @@ func (r *registry) GetFactories() map[string]Factory {
 	return newFs
 }
 
-func (r *registry) RegisterInstance(id string, inst Trigger2) error {
+func (r *registry) RegisterInstance(id string, inst *TriggerInstance) error {
 	triggersMu.Lock()
 	defer triggersMu.Unlock()
 
@@ -81,7 +81,7 @@ func (r *registry) RegisterInstance(id string, inst Trigger2) error {
 	}
 
 	// copy on write to avoid synchronization on access
-	newInst := make(map[string]Trigger2, len(r.instances))
+	newInst := make(map[string]*TriggerInstance, len(r.instances))
 
 	for k, v := range r.instances {
 		newInst[k] = v
@@ -94,8 +94,6 @@ func (r *registry) RegisterInstance(id string, inst Trigger2) error {
 	newInst[id] = inst
 
 	r.instances = newInst
-
-	return nil
 
 	return nil
 }
