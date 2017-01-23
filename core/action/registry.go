@@ -15,9 +15,9 @@ var (
 )
 
 type Registry interface {
-	RegisterFactory(ref string, f Factory) error
+	AddFactory(ref string, f Factory) error
 	GetFactories() map[string]Factory
-	RegisterInstance(id string, instance *ActionInstance) error
+	AddInstance(id string, instance *ActionInstance) error
 	GetAction(id string) Action2
 }
 
@@ -26,11 +26,11 @@ type registry struct {
 	instances map[string]*ActionInstance
 }
 
-func GetRegistry() Registry {
-	return reg
+func RegisterFactory(ref string, f Factory) error {
+	return reg.AddFactory(ref, f)
 }
 
-func (r *registry) RegisterFactory(ref string, f Factory) error {
+func (r *registry) AddFactory(ref string, f Factory) error {
 	actionsMu.Lock()
 	defer actionsMu.Unlock()
 
@@ -60,6 +60,10 @@ func (r *registry) RegisterFactory(ref string, f Factory) error {
 	return nil
 }
 
+func Factories() map[string]Factory {
+	return reg.GetFactories()
+}
+
 // GetFactories returns a copy of the factories map
 func (r *registry) GetFactories() map[string]Factory {
 
@@ -72,7 +76,11 @@ func (r *registry) GetFactories() map[string]Factory {
 	return newFs
 }
 
-func (r *registry) RegisterInstance(id string, inst *ActionInstance) error {
+func RegisterInstance(id string, inst *ActionInstance) error {
+	return reg.AddInstance(id, inst)
+}
+
+func (r *registry) AddInstance(id string, inst *ActionInstance) error {
 	actionsMu.Lock()
 	defer actionsMu.Unlock()
 
@@ -149,6 +157,11 @@ func Actions() []Action {
 // Get gets specified Action
 func Get(actionType string) Action {
 	return actions[actionType]
+}
+
+// Get gets specified Action
+func Get2(id string) Action2 {
+	return reg.GetAction(id)
 }
 
 // Get gets specified Action

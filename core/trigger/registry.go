@@ -12,9 +12,9 @@ var (
 )
 
 type Registry interface {
-	RegisterFactory(ref string, f Factory) error
+	AddFactory(ref string, f Factory) error
 	GetFactories() map[string]Factory
-	RegisterInstance(id string, instance *TriggerInstance) error
+	AddInstance(id string, instance *TriggerInstance) error
 }
 
 type registry struct {
@@ -26,7 +26,11 @@ func GetRegistry() Registry {
 	return reg
 }
 
-func (r *registry) RegisterFactory(ref string, f Factory) error {
+func RegisterFactory(ref string, f Factory) error {
+	return reg.AddFactory(ref, f)
+}
+
+func (r *registry) AddFactory(ref string, f Factory) error {
 	triggersMu.Lock()
 	defer triggersMu.Unlock()
 
@@ -56,6 +60,10 @@ func (r *registry) RegisterFactory(ref string, f Factory) error {
 	return nil
 }
 
+func Factories() map[string]Factory {
+	return reg.GetFactories()
+}
+
 // GetFactories returns a copy of the factories map
 func (r *registry) GetFactories() map[string]Factory {
 
@@ -68,7 +76,11 @@ func (r *registry) GetFactories() map[string]Factory {
 	return newFs
 }
 
-func (r *registry) RegisterInstance(id string, inst *TriggerInstance) error {
+func RegisterInstance(id string, inst *TriggerInstance) error {
+	return reg.AddInstance(id, inst)
+}
+
+func (r *registry) AddInstance(id string, inst *TriggerInstance) error {
 	triggersMu.Lock()
 	defer triggersMu.Unlock()
 

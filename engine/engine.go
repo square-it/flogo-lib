@@ -75,7 +75,7 @@ func New(app *types.AppConfig) (IEngine, error) {
 func (e *EngineConfig) Start() {
 	log.Info("Engine: Starting...")
 
-	instanceHelper := app.NewInstanceHelper(e.App, trigger.GetRegistry().GetFactories(), action.GetRegistry().GetFactories())
+	instanceHelper := app.NewInstanceHelper(e.App, trigger.Factories(), action.Factories())
 
 	// Create the trigger instances
 	tInstances, err := instanceHelper.CreateTriggers()
@@ -93,7 +93,7 @@ func (e *EngineConfig) Start() {
 		//Init
 		triggerInterface.Init(*triggerConfig, e.runner)
 		//Register
-		trigger.GetRegistry().RegisterInstance(key, value)
+		trigger.RegisterInstance(key, value)
 	}
 
 	// Create the action instances
@@ -112,7 +112,7 @@ func (e *EngineConfig) Start() {
 		//Init
 		actionInterface.Init(*actionConfig)
 		//Register
-		action.GetRegistry().RegisterInstance(key, value)
+		action.RegisterInstance(key, value)
 
 	}
 
