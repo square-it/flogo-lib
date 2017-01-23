@@ -35,9 +35,10 @@ type Engine struct {
 
 // EngineConfig is the type for the Engine Configuration
 type EngineConfig struct {
-	App      *types.AppConfig
-	LogLevel string
-	runner   action.Runner
+	App            *types.AppConfig
+	LogLevel       string
+	runner         action.Runner
+	serviceManager *util.ServiceManager
 }
 
 // New creates a new Engine
@@ -68,7 +69,7 @@ func New(app *types.AppConfig) (IEngine, error) {
 		r = runner.NewPooled(runnerConfig.Pooled)
 	}
 
-	return &EngineConfig{App: app, LogLevel: logLevel, runner: r}, nil
+	return &EngineConfig{App: app, LogLevel: logLevel, runner: r, serviceManager: util.NewServiceManager()}, nil
 }
 
 //Start initializes and starts the Triggers and initializes the Actions
@@ -110,7 +111,7 @@ func (e *EngineConfig) Start() {
 		actionInterface := value.Interf
 
 		//Init
-		actionInterface.Init(*actionConfig)
+		actionInterface.Init(*actionConfig, e.serviceManager)
 		//Register
 		action.RegisterInstance(key, value)
 

@@ -118,7 +118,7 @@ func (fa *FlowAction) Run(context context.Context, uri string, options interface
 
 	if ok && ro.ExecOptions != nil {
 		log.Debugf("Applying Exec Options to instance: %s\n", instance.ID())
-		applyExecOptions(instance, ro.ExecOptions)
+		ApplyExecOptions(instance, ro.ExecOptions)
 	}
 
 	triggerAttrs, ok := trigger.FromContext(context)

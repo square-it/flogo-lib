@@ -165,7 +165,7 @@ func (pi *Instance) Start(startAttrs []*data.Attribute) bool {
 	//apply inputMapper if we have one, otherwise do default mappings
 	applyDefaultInstanceInputMappings(pi, startAttrs)
 
-	log.Debugf("FlowInstance Flow: %v", pi.FlowModel)
+	log.Infof("FlowInstance Flow: %v", pi.FlowModel)
 	model := pi.FlowModel.GetFlowBehavior()
 
 	//todo: error if model not found

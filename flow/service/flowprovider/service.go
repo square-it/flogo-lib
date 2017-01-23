@@ -8,8 +8,8 @@ import (
 	"sync"
 
 	"github.com/TIBCOSoftware/flogo-lib/flow/flowdef"
-	"github.com/TIBCOSoftware/flogo-lib/flow/service"
 	"github.com/TIBCOSoftware/flogo-lib/flow/script/fggos"
+	"github.com/TIBCOSoftware/flogo-lib/flow/service"
 	"github.com/TIBCOSoftware/flogo-lib/flow/support"
 	"github.com/TIBCOSoftware/flogo-lib/util"
 	"github.com/op/go-logging"
@@ -74,25 +74,25 @@ func (pps *RemoteFlowProvider) GetFlow(flowURI string) *flowdef.Definition {
 		return flow
 	}
 
-	log.Debugf("Get Flow: %s\n", flowURI)
+	log.Infof("Get Flow: %s\n", flowURI)
 
 	var flowJSON []byte
 
 	if strings.HasPrefix(flowURI, uriSchemeEmbedded) {
 
-		log.Debugf("Loading Embedded Flow: %s\n", flowURI)
+		log.Infof("Loading Embedded Flow: %s\n", flowURI)
 		flowJSON = pps.embeddedMgr.GetEmbeddedFlowJSON(flowURI)
 
 	} else if strings.HasPrefix(flowURI, uriSchemeFile) {
 
-		log.Debugf("Loading Local Flow: %s\n", flowURI)
+		log.Infof("Loading Local Flow: %s\n", flowURI)
 		flowFilePath, _ := util.URLStringToFilePath(flowURI)
 
 		flowJSON, _ = ioutil.ReadFile(flowFilePath)
 
 	} else {
 
-		log.Debugf("Loading Remote Flow: %s\n", flowURI)
+		log.Infof("Loading Remote Flow: %s\n", flowURI)
 
 		req, err := http.NewRequest("GET", flowURI, nil)
 		client := &http.Client{}
@@ -102,7 +102,7 @@ func (pps *RemoteFlowProvider) GetFlow(flowURI string) *flowdef.Definition {
 		}
 		defer resp.Body.Close()
 
-		log.Debug("response Status:", resp.Status)
+		log.Infof("response Status:", resp.Status)
 
 		if resp.StatusCode >= 300 {
 			//not found
