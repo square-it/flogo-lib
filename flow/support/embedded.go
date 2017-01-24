@@ -4,8 +4,11 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/base64"
+	"github.com/op/go-logging"
 	"io/ioutil"
 )
+
+var log = logging.MustGetLogger("embedded")
 
 // EmbeddedFlowManager is a simple manager for embedded flows
 type EmbeddedFlowManager struct {
@@ -28,6 +31,7 @@ func NewEmbeddedFlowManager(compressed bool, embeddedFlows map[string]string) *E
 // GetEmbeddedFlowJSON gets the specified embedded flow
 func (mgr *EmbeddedFlowManager) GetEmbeddedFlowJSON(flowID string) []byte {
 
+	//log.Infof("embeddedFlows '%+v'", mgr.embeddedFlows)
 	flow, ok := mgr.embeddedFlows[flowID]
 
 	if !ok {

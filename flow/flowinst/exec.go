@@ -17,8 +17,8 @@ type IDGenerator interface {
 	NewFlowInstanceID() string
 }
 
-// applyExecOptions applies any execution options to the flow instance
-func applyExecOptions(instance *Instance, execOptions *ExecOptions) {
+// ApplyExecOptions applies any execution options to the flow instance
+func ApplyExecOptions(instance *Instance, execOptions *ExecOptions) {
 
 	if execOptions != nil {
 
