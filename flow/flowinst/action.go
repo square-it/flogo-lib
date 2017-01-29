@@ -86,7 +86,7 @@ func (fa *FlowAction) Run(context context.Context, uri string, options interface
 
 	switch op {
 	case AoStart:
-		flow := fa.flowProvider.GetFlow(uri)
+		flow, _ := fa.flowProvider.GetFlow(uri)
 
 		if flow == nil {
 			err := fmt.Errorf("Flow [%s] not found", uri)
