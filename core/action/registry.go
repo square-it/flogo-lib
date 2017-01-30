@@ -34,6 +34,8 @@ func (r *registry) AddFactory(ref string, f Factory) error {
 	actionsMu.Lock()
 	defer actionsMu.Unlock()
 
+	log.Debugf("Registering action factory ref: '%s'", ref)
+
 	if len(ref) == 0 {
 		return fmt.Errorf("registry.RegisterFactory: ref is empty")
 	}
