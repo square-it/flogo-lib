@@ -15,9 +15,16 @@ type AppConfig struct {
 
 // Trigger is the configuration for the Trigger
 type TriggerConfig struct {
-	Id   string          `json:"id"`
-	Ref  string          `json:"ref"`
-	Data json.RawMessage `json:"data"`
+	Id       string            `json:"id"`
+	Ref      string            `json:"ref"`
+	Settings json.RawMessage   `json:"settings"`
+	Handlers []*TriggerHandler `json:"handlers"`
+}
+
+// TriggerHandler is the configuration for the Trigger Handler
+type TriggerHandler struct {
+	ActionId string          `json:"actionId"`
+	Settings json.RawMessage `json:"settings"`
 }
 
 // Action is the configuration for the Action
