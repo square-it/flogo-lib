@@ -64,14 +64,14 @@ func (pps *RemoteFlowProvider) Stop() error {
 }
 
 // GetFlow implements flow.Provider.GetFlow
-func (pps *RemoteFlowProvider) GetFlow(flowURI string) *flowdef.Definition {
+func (pps *RemoteFlowProvider) GetFlow(flowURI string) (*flowdef.Definition, error) {
 
 	//handle panic
 
 	// todo turn pps.flowCache to real cache
 	if flow, ok := pps.flowCache[flowURI]; ok {
 		log.Debugf("Accessing cached Flow: %s\n")
-		return flow
+		return flow, nil
 	}
 
 	log.Infof("Get Flow: %s\n", flowURI)
@@ -106,7 +106,7 @@ func (pps *RemoteFlowProvider) GetFlow(flowURI string) *flowdef.Definition {
 
 		if resp.StatusCode >= 300 {
 			//not found
-			return nil
+			return nil, nil
 		}
 
 		body, _ := ioutil.ReadAll(resp.Body)
@@ -123,7 +123,7 @@ func (pps *RemoteFlowProvider) GetFlow(flowURI string) *flowdef.Definition {
 			log.Errorf("Error unmarshalling flow: %s", err.Error())
 			log.Debugf("Failed to unmarshal: %s", string(flowJSON))
 
-			return nil
+			return nil, nil
 		}
 
 		//todo optimize this - not needed if flow doesn't have expressions
@@ -136,12 +136,12 @@ func (pps *RemoteFlowProvider) GetFlow(flowURI string) *flowdef.Definition {
 		pps.flowCache[flowURI] = def
 		pps.mutex.Unlock()
 
-		return def
+		return def, nil
 	}
 
 	log.Debugf("Flow Not Found: %s\n", flowURI)
 
-	return nil
+	return nil, nil
 }
 
 func DefaultConfig() *util.ServiceConfig {

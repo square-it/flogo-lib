@@ -3,11 +3,14 @@ package trigger
 import (
 	"fmt"
 	"sync"
+
+	"github.com/op/go-logging"
 )
 
 var (
 	triggersMu sync.Mutex
 	triggers   = make(map[string]Trigger)
+	log        = logging.MustGetLogger("trigger")
 	reg        = &registry{}
 )
 
@@ -33,6 +36,8 @@ func RegisterFactory(ref string, f Factory) error {
 func (r *registry) AddFactory(ref string, f Factory) error {
 	triggersMu.Lock()
 	defer triggersMu.Unlock()
+
+	log.Debugf("Registering trigger factory ref: '%s'", ref)
 
 	if len(ref) == 0 {
 		return fmt.Errorf("registry.RegisterFactory: ref is empty")

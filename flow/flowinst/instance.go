@@ -82,7 +82,7 @@ func (pi *Instance) SetFlowProvider(provider flowdef.Provider) {
 func (pi *Instance) Restart(id string, provider flowdef.Provider) {
 	pi.id = id
 	pi.flowProvider = provider
-	pi.Flow = pi.flowProvider.GetFlow(pi.FlowURI)
+	pi.Flow, _ = pi.flowProvider.GetFlow(pi.FlowURI)
 	pi.FlowModel = model.Get(pi.Flow.ModelID())
 	pi.RootTaskEnv.init(pi)
 }

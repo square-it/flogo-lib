@@ -35,6 +35,12 @@ func (h *InstanceHelper) CreateTriggers() (map[string]*trigger.TriggerInstance, 
 		if tConfig == nil {
 			continue
 		}
+
+		_, ok := instances[tConfig.Id]
+		if ok {
+			return nil, fmt.Errorf("Trigger with id '%s' already registered, trigger ids have to be unique", tConfig.Id)
+		}
+
 		factory, ok := h.tFactories[tConfig.Ref]
 		if !ok {
 			return nil, fmt.Errorf("Trigger Factory '%s' not registered", tConfig.Ref)
@@ -64,6 +70,12 @@ func (h *InstanceHelper) CreateActions() (map[string]*action.ActionInstance, err
 		if aConfig == nil {
 			continue
 		}
+
+		_, ok := instances[aConfig.Id]
+		if ok {
+			return nil, fmt.Errorf("Action with id '%s' already registered, action ids have to be unique", aConfig.Id)
+		}
+
 		factory, ok := h.aFactories[aConfig.Ref]
 		if !ok {
 			return nil, fmt.Errorf("Action Factory '%s' not registered", aConfig.Ref)

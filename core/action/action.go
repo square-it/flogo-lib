@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/TIBCOSoftware/flogo-lib/types"
-	"github.com/TIBCOSoftware/flogo-lib/util"
 )
 
 // Action is an action to perform as a result of a trigger
@@ -19,7 +18,7 @@ type Action2 interface {
 	Run(context context.Context, uri string, options interface{}, handler ResultHandler) error
 
 	// Init sets up the action
-	Init(config types.ActionConfig, serviceManager *util.ServiceManager)
+	Init(config types.ActionConfig)
 }
 
 // Runner runs actions

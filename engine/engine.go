@@ -111,7 +111,7 @@ func (e *EngineConfig) Start() {
 		actionInterface := value.Interf
 
 		//Init
-		actionInterface.Init(*actionConfig, e.serviceManager)
+		actionInterface.Init(*actionConfig)
 		//Register
 		action.RegisterInstance(key, value)
 
