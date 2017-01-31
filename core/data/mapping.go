@@ -3,6 +3,7 @@ package data
 import (
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 // MappingType is an enum for possible Mapping Types
@@ -80,7 +81,9 @@ func (m *Mapper) Apply(inputScope Scope, outputScope Scope) {
 				} else {
 					//for now assume if we have a path, attr is "object"
 					valMap := attrValue.(map[string]interface{})
-					attrValue, exists = valMap[attrPath]
+					attrValue = GetMapValue(valMap, attrPath)
+
+					//attrValue, exists = valMap[attrPath]
 				}
 			}
 
@@ -149,7 +152,30 @@ func (m *Mapper) Apply(inputScope Scope, outputScope Scope) {
 		case MtLiteral:
 			outputScope.SetAttrValue(mapping.MapTo, mapping.Value)
 		case MtExpression:
-			//todo implement script mapping
+		//todo implement script mapping
 		}
 	}
+}
+
+func GetMapValue(valueMap map[string]interface{}, path string) interface{} {
+
+	var pathComponents []string = strings.Split(path, ".")
+	lastPcIdx := len(pathComponents) - 1
+
+	tmpObj := valueMap
+
+	for pcIdx, pc := range pathComponents {
+
+		if pcIdx == lastPcIdx {
+			return tmpObj[pc]
+		}
+
+		switch tmpObj[pc].(type) {
+		//todo need to throw error if not a map
+		case map[string]interface{}:
+			tmpObj = tmpObj[pc].(map[string]interface{})
+		}
+	}
+
+	return tmpObj
 }

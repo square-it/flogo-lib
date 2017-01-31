@@ -169,10 +169,8 @@ func (em *GosLinkExprManager) EvalLinkExpr(link *flowdef.Link, scope data.Scope)
 		} else {
 
 			if exists && len(attrPath) > 0 {
-				//for now assume if we have a path, attr is "object" and only one level
-				valMap := attrValue.(map[string]interface{})
-				//todo what if the value does not exists
-				val, _ := valMap[attrPath]
+
+				val := data.GetMapValue(attrValue.(map[string]interface{}), attrPath)
 				attrValue = FixUpValue(val)
 			}
 
@@ -215,3 +213,4 @@ func FixUpValue(val interface{}) interface{} {
 
 	return ret
 }
+
