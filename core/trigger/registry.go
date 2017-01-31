@@ -18,7 +18,6 @@ type Registry interface {
 	AddFactory(ref string, f Factory) error
 	GetFactories() map[string]Factory
 	AddInstance(id string, instance *TriggerInstance) error
-	GetTrigger(id string) Trigger2
 }
 
 type registry struct {
@@ -158,18 +157,4 @@ func Triggers() []Trigger {
 func Get(id string) Trigger {
 	//var curTriggers = triggers
 	return triggers[id]
-}
-
-// Get gets specified Trigger
-func Get2(id string) Trigger2 {
-	return reg.GetTrigger(id)
-}
-
-// Get gets specified Trigger
-func (r *registry) GetTrigger(id string) Trigger2 {
-	instance := r.instances[id]
-	if instance != nil {
-		return instance.Interf
-	}
-	return nil
 }

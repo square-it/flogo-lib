@@ -47,6 +47,31 @@ type Instance struct {
 	replyHandler support.ReplyHandler
 }
 
+// New creates a new Flow Instance from the specified Flow
+func New(instanceID string, flowURI string, flow *flowdef.Definition, flowModel *model.FlowModel) *Instance {
+	var instance Instance
+	instance.id = instanceID
+	instance.stepID = 0
+	instance.FlowURI = flowURI
+	instance.Flow = flow
+	instance.FlowModel = flowModel
+	instance.status = StatusNotStarted
+	instance.WorkItemQueue = util.NewSyncQueue()
+	instance.ChangeTracker = NewInstanceChangeTracker()
+
+	var taskEnv TaskEnv
+	taskEnv.ID = idRootTaskEnv
+	taskEnv.Task = flow.RootTask()
+	taskEnv.taskID = flow.RootTask().ID()
+	taskEnv.Instance = &instance
+	taskEnv.TaskDatas = make(map[int]*TaskData)
+	taskEnv.LinkDatas = make(map[int]*LinkData)
+
+	instance.RootTaskEnv = &taskEnv
+
+	return &instance
+}
+
 // NewFlowInstance creates a new Flow Instance from the specified Flow
 func NewFlowInstance(instanceID string, flowURI string, flow *flowdef.Definition) *Instance {
 
