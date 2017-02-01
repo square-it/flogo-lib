@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/TIBCOSoftware/flogo-lib/flow/flowinst"
 	"github.com/TIBCOSoftware/flogo-lib/flow/service"
 	"github.com/TIBCOSoftware/flogo-lib/util"
 	"github.com/julienschmidt/httprouter"
-	"github.com/TIBCOSoftware/flogo-lib/flow/flowinst"
 )
 
 // RestEngineTester is default REST implementation of the EngineTester
