@@ -1,9 +1,10 @@
-package action
+package trigger
 
 import (
-	"context"
+	//"context"
 	"testing"
 
+	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -11,20 +12,19 @@ import (
 type MockFactory struct {
 }
 
-func (f *MockFactory) New(id string) Action2 {
-	return &MockAction{}
+func (f *MockFactory) New(id string) Trigger2 {
+	return &MockTrigger{}
 }
 
-type MockAction struct {
+type MockTrigger struct {
 }
 
-func (a *MockAction) Run(context context.Context, uri string, options interface{}, handler ResultHandler) error {
-	return nil
-}
-
-func (a *MockAction) Init(config types.ActionConfig) {
+func (t *MockTrigger) Init(config types.TriggerConfig, actionRunner action.Runner) {
 	//Noop
 }
+
+func (t *MockTrigger) Start() error { return nil }
+func (t *MockTrigger) Stop() error  { return nil }
 
 //TestAddFactoryEmptyRef
 func TestAddFactoryEmptyRef(t *testing.T) {
@@ -120,7 +120,7 @@ func TestAddInstanceNilInstance(t *testing.T) {
 func TestAddInstanceDuplicated(t *testing.T) {
 
 	reg := &registry{}
-	i := &ActionInstance{}
+	i := &TriggerInstance{}
 
 	// Add instance: this time should pass
 	err := reg.AddInstance("myinstanceId", i)
@@ -135,27 +135,10 @@ func TestAddInstanceDuplicated(t *testing.T) {
 func TestAddInstanceOk(t *testing.T) {
 
 	reg := &registry{}
-	i := &ActionInstance{}
+	i := &TriggerInstance{}
 
 	// Add instance
 	err := reg.AddInstance("myinstanceId", i)
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(reg.instances))
-}
-
-//TestGetActionOk
-func TestGetActionOk(t *testing.T) {
-
-	reg := &registry{}
-	i := &ActionInstance{Interf: &MockAction{}}
-
-	// Add instance
-	err := reg.AddInstance("myinstanceId", i)
-	assert.Nil(t, err)
-
-	a := reg.GetAction("myinstanceId")
-	assert.NotNil(t, a)
-
-	a = reg.GetAction("myunknowninstanceId")
-	assert.Nil(t, a)
 }
