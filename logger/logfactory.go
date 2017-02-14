@@ -48,7 +48,7 @@ func getLevel(level logrus.Level) string {
 	return "UNKNOWN"
 }
 
-// Debugf logs message at Debug level.
+// Debug logs message at Debug level.
 func (logger *FlogoLogger) Debug(args ...interface{}) {
 	logger.loggerImpl.Debug(args)
 }
@@ -58,7 +58,7 @@ func (logger *FlogoLogger) DebugEnabled() bool {
 	return logger.loggerImpl.Level >= logrus.DebugLevel
 }
 
-// Infof logs message at Info level.
+// Info logs message at Info level.
 func (logger *FlogoLogger) Info(args ...interface{}) {
 	logger.loggerImpl.Info(args)
 }
@@ -68,7 +68,7 @@ func (logger *FlogoLogger) InfoEnabled() bool {
 	return logger.loggerImpl.Level >= logrus.InfoLevel
 }
 
-// Warnf logs message at Warning level.
+// Warn logs message at Warning level.
 func (logger *FlogoLogger) Warn(args ...interface{}) {
 	logger.loggerImpl.Warn(args)
 }
@@ -78,7 +78,7 @@ func (logger *FlogoLogger) WarnEnabled() bool {
 	return logger.loggerImpl.Level >= logrus.WarnLevel
 }
 
-// Errorf logs message at Error level.
+// Error logs message at Error level.
 func (logger *FlogoLogger) Error(args ...interface{}) {
 	logger.loggerImpl.Error(args)
 }
