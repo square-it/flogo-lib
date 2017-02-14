@@ -3,13 +3,13 @@ package logger
 import "errors"
 
 type Logger interface {
-	Debug(agrs ...interface{})
+	Debug(args ...interface{})
     Debugf(format string, args ...interface{})
-    Info(agrs ...interface{})
+    Info(args ...interface{})
     Infof(format string, args ...interface{})
-    Warn(agrs ...interface{})
+    Warn(args ...interface{})
     Warnf(format string, args ...interface{})
-    Error(agrs ...interface{})
+    Error(args ...interface{})
     Errorf(format string, args ...interface{})
 	SetLogLevel(Level)
 }
