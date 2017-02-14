@@ -8,23 +8,23 @@ import (
 
 var loggerMap = make(map[string]interface{})
 
-type FlogoLogFactory struct {
+type DefaultLoggerFactory struct {
 }
 
 func init() {
-	RegisterLoggerFactory(&FlogoLogFactory{})
+	RegisterLoggerFactory(&DefaultLoggerFactory{})
 }
 
-type FlogoLogger struct {
+type DefaultLogger struct {
 	loggerName string
 	loggerImpl *logrus.Logger
 }
 
-type FlogoFormatter struct {
+type LogFormatter struct {
 	loggerName string
 }
 
-func (f *FlogoFormatter) Format(entry *logrus.Entry) ([]byte, error) {
+func (f *LogFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	logEntry := fmt.Sprintf("%s %-6s [%s] - %s\n", entry.Time.Format("2006-01-02 15:04:05.000000"), getLevel(entry.Level), f.loggerName, strings.TrimPrefix(strings.TrimSuffix(entry.Message, "]"), "["))
 	return []byte(logEntry), nil
 }
@@ -49,47 +49,47 @@ func getLevel(level logrus.Level) string {
 }
 
 // Debug logs message at Debug level.
-func (logger *FlogoLogger) Debug(args ...interface{}) {
+func (logger *DefaultLogger) Debug(args ...interface{}) {
 	logger.loggerImpl.Debug(args)
 }
 
 // DebugEnabled checks if Debug level is enabled.
-func (logger *FlogoLogger) DebugEnabled() bool {
+func (logger *DefaultLogger) DebugEnabled() bool {
 	return logger.loggerImpl.Level >= logrus.DebugLevel
 }
 
 // Info logs message at Info level.
-func (logger *FlogoLogger) Info(args ...interface{}) {
+func (logger *DefaultLogger) Info(args ...interface{}) {
 	logger.loggerImpl.Info(args)
 }
 
 // InfoEnabled checks if Info level is enabled.
-func (logger *FlogoLogger) InfoEnabled() bool {
+func (logger *DefaultLogger) InfoEnabled() bool {
 	return logger.loggerImpl.Level >= logrus.InfoLevel
 }
 
 // Warn logs message at Warning level.
-func (logger *FlogoLogger) Warn(args ...interface{}) {
+func (logger *DefaultLogger) Warn(args ...interface{}) {
 	logger.loggerImpl.Warn(args)
 }
 
 // WarnEnabled checks if Warning level is enabled.
-func (logger *FlogoLogger) WarnEnabled() bool {
+func (logger *DefaultLogger) WarnEnabled() bool {
 	return logger.loggerImpl.Level >= logrus.WarnLevel
 }
 
 // Error logs message at Error level.
-func (logger *FlogoLogger) Error(args ...interface{}) {
+func (logger *DefaultLogger) Error(args ...interface{}) {
 	logger.loggerImpl.Error(args)
 }
 
 // ErrorEnabled checks if Error level is enabled.
-func (logger *FlogoLogger) ErrorEnabled() bool {
+func (logger *DefaultLogger) ErrorEnabled() bool {
 	return logger.loggerImpl.Level >= logrus.ErrorLevel
 }
 
 //SetLog Level
-func (logger *FlogoLogger) SetLogLevel(logLevel Level) {
+func (logger *DefaultLogger) SetLogLevel(logLevel Level) {
 	switch logLevel {
 	case Debug:
 		logger.loggerImpl.Level = logrus.DebugLevel
@@ -104,14 +104,14 @@ func (logger *FlogoLogger) SetLogLevel(logLevel Level) {
 	}
 }
 
-func (logfactory *FlogoLogFactory) GetLogger(name string) (Logger, error) {
+func (logfactory *DefaultLoggerFactory) GetLogger(name string) (Logger, error) {
 	logger := loggerMap[name]
 	if logger == nil {
 		logImpl := logrus.New()
-		logImpl.Formatter = &FlogoFormatter{
+		logImpl.Formatter = &LogFormatter{
 			loggerName: name,
 		}
-		logger = &FlogoLogger{
+		logger = &DefaultLogger{
 			loggerName: name,
 			loggerImpl: logImpl,
 		}
