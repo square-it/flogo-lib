@@ -3,7 +3,6 @@ package logger
 import (
 	"fmt"
 	"github.com/Sirupsen/logrus"
-	"strings"
 )
 
 var loggerMap = make(map[string]interface{})
@@ -25,7 +24,7 @@ type LogFormatter struct {
 }
 
 func (f *LogFormatter) Format(entry *logrus.Entry) ([]byte, error) {
-	logEntry := fmt.Sprintf("%s %-6s [%s] - %s\n", entry.Time.Format("2006-01-02 15:04:05.000000"), getLevel(entry.Level), f.loggerName, strings.TrimPrefix(strings.TrimSuffix(entry.Message, "]"), "["))
+	logEntry := fmt.Sprintf("%s %-6s [%s] - %s\n", entry.Time.Format("2006-01-02 15:04:05.000000"), getLevel(entry.Level), f.loggerName, entry.Message)
 	return []byte(logEntry), nil
 }
 
@@ -50,7 +49,7 @@ func getLevel(level logrus.Level) string {
 
 // Debug logs message at Debug level.
 func (logger *DefaultLogger) Debug(args ...interface{}) {
-	logger.loggerImpl.Debug(args)
+	logger.loggerImpl.Debug(args...)
 }
 
 // DebugEnabled checks if Debug level is enabled.
@@ -60,7 +59,7 @@ func (logger *DefaultLogger) DebugEnabled() bool {
 
 // Info logs message at Info level.
 func (logger *DefaultLogger) Info(args ...interface{}) {
-	logger.loggerImpl.Info(args)
+	logger.loggerImpl.Info(args...)
 }
 
 // InfoEnabled checks if Info level is enabled.
@@ -70,7 +69,7 @@ func (logger *DefaultLogger) InfoEnabled() bool {
 
 // Warn logs message at Warning level.
 func (logger *DefaultLogger) Warn(args ...interface{}) {
-	logger.loggerImpl.Warn(args)
+	logger.loggerImpl.Warn(args...)
 }
 
 // WarnEnabled checks if Warning level is enabled.
@@ -80,12 +79,32 @@ func (logger *DefaultLogger) WarnEnabled() bool {
 
 // Error logs message at Error level.
 func (logger *DefaultLogger) Error(args ...interface{}) {
-	logger.loggerImpl.Error(args)
+	logger.loggerImpl.Error(args...)
 }
 
 // ErrorEnabled checks if Error level is enabled.
 func (logger *DefaultLogger) ErrorEnabled() bool {
 	return logger.loggerImpl.Level >= logrus.ErrorLevel
+}
+
+// Debug logs message at Debug level.
+func (logger *DefaultLogger) Debugf(format string, args ...interface{}) {
+	logger.loggerImpl.Debugf(format, args...)
+}
+
+// Info logs message at Info level.
+func (logger *DefaultLogger) Infof(format string, args ...interface{}) {
+	logger.loggerImpl.Infof(format, args...)
+}
+
+// Warn logs message at Warning level.
+func (logger *DefaultLogger) Warnf(format string, args ...interface{}) {
+	logger.loggerImpl.Warnf(format, args...)
+}
+
+// Error logs message at Error level.
+func (logger *DefaultLogger) Errorf(format string, args ...interface{}) {
+	logger.loggerImpl.Errorf(format, args...)
 }
 
 //SetLog Level

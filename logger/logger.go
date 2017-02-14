@@ -3,14 +3,14 @@ package logger
 import "errors"
 
 type Logger interface {
-	Debug(...interface{})
-	DebugEnabled() bool
-	Info(...interface{})
-	InfoEnabled() bool
-	Warn(...interface{})
-	WarnEnabled() bool
-	Error(...interface{})
-	ErrorEnabled() bool
+	Debug(agrs ...interface{})
+    Debugf(format string, args ...interface{})
+    Info(agrs ...interface{})
+    Infof(format string, args ...interface{})
+    Warn(agrs ...interface{})
+    Warnf(format string, args ...interface{})
+    Error(agrs ...interface{})
+    Errorf(format string, args ...interface{})
 	SetLogLevel(Level)
 }
 
