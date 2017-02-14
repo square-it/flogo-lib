@@ -1,5 +1,7 @@
 package logger
 
+import "errors"
+
 type Logger interface {
 	Debug(...interface{})
 	DebugEnabled() bool
@@ -31,6 +33,9 @@ func RegisterLoggerFactory(factory LoggerFactory) {
 	logFactory = factory
 }
 
-func GetLoggerFactory() LoggerFactory {
-	return logFactory
+func GetLogger(name string) (Logger, error) {
+	if logFactory == nil {
+		return nil, errors.New("No logger factory found.")
+	}
+	return logFactory.GetLogger(name)
 }
