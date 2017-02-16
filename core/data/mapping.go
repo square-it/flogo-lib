@@ -82,7 +82,6 @@ func (m *Mapper) Apply(inputScope Scope, outputScope Scope) {
 					//for now assume if we have a path, attr is "object"
 					valMap := attrValue.(map[string]interface{})
 					attrValue = GetMapValue(valMap, attrPath)
-
 					//attrValue, exists = valMap[attrPath]
 				}
 			}
@@ -152,7 +151,7 @@ func (m *Mapper) Apply(inputScope Scope, outputScope Scope) {
 		case MtLiteral:
 			outputScope.SetAttrValue(mapping.MapTo, mapping.Value)
 		case MtExpression:
-		//todo implement script mapping
+			//todo implement script mapping
 		}
 	}
 }
@@ -163,18 +162,43 @@ func GetMapValue(valueMap map[string]interface{}, path string) interface{} {
 	lastPcIdx := len(pathComponents) - 1
 
 	tmpObj := valueMap
-
 	for pcIdx, pc := range pathComponents {
+		if strings.Index(pc, "[") > -1 {
+			//Its Array
+			bIdx := strings.Index(pc, "[")
+			arrayName := pc[:bIdx]
+			if tmpObj[arrayName] == nil {
+				panic(fmt.Sprintf("Invalid mapping [%s].", path))
+			}
 
-		if pcIdx == lastPcIdx {
-			return tmpObj[pc]
+			switch tmpObj[arrayName].(type) {
+			case []interface{}:
+			   //Array
+				arrayIdx, _ := strconv.Atoi(pc[bIdx+1 : len(pc)-1])
+				if arrayIdx >= len(tmpObj[arrayName].([]interface{})) {
+					panic(fmt.Sprintf("Invalid mapping [%s]. Index out of range.", path))
+				}
+				tmpObj = tmpObj[arrayName].([]interface{})[arrayIdx].(map[string]interface{})
+			case interface{}:
+			    //Object
+				tmpObj = tmpObj[arrayName].(interface{}).(map[string]interface{})
+			case map[string]interface{}:
+			    //Object
+				tmpObj = tmpObj[arrayName].(map[string]interface{})
+			}
+		} else {
+			if pcIdx == lastPcIdx {
+				return tmpObj[pc]
+			}
+
+			switch tmpObj[pc].(type) {
+			//todo need to throw error if not a map
+
+			case map[string]interface{}:
+				tmpObj = tmpObj[pc].(map[string]interface{})
+			}
 		}
 
-		switch tmpObj[pc].(type) {
-		//todo need to throw error if not a map
-		case map[string]interface{}:
-			tmpObj = tmpObj[pc].(map[string]interface{})
-		}
 	}
 
 	return tmpObj
