@@ -173,30 +173,36 @@ func GetMapValue(valueMap map[string]interface{}, path string) interface{} {
 
 			switch tmpObj[arrayName].(type) {
 			case []interface{}:
-			   //Array
+				//Array
 				arrayIdx, _ := strconv.Atoi(pc[bIdx+1 : len(pc)-1])
 				if arrayIdx >= len(tmpObj[arrayName].([]interface{})) {
 					panic(fmt.Sprintf("Invalid mapping [%s]. Index out of range.", path))
 				}
-				tmpObj = tmpObj[arrayName].([]interface{})[arrayIdx].(map[string]interface{})
-			case interface{}:
-			    //Object
-				tmpObj = tmpObj[arrayName].(interface{}).(map[string]interface{})
+
+				arrayObject := tmpObj[arrayName].([]interface{})[arrayIdx]
+				switch arrayObject.(type) {
+				case map[string]interface{}:
+					tmpObj = arrayObject.(map[string]interface{})
+				case interface{}:
+					return arrayObject
+				}
 			case map[string]interface{}:
-			    //Object
+				//Object
 				tmpObj = tmpObj[arrayName].(map[string]interface{})
+			case interface{}:
+				return tmpObj[arrayName]
 			}
-		} else {
-			if pcIdx == lastPcIdx {
-				return tmpObj[pc]
-			}
+		}
+		
+		if pcIdx == lastPcIdx {
+			return tmpObj[pc]
+		}
 
-			switch tmpObj[pc].(type) {
-			//todo need to throw error if not a map
+		switch tmpObj[pc].(type) {
+		//todo need to throw error if not a map
 
-			case map[string]interface{}:
-				tmpObj = tmpObj[pc].(map[string]interface{})
-			}
+		case map[string]interface{}:
+			tmpObj = tmpObj[pc].(map[string]interface{})
 		}
 
 	}
