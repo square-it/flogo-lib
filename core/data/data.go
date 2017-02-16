@@ -1,6 +1,8 @@
 package data
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 // Attribute is a simple structure used to define a data Attribute/property
 type Attribute struct {
@@ -61,6 +63,6 @@ func (tv *Attribute) UnmarshalJSON(data []byte) error {
 
 // ComplexObject is the value that is used when using a "COMPLEX_OBJECT" type
 type ComplexObject struct {
-	Metadata string
-	Value    interface{}
+	Metadata string `json:"metadata"`
+	Value    interface{} `json:"value"`
 }
