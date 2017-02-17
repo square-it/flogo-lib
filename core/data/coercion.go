@@ -240,7 +240,7 @@ func CoerceToParams(val interface{}) (map[string]string, error) {
 	}
 }
 
-// CoerceToObject coerce a value to an object
+// CoerceToObject coerce a value to an complex object
 func CoerceToComplexObject(val interface{}) (*ComplexObject, error) {
 	//If the val is nil then just return empty struct
 	var emptyComplexObject = &ComplexObject{Value: "{}"}
@@ -258,7 +258,7 @@ func CoerceToComplexObject(val interface{}) (*ComplexObject, error) {
 				return nil, err
 
 			}
-			return setDefaultComplex(complexObject), nil
+			return handleComplex(complexObject), nil
 		}
 	case map[string]interface{}:
 		v, err := json.Marshal(val)
@@ -270,15 +270,15 @@ func CoerceToComplexObject(val interface{}) (*ComplexObject, error) {
 		if err != nil {
 			return nil, err
 		}
-		return setDefaultComplex(complexObject), nil
+		return handleComplex(complexObject), nil
 	case *ComplexObject:
-		return setDefaultComplex(val.(*ComplexObject)), nil
+		return handleComplex(val.(*ComplexObject)), nil
 	default:
 		return nil, fmt.Errorf("Unable to coerce %#v to complex object", val)
 	}
 }
 
-func setDefaultComplex(complex *ComplexObject) *ComplexObject {
+func handleComplex(complex *ComplexObject) *ComplexObject {
 	if complex != nil {
 		if complex.Value == "" {
 			complex.Value = "{}"
