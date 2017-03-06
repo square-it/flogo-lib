@@ -12,10 +12,9 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/flow/service"
 	"github.com/TIBCOSoftware/flogo-lib/flow/support"
 	"github.com/TIBCOSoftware/flogo-lib/util"
-	"github.com/op/go-logging"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
-var log = logging.MustGetLogger("flowprovider")
 
 const (
 	uriSchemeFile     = "file://"
@@ -70,29 +69,29 @@ func (pps *RemoteFlowProvider) GetFlow(flowURI string) (*flowdef.Definition, err
 
 	// todo turn pps.flowCache to real cache
 	if flow, ok := pps.flowCache[flowURI]; ok {
-		log.Debugf("Accessing cached Flow: %s\n")
+		logger.Debugf("Accessing cached Flow: %s\n")
 		return flow, nil
 	}
 
-	log.Infof("Get Flow: %s\n", flowURI)
+	logger.Infof("Get Flow: %s\n", flowURI)
 
 	var flowJSON []byte
 
 	if strings.HasPrefix(flowURI, uriSchemeEmbedded) {
 
-		log.Infof("Loading Embedded Flow: %s\n", flowURI)
+		logger.Infof("Loading Embedded Flow: %s\n", flowURI)
 		flowJSON = pps.embeddedMgr.GetEmbeddedFlowJSON(flowURI)
 
 	} else if strings.HasPrefix(flowURI, uriSchemeFile) {
 
-		log.Infof("Loading Local Flow: %s\n", flowURI)
+		logger.Infof("Loading Local Flow: %s\n", flowURI)
 		flowFilePath, _ := util.URLStringToFilePath(flowURI)
 
 		flowJSON, _ = ioutil.ReadFile(flowFilePath)
 
 	} else {
 
-		log.Infof("Loading Remote Flow: %s\n", flowURI)
+		logger.Infof("Loading Remote Flow: %s\n", flowURI)
 
 		req, err := http.NewRequest("GET", flowURI, nil)
 		client := &http.Client{}
@@ -102,7 +101,7 @@ func (pps *RemoteFlowProvider) GetFlow(flowURI string) (*flowdef.Definition, err
 		}
 		defer resp.Body.Close()
 
-		log.Infof("response Status:", resp.Status)
+		logger.Infof("response Status:", resp.Status)
 
 		if resp.StatusCode >= 300 {
 			//not found
@@ -120,8 +119,8 @@ func (pps *RemoteFlowProvider) GetFlow(flowURI string) (*flowdef.Definition, err
 		def, err := flowdef.NewDefinition(&defRep)
 
 		if err != nil {
-			log.Errorf("Error unmarshalling flow: %s", err.Error())
-			log.Debugf("Failed to unmarshal: %s", string(flowJSON))
+			logger.Errorf("Error unmarshalling flow: %s", err.Error())
+			logger.Debugf("Failed to unmarshal: %s", string(flowJSON))
 
 			return nil, nil
 		}
@@ -139,7 +138,7 @@ func (pps *RemoteFlowProvider) GetFlow(flowURI string) (*flowdef.Definition, err
 		return def, nil
 	}
 
-	log.Debugf("Flow Not Found: %s\n", flowURI)
+	logger.Debugf("Flow Not Found: %s\n", flowURI)
 
 	return nil, nil
 }
