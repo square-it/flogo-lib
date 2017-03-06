@@ -2,10 +2,12 @@ package logger
 
 import (
 	"fmt"
+
+	"github.com/TIBCOSoftware/flogo-lib/config"
 	"github.com/Sirupsen/logrus"
 )
 
-var loggerMap = make(map[string]interface{})
+var loggerMap = make(map[string]Logger)
 
 type DefaultLoggerFactory struct {
 }
@@ -110,13 +112,13 @@ func (logger *DefaultLogger) Errorf(format string, args ...interface{}) {
 //SetLog Level
 func (logger *DefaultLogger) SetLogLevel(logLevel Level) {
 	switch logLevel {
-	case Debug:
+	case DebugLevel:
 		logger.loggerImpl.Level = logrus.DebugLevel
-	case Info:
+	case InfoLevel:
 		logger.loggerImpl.Level = logrus.InfoLevel
-	case Error:
+	case ErrorLevel:
 		logger.loggerImpl.Level = logrus.ErrorLevel
-	case Warn:
+	case WarnLevel:
 		logger.loggerImpl.Level = logrus.WarnLevel
 	default:
 		logger.loggerImpl.Level = logrus.ErrorLevel
@@ -124,17 +126,25 @@ func (logger *DefaultLogger) SetLogLevel(logLevel Level) {
 }
 
 func (logfactory *DefaultLoggerFactory) GetLogger(name string) (Logger, error) {
-	logger := loggerMap[name]
-	if logger == nil {
+	l := loggerMap[name]
+	if l == nil {
 		logImpl := logrus.New()
 		logImpl.Formatter = &LogFormatter{
 			loggerName: name,
 		}
-		logger = &DefaultLogger{
+		l = &DefaultLogger{
 			loggerName: name,
 			loggerImpl: logImpl,
 		}
-		loggerMap[name] = logger
+		// Get log level from config
+		logLevelName := config.GetLogLevel()
+		// Get log level for name
+		level, err := GetLevelForName(logLevelName)
+		if err != nil{
+			return nil, err
+		}
+		l.SetLogLevel(level)
+		loggerMap[name] = l
 	}
-	return logger.(Logger), nil
+	return l, nil
 }

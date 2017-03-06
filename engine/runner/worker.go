@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 // Based off: http://nesv.github.io/golang/2014/02/25/worker-queues-in-go.html
@@ -76,7 +77,7 @@ func (w ActionWorker) Start() {
 			select {
 			case work := <-w.Work:
 				// Receive a work request.
-				log.Debugf("worker-%d: Received Request\n", w.ID)
+				logger.Debugf("worker-%d: Received Request\n", w.ID)
 
 				switch work.ReqType {
 				default:
@@ -94,7 +95,7 @@ func (w ActionWorker) Start() {
 					err := actionData.action.Run(actionData.context, actionData.uri, actionData.options, handler)
 
 					if err != nil {
-						log.Debugf("worker-%d: Action Run error: %s\n", w.ID, err.Error())
+						logger.Debugf("worker-%d: Action Run error: %s\n", w.ID, err.Error())
 						// error so just return
 						actionData.rc <- &ActionResult{err: err}
 					} else {
@@ -103,7 +104,7 @@ func (w ActionWorker) Start() {
 						for !done {
 							select {
 							case result := <-handler.result:
-								log.Debugf("*** Worker received result: %v\n", result)
+								logger.Debugf("*** Worker received result: %v\n", result)
 								actionData.rc <- result
 							case <-handler.done:
 								if !handler.replied {
@@ -114,12 +115,12 @@ func (w ActionWorker) Start() {
 						}
 					}
 
-					log.Debugf("worker-%d: Completed Request\n", w.ID)
+					logger.Debugf("worker-%d: Completed Request\n", w.ID)
 				}
 
 			case <-w.QuitChan:
 				// We have been asked to stop.
-				log.Debugf("worker-%d stopping\n", w.ID)
+				logger.Debugf("worker-%d stopping\n", w.ID)
 				return
 			}
 		}

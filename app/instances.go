@@ -6,10 +6,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/types"
-	"github.com/op/go-logging"
 )
-
-var log = logging.MustGetLogger("app")
 
 //InstanceHelper helps to create the instances for a given id
 type InstanceHelper struct {

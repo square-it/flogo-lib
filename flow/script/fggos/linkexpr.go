@@ -9,10 +9,9 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/flow/flowdef"
 	"github.com/japm/goScript"
-	"github.com/op/go-logging"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
-var log = logging.MustGetLogger("fggos")
 
 // GosLinkExprManager is the Lua Implementation of a Link Expression Manager
 type GosLinkExprManager struct {
@@ -41,7 +40,7 @@ func NewGosLinkExprManager(def *flowdef.Definition) *GosLinkExprManager {
 
 			mgr.values[link.ID()] = vars
 
-			log.Debugf("expr: %v\n", exprStr)
+			logger.Debugf("expr: %v\n", exprStr)
 
 			expr := &goScript.Expr{}
 			err := expr.Prepare(exprStr)
@@ -49,7 +48,7 @@ func NewGosLinkExprManager(def *flowdef.Definition) *GosLinkExprManager {
 			if err == nil {
 				mgr.exprs[link.ID()] = expr
 			} else {
-				log.Errorf("Error preparing expression: %s - %v", link.Value(), err)
+				logger.Errorf("Error preparing expression: %s - %v", link.Value(), err)
 			}
 		}
 	}
@@ -138,7 +137,7 @@ func (em *GosLinkExprManager) EvalLinkExpr(link *flowdef.Link, scope data.Scope)
 
 	if !attrsOK || !exprOK {
 
-		log.Warningf("Unable to evaluate expression '%s', did not compile properly\n", link.Value())
+		logger.Warnf("Unable to evaluate expression '%s', did not compile properly\n", link.Value())
 		return false
 	}
 
@@ -180,13 +179,13 @@ func (em *GosLinkExprManager) EvalLinkExpr(link *flowdef.Link, scope data.Scope)
 
 	ctxt["v"] = vals
 
-	log.Debugf("Vals: %v", vals)
+	logger.Debugf("Vals: %v", vals)
 
 	val, err := expr.Eval(ctxt)
 
 	//todo handle error
 	if err != nil {
-		log.Error(err)
+		logger.Error(err)
 	}
 
 	return val.(bool)
