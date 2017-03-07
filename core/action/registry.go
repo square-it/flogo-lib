@@ -3,14 +3,12 @@ package action
 import (
 	"fmt"
 	"sync"
-
-	"github.com/op/go-logging"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 var (
 	actionsMu sync.Mutex
 	actions   = make(map[string]Action)
-	log       = logging.MustGetLogger("action")
 	reg       = &registry{}
 )
 
@@ -34,7 +32,7 @@ func (r *registry) AddFactory(ref string, f Factory) error {
 	actionsMu.Lock()
 	defer actionsMu.Unlock()
 
-	log.Debugf("Registering action factory ref: '%s'", ref)
+	logger.Debugf("Registering action factory ref: '%s'", ref)
 
 	if len(ref) == 0 {
 		return fmt.Errorf("registry.RegisterFactory: ref is empty")
@@ -139,7 +137,7 @@ func Register(actionType string, action Action) {
 	newActions[actionType] = action
 	actions = newActions
 
-	log.Debugf("Registerd Action: %s", actionType)
+	logger.Debugf("Registerd Action: %s", actionType)
 }
 
 // Actions gets all the registered Action Actions
