@@ -107,7 +107,6 @@ func (m *BasicMapper) Apply(inputScope data.Scope, outputScope data.Scope) {
 					//for now assume if we have a path, attr is "object"
 					valMap := attrValue.(map[string]interface{})
 					attrValue = data.GetMapValue(valMap, attrPath)
-
 					//attrValue, exists = valMap[attrPath]
 				}
 			}
