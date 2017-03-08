@@ -26,7 +26,7 @@ type LogFormatter struct {
 }
 
 func (f *LogFormatter) Format(entry *logrus.Entry) ([]byte, error) {
-	logEntry := fmt.Sprintf("%s %-6s [%s] - %s\n", entry.Time.Format("2006-01-02 15:04:05.000000"), getLevel(entry.Level), f.loggerName, entry.Message)
+	logEntry := fmt.Sprintf("%s %-6s [%s] - %s\n", entry.Time.Format(config.GetLogDateTimeFormat()), getLevel(entry.Level), f.loggerName, entry.Message)
 	return []byte(logEntry), nil
 }
 
