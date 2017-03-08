@@ -4,10 +4,7 @@ import (
 	"fmt"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
-	"github.com/op/go-logging"
 )
-
-var log = logging.MustGetLogger("flow")
 
 // Definition is the object that describes the definition of
 // a flow.  It contains its data (attributes) and

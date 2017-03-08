@@ -10,12 +10,10 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/TIBCOSoftware/flogo-lib/types"
 	"github.com/TIBCOSoftware/flogo-lib/util"
-	"github.com/op/go-logging"
 )
-
-var log = logging.MustGetLogger("engine")
 
 // Interface for the engine behaviour
 // Todo: rename to Engine once the refactoring is completed
@@ -74,7 +72,7 @@ func New(app *types.AppConfig) (IEngine, error) {
 
 //Start initializes and starts the Triggers and initializes the Actions
 func (e *EngineConfig) Start() {
-	log.Info("Engine: Starting...")
+	logger.Info("Engine: Starting...")
 
 	instanceHelper := app.NewInstanceHelper(e.App, trigger.Factories(), action.Factories())
 
@@ -82,7 +80,7 @@ func (e *EngineConfig) Start() {
 	tInstances, err := instanceHelper.CreateTriggers()
 	if err != nil {
 		errorMsg := fmt.Sprintf("Engine: Error Creating trigger instances - %s", err.Error())
-		log.Error(errorMsg)
+		logger.Error(errorMsg)
 		panic(errorMsg)
 	}
 
@@ -101,7 +99,7 @@ func (e *EngineConfig) Start() {
 	aInstances, err := instanceHelper.CreateActions()
 	if err != nil {
 		errorMsg := fmt.Sprintf("Engine: Error Creating action instances - %s", err.Error())
-		log.Error(errorMsg)
+		logger.Error(errorMsg)
 		panic(errorMsg)
 	}
 
@@ -129,7 +127,7 @@ func (e *EngineConfig) Start() {
 		util.StartManaged(fmt.Sprintf("Trigger [ '%s' ]", key), value.Interf)
 	}
 
-	log.Info("Engine: Started")
+	logger.Info("Engine: Started")
 }
 
 func (e *EngineConfig) Stop() {
@@ -154,15 +152,11 @@ func NewEngine(engineConfig *Config, triggersConfig *TriggersConfig) *Engine {
 		engine.runner = runner.NewPooled(runnerConfig.Pooled)
 	}
 
-	if log.IsEnabledFor(logging.DEBUG) {
-		cfgJSON, _ := json.MarshalIndent(engineConfig, "", "  ")
-		log.Debugf("Engine Configuration:\n%s\n", string(cfgJSON))
-	}
+	cfgJSON, _ := json.MarshalIndent(engineConfig, "", "  ")
+	logger.Debugf("Engine Configuration:\n%s\n", string(cfgJSON))
 
-	if log.IsEnabledFor(logging.DEBUG) {
-		cfgJSON, _ := json.MarshalIndent(triggersConfig, "", "  ")
-		log.Debugf("Triggers Configuration:\n%s\n", string(cfgJSON))
-	}
+	cfgJSON, _ = json.MarshalIndent(triggersConfig, "", "  ")
+	logger.Debugf("Triggers Configuration:\n%s\n", string(cfgJSON))
 
 	return &engine
 }
@@ -175,9 +169,9 @@ func (e *Engine) RegisterService(service util.Service) {
 // Start will start the engine, by starting all of its triggers and runner
 func (e *Engine) Start() {
 
-	log.Info("Engine: Starting...")
+	logger.Info("Engine: Starting...")
 
-	log.Info("Engine: Starting Services...")
+	logger.Info("Engine: Starting Services...")
 
 	err := e.serviceManager.Start()
 
@@ -186,7 +180,7 @@ func (e *Engine) Start() {
 		panic("Engine: Error Starting Services - " + err.Error())
 	}
 
-	log.Info("Engine: Started Services")
+	logger.Info("Engine: Started Services")
 
 	validateTriggers := e.engineConfig.ValidateTriggers
 
@@ -224,13 +218,13 @@ func (e *Engine) Start() {
 		}
 	}
 
-	log.Info("Engine: Started")
+	logger.Info("Engine: Started")
 }
 
 // Stop will stop the engine, by stopping all of its triggers and runner
 func (e *Engine) Stop() {
 
-	log.Info("Engine: Stopping...")
+	logger.Info("Engine: Stopping...")
 
 	triggers := trigger.Triggers()
 
@@ -246,15 +240,15 @@ func (e *Engine) Stop() {
 		util.StopManaged("ActionRunner", managedRunner)
 	}
 
-	log.Info("Engine: Stopping Services...")
+	logger.Info("Engine: Stopping Services...")
 
 	err := e.serviceManager.Stop()
 
 	if err != nil {
-		log.Error("Engine: Error Stopping Services - " + err.Error())
+		logger.Error("Engine: Error Stopping Services - " + err.Error())
 	} else {
-		log.Info("Engine: Stopped Services")
+		logger.Info("Engine: Stopped Services")
 	}
 
-	log.Info("Engine: Stopped")
+	logger.Info("Engine: Stopped")
 }
