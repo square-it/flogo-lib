@@ -30,7 +30,7 @@ func (pp *Patch) GetPatch(taskID int) *TaskPatch {
 }
 
 // GetInputMapper returns the InputMapper for the specified task (referred to by ID)
-func (pp *Patch) GetInputMapper(taskID int) *data.Mapper {
+func (pp *Patch) GetInputMapper(taskID int) data.Mapper {
 	taskPatch, exists := pp.taskPatchMap[taskID]
 
 	if exists {
@@ -41,7 +41,7 @@ func (pp *Patch) GetInputMapper(taskID int) *data.Mapper {
 }
 
 // GetOutputMapper returns the OutputMapper for the specified task (referred to by ID)
-func (pp *Patch) GetOutputMapper(taskID int) *data.Mapper {
+func (pp *Patch) GetOutputMapper(taskID int) data.Mapper {
 	taskPatch, exists := pp.taskPatchMap[taskID]
 
 	if exists {
@@ -55,22 +55,22 @@ func (pp *Patch) GetOutputMapper(taskID int) *data.Mapper {
 // input mappings, output mappings.  This is used to override the corresponding
 // settings for a Task in the Process
 type TaskPatch struct {
-	ID             int               `json:"id"`
-	Attributes     []*data.Attribute `json:"attributes"`
-	InputMappings  []*data.Mapping   `json:"inputMappings"` //put in mapper object
-	OutputMappings []*data.Mapping   `json:"ouputMappings"` //put in mapper object
+	ID             int                `json:"id"`
+	Attributes     []*data.Attribute  `json:"attributes"`
+	InputMappings  []*data.MappingDef `json:"inputMappings"` //put in mapper object
+	OutputMappings []*data.MappingDef `json:"ouputMappings"` //put in mapper object
 
 	Attrs        map[string]*data.Attribute
-	inputMapper  *data.Mapper
-	outputMapper *data.Mapper
+	inputMapper  data.Mapper
+	outputMapper data.Mapper
 }
 
 // InputMapper returns the overriding InputMapper
-func (tp *TaskPatch) InputMapper() *data.Mapper {
+func (tp *TaskPatch) InputMapper() data.Mapper {
 	return tp.inputMapper
 }
 
 // OutputMapper returns the overriding OutputMapper
-func (tp *TaskPatch) OutputMapper() *data.Mapper {
+func (tp *TaskPatch) OutputMapper() data.Mapper {
 	return tp.outputMapper
 }

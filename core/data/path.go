@@ -62,3 +62,26 @@ func GetAttrPath(inAttrName string) (attrName string, attrPath string, pathType 
 
 	return attrName, attrPath, pathType
 }
+
+func GetMapValue(valueMap map[string]interface{}, path string) interface{} {
+
+	var pathComponents []string = strings.Split(path, ".")
+	lastPcIdx := len(pathComponents) - 1
+
+	tmpObj := valueMap
+
+	for pcIdx, pc := range pathComponents {
+
+		if pcIdx == lastPcIdx {
+			return tmpObj[pc]
+		}
+
+		switch tmpObj[pc].(type) {
+		//todo need to throw error if not a map
+		case map[string]interface{}:
+			tmpObj = tmpObj[pc].(map[string]interface{})
+		}
+	}
+
+	return tmpObj
+}
