@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 // PooledRunner is a action runner that queues and runs a action in a worker pool
@@ -48,7 +49,7 @@ func (runner *PooledRunner) Start() error {
 
 		for i := 0; i < runner.numWorkers; i++ {
 			id := i + 1
-			log.Debugf("Starting worker with id '%d'", id)
+			logger.Debugf("Starting worker with id '%d'", id)
 			worker := NewWorker(id, runner.directRunner, runner.workerQueue)
 			runner.workers[i] = &worker
 			worker.Start()
@@ -58,13 +59,13 @@ func (runner *PooledRunner) Start() error {
 			for {
 				select {
 				case work := <-runner.workQueue:
-					log.Debug("Received work request")
+					logger.Debug("Received work request")
 
 					//todo fix, this creates unbounded go routines waiting to be serviced by worker queue
 					go func() {
 						worker := <-runner.workerQueue
 
-						log.Debug("Dispatching work request")
+						logger.Debug("Dispatching work request")
 						worker <- work
 					}()
 				}
@@ -85,7 +86,7 @@ func (runner *PooledRunner) Stop() error {
 		runner.active = false
 
 		for _, worker := range runner.workers {
-			log.Debug("Stopping worker", worker.ID)
+			logger.Debug("Stopping worker", worker.ID)
 			worker.Stop()
 		}
 	}
@@ -106,10 +107,10 @@ func (runner *PooledRunner) Run(context context.Context, action action.Action, u
 		work := ActionWorkRequest{ReqType: RtRun, actionData: data}
 
 		runner.workQueue <- work
-		log.Debugf("Run Action '%s' queued", uri)
+		logger.Debugf("Run Action '%s' queued", uri)
 
 		reply := <-data.rc
-		log.Debugf("Run Action '%s' complete", uri)
+		logger.Debugf("Run Action '%s' complete", uri)
 
 		return reply.code, reply.data, reply.err
 	}
