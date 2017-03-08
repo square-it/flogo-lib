@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -18,7 +17,7 @@ type Logger interface {
 }
 
 type LoggerFactory interface {
-	GetLogger(name string) (Logger, error)
+	GetLogger(name string) Logger
 }
 
 type Level int
@@ -48,9 +47,10 @@ func RegisterLoggerFactory(factory LoggerFactory) {
 }
 
 // GetLogger returns the Logger using the logFactory registered.
-func GetLogger(name string) (Logger, error) {
+// Returns nil if no factory is found
+func GetLogger(name string) Logger {
 	if logFactory == nil {
-		return nil, errors.New("No logger factory found.")
+		return nil
 	}
 	return logFactory.GetLogger(name)
 }

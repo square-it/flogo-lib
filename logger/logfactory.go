@@ -125,7 +125,7 @@ func (logger *DefaultLogger) SetLogLevel(logLevel Level) {
 	}
 }
 
-func (logfactory *DefaultLoggerFactory) GetLogger(name string) (Logger, error) {
+func (logfactory *DefaultLoggerFactory) GetLogger(name string) Logger {
 	l := loggerMap[name]
 	if l == nil {
 		logImpl := logrus.New()
@@ -141,10 +141,10 @@ func (logfactory *DefaultLoggerFactory) GetLogger(name string) (Logger, error) {
 		// Get log level for name
 		level, err := GetLevelForName(logLevelName)
 		if err != nil{
-			return nil, err
+			return nil
 		}
 		l.SetLogLevel(level)
 		loggerMap[name] = l
 	}
-	return l, nil
+	return l
 }
