@@ -390,7 +390,7 @@ func (pi *Instance) handleTaskDone(taskBehavior model.TaskBehavior, taskData *Ta
 
 		for _, taskEntry := range taskEntries {
 
-			logger.Debugf("execTask - TaskEntry: %v\n", taskEntry)
+			logger.Debugf("execTask - TaskEntry: %v", taskEntry)
 			taskToEnterBehavior := pi.FlowModel.GetTaskBehavior(taskEntry.Task.TypeID())
 
 			enterTaskData, _ := taskData.taskEnv.FindOrCreateTaskData(taskEntry.Task)
@@ -398,7 +398,13 @@ func (pi *Instance) handleTaskDone(taskBehavior model.TaskBehavior, taskData *Ta
 			eval, evalCode := taskToEnterBehavior.Enter(enterTaskData, taskEntry.EnterCode)
 
 			if eval {
-				pi.scheduleEval(enterTaskData, evalCode)
+				// todo add ENUM for eval,skip, not_ready for Enter return to
+				// support skip propagation
+				if evalCode == -666 {
+					pi.handleTaskDone(taskBehavior, enterTaskData, evalCode)
+				} else {
+					pi.scheduleEval(enterTaskData, evalCode)
+				}
 			}
 		}
 	}
@@ -662,7 +668,7 @@ func (td *TaskData) Task() *flowdef.Task {
 // FromInstLinks implements model.TaskContext.FromInstLinks
 func (td *TaskData) FromInstLinks() []model.LinkInst {
 
-	logger.Debugf("FromInstLinks: task=%v\n", td.Task)
+	logger.Debugf("FromInstLinks: task = %v", td.Task)
 
 	links := td.task.FromLinks()
 
