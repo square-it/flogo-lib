@@ -18,7 +18,7 @@ type Definition struct {
 
 	attrs map[string]*data.Attribute
 
-	inputMapper *data.Mapper
+	inputMapper data.Mapper
 	links       map[int]*Link
 	tasks       map[int]*Task
 
@@ -104,8 +104,8 @@ type Task struct {
 	parent     *Task
 	attrs      map[string]*data.Attribute
 
-	inputMapper  *data.Mapper
-	outputMapper *data.Mapper
+	inputMapper  data.Mapper
+	outputMapper data.Mapper
 
 	toLinks   []*Link
 	fromLinks []*Link
@@ -170,12 +170,12 @@ func (task *Task) FromLinks() []*Link {
 }
 
 // InputMapper returns the InputMapper of the task
-func (task *Task) InputMapper() *data.Mapper {
+func (task *Task) InputMapper() data.Mapper {
 	return task.inputMapper
 }
 
 // OutputMapper returns the OutputMapper of the task
-func (task *Task) OutputMapper() *data.Mapper {
+func (task *Task) OutputMapper() data.Mapper {
 	return task.outputMapper
 }
 

@@ -7,26 +7,26 @@ import (
 
 // DefinitionRep is a serializable representation of a flow Definition
 type DefinitionRep struct {
-	ExplicitReply    bool              `json:"explicitReply"`
-	Name             string            `json:"name"`
-	ModelID          string            `json:"model"`
-	Attributes       []*data.Attribute `json:"attributes,omitempty"`
-	InputMappings    []*data.Mapping   `json:"inputMappings,omitempty"`
-	RootTask         *TaskRep          `json:"rootTask"`
-	ErrorHandlerTask *TaskRep          `json:"errorHandlerTask"`
+	ExplicitReply    bool               `json:"explicitReply"`
+	Name             string             `json:"name"`
+	ModelID          string             `json:"model"`
+	Attributes       []*data.Attribute  `json:"attributes,omitempty"`
+	InputMappings    []*data.MappingDef `json:"inputMappings,omitempty"`
+	RootTask         *TaskRep           `json:"rootTask"`
+	ErrorHandlerTask *TaskRep           `json:"errorHandlerTask"`
 }
 
 // TaskRep is a serializable representation of a flow Task
 type TaskRep struct {
-	ID             int               `json:"id"`
-	TypeID         int               `json:"type"`
-	ActivityType   string            `json:"activityType"`
-	Name           string            `json:"name"`
-	Attributes     []*data.Attribute `json:"attributes,omitempty"`
-	InputMappings  []*data.Mapping   `json:"inputMappings,omitempty"`
-	OutputMappings []*data.Mapping   `json:"ouputMappings,omitempty"`
-	Tasks          []*TaskRep        `json:"tasks,omitempty"`
-	Links          []*LinkRep        `json:"links,omitempty"`
+	ID             int                `json:"id"`
+	TypeID         int                `json:"type"`
+	ActivityType   string             `json:"activityType"`
+	Name           string             `json:"name"`
+	Attributes     []*data.Attribute  `json:"attributes,omitempty"`
+	InputMappings  []*data.MappingDef `json:"inputMappings,omitempty"`
+	OutputMappings []*data.MappingDef `json:"ouputMappings,omitempty"`
+	Tasks          []*TaskRep         `json:"tasks,omitempty"`
+	Links          []*LinkRep         `json:"links,omitempty"`
 }
 
 // LinkRep is a serializable representation of a flow Link
@@ -50,8 +50,9 @@ func NewDefinition(rep *DefinitionRep) (def *Definition, err error) {
 	def.modelID = rep.ModelID
 	def.explicitReply = rep.ExplicitReply
 
+	//todo is this used or needed?
 	if rep.InputMappings != nil {
-		def.inputMapper = data.NewMapper(rep.InputMappings)
+		def.inputMapper = GetMapperFactory().NewMapper(&MapperDef{Mappings:rep.InputMappings})
 	}
 
 	if len(rep.Attributes) > 0 {
@@ -89,11 +90,11 @@ func addTask(def *Definition, task *Task, rep *TaskRep) {
 	//task.Definition = def
 
 	if rep.InputMappings != nil {
-		task.inputMapper = data.NewMapper(rep.InputMappings)
+		task.inputMapper = GetMapperFactory().NewTaskInputMapper(task, &MapperDef{Mappings:rep.InputMappings})
 	}
 
 	if rep.OutputMappings != nil {
-		task.outputMapper = data.NewMapper(rep.OutputMappings)
+		task.outputMapper = GetMapperFactory().NewTaskOutputMapper(task, &MapperDef{Mappings:rep.OutputMappings})
 	}
 
 	if len(rep.Attributes) > 0 {
