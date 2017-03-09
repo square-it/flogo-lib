@@ -52,7 +52,7 @@ func NewDefinition(rep *DefinitionRep) (def *Definition, err error) {
 
 	//todo is this used or needed?
 	if rep.InputMappings != nil {
-		def.inputMapper = GetMapperFactory().NewMapper(&data.MapperDef{Mappings:rep.InputMappings})
+		def.inputMapper = GetMapperFactory().NewMapper(&MapperDef{Mappings:rep.InputMappings})
 	}
 
 	if len(rep.Attributes) > 0 {
@@ -90,11 +90,11 @@ func addTask(def *Definition, task *Task, rep *TaskRep) {
 	//task.Definition = def
 
 	if rep.InputMappings != nil {
-		task.inputMapper = GetMapperFactory().NewTaskInputMapper(task, &data.MapperDef{Mappings:rep.InputMappings})
+		task.inputMapper = GetMapperFactory().NewTaskInputMapper(task, &MapperDef{Mappings:rep.InputMappings})
 	}
 
 	if rep.OutputMappings != nil {
-		task.outputMapper = GetMapperFactory().NewTaskOutputMapper(task, &data.MapperDef{Mappings:rep.OutputMappings})
+		task.outputMapper = GetMapperFactory().NewTaskOutputMapper(task, &MapperDef{Mappings:rep.OutputMappings})
 	}
 
 	if len(rep.Attributes) > 0 {

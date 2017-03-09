@@ -7,18 +7,25 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
+
+// MapperDef represents a Mapper, which is a collection of mappings
+type MapperDef struct {
+	//todo possibly add optional lang/mapper type so we can fast fail on unsupported mappings/mapper combo
+	Mappings []*data.MappingDef
+}
+
 type MapperFactory interface {
 
 	// NewMapper creates a new Mapper from the specified MapperDef
-	NewMapper(mapperDef *data.MapperDef) data.Mapper
+	NewMapper(mapperDef *MapperDef) data.Mapper
 
 	// NewTaskInputMapper creates a new Input Mapper from the specified MapperDef
 	// for the specified Task, method to facilitate pre-compiled mappers
-	NewTaskInputMapper(task *Task, mapperDef *data.MapperDef) data.Mapper
+	NewTaskInputMapper(task *Task, mapperDef *MapperDef) data.Mapper
 
 	// NewTaskOutputMapper creates a new Output Mapper from the specified MapperDef
 	// for the specified Task, method to facilitate pre-compiled mappers
-	NewTaskOutputMapper(task *Task, mapperDef *data.MapperDef) data.Mapper
+	NewTaskOutputMapper(task *Task, mapperDef *MapperDef) data.Mapper
 }
 
 var	mapperFactory MapperFactory
@@ -44,15 +51,15 @@ type BasicMapperFactory struct {
 
 }
 
-func(mf *BasicMapperFactory) NewMapper(mapperDef *data.MapperDef) data.Mapper {
+func(mf *BasicMapperFactory) NewMapper(mapperDef *MapperDef) data.Mapper {
 	return NewBasicMapper(mapperDef)
 }
 
-func(mf *BasicMapperFactory) NewTaskInputMapper(task *Task, mapperDef *data.MapperDef) data.Mapper {
+func(mf *BasicMapperFactory) NewTaskInputMapper(task *Task, mapperDef *MapperDef) data.Mapper {
 	return NewBasicMapper(mapperDef)
 }
 
-func(mf *BasicMapperFactory) NewTaskOutputMapper(task *Task, mapperDef *data.MapperDef) data.Mapper {
+func(mf *BasicMapperFactory) NewTaskOutputMapper(task *Task, mapperDef *MapperDef) data.Mapper {
 	return NewBasicMapper(mapperDef)
 }
 
@@ -63,7 +70,7 @@ type BasicMapper struct {
 }
 
 // NewBasicMapper creates a new BasicMapper with the specified mappings
-func NewBasicMapper(mapperDef *data.MapperDef) data.Mapper {
+func NewBasicMapper(mapperDef *MapperDef) data.Mapper {
 
 	var mapper BasicMapper
 	mapper.mappings = mapperDef.Mappings

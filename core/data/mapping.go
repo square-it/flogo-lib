@@ -26,12 +26,6 @@ type MappingDef struct {
 	MapTo string `json:"mapTo"`
 }
 
-// MapperDef represents a Mapper, which is a collection of mappings
-type MapperDef struct {
-	//todo possibly add optional lang/mapper type so we can fast fail on unsupported mappings/mapper combo
-	Mappings []*MappingDef
-}
-
 // Mapper is a constructs that maps values from one scope to another
 type Mapper interface {
 	Apply(inputScope Scope, outputScope Scope)
