@@ -131,7 +131,7 @@ func (e *EngineConfig) Start() {
 			logger.Infof("Engine: StartFailed due to error [%s]", err.Error())
 			logger.Debugf("StackTrace: %s", debug.Stack())
 			if config.StopEngineOnError() {
-				logger.Debugf("{%s=true}. Stopping engine", config.ENGINE_SHUTDOWN_ON_ERROR_KEY)
+				logger.Debugf("{%s=true}. Stopping engine", config.STOP_ENGINE_ON_ERROR_KEY)
 				logger.Info("Engine: Stopped")
 				os.Exit(1)
 			}

@@ -17,7 +17,7 @@ const (
 	RUNNER_WORKERS_DEFAULT       = 5
 	RUNNER_QUEUE_SIZE_KEY        = "RUNNER_QUEUE_SIZE"
 	RUNNER_QUEUE_SIZE_DEFAULT    = 50
-	ENGINE_SHUTDOWN_ON_ERROR_KEY = "STOP_ENGINE_ON_ERROR"
+	STOP_ENGINE_ON_ERROR_KEY = "STOP_ENGINE_ON_ERROR"
 )
 
 //GetRunnerType returns the runner type
@@ -73,7 +73,7 @@ func GetLogDateTimeFormat() string {
 }
 
 func StopEngineOnError() bool {
-	stopEngineOnError := os.Getenv(ENGINE_SHUTDOWN_ON_ERROR_KEY)
+	stopEngineOnError := os.Getenv(STOP_ENGINE_ON_ERROR_KEY)
 	if len(stopEngineOnError) == 0 {
 		return true
 	}
