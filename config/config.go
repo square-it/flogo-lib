@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	LOG_LEVEL_DEFAULT            = "DEBUG"
+	LOG_LEVEL_DEFAULT            = "INFO"
 	LOG_DATE_FORMAT_DEFAULT      = "2006-01-02 15:04:05.000"
 	LOG_DATE_FORMAT_KEY          = "LOG_DATETIME_FORMAT"
 	LOG_LEVEL_KEY                = "LOG_LEVEL"
