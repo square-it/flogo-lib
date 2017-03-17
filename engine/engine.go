@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"runtime/debug"
 
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	"github.com/TIBCOSoftware/flogo-lib/config"
@@ -124,7 +126,15 @@ func (e *EngineConfig) Start() {
 
 	// Start the triggers
 	for key, value := range tInstances {
-		util.StartManaged(fmt.Sprintf("Trigger [ '%s' ]", key), value.Interf)
+		err := util.StartManaged(fmt.Sprintf("Trigger [ '%s' ]", key), value.Interf)
+		if err != nil {
+			logger.Infof("Engine: StartFailed due to error [%s]", err.Error())
+			logger.Debugf("StackTrace: %s", debug.Stack())
+			if config.ShutdownEngineOnError() {
+				logger.Info("Engine: Shutdown")
+				os.Exit(1)
+			}
+		}
 	}
 
 	logger.Info("Engine: Started")

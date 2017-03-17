@@ -7,16 +7,17 @@ import (
 )
 
 const (
-	LOG_LEVEL_DEFAULT         = "INFO"
-	LOG_DATE_FORMAT_DEFAULT   = "2006-01-02 15:04:05.000"
-	LOG_DATE_FORMAT_KEY       = "LOG_DATETIME_FORMAT"
-	LOG_LEVEL_KEY             = "LOG_LEVEL"
-	RUNNER_TYPE_DEFAULT       = "POOLED"
-	RUNNER_TYPE_KEY           = "RUNNER_TYPE"
-	RUNNER_WORKERS_KEY        = "RUNNER_WORKERS"
-	RUNNER_WORKERS_DEFAULT    = 5
-	RUNNER_QUEUE_SIZE_KEY     = "RUNNER_QUEUE_SIZE"
-	RUNNER_QUEUE_SIZE_DEFAULT = 50
+	LOG_LEVEL_DEFAULT            = "INFO"
+	LOG_DATE_FORMAT_DEFAULT      = "2006-01-02 15:04:05.000"
+	LOG_DATE_FORMAT_KEY          = "LOG_DATETIME_FORMAT"
+	LOG_LEVEL_KEY                = "LOG_LEVEL"
+	RUNNER_TYPE_DEFAULT          = "POOLED"
+	RUNNER_TYPE_KEY              = "RUNNER_TYPE"
+	RUNNER_WORKERS_KEY           = "RUNNER_WORKERS"
+	RUNNER_WORKERS_DEFAULT       = 5
+	RUNNER_QUEUE_SIZE_KEY        = "RUNNER_QUEUE_SIZE"
+	RUNNER_QUEUE_SIZE_DEFAULT    = 50
+	ENGINE_SHUTDOWN_ON_ERROR_KEY = "ENGINE_SHUTDOWN_ON_ERROR"
 )
 
 //GetRunnerType returns the runner type
@@ -69,4 +70,13 @@ func GetLogDateTimeFormat() string {
 		return logLevelEnv
 	}
 	return LOG_DATE_FORMAT_DEFAULT
+}
+
+func ShutdownEngineOnError() bool {
+	shutdownOnError := os.Getenv(ENGINE_SHUTDOWN_ON_ERROR_KEY)
+	if len(shutdownOnError) == 0 {
+		return true
+	}
+	b, _ := strconv.ParseBool(shutdownOnError)
+	return b
 }
