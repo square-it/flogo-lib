@@ -9,6 +9,21 @@ type LinkExprManager interface {
 	EvalLinkExpr(link *Link, scope data.Scope) bool
 }
 
+type LinkExprManagerFactory interface {
+
+	NewLinkExprManager(def *Definition) LinkExprManager
+}
+
+var	linkExprMangerFactory LinkExprManagerFactory
+
+func SetLinkExprManagerFactory(factory LinkExprManagerFactory) {
+	linkExprMangerFactory = factory
+}
+
+func GetLinkExprManagerFactory() LinkExprManagerFactory {
+	return linkExprMangerFactory
+}
+
 // GetExpressionLinks gets the links of the definition that are of type LtExpression
 func GetExpressionLinks(def *Definition) []*Link {
 

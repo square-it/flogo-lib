@@ -79,3 +79,13 @@ func GetType(val interface{}) (Type, error) {
 		return 0, fmt.Errorf("Unable to determine type of %#v", t)
 	}
 }
+
+func IsSimpleType(val interface{}) bool {
+
+	switch val.(type) {
+	case string, int, float64, json.Number, bool:
+		return true
+	default:
+		return false
+	}
+}

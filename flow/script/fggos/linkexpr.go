@@ -24,8 +24,12 @@ type varInfo struct {
 	isd  int
 }
 
+type GosLinkExprManagerFactory struct {
+
+}
+
 // NewGosLinkExprManager creates a new LuaLinkExprManager
-func NewGosLinkExprManager(def *flowdef.Definition) *GosLinkExprManager {
+func (f *GosLinkExprManagerFactory) NewLinkExprManager(def *flowdef.Definition) flowdef.LinkExprManager {
 
 	mgr := &GosLinkExprManager{}
 	mgr.values = make(map[int][]*varInfo)
