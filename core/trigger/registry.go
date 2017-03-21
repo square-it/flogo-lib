@@ -2,8 +2,8 @@ package trigger
 
 import (
 	"fmt"
-	"sync"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"sync"
 )
 
 var (
@@ -155,4 +155,17 @@ func Triggers() []Trigger {
 func Get(id string) Trigger {
 	//var curTriggers = triggers
 	return triggers[id]
+}
+
+func GetTriggerInstanceInfo() []TriggerInstanceInfo {
+	currentInstances := reg.instances
+	list := make([]TriggerInstanceInfo, 0, len(currentInstances))
+	for id, triggerInstance := range currentInstances {
+		list = append(list, TriggerInstanceInfo{
+			Name:   id,
+			Status: triggerInstance.Status,
+			Error:  triggerInstance.Error,
+		})
+	}
+	return list
 }
