@@ -33,8 +33,26 @@ type Trigger2 interface {
 	Init(config types.TriggerConfig, actionRunner action.Runner)
 }
 
+type Status string
+
+const (
+    Started          Status = "Started"
+    Stopped                 = "Stopped"
+    Failed                  = "Failed"
+)
+
 //TriggerInstance contains all the information for a Trigger Instance, configuration and interface
 type TriggerInstance struct {
-	Config *types.TriggerConfig
-	Interf Trigger2
+    Config *types.TriggerConfig
+    Interf Trigger2
+    Status Status
+    Error error
 }
+
+type TriggerInstanceInfo  struct {
+	Name string
+	Status Status
+	Error error
+}
+
+

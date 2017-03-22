@@ -128,13 +128,18 @@ func (e *EngineConfig) Start() {
 	for key, value := range tInstances {
 		err := util.StartManaged(fmt.Sprintf("Trigger [ '%s' ]", key), value.Interf)
 		if err != nil {
-			logger.Infof("Engine: StartFailed due to error [%s]", err.Error())
+			logger.Infof("Trigger [%s] failed to start due to error [%s]", key, err.Error())
+			value.Status = trigger.Failed
+			value.Error = err
 			logger.Debugf("StackTrace: %s", debug.Stack())
 			if config.StopEngineOnError() {
 				logger.Debugf("{%s=true}. Stopping engine", config.STOP_ENGINE_ON_ERROR_KEY)
 				logger.Info("Engine: Stopped")
 				os.Exit(1)
 			}
+		} else {
+			logger.Infof("Trigger [%s] started", key)
+			value.Status = trigger.Started
 		}
 	}
 
