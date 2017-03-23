@@ -95,6 +95,7 @@ type Task struct {
 	id           int
 	typeID       int
 	activityType string
+	activityRef  string
 	name         string
 	tasks        []*Task
 	links        []*Link
@@ -129,6 +130,11 @@ func (task *Task) TypeID() int {
 // ActivityType gets the activity type
 func (task *Task) ActivityType() string {
 	return task.activityType
+}
+
+// ActivityRef gets the activity ref
+func (task *Task) ActivityRef() string {
+	return task.activityRef
 }
 
 // Parent gets the parent task of the task
