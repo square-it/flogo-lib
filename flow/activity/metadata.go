@@ -55,6 +55,7 @@ func (md *Metadata) UnmarshalJSON(b []byte) error {
 
 	ser := &struct {
 		Name    string            `json:"name"`
+		Ref     string            `json:"ref"`
 		Inputs  []*data.Attribute `json:"inputs"`
 		Outputs []*data.Attribute `json:"outputs"`
 	}{}
@@ -63,7 +64,14 @@ func (md *Metadata) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	md.ID = ser.Name
+	if len(ser.Ref) > 0 {
+		md.ID = ser.Ref
+	} else {
+		// Added for backwards compatibility
+		// TODO remove and add a proper error once the BC is removed
+		md.ID = ser.Name
+	}
+
 	md.Inputs = make(map[string]*data.Attribute, len(ser.Inputs))
 	md.Outputs = make(map[string]*data.Attribute, len(ser.Outputs))
 

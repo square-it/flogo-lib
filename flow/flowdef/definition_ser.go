@@ -21,6 +21,7 @@ type TaskRep struct {
 	ID             int                `json:"id"`
 	TypeID         int                `json:"type"`
 	ActivityType   string             `json:"activityType"`
+	ActivityRef    string             `json:"activityRef"`
 	Name           string             `json:"name"`
 	Attributes     []*data.Attribute  `json:"attributes,omitempty"`
 	InputMappings  []*data.MappingDef `json:"inputMappings,omitempty"`
@@ -52,7 +53,7 @@ func NewDefinition(rep *DefinitionRep) (def *Definition, err error) {
 
 	//todo is this used or needed?
 	if rep.InputMappings != nil {
-		def.inputMapper = GetMapperFactory().NewMapper(&MapperDef{Mappings:rep.InputMappings})
+		def.inputMapper = GetMapperFactory().NewMapper(&MapperDef{Mappings: rep.InputMappings})
 	}
 
 	if len(rep.Attributes) > 0 {
@@ -82,19 +83,19 @@ func NewDefinition(rep *DefinitionRep) (def *Definition, err error) {
 }
 
 func addTask(def *Definition, task *Task, rep *TaskRep) {
-
 	task.id = rep.ID
 	task.activityType = rep.ActivityType
+	task.activityRef = rep.ActivityRef
 	task.typeID = rep.TypeID
 	task.name = rep.Name
 	//task.Definition = def
 
 	if rep.InputMappings != nil {
-		task.inputMapper = GetMapperFactory().NewTaskInputMapper(task, &MapperDef{Mappings:rep.InputMappings})
+		task.inputMapper = GetMapperFactory().NewTaskInputMapper(task, &MapperDef{Mappings: rep.InputMappings})
 	}
 
 	if rep.OutputMappings != nil {
-		task.outputMapper = GetMapperFactory().NewTaskOutputMapper(task, &MapperDef{Mappings:rep.OutputMappings})
+		task.outputMapper = GetMapperFactory().NewTaskOutputMapper(task, &MapperDef{Mappings: rep.OutputMappings})
 	}
 
 	if len(rep.Attributes) > 0 {
