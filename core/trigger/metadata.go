@@ -47,6 +47,7 @@ func (md *Metadata) MarshalJSON() ([]byte, error) {
 
 	return json.Marshal(&struct {
 		Name     string            `json:"name"`
+		Ref      string            `json:"ref"`
 		Endpoint EndpointMetadata  `json:"endpoint"`
 		Settings []*data.Attribute `json:"settings"`
 		Outputs  []*data.Attribute `json:"outputs"`
@@ -63,6 +64,7 @@ func (md *Metadata) UnmarshalJSON(b []byte) error {
 
 	ser := &struct {
 		Name     string            `json:"name"`
+		Ref      string            `json:"ref"`
 		Endpoint EndpointMetadata  `json:"endpoint"`
 		Settings []*data.Attribute `json:"settings"`
 		Outputs  []*data.Attribute `json:"outputs"`
@@ -72,7 +74,13 @@ func (md *Metadata) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	md.ID = ser.Name
+	if len(ser.Ref) > 0 {
+		md.ID = ser.Ref
+	} else {
+		// Added for backwards compatibility
+		// TODO remove and add a proper error once the BC is removed
+		md.ID = ser.Name
+	}
 	md.Settings = make(map[string]*data.Attribute, len(ser.Settings))
 	md.Outputs = make(map[string]*data.Attribute, len(ser.Outputs))
 

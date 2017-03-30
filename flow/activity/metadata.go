@@ -41,6 +41,7 @@ func (md *Metadata) MarshalJSON() ([]byte, error) {
 
 	return json.Marshal(&struct {
 		Name    string            `json:"name"`
+		Ref     string            `json:"ref"`
 		Inputs  []*data.Attribute `json:"inputs"`
 		Outputs []*data.Attribute `json:"outputs"`
 	}{
