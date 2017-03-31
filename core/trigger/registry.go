@@ -16,6 +16,7 @@ type Registry interface {
 	AddFactory(ref string, f Factory) error
 	GetFactories() map[string]Factory
 	AddInstance(id string, instance *TriggerInstance) error
+	GetInstance(id string) *TriggerInstance
 }
 
 type registry struct {
@@ -149,6 +150,16 @@ func Triggers() []Trigger {
 	}
 
 	return list
+}
+
+// Instance gets specified trigger instance
+func Instance(id string) *TriggerInstance{
+	return reg.GetInstance(id)
+}
+
+// GetInstances gets specified trigger instance
+func (r registry) GetInstance(id string) *TriggerInstance {
+	return r.instances[id];
 }
 
 // Get gets specified trigger

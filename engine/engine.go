@@ -147,7 +147,46 @@ func (e *EngineConfig) Start() {
 }
 
 func (e *EngineConfig) Stop() {
-	// Todo implement
+	logger.Info("Engine: Stopping...")
+
+	// Stop Triggers
+	tConfigs := e.App.Triggers
+
+	for _, tConfig := range tConfigs{
+		// Get instance
+		tInst := trigger.Instance(tConfig.Id)
+		if tInst == nil {
+			//nothing to stop
+			continue
+		}
+		tInterf := tInst.Interf
+		if tInterf == nil {
+			//nothing to stop
+			continue
+		}
+		util.StopManaged("Trigger [ "+tConfig.Id+" ]", tInterf)
+	}
+
+
+	runner := e.runner.(interface{})
+	managedRunner, ok := runner.(util.Managed)
+
+	if ok {
+		util.StopManaged("ActionRunner", managedRunner)
+	}
+
+	//TODO stop services when we support them
+	/*logger.Info("Engine: Stopping Services...")
+
+	err := e.serviceManager.Stop()
+
+	if err != nil {
+		logger.Error("Engine: Error Stopping Services - " + err.Error())
+	} else {
+		logger.Info("Engine: Stopped Services")
+	}*/
+
+	logger.Info("Engine: Stopped")
 }
 
 // NewEngine create a new Engine
