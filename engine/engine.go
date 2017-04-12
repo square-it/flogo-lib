@@ -69,7 +69,7 @@ func New(app *types.AppConfig) (IEngine, error) {
 		r = runner.NewPooled(runnerConfig.Pooled)
 	}
 
-	return &EngineConfig{App: app, LogLevel: logLevel, runner: r, serviceManager: util.NewServiceManager()}, nil
+	return &EngineConfig{App: app, LogLevel: logLevel, runner: r, serviceManager: util.GetDefaultServiceManager()}, nil
 }
 
 //Start initializes and starts the Triggers and initializes the Actions
@@ -124,6 +124,16 @@ func (e *EngineConfig) Start() {
 		util.StartManaged("ActionRunner Service", managedRunner)
 	}
 
+	logger.Info("Engine: Starting Services...")
+
+	err = e.serviceManager.Start()
+
+	if err != nil {
+		logger.Error("Engine: Error Starting Services - " + err.Error())
+	} else {
+		logger.Info("Engine: Started Services")
+	}
+
 	// Start the triggers
 	for key, value := range tInstances {
 		err := util.StartManaged(fmt.Sprintf("Trigger [ '%s' ]", key), value.Interf)
@@ -167,7 +177,6 @@ func (e *EngineConfig) Stop() {
 		util.StopManaged("Trigger [ "+tConfig.Id+" ]", tInterf)
 	}
 
-
 	runner := e.runner.(interface{})
 	managedRunner, ok := runner.(util.Managed)
 
@@ -175,8 +184,8 @@ func (e *EngineConfig) Stop() {
 		util.StopManaged("ActionRunner", managedRunner)
 	}
 
-	//TODO stop services when we support them
-	/*logger.Info("Engine: Stopping Services...")
+	//TODO temporarily add services
+	logger.Info("Engine: Stopping Services...")
 
 	err := e.serviceManager.Stop()
 
@@ -184,7 +193,7 @@ func (e *EngineConfig) Stop() {
 		logger.Error("Engine: Error Stopping Services - " + err.Error())
 	} else {
 		logger.Info("Engine: Stopped Services")
-	}*/
+	}
 
 	logger.Info("Engine: Stopped")
 }

@@ -27,6 +27,16 @@ type ServiceManager struct {
 	started    []Service
 }
 
+var defaultServiceManager *ServiceManager
+
+func init() {
+	defaultServiceManager = NewServiceManager()
+}
+
+func GetDefaultServiceManager() *ServiceManager{
+	return defaultServiceManager
+}
+
 // NewServiceManager creates a new ServiceManager
 func NewServiceManager() *ServiceManager {
 
