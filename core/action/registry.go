@@ -28,6 +28,10 @@ func RegisterFactory(ref string, f Factory) error {
 	return reg.AddFactory(ref, f)
 }
 
+func GetFactory(ref string) Factory {
+	return reg.GetFactories()[ref]
+}
+
 func (r *registry) AddFactory(ref string, f Factory) error {
 	actionsMu.Lock()
 	defer actionsMu.Unlock()
