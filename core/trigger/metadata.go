@@ -9,13 +9,13 @@ import (
 // Metadata is the metadata for a Trigger
 type Metadata struct {
 	ID       string
-	Endpoint EndpointMetadata
+	Handler  *HandlerMetadata
 	Settings map[string]*data.Attribute
 	Outputs  map[string]*data.Attribute
 }
 
 // EndpointMetadata is the metadata for a Trigger Endpoint
-type EndpointMetadata struct {
+type HandlerMetadata struct {
 	Settings []*data.Attribute `json:"settings"`
 }
 
@@ -30,42 +30,43 @@ func NewMetadata(jsonMetadata string) *Metadata {
 	return md
 }
 
-// MarshalJSON overrides the default MarshalJSON for TaskEnv
-func (md *Metadata) MarshalJSON() ([]byte, error) {
+//// MarshalJSON overrides the default MarshalJSON for TaskEnv
+//func (md *Metadata) MarshalJSON() ([]byte, error) {
+//
+//	settings := make([]*data.Attribute, 0, len(md.Settings))
+//
+//	for _, value := range md.Settings {
+//		settings = append(settings, value)
+//	}
+//
+//	outputs := make([]*data.Attribute, 0, len(md.Outputs))
+//
+//	for _, value := range md.Outputs {
+//		outputs = append(outputs, value)
+//	}
+//
+//	return json.Marshal(&struct {
+//		Name     string            `json:"name"`
+//		Ref      string            `json:"ref"`
+//		Endpoint EndpointMetadata  `json:"endpoint"`
+//		Settings []*data.Attribute `json:"settings"`
+//		Outputs  []*data.Attribute `json:"outputs"`
+//	}{
+//		Name:     md.ID,
+//		Endpoint: md.Endpoint,
+//		Settings: settings,
+//		Outputs:  outputs,
+//	})
+//}
 
-	settings := make([]*data.Attribute, 0, len(md.Settings))
-
-	for _, value := range md.Settings {
-		settings = append(settings, value)
-	}
-
-	outputs := make([]*data.Attribute, 0, len(md.Outputs))
-
-	for _, value := range md.Outputs {
-		outputs = append(outputs, value)
-	}
-
-	return json.Marshal(&struct {
-		Name     string            `json:"name"`
-		Ref      string            `json:"ref"`
-		Endpoint EndpointMetadata  `json:"endpoint"`
-		Settings []*data.Attribute `json:"settings"`
-		Outputs  []*data.Attribute `json:"outputs"`
-	}{
-		Name:     md.ID,
-		Endpoint: md.Endpoint,
-		Settings: settings,
-		Outputs:  outputs,
-	})
-}
-
-// UnmarshalJSON overrides the default UnmarshalJSON for TaskEnv
+// UnmarshalJSON overrides the default UnmarshalJSON for Metadata
 func (md *Metadata) UnmarshalJSON(b []byte) error {
 
 	ser := &struct {
 		Name     string            `json:"name"`
 		Ref      string            `json:"ref"`
-		Endpoint EndpointMetadata  `json:"endpoint"`
+		Handler  *HandlerMetadata  `json:"handler"`
+		Endpoint *HandlerMetadata  `json:"endpoint"`
 		Settings []*data.Attribute `json:"settings"`
 		Outputs  []*data.Attribute `json:"outputs"`
 	}{}
@@ -81,6 +82,18 @@ func (md *Metadata) UnmarshalJSON(b []byte) error {
 		// TODO remove and add a proper error once the BC is removed
 		md.ID = ser.Name
 	}
+
+	if ser.Handler != nil {
+		md.Handler = ser.Handler
+	} else {
+		// Added for backwards compatibility
+		// TODO remove and add a proper error once the BC is removed
+
+		if ser.Endpoint != nil {
+			md.Handler = ser.Endpoint
+		}
+	}
+
 	md.Settings = make(map[string]*data.Attribute, len(ser.Settings))
 	md.Outputs = make(map[string]*data.Attribute, len(ser.Outputs))
 

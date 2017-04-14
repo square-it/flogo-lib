@@ -5,18 +5,17 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
-	"github.com/TIBCOSoftware/flogo-lib/types"
 )
 
 //InstanceHelper helps to create the instances for a given id
 type InstanceHelper struct {
-	app        *types.AppConfig
+	app        *Config
 	tFactories map[string]trigger.Factory
 	aFactories map[string]action.Factory
 }
 
 //NewInstanceManager creates a new instance manager
-func NewInstanceHelper(app *types.AppConfig, tFactories map[string]trigger.Factory, aFactories map[string]action.Factory) *InstanceHelper {
+func NewInstanceHelper(app *Config, tFactories map[string]trigger.Factory, aFactories map[string]action.Factory) *InstanceHelper {
 	return &InstanceHelper{app: app, tFactories: tFactories, aFactories: aFactories}
 }
 
@@ -43,7 +42,7 @@ func (h *InstanceHelper) CreateTriggers() (map[string]*trigger.TriggerInstance, 
 			return nil, fmt.Errorf("Trigger Factory '%s' not registered", tConfig.Ref)
 		}
 
-		newInterface := factory.New(tConfig.Id)
+		newInterface := factory.New(tConfig)
 
 		if newInterface == nil {
 			return nil, fmt.Errorf("Cannot create Trigger nil for id '%s'", tConfig.Id)
@@ -56,19 +55,19 @@ func (h *InstanceHelper) CreateTriggers() (map[string]*trigger.TriggerInstance, 
 }
 
 //CreateActions creates new instances for actions in the configuration
-func (h *InstanceHelper) CreateActions() (map[string]*action.ActionInstance, error) {
+func (h *InstanceHelper) CreateActions() (map[string]action.Action, error) {
 
 	// Get Action instances from configuration
 	aConfigs := h.app.Actions
 
-	instances := make(map[string]*action.ActionInstance, len(aConfigs))
+	actions := make(map[string]action.Action, len(aConfigs))
 
 	for _, aConfig := range aConfigs {
 		if aConfig == nil {
 			continue
 		}
 
-		_, ok := instances[aConfig.Id]
+		_, ok := actions[aConfig.Id]
 		if ok {
 			return nil, fmt.Errorf("Action with id '%s' already registered, action ids have to be unique", aConfig.Id)
 		}
@@ -78,14 +77,14 @@ func (h *InstanceHelper) CreateActions() (map[string]*action.ActionInstance, err
 			return nil, fmt.Errorf("Action Factory '%s' not registered", aConfig.Ref)
 		}
 
-		newInterface := factory.New(aConfig.Id)
+		newAction := factory.New(aConfig)
 
-		if newInterface == nil {
+		if newAction == nil {
 			return nil, fmt.Errorf("Cannot create Action nil for id '%s'", aConfig.Id)
 		}
 
-		instances[aConfig.Id] = &action.ActionInstance{Config: aConfig, Interf: newInterface}
+		actions[aConfig.Id] = newAction
 	}
 
-	return instances, nil
+	return actions, nil
 }
