@@ -4,6 +4,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/types"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"github.com/TIBCOSoftware/flogo-lib/app"
 )
 
 //TestNewEngineErrorNoApp
@@ -16,7 +17,7 @@ func TestNewEngineErrorNoApp(t *testing.T) {
 
 //TestNewEngineErrorNoAppName
 func TestNewEngineErrorNoAppName(t *testing.T) {
-	app := &types.AppConfig{}
+	app := &app.Config{}
 
 	_, err := New(app)
 
@@ -26,7 +27,7 @@ func TestNewEngineErrorNoAppName(t *testing.T) {
 
 //TestNewEngineErrorNoAppVersion
 func TestNewEngineErrorNoAppVersion(t *testing.T) {
-	app := &types.AppConfig{Name: "MyApp"}
+	app := &app.Config{Name: "MyApp"}
 
 	_, err := New(app)
 

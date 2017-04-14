@@ -1,19 +1,7 @@
 package flowinst
 
 import (
-	//"encoding/json"
-	"os"
-	"testing"
-
-	//"github.com/TIBCOSoftware/flogo-lib/flow/flowdef"
-	//"github.com/TIBCOSoftware/flogo-lib/util"
-	"github.com/op/go-logging"
 )
-
-func TestMain(m *testing.M) {
-	log = logging.MustGetLogger("core")
-	os.Exit(m.Run())
-}
 
 const defJSON = `
 {

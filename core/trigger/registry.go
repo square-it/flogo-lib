@@ -8,7 +8,7 @@ import (
 
 var (
 	triggersMu sync.Mutex
-	triggers   = make(map[string]Trigger)
+	triggers   = make(map[string]TriggerDeprecated)
 	reg        = &registry{}
 )
 
@@ -115,7 +115,7 @@ func (r *registry) AddInstance(id string, inst *TriggerInstance) error {
 }
 
 // Register registers the specified trigger
-func Register(trigger Trigger) {
+func Register(trigger TriggerDeprecated) {
 	triggersMu.Lock()
 	defer triggersMu.Unlock()
 
@@ -128,7 +128,7 @@ func Register(trigger Trigger) {
 		panic("trigger.Register: Register called twice for trigger " + id)
 	}
 	// copy on write to avoid synchronization on access
-	newTriggers := make(map[string]Trigger, len(triggers))
+	newTriggers := make(map[string]TriggerDeprecated, len(triggers))
 
 	for k, v := range triggers {
 		newTriggers[k] = v
@@ -139,11 +139,11 @@ func Register(trigger Trigger) {
 }
 
 // Triggers gets all the registered triggers
-func Triggers() []Trigger {
+func Triggers() []TriggerDeprecated {
 
 	var curTriggers = triggers
 
-	list := make([]Trigger, 0, len(curTriggers))
+	list := make([]TriggerDeprecated, 0, len(curTriggers))
 
 	for _, value := range curTriggers {
 		list = append(list, value)
@@ -163,7 +163,7 @@ func (r registry) GetInstance(id string) *TriggerInstance {
 }
 
 // Get gets specified trigger
-func Get(id string) Trigger {
+func Get(id string) TriggerDeprecated {
 	//var curTriggers = triggers
 	return triggers[id]
 }

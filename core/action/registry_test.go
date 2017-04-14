@@ -120,7 +120,7 @@ func TestAddInstanceNilInstance(t *testing.T) {
 func TestAddInstanceDuplicated(t *testing.T) {
 
 	reg := &registry{}
-	i := &ActionInstance{}
+	i := &Instance{}
 
 	// Add instance: this time should pass
 	err := reg.AddInstance("myinstanceId", i)
@@ -135,7 +135,7 @@ func TestAddInstanceDuplicated(t *testing.T) {
 func TestAddInstanceOk(t *testing.T) {
 
 	reg := &registry{}
-	i := &ActionInstance{}
+	i := &Instance{}
 
 	// Add instance
 	err := reg.AddInstance("myinstanceId", i)
@@ -147,7 +147,7 @@ func TestAddInstanceOk(t *testing.T) {
 func TestGetActionOk(t *testing.T) {
 
 	reg := &registry{}
-	i := &ActionInstance{Interf: &MockAction{}}
+	i := &Instance{Interf: &MockAction{}}
 
 	// Add instance
 	err := reg.AddInstance("myinstanceId", i)

@@ -13,7 +13,6 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"github.com/TIBCOSoftware/flogo-lib/types"
 	"github.com/TIBCOSoftware/flogo-lib/util"
 )
 
@@ -35,14 +34,14 @@ type Engine struct {
 
 // EngineConfig is the type for the Engine Configuration
 type EngineConfig struct {
-	App            *types.AppConfig
+	App            *app.Config
 	LogLevel       string
 	runner         action.Runner
 	serviceManager *util.ServiceManager
 }
 
 // New creates a new Engine
-func New(app *types.AppConfig) (IEngine, error) {
+func New(app *app.Config) (IEngine, error) {
 	// App is required
 	if app == nil {
 		return nil, errors.New("Error: No App configuration provided")
@@ -88,17 +87,16 @@ func (e *EngineConfig) Start() {
 
 	// Initialize and register the triggers
 	for key, value := range tInstances {
-		triggerConfig := value.Config
 		triggerInterface := value.Interf
 
 		//Init
-		triggerInterface.Init(*triggerConfig, e.runner)
+		triggerInterface.Init(e.runner)
 		//Register
 		trigger.RegisterInstance(key, value)
 	}
 
 	// Create the action instances
-	aInstances, err := instanceHelper.CreateActions()
+	actions, err := instanceHelper.CreateActions()
 	if err != nil {
 		errorMsg := fmt.Sprintf("Engine: Error Creating action instances - %s", err.Error())
 		logger.Error(errorMsg)
@@ -106,15 +104,10 @@ func (e *EngineConfig) Start() {
 	}
 
 	// Initialize and register the actions,
-	for key, value := range aInstances {
-		actionConfig := value.Config
-		actionInterface := value.Interf
+	for key, value := range actions {
 
-		//Init
-		actionInterface.Init(*actionConfig)
-		//Register
-		action.RegisterInstance(key, value)
-
+		action.Register(key, value)
+		//do we need an init? or start
 	}
 
 	runner := e.runner.(interface{})
@@ -250,7 +243,7 @@ func (e *Engine) Start() {
 
 	triggers := trigger.Triggers()
 
-	var triggersToStart []trigger.Trigger
+	var triggersToStart []trigger.TriggerDeprecated
 
 	// initialize triggers
 	for _, trigger := range triggers {
