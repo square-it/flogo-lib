@@ -41,9 +41,9 @@ func SetLogLevel(level Level) {
 }
 
 func GetDefaultLogger() Logger {
-	defLogger := GetLogger("default")
+	defLogger := GetLogger("engine")
 	if defLogger == nil {
-		errorMsg := fmt.Sprintf("Engine: Error Getting Default Logger null")
+		errorMsg := fmt.Sprintf("Engine: Error Getting engine Logger null")
 		panic(errorMsg)
 	}
 	return defLogger
