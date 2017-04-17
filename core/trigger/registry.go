@@ -36,7 +36,7 @@ func (r *registry) AddFactory(ref string, f Factory) error {
 	triggersMu.Lock()
 	defer triggersMu.Unlock()
 
-	logger.Debugf("Registering trigger factory ref: '%s'", ref)
+	logger.Debugf("Registering trigger factory: '%s'", ref)
 
 	if len(ref) == 0 {
 		return fmt.Errorf("registry.RegisterFactory: ref is empty")
