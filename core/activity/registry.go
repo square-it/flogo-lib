@@ -2,6 +2,7 @@ package activity
 
 import (
 	"sync"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 var (
@@ -13,6 +14,8 @@ var (
 func Register(activity Activity) {
 	activitiesMu.Lock()
 	defer activitiesMu.Unlock()
+
+	logger.Debugf("Registering actvitiy: '%s'", activity.Metadata().ID)
 
 	if activity == nil {
 		panic("activity.Register: activity is nil")
