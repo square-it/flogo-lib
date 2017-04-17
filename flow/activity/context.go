@@ -7,9 +7,11 @@ import "github.com/TIBCOSoftware/flogo-lib/flow/support"
 type Context interface {
 
 	// FlowDetails returns the details fo the Flow Instance
+	//DEPRECATED - to be replace with generic context details
 	FlowDetails() FlowDetails
 
 	// TaskName returns the name of the Task the Activity is currently executing
+	// DEPRECATED  - to be replaced with generic activity container name
 	TaskName() string
 
 	// GetInput gets the value of the specified input attribute
