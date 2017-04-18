@@ -6,7 +6,6 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
-	"github.com/TIBCOSoftware/flogo-lib/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -52,7 +51,7 @@ type MockTriggerFactory struct {
 type MockTrigger struct {
 }
 
-func (t *MockTrigger) Init(config types.TriggerConfig, actionRunner action.Runner) {
+func (t *MockTrigger) Init(actionRunner action.Runner) {
 	//Noop
 }
 func (t *MockTrigger) Start() error {
@@ -61,7 +60,12 @@ func (t *MockTrigger) Start() error {
 func (t *MockTrigger) Stop() error {
 	return nil
 }
-func (t *MockTriggerFactory) New(id string) trigger.Trigger2 {
+
+func (t *MockTrigger) Metadata() *trigger.Metadata {
+	return nil
+}
+
+func (t *MockTriggerFactory) New(config *trigger.Config) trigger.Trigger {
 	return &MockTrigger{}
 }
 
@@ -73,9 +77,6 @@ type MockActionFactory struct {
 type MockAction struct {
 }
 
-func (t *MockAction) Init(config types.ActionConfig) {
-	//Noop
-}
 func (t *MockAction) Start() error {
 	return nil
 }
@@ -87,21 +88,21 @@ func (t *MockAction) Run(context context.Context, uri string, options interface{
 	return nil
 }
 
-func (t *MockActionFactory) New(id string) action.Action2 {
+func (t *MockActionFactory) New(config *action.Config) action.Action {
 	return &MockAction{}
 }
 
 //getMockApp returns a mock app
-func getMockApp() *types.AppConfig {
-	triggers := make([]*types.TriggerConfig, 1)
+func getMockApp() *Config {
+	triggers := make([]*trigger.Config, 1)
 
-	trigger1 := &types.TriggerConfig{Id: "myTrigger1", Ref: "github.com/TIBCOSoftware/flogo-lib/app/mocktrigger"}
+	trigger1 := &trigger.Config{Id: "myTrigger1", Ref: "github.com/TIBCOSoftware/flogo-lib/app/mocktrigger"}
 	triggers[0] = trigger1
 
-	actions := make([]*types.ActionConfig, 1)
+	actions := make([]*action.Config, 1)
 
-	action1 := &types.ActionConfig{Id: "myAction1", Ref: "github.com/TIBCOSoftware/flogo-lib/app/mockaction"}
+	action1 := &action.Config{Id: "myAction1", Ref: "github.com/TIBCOSoftware/flogo-lib/app/mockaction"}
 	actions[0] = action1
 
-	return &types.AppConfig{Name: "MyApp", Version: "1.0.0", Triggers: triggers, Actions: actions}
+	return &Config{Name: "MyApp", Version: "1.0.0", Triggers: triggers, Actions: actions}
 }

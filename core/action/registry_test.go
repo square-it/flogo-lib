@@ -4,14 +4,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/TIBCOSoftware/flogo-lib/types"
 	"github.com/stretchr/testify/assert"
 )
 
 type MockFactory struct {
 }
 
-func (f *MockFactory) New(id string) Action2 {
+func (f *MockFactory) New(config *Config) Action {
 	return &MockAction{}
 }
 
@@ -22,140 +21,140 @@ func (a *MockAction) Run(context context.Context, uri string, options interface{
 	return nil
 }
 
-func (a *MockAction) Init(config types.ActionConfig) {
-	//Noop
+func clearFactory (){
+	factories = make(map[string]Factory)
 }
 
-//TestAddFactoryEmptyRef
-func TestAddFactoryEmptyRef(t *testing.T) {
+func clearActions (){
+	actions = make(map[string]Action)
+}
 
-	reg := &registry{}
+//TestRegisterFactoryEmptyRef
+func TestRegisterFactoryEmptyRef(t *testing.T) {
+	defer clearFactory()
 
-	// Add factory
-	err := reg.AddFactory("", nil)
+	// Register factory
+	err := RegisterFactory("", nil)
 
 	assert.NotNil(t, err)
-	assert.Equal(t, "registry.RegisterFactory: ref is empty", err.Error())
+	assert.Equal(t, "RegisterFactory: ref is empty", err.Error())
 }
 
-//TestAddFactoryNilFactory
-func TestAddFactoryNilFactory(t *testing.T) {
+//TestRegisterFactoryNilFactory
+func TestRegisterFactoryNilFactory(t *testing.T) {
+	defer clearFactory()
 
-	reg := &registry{}
-
-	// Add factory
-	err := reg.AddFactory("github.com/mock", nil)
+	// Register factory
+	err := RegisterFactory("github.com/mock", nil)
 
 	assert.NotNil(t, err)
-	assert.Equal(t, "registry.RegisterFactory: factory is nil", err.Error())
+	assert.Equal(t, "RegisterFactory: factory is nil", err.Error())
 }
 
-//TestAddFactoryDuplicated
-func TestAddFactoryDuplicated(t *testing.T) {
+//TestRegisterFactoryDuplicated
+func TestRegisterFactoryDuplicated(t *testing.T) {
 
-	reg := &registry{}
+	defer clearFactory()
 	f := &MockFactory{}
 
 	// Add factory: this time should pass
-	err := reg.AddFactory("github.com/mock", f)
+	err := RegisterFactory("github.com/mock", f)
 	assert.Nil(t, err)
 	// Add factory: this time should fail, duplicated
-	err = reg.AddFactory("github.com/mock", f)
+	err = RegisterFactory("github.com/mock", f)
 	assert.NotNil(t, err)
-	assert.Equal(t, "registry.RegisterFactory: already registered factory for ref 'github.com/mock'", err.Error())
+	assert.Equal(t, "RegisterFactory: already registered factory for ref 'github.com/mock'", err.Error())
 }
 
-//TestAddFactoryOk
-func TestAddFactoryOk(t *testing.T) {
+//TestRegisterFactoryOk
+func TestRegisterFactoryOk(t *testing.T) {
+	defer clearFactory()
 
-	reg := &registry{}
 	f := &MockFactory{}
 
 	// Add factory
-	err := reg.AddFactory("github.com/mock", f)
+	err := RegisterFactory("github.com/mock", f)
 	assert.Nil(t, err)
-	assert.Equal(t, 1, len(reg.factories))
+	assert.Equal(t, 1, len(Factories()))
 }
 
 //TestGetFactoriesOk
 func TestGetFactoriesOk(t *testing.T) {
+	defer clearFactory()
 
-	reg := &registry{}
 	f := &MockFactory{}
 
 	// Add factory
-	err := reg.AddFactory("github.com/mock", f)
+	err := RegisterFactory("github.com/mock", f)
 	assert.Nil(t, err)
 
 	// Get factory
-	fs := reg.GetFactories()
+	fs := Factories()
 	assert.Equal(t, 1, len(fs))
 }
 
-//TestAddInstanceEmptyId
-func TestAddInstanceEmptyId(t *testing.T) {
+//TestRegisterEmptyId
+func TestRegisterEmptyId(t *testing.T) {
+	defer clearActions()
 
-	reg := &registry{}
-
-	// Add factory
-	err := reg.AddInstance("", nil)
+	// Register
+	err := Register("", nil)
 
 	assert.NotNil(t, err)
-	assert.Equal(t, "registry.RegisterInstance: id is empty", err.Error())
+	assert.Equal(t, "error registering action, id is empty", err.Error())
 }
 
-//TestAddInstanceNilInstance
-func TestAddInstanceNilInstance(t *testing.T) {
-
-	reg := &registry{}
+//TestRegisterNilInstance
+func TestRegisterNilInstance(t *testing.T) {
+	defer clearActions()
 
 	// Add instance
-	err := reg.AddInstance("myInstanceId", nil)
+	err := Register("myInstanceId", nil)
 
 	assert.NotNil(t, err)
-	assert.Equal(t, "registry.RegisterInstance: instance is nil", err.Error())
+	assert.Equal(t, "error registering action for id 'myInstanceId', action is nil", err.Error())
 }
 
-//TestAddInstanceDuplicated
-func TestAddInstanceDuplicated(t *testing.T) {
+//TestRegisterDuplicated
+func TestRegisterDuplicated(t *testing.T) {
+	defer clearActions()
 
-	reg := &registry{}
-	i := &Instance{}
+	a := &MockAction{}
 
 	// Add instance: this time should pass
-	err := reg.AddInstance("myinstanceId", i)
+	err := Register("myinstanceId", a)
 	assert.Nil(t, err)
 	// Add instance: this time should fail, duplicated
-	err = reg.AddInstance("myinstanceId", i)
+	err = Register("myinstanceId", a)
 	assert.NotNil(t, err)
-	assert.Equal(t, "registry.RegisterInstance: already registered instance for id 'myinstanceId'", err.Error())
+	assert.Equal(t, "Error registering action, action already registered for id 'myinstanceId'", err.Error())
 }
 
-//TestAddInstanceOk
-func TestAddInstanceOk(t *testing.T) {
+//TestRegisterOk
+func TestRegisterOk(t *testing.T) {
+	defer clearActions()
 
-	reg := &registry{}
-	i := &Instance{}
+	a := &MockAction{}
 
 	// Add instance
-	err := reg.AddInstance("myinstanceId", i)
+	err := Register("myinstanceId", a)
 	assert.Nil(t, err)
-	assert.Equal(t, 1, len(reg.instances))
+	assert.Equal(t, 1, len(Actions()))
 }
 
 //TestGetActionOk
 func TestGetActionOk(t *testing.T) {
+	defer clearActions()
 
-	reg := &registry{}
-	i := &Instance{Interf: &MockAction{}}
+	a := &MockAction{}
 
 	// Add instance
-	err := reg.AddInstance("myinstanceId", i)
+	err := Register("myinstanceId", a)
 	assert.Nil(t, err)
 
-	a := reg.GetAction("myinstanceId")
-	assert.NotNil(t, a)
+	myInstance :=  Get("myinstanceId")
+	assert.NotNil(t, myInstance)
 
-	a = reg.GetAction("myunknowninstanceId")
-	assert.Nil(t, a)
+	myUnknownInstance := Get("myunknowninstanceId")
+	assert.Nil(t, myUnknownInstance)
 }
