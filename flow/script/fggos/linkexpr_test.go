@@ -99,8 +99,8 @@ func TestLuaLinkExprManager_EvalLinkExpr(t *testing.T) {
 	json.Unmarshal([]byte(defJSON), defRep)
 
 	def, _ := flowdef.NewDefinition(defRep)
-
-	mgr := NewGosLinkExprManager(def)
+	f := GosLinkExprManagerFactory{}
+	mgr := f.NewLinkExprManager(def)
 
 	link1 := def.GetLink(1)
 	link2 := def.GetLink(2)

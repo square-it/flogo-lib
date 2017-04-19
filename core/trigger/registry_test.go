@@ -5,26 +5,27 @@ import (
 	"testing"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
-	"github.com/TIBCOSoftware/flogo-lib/types"
 	"github.com/stretchr/testify/assert"
 )
 
 type MockFactory struct {
 }
 
-func (f *MockFactory) New(id string) Trigger2 {
+func (f *MockFactory) New(config *Config) Trigger {
 	return &MockTrigger{}
 }
 
 type MockTrigger struct {
 }
 
-func (t *MockTrigger) Init(config types.TriggerConfig, actionRunner action.Runner) {
+func (t *MockTrigger) Init(actionRunner action.Runner) {
 	//Noop
 }
 
 func (t *MockTrigger) Start() error { return nil }
 func (t *MockTrigger) Stop() error  { return nil }
+func (t *MockTrigger) Metadata() *Metadata  { return nil }
+
 
 //TestAddFactoryEmptyRef
 func TestAddFactoryEmptyRef(t *testing.T) {
