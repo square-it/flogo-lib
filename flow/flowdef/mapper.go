@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/TIBCOSoftware/flogo-lib/core/activity"
 )
 
 
@@ -26,6 +27,10 @@ type MapperFactory interface {
 	// NewTaskOutputMapper creates a new Output Mapper from the specified MapperDef
 	// for the specified Task, method to facilitate pre-compiled mappers
 	NewTaskOutputMapper(task *Task, mapperDef *MapperDef) data.Mapper
+
+	// GetDefaultTaskOutputMapper get the default Output Mapper for the
+	// specified Task
+	GetDefaultTaskOutputMapper(task *Task) data.Mapper
 }
 
 var	mapperFactory MapperFactory
@@ -63,6 +68,9 @@ func(mf *BasicMapperFactory) NewTaskOutputMapper(task *Task, mapperDef *MapperDe
 	return NewBasicMapper(mapperDef)
 }
 
+func (mf *BasicMapperFactory) GetDefaultTaskOutputMapper(task *Task) data.Mapper {
+	return &DefaultOutputMapper{task:task}
+}
 
 // BasicMapper is a simple object holding and executing mappings
 type BasicMapper struct {
@@ -187,3 +195,28 @@ func (m *BasicMapper) Apply(inputScope data.Scope, outputScope data.Scope) {
 		}
 	}
 }
+
+// BasicMapper is a simple object holding and executing mappings
+type DefaultOutputMapper struct {
+	task *Task
+}
+
+func (m *DefaultOutputMapper) Apply(inputScope data.Scope, outputScope data.Scope) {
+
+	oscope := outputScope.(data.MutableScope)
+
+	act := activity.Get(m.task.ActivityRef())
+
+	attrNS := "{A" + strconv.Itoa(m.task.ID()) + "."
+
+	for _, attr := range act.Metadata().Outputs {
+
+		oAttr, _ := inputScope.GetAttr(attr.Name)
+
+		if oAttr != nil {
+			oscope.AddAttr(attrNS+attr.Name+"}", attr.Type, oAttr.Value)
+		}
+	}
+}
+
+
