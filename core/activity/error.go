@@ -17,6 +17,10 @@ func NewErrorWithData(errorText string, errorData interface{}) *Error {
 	return &Error{errorStr: errorText, errorData: errorData}
 }
 
+func NewErrorWithCode(errorText string, code int) *Error {
+	return &Error{errorStr: errorText, errorCode: code}
+}
+
 func NewErrorWithDataAndCode(errorText string, errorData interface{}, code int) *Error {
 	return &Error{errorStr: errorText, errorData: errorData, errorCode: code}
 }
