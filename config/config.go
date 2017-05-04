@@ -18,7 +18,18 @@ const (
 	RUNNER_QUEUE_SIZE_KEY        = "RUNNER_QUEUE_SIZE"
 	RUNNER_QUEUE_SIZE_DEFAULT    = 50
 	STOP_ENGINE_ON_ERROR_KEY     = "STOP_ENGINE_ON_ERROR"
+	APP_CONFIG_LOCATION_DEFAULT  = "flogo.json"
+	APP_CONFIG_LOCATION_KEY      = "FLOGO_CONFIG_PATH"
 )
+
+//GetFlogoConfigPath returns the flogo config path
+func GetFlogoConfigPath() string {
+	flogoConfigPathEnv := os.Getenv(APP_CONFIG_LOCATION_KEY)
+	if len(flogoConfigPathEnv) > 0 {
+		return flogoConfigPathEnv
+	}
+	return APP_CONFIG_LOCATION_DEFAULT
+}
 
 //GetRunnerType returns the runner type
 func GetRunnerType() string {

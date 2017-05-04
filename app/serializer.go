@@ -3,10 +3,7 @@ package app
 import (
 	"os"
 	"encoding/json"
-)
-
-const (
-	FLOGO_CONFIG_PATH = "flogo.json"
+	"github.com/TIBCOSoftware/flogo-lib/config"
 )
 
 // defaultSerializer implementation of AppSerializer
@@ -25,7 +22,10 @@ func DefaultSerializer() AppSerializer {
 
 // GetApp returns the app configuration
 func (d *defaultSerializer) GetApp() (*Config, error){
-	flogo, err := os.Open(FLOGO_CONFIG_PATH)
+
+	configPath := config.GetFlogoConfigPath()
+
+	flogo, err := os.Open(configPath)
 	if err != nil {
 		return nil, err
 	}
