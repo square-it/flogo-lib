@@ -24,7 +24,7 @@ func DefaultSerializer() AppSerializer {
 }
 
 // GetApp returns the app configuration
-func (d defaultSerializer) GetApp() (*Config, error){
+func (d *defaultSerializer) GetApp() (*Config, error){
 	flogo, err := os.Open(FLOGO_CONFIG_PATH)
 	if err != nil {
 		return nil, err
