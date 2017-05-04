@@ -3,7 +3,7 @@ package activity
 // Error is an activity error
 type Error struct {
 	errorStr  string
-	errorCode int
+	errorCode string
 	errorData interface{}
 }
 
@@ -17,11 +17,11 @@ func NewErrorWithData(errorText string, errorData interface{}) *Error {
 	return &Error{errorStr: errorText, errorData: errorData}
 }
 
-func NewErrorWithCode(errorText string, code int) *Error {
+func NewErrorWithCode(errorText string, code string) *Error {
 	return &Error{errorStr: errorText, errorCode: code}
 }
 
-func NewErrorWithDataAndCode(errorText string, errorData interface{}, code int) *Error {
+func NewErrorWithDataAndCode(errorText string, errorData interface{}, code string) *Error {
 	return &Error{errorStr: errorText, errorData: errorData, errorCode: code}
 }
 
@@ -36,6 +36,6 @@ func (e *Error) Data() interface{} {
 }
 
 // Code returns any associated error code
-func (e *Error) Code() int {
+func (e *Error) Code() string {
 	return e.errorCode
 }
