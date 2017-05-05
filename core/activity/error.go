@@ -7,21 +7,7 @@ type Error struct {
 	errorData interface{}
 }
 
-// NewError creates a error object
-func NewError(errorText string) *Error {
-	return &Error{errorStr: errorText}
-}
-
-// NewErrorWithData creates a error object with associated data
-func NewErrorWithData(errorText string, errorData interface{}) *Error {
-	return &Error{errorStr: errorText, errorData: errorData}
-}
-
-func NewErrorWithCode(errorText string, code string) *Error {
-	return &Error{errorStr: errorText, errorCode: code}
-}
-
-func NewErrorWithDataAndCode(errorText string, errorData interface{}, code string) *Error {
+func NewError(errorText string, errorData interface{}, code string) *Error {
 	return &Error{errorStr: errorText, errorData: errorData, errorCode: code}
 }
 
