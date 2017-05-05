@@ -284,7 +284,7 @@ func (pi *Instance) execTask(workItem *WorkItem) {
 			// todo: useful for debugging
 			logger.Debugf("StackTrace: %s", debug.Stack())
 
-			pi.handleError(workItem.TaskData, activity.NewError(err.Error()))
+			pi.handleError(workItem.TaskData, activity.NewError(err.Error(),"", nil))
 		}
 	}()
 
@@ -839,7 +839,7 @@ func (td *TaskData) EvalActivity() (done bool, evalErr error) {
 			logger.Debugf("StackTrace: %s", debug.Stack())
 
 			if evalErr == nil {
-				evalErr = activity.NewError(fmt.Sprintf("%v", r))
+				evalErr = activity.NewError(fmt.Sprintf("%v", r),"", nil)
 				done = false
 			}
 		}
