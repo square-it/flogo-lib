@@ -7,7 +7,7 @@ type Error struct {
 	errorData interface{}
 }
 
-func NewError(errorText string, errorData interface{}, code string) *Error {
+func NewError(errorText string, code string, errorData interface{}) *Error {
 	return &Error{errorStr: errorText, errorData: errorData, errorCode: code}
 }
 
