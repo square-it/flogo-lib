@@ -2,12 +2,14 @@ package logger
 
 import (
 	"fmt"
+	"sync"
 
-	"github.com/TIBCOSoftware/flogo-lib/config"
 	"github.com/Sirupsen/logrus"
+	"github.com/TIBCOSoftware/flogo-lib/config"
 )
 
 var loggerMap = make(map[string]Logger)
+var mutex = &sync.RWMutex{}
 
 type DefaultLoggerFactory struct {
 }
@@ -126,7 +128,9 @@ func (logger *DefaultLogger) SetLogLevel(logLevel Level) {
 }
 
 func (logfactory *DefaultLoggerFactory) GetLogger(name string) Logger {
+	mutex.RLock()
 	l := loggerMap[name]
+	mutex.RUnlock()
 	if l == nil {
 		logImpl := logrus.New()
 		logImpl.Formatter = &LogFormatter{
@@ -140,11 +144,13 @@ func (logfactory *DefaultLoggerFactory) GetLogger(name string) Logger {
 		logLevelName := config.GetLogLevel()
 		// Get log level for name
 		level, err := GetLevelForName(logLevelName)
-		if err != nil{
+		if err != nil {
 			return nil
 		}
 		l.SetLogLevel(level)
+		mutex.Lock()
 		loggerMap[name] = l
+		mutex.Unlock()
 	}
 	return l
 }
