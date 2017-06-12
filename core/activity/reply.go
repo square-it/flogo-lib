@@ -1,4 +1,4 @@
-package support
+package activity
 
 // ReplyHandler is used to reply back to whoever started the flow instance
 type ReplyHandler interface {
