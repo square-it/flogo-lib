@@ -48,13 +48,13 @@ func Factories() map[string]Factory {
 	factoryMu.Lock()
 	defer factoryMu.Unlock()
 
-	newFs := make(map[string]Factory, len(factories))
+	factoriesCopy := make(map[string]Factory, len(factories))
 
 	for k, v := range factories {
-		newFs[k] = v
+		factoriesCopy[k] = v
 	}
 
-	return newFs
+	return factoriesCopy
 }
 
 func Get(id string) Action {
