@@ -58,6 +58,9 @@ func Factories() map[string]Factory {
 }
 
 func Get(id string) Action {
+	actionMu.Lock()
+	defer actionMu.Unlock()
+
 	return actions[id]
 }
 
