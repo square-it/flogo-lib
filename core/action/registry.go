@@ -95,8 +95,8 @@ func Register(id string, act Action) error {
 }
 
 func Actions() map[string]Action {
-	factoryMu.Lock()
-	defer factoryMu.Unlock()
+	actionMu.Lock()
+	defer actionMu.Unlock()
 
 	actionsCopy := make(map[string]Action, len(actions))
 
