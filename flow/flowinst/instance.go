@@ -284,7 +284,7 @@ func (pi *Instance) execTask(workItem *WorkItem) {
 			// todo: useful for debugging
 			logger.Debugf("StackTrace: %s", debug.Stack())
 
-			pi.handleError(workItem.TaskData, activity.NewError(err.Error(),"", nil))
+			pi.handleActivityError(workItem.TaskData, activity.NewError(err.Error(),"", nil))
 		}
 	}()
 
@@ -317,7 +317,7 @@ func (pi *Instance) execTask(workItem *WorkItem) {
 	}
 
 	if err != nil {
-		pi.handleError(taskData, err)
+		pi.handleActivityError(taskData, err)
 		return
 	}
 
@@ -326,7 +326,12 @@ func (pi *Instance) execTask(workItem *WorkItem) {
 		if taskData.HasAttrs() {
 			applyOutputInterceptor(pi, taskData)
 
-			appliedMapper := applyOutputMapper(pi, taskData)
+			appliedMapper, err := applyOutputMapper(pi, taskData)
+
+			if err != nil {
+				pi.handleMapperError(err)
+				return
+			}
 
 			if !appliedMapper && !taskData.task.IsScope() {
 
@@ -339,7 +344,18 @@ func (pi *Instance) execTask(workItem *WorkItem) {
 	}
 }
 
-func (pi *Instance) handleError(taskData *TaskData, err error) {
+func (pi *Instance) handleMapperError(err error) {
+
+	pi.AddAttr("{E.message}", data.STRING, err.Error())
+
+	//if aerr, ok := err.(*data.MapperError); ok {
+	//	pi.AddAttr("{E.data}", data.OBJECT, aerr.Data())
+	//}
+
+	pi.HandleError()
+}
+
+func (pi *Instance) handleActivityError(taskData *TaskData, err error) {
 
 	pi.AddAttr("{E.activity}", data.STRING, taskData.TaskName())
 	pi.AddAttr("{E.message}", data.STRING, err.Error())

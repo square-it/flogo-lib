@@ -9,7 +9,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
-func applyInputMapper(pi *Instance, taskData *TaskData) {
+func applyInputMapper(pi *Instance, taskData *TaskData) error {
 
 	// get the input mapper
 	inputMapper := taskData.task.InputMapper()
@@ -24,8 +24,13 @@ func applyInputMapper(pi *Instance, taskData *TaskData) {
 
 	if inputMapper != nil {
 		logger.Debug("Applying InputMapper")
-		inputMapper.Apply(pi, taskData.InputScope())
+		err := inputMapper.Apply(pi, taskData.InputScope())
+		if err != nil {
+			return err
+		}
 	}
+
+	return nil
 }
 
 func applyInputInterceptor(pi *Instance, taskData *TaskData) bool {
@@ -77,7 +82,7 @@ func applyOutputInterceptor(pi *Instance, taskData *TaskData) {
 
 // applyOutputMapper applies the output mapper, returns flag indicating if
 // there was an output mapper
-func applyOutputMapper(pi *Instance, taskData *TaskData) bool {
+func applyOutputMapper(pi *Instance, taskData *TaskData) (bool,error) {
 
 	// get the Output Mapper for the Task if one exists
 	outputMapper := taskData.task.OutputMapper()
@@ -92,11 +97,11 @@ func applyOutputMapper(pi *Instance, taskData *TaskData) bool {
 
 	if outputMapper != nil {
 		logger.Debug("Applying OutputMapper")
-		outputMapper.Apply(taskData.OutputScope(), pi)
-		return true
+		err := outputMapper.Apply(taskData.OutputScope(), pi)
+		return true, err
 	}
 
-	return false
+	return false,nil
 }
 
 func applyDefaultActivityOutputMappings(pi *Instance, taskData *TaskData) {

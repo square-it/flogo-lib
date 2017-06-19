@@ -28,5 +28,5 @@ type MappingDef struct {
 
 // Mapper is a constructs that maps values from one scope to another
 type Mapper interface {
-	Apply(inputScope Scope, outputScope Scope)
+	Apply(inputScope Scope, outputScope Scope) error
 }
