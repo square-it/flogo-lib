@@ -10,6 +10,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	"github.com/TIBCOSoftware/flogo-lib/config"
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
+	"github.com/TIBCOSoftware/flogo-lib/core/property"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
@@ -74,6 +75,11 @@ func New(app *app.Config) (IEngine, error) {
 //Start initializes and starts the Triggers and initializes the Actions
 func (e *EngineConfig) Start() {
 	logger.Info("Engine: Starting...")
+
+	// Initialize the properties
+	for id, value := range e.App.Properties {
+		property.Register(id, value)
+	}
 
 	instanceHelper := app.NewInstanceHelper(e.App, trigger.Factories(), action.Factories())
 
@@ -155,7 +161,7 @@ func (e *EngineConfig) Stop() {
 	// Stop Triggers
 	tConfigs := e.App.Triggers
 
-	for _, tConfig := range tConfigs{
+	for _, tConfig := range tConfigs {
 		// Get instance
 		tInst := trigger.Instance(tConfig.Id)
 		if tInst == nil {
