@@ -1,7 +1,5 @@
 package activity
 
-import "github.com/TIBCOSoftware/flogo-lib/flow/support"
-
 // Context describes the execution context for an Activity.
 // It provides access to attributes, task and Flow information.
 type Context interface {
@@ -29,5 +27,5 @@ type FlowDetails interface {
 	Name() string
 
 	// ReplyHandler returns the reply handler for the flow Instance
-	ReplyHandler() support.ReplyHandler
+	ReplyHandler() ReplyHandler
 }
