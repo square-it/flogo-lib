@@ -1,18 +1,20 @@
 package app
 
 import (
+	"encoding/json"
+	"github.com/TIBCOSoftware/flogo-lib/config"
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
-	"github.com/TIBCOSoftware/flogo-lib/config"
 	"os"
-	"encoding/json"
 )
 
 // App is the configuration for the App
 type Config struct {
 	Name        string            `json:"name"`
+	Type        string            `json:"type"`
 	Version     string            `json:"version"`
 	Description string            `json:"description"`
+	Properties  map[string]string `json:"properties"`
 	Triggers    []*trigger.Config `json:"triggers"`
 	Actions     []*action.Config  `json:"actions"`
 }
@@ -32,7 +34,7 @@ func DefaultConfigProvider() ConfigProvider {
 }
 
 // GetApp returns the app configuration
-func (d *defaultConfigProvider) GetApp() (*Config, error){
+func (d *defaultConfigProvider) GetApp() (*Config, error) {
 
 	configPath := config.GetFlogoConfigPath()
 
