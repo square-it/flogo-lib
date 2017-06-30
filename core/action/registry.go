@@ -48,16 +48,19 @@ func Factories() map[string]Factory {
 	factoryMu.Lock()
 	defer factoryMu.Unlock()
 
-	newFs := make(map[string]Factory, len(factories))
+	factoriesCopy := make(map[string]Factory, len(factories))
 
 	for k, v := range factories {
-		newFs[k] = v
+		factoriesCopy[k] = v
 	}
 
-	return newFs
+	return factoriesCopy
 }
 
 func Get(id string) Action {
+	actionMu.Lock()
+	defer actionMu.Unlock()
+
 	return actions[id]
 }
 
@@ -92,8 +95,8 @@ func Register(id string, act Action) error {
 }
 
 func Actions() map[string]Action {
-	factoryMu.Lock()
-	defer factoryMu.Unlock()
+	actionMu.Lock()
+	defer actionMu.Unlock()
 
 	actionsCopy := make(map[string]Action, len(actions))
 
