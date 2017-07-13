@@ -13,6 +13,9 @@ type Context interface {
 	// GetInput gets the value of the specified input attribute
 	GetInput(name string) interface{}
 
+	// GetOutput gets the value of the specified output attribute
+	GetOutput(name string) interface{}
+
 	// SetOutput sets the value of the specified output attribute
 	SetOutput(name string, value interface{})
 }
