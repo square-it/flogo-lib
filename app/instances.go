@@ -48,6 +48,8 @@ func (h *InstanceHelper) CreateTriggers() (map[string]*trigger.TriggerInstance, 
 			return nil, fmt.Errorf("Cannot create Trigger nil for id '%s'", tConfig.Id)
 		}
 
+		tConfig.FixUp(newInterface.Metadata())
+
 		instances[tConfig.Id] = &trigger.TriggerInstance{Config: tConfig, Interf: newInterface}
 	}
 
