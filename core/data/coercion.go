@@ -149,6 +149,15 @@ func CoerceToObject(val interface{}) (map[string]interface{}, error) {
 	switch t := val.(type) {
 	case map[string]interface{}:
 		return t, nil
+	case string:
+		m := make(map[string]interface{})
+		if t != "" {
+			err := json.Unmarshal([]byte(t), &m)
+			if err != nil {
+				return nil, fmt.Errorf("Unable to coerce %#v to map[string]interface{}", val)
+			}
+		}
+		return m, nil
 	default:
 		return nil, fmt.Errorf("Unable to coerce %#v to map[string]interface{}", val)
 	}
