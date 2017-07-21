@@ -176,17 +176,11 @@ func CoerceToArray(val interface{}) ([]interface{}, error) {
 		}
 		return a, nil
 	case string:
-		var a []interface{}
+		a := make([]interface{}, 0)
 		if t != "" {
-			m := make([]map[string]interface{}, 0)
-			if t != "" {
-				err := json.Unmarshal([]byte(t), &m)
-				if err != nil {
-					return nil, fmt.Errorf("Unable to coerce %#v to map[string]interface{}", val)
-				}
-			}
-			for _, v := range m {
-				a = append(a, v)
+			err := json.Unmarshal([]byte(t), &a)
+			if err != nil {
+				return nil, fmt.Errorf("Unable to coerce %#v to map[string]interface{}", val)
 			}
 		}
 		return a, nil
