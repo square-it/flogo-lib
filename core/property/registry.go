@@ -6,10 +6,11 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"reflect"
 	"sync"
+	"strings"
 )
 
 var (
-	props     = make(map[string]string)
+	props     = make(map[string]interface{})
 	mut       = sync.RWMutex{}
 	resolvers []PropertyValueResolver
 )
@@ -17,7 +18,7 @@ var (
 // Resolve value sourced from Enviornment variable or any other configuration management services
 type PropertyValueResolver interface {
 	//Resolve value for given name
-	Resolve(name string) string
+	Resolve(name string) interface{}
 }
 
 func RegisterDefaultResolver() {
@@ -27,24 +28,37 @@ func RegisterDefaultResolver() {
 // Get returns the value of the property for the given id
 // If it is an environment property (for example {MY_PROP})
 // The value will be looked up in the os environment
-func Get(id string) string {
+func Get(id string) interface{} {
 	mut.RLock()
 	defer mut.RUnlock()
 	prop, ok := props[id]
 	if !ok {
 		return prop
 	}
-	for _, resolver := range resolvers {
-		//Value resolved by first resolver will be returned
-		prop = resolver.Resolve(prop)
-		if prop != "" {
-			return prop
+    
+	switch prop.(type) {
+	case string:
+		value := prop.(string)
+		// Resolution needed?
+		if strings.HasPrefix(value, "{") && strings.HasSuffix(value, "}") {
+			value = value[1 : len(value)-1]
+			logger.Debugf("Resolving  value for property: '%s'", value)
+			for _, resolver := range resolvers {
+				//Value resolved by first resolver will be returned
+				resolvedValue := resolver.Resolve(value)
+				if resolvedValue != nil {
+					logger.Debugf("Value is resolved by: '%s'", reflect.TypeOf(resolver).String())
+					return resolvedValue
+				}
+			}
 		}
+		// Its literal value
+		return value
 	}
 	return prop
 }
 
-func Register(id, value string) error {
+func Register(id string, value interface{}) error {
 	mut.Lock()
 	defer mut.Unlock()
 
