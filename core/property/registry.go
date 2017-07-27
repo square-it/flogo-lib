@@ -2,16 +2,27 @@ package property
 
 import (
 	"fmt"
-	"sync"
-
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"reflect"
+	"sync"
 )
 
 var (
-	props = make(map[string]string)
-	mut   = sync.RWMutex{}
+	props     = make(map[string]string)
+	mut       = sync.RWMutex{}
+	resolvers []PropertyValueResolver
 )
+
+// Resolve value sourced from Enviornment variable or any other configuration management services
+type PropertyValueResolver interface {
+	//Resolve value for given name
+	Resolve(name string) string
+}
+
+func RegisterDefaultResolver() {
+	RegisterValueResolver(&data.EnvVarResolver{})
+}
 
 // Get returns the value of the property for the given id
 // If it is an environment property (for example {MY_PROP})
@@ -23,7 +34,14 @@ func Get(id string) string {
 	if !ok {
 		return prop
 	}
-	return data.ResolveEnv(prop)
+	for _, resolver := range resolvers {
+		//Value resolved by first resolver will be returned
+		prop = resolver.Resolve(prop)
+		if prop != "" {
+			return prop
+		}
+	}
+	return prop
 }
 
 func Register(id, value string) error {
@@ -43,4 +61,12 @@ func Register(id, value string) error {
 	props[id] = value
 
 	return nil
+}
+
+func RegisterValueResolver(resolver PropertyValueResolver) {
+	mut.Lock()
+	defer mut.Unlock()
+
+	logger.Debugf("Registering property resolver: '%s'", reflect.TypeOf(resolver).String())
+	resolvers = append(resolvers, resolver)
 }

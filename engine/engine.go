@@ -68,6 +68,9 @@ func New(app *app.Config) (IEngine, error) {
 		runnerConfig := defaultRunnerConfig()
 		r = runner.NewPooled(runnerConfig.Pooled)
 	}
+	
+	//Register Env variable  resolver
+	property.RegisterDefaultResolver()
 
 	return &EngineConfig{App: app, LogLevel: logLevel, runner: r, serviceManager: util.GetDefaultServiceManager()}, nil
 }

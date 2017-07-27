@@ -5,9 +5,14 @@ import (
 	"strings"
 )
 
+type EnvVarResolver struct {
+	
+}
+
+
 // This function will check if the value is an environment value (for example {MY_VALUE})
 // if it is an environment value it will get resolved, otherwise the original value is returned
-func ResolveEnv(value string) string {
+func (resolver *EnvVarResolver) Resolve(value string) string {
 	if len(value) == 0 {
 		return value
 	}
