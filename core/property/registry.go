@@ -18,14 +18,15 @@ var (
 
 var regex = regexp.MustCompile(config.GetPropertyDelimiterFormat())
 
+func init() {
+	logger.Debugf("Registering environment variable value resolver")
+	RegisterValueResolver(&data.EnvVarResolver{})
+}
+
 // Resolve value sourced from Enviornment variable or any other configuration management services
 type PropertyValueResolver interface {
 	//Resolve value for given name
 	Resolve(name string) interface{}
-}
-
-func RegisterDefaultResolver() {
-	RegisterValueResolver(&data.EnvVarResolver{})
 }
 
 // Get returns the value of the property for the given id
