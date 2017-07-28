@@ -13,10 +13,9 @@ import (
 var (
 	props     = make(map[string]interface{})
 	mut       = sync.RWMutex{}
+	regex     = regexp.MustCompile(config.GetPropertyDelimiterFormat())
 	resolvers []PropertyValueResolver
 )
-
-var regex = regexp.MustCompile(config.GetPropertyDelimiterFormat())
 
 func init() {
 	logger.Debugf("Registering environment variable value resolver")
