@@ -2,11 +2,12 @@ package property
 
 import (
 	"fmt"
+	"github.com/TIBCOSoftware/flogo-lib/config"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"reflect"
+	"regexp"
 	"sync"
-	"strings"
 )
 
 var (
@@ -14,6 +15,8 @@ var (
 	mut       = sync.RWMutex{}
 	resolvers []PropertyValueResolver
 )
+
+var regex = regexp.MustCompile(config.GetPropertyDelimiterFormat())
 
 // Resolve value sourced from Enviornment variable or any other configuration management services
 type PropertyValueResolver interface {
@@ -35,12 +38,12 @@ func Get(id string) interface{} {
 	if !ok {
 		return prop
 	}
-    
+
 	switch prop.(type) {
 	case string:
 		value := prop.(string)
 		// Resolution needed?
-		if strings.HasPrefix(value, "{") && strings.HasSuffix(value, "}") {
+		if regex.MatchString(value) {
 			value = value[1 : len(value)-1]
 			logger.Debugf("Resolving  value for property: '%s'", value)
 			for _, resolver := range resolvers {
