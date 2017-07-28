@@ -33,6 +33,7 @@ func TestRegisterDuplicate(t *testing.T) {
 
 // TestRegisterEnvironmentOk register environment property
 func TestRegisterEnvironmentOk(t *testing.T) {
+	RegisterDefaultResolver()
 	os.Setenv("TEST_FLOGO2", "my_test_value2")
 	defer os.Unsetenv("TEST_FLOGO2")
 
