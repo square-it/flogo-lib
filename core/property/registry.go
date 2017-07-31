@@ -14,16 +14,16 @@ var (
 	props    = make(map[string]interface{})
 	mut      = sync.RWMutex{}
 	regex    = regexp.MustCompile(config.GetPropertyDelimiterFormat())
-	resolver PropertyValueResolver
+	resolver Resolver
 )
 
 func init() {
 	logger.Debugf("Registering environment variable value resolver")
-	RegisterValueResolver(&data.EnvVarResolver{})
+	RegisterResolver(&data.EnvVarResolver{})
 }
 
 // Resolve value sourced from Enviornment variable or any other configuration management services
-type PropertyValueResolver interface {
+type Resolver interface {
 	//Resolve value for given name
 	Resolve(name string) interface{}
 }
@@ -44,7 +44,9 @@ func Get(id string) interface{} {
 		value := prop.(string)
 		// Resolution needed?
 		if regex.MatchString(value) {
-			value = value[1 : len(value)-1]
+			fmt.Println("Matched")
+			value = value[2 : len(value)-1]
+			fmt.Println(value)
 			logger.Debugf("Resolving  value for property: '%s'", value)
 			if resolver != nil {
 				//Value resolved by first resolver will be returned
@@ -80,7 +82,7 @@ func Register(id string, value interface{}) error {
 	return nil
 }
 
-func RegisterValueResolver(newresolver PropertyValueResolver) {
+func RegisterResolver(newresolver Resolver) {
 	mut.Lock()
 	defer mut.Unlock()
 
