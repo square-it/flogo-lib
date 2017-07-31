@@ -11,10 +11,10 @@ import (
 )
 
 var (
-	props     = make(map[string]interface{})
-	mut       = sync.RWMutex{}
-	regex     = regexp.MustCompile(config.GetPropertyDelimiterFormat())
-	resolvers []PropertyValueResolver
+	props    = make(map[string]interface{})
+	mut      = sync.RWMutex{}
+	regex    = regexp.MustCompile(config.GetPropertyDelimiterFormat())
+	resolver PropertyValueResolver
 )
 
 func init() {
@@ -46,7 +46,7 @@ func Get(id string) interface{} {
 		if regex.MatchString(value) {
 			value = value[1 : len(value)-1]
 			logger.Debugf("Resolving  value for property: '%s'", value)
-			for _, resolver := range resolvers {
+			if resolver != nil {
 				//Value resolved by first resolver will be returned
 				resolvedValue := resolver.Resolve(value)
 				if resolvedValue != nil {
@@ -80,10 +80,10 @@ func Register(id string, value interface{}) error {
 	return nil
 }
 
-func RegisterValueResolver(resolver PropertyValueResolver) {
+func RegisterValueResolver(newresolver PropertyValueResolver) {
 	mut.Lock()
 	defer mut.Unlock()
 
-	logger.Debugf("Registering property resolver: '%s'", reflect.TypeOf(resolver).String())
-	resolvers = append(resolvers, resolver)
+	logger.Debugf("Registering property resolver: '%s'", reflect.TypeOf(newresolver).String())
+	resolver = newresolver
 }
