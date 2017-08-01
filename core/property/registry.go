@@ -12,16 +12,12 @@ import (
 )
 
 var (
-	props    = make(map[string]interface{})
-	mut      = sync.RWMutex{}
-	regex    = regexp.MustCompile(config.GetPropertyDelimiterFormat())
-	resolver Resolver
+	props = make(map[string]interface{})
+	mut   = sync.RWMutex{}
+	regex = regexp.MustCompile(config.GetPropertyDelimiterFormat())
+	// Default Resolver
+	resolver Resolver = &data.EnvVarResolver{}
 )
-
-func init() {
-	logger.Debugf("Registering environment variable value resolver")
-	RegisterResolver(&data.EnvVarResolver{})
-}
 
 // Resolve value sourced from Enviornment variable or any other configuration management services
 type Resolver interface {
