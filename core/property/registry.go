@@ -7,6 +7,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"reflect"
 	"regexp"
+	"strings"
 	"sync"
 )
 
@@ -29,8 +30,6 @@ type Resolver interface {
 }
 
 // Get returns the value of the property for the given id
-// If it is an environment property (for example {MY_PROP})
-// The value will be looked up in the os environment
 func Get(id string) interface{} {
 	mut.RLock()
 	defer mut.RUnlock()
@@ -78,6 +77,30 @@ func Register(id string, value interface{}) error {
 	return nil
 }
 
+// Use resolver to resolve values like ${MYVALUE}
+func Resolve(value string) interface{} {
+	mut.RLock()
+	defer mut.RUnlock()
+	// Should match with ${*}
+	if regex.MatchString(value) {
+		if strings.Contains(value, `{property.`) {
+			// This is property bag resolution
+			property := value[11 : len(value)-1]
+			return Get(property)
+		} else {
+			// Call resolver to resolve value
+			if resolver != nil {
+				resolvedValue := resolver.Resolve(value)
+				if resolvedValue != nil {
+					logger.Debugf("Value is resolved by: '%s'", reflect.TypeOf(resolver).String())
+					return resolvedValue
+				}
+			}
+		}
+	}
+	// Return same value
+	return value
+}
 func RegisterResolver(newresolver Resolver) {
 	mut.Lock()
 	defer mut.Unlock()
