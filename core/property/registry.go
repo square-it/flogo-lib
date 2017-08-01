@@ -42,12 +42,8 @@ func Get(id string) interface{} {
 	switch prop.(type) {
 	case string:
 		value := prop.(string)
-		// Resolution needed?
+		// further resolution needed?
 		if regex.MatchString(value) {
-			fmt.Println("Matched")
-			value = value[2 : len(value)-1]
-			fmt.Println(value)
-			logger.Debugf("Resolving  value for property: '%s'", value)
 			if resolver != nil {
 				//Value resolved by first resolver will be returned
 				resolvedValue := resolver.Resolve(value)

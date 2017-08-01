@@ -21,7 +21,7 @@ const (
 	APP_CONFIG_LOCATION_DEFAULT       = "flogo.json"
 	STOP_ENGINE_ON_ERROR_KEY          = "STOP_ENGINE_ON_ERROR"
 	PROPERTY_DELIMITER_FORMAT_KEY     = "FLOGO_PROPERTY_DELIMITER"
-	PROPERTY_DELIMITER_FORMAT_DEFAULT = `^\${\w+\.?\w+?}`
+	PROPERTY_DELIMITER_FORMAT_DEFAULT = `^\$*`
 )
 
 //GetFlogoConfigPath returns the flogo config path
