@@ -40,7 +40,6 @@ func Get(id string) interface{} {
 		// further resolution needed?
 		if regex.MatchString(value) {
 			if resolver != nil {
-				//Value resolved by first resolver will be returned
 				resolvedValue := resolver.Resolve(value)
 				if resolvedValue != nil {
 					logger.Debugf("Value is resolved by: '%s'", reflect.TypeOf(resolver).String())
@@ -79,7 +78,7 @@ func Resolve(value string) interface{} {
 	defer mut.RUnlock()
 	// Should match with ${*}
 	if regex.MatchString(value) {
-		if strings.Contains(value, `{property.`) {
+		if strings.Contains(value, "${property.") {
 			// This is property bag resolution
 			property := value[11 : len(value)-1]
 			return Get(property)
