@@ -18,7 +18,7 @@ func TestRegisterOk(t *testing.T) {
 	err := Register("id_test", "a value")
 	assert.Nil(t, err)
 
-	value := Get("id_test")
+	value, _ := Get("id_test")
 	assert.Equal(t, "a value", value)
 }
 
@@ -36,9 +36,20 @@ func TestRegisterEnvironmentOk(t *testing.T) {
 	os.Setenv("TEST_FLOGO2", "my_test_value2")
 	defer os.Unsetenv("TEST_FLOGO2")
 
-	err := Register("id_environment", "{TEST_FLOGO2}")
+	err := Register("id_environment", "${env.TEST_FLOGO2}")
 	assert.Nil(t, err)
 
-	value := Get("id_environment")
+	value, _ := Get("id_environment")
+	assert.Equal(t, "my_test_value2", value)
+}
+
+// TestDefaultResolverOk resolves environment and property value
+func TestDefaultResolverOk(t *testing.T) {
+	os.Setenv("TEST_FLOGO2", "my_test_value2")
+	defer os.Unsetenv("TEST_FLOGO2")
+	Register("id_test", "a value")
+	value, _ := Resolve("${property.id_test}")
+    assert.Equal(t, "a value", value)
+	value, _ = Resolve("${env.TEST_FLOGO2}")
 	assert.Equal(t, "my_test_value2", value)
 }
