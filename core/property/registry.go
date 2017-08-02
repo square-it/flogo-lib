@@ -21,9 +21,12 @@ var (
 
 // Resolve value sourced from Enviornment variable or any other configuration management services
 type Resolver interface {
-	//Resolve value for given name
+	// Resolve value for given name
 	Resolve(name string) interface{}
+	// Checks whether resolver is capable of resolving value
 	CanResolve(name string) bool
+	// Checks whether resolver supports dynamic resolution
+	SupportsDynamicResolution() bool
 }
 
 type DefaultResolver struct {
@@ -35,8 +38,8 @@ func (resolver *DefaultResolver) Resolve(value string) interface{} {
 		return value
 	}
 
-	// Value format: ${env.ENVVAR1}
 	if strings.Contains(value, "${env.") {
+		// Value format: ${env.ENVVAR1}
 		value = value[6 : len(value)-1]
 		logger.Debugf("Resolving  value for enviornment variable: '%s'", value)
 		return os.Getenv(value)
@@ -54,21 +57,26 @@ func (resolver *DefaultResolver) CanResolve(value string) bool {
 	return regex.MatchString(value)
 }
 
+func (resolver *DefaultResolver) SupportsDynamicResolution() bool {
+	return false
+}
+
 // Get returns the value of the property for the given id
 func Get(id string) interface{} {
 	mut.RLock()
 	defer mut.RUnlock()
 	prop, ok := props[id]
-
 	if !ok {
-		if resolver.CanResolve(id) {
-			// May be its an expression like ${property.propertyName}
-			// Let resolver resolve the value
-			return resolver.Resolve(id)
-		}
 		return prop
 	}
+	// Resolve property value dynamically
+	if resolver.SupportsDynamicResolution() {
+		return getValueFromResolver(prop)
+	}
+	return prop
+}
 
+func getValueFromResolver(prop interface{}) interface{} {
 	switch prop.(type) {
 	case string:
 		value := prop.(string)
@@ -78,10 +86,20 @@ func Get(id string) interface{} {
 			logger.Debugf("Value is resolved by: '%s'", reflect.TypeOf(resolver).String())
 			return resolvedValue
 		}
-		// Its literal value
-		return value
 	}
 	return prop
+}
+
+// Resolves value expressions like ${property.Prop1} or ${env.ENVVAR} using resolver
+func Resolve(name string) interface{} {
+	mut.RLock()
+	defer mut.RUnlock()
+	if resolver.CanResolve(name) {
+		// May be its an expression like ${property.propertyName}
+		// Let resolver resolve the value
+		return resolver.Resolve(name)
+	}
+	return nil
 }
 
 func Register(id string, value interface{}) error {
@@ -97,6 +115,11 @@ func Register(id string, value interface{}) error {
 	}
 
 	logger.Debugf("Registering property id: '%s', value: '%s'", id, value)
+
+	// Resolve value once
+	if resolver.SupportsDynamicResolution() == false {
+		value = getValueFromResolver(value)
+	}
 
 	props[id] = value
 
