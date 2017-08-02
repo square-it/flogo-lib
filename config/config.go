@@ -20,8 +20,6 @@ const (
 	APP_CONFIG_LOCATION_KEY           = "FLOGO_CONFIG_PATH"
 	APP_CONFIG_LOCATION_DEFAULT       = "flogo.json"
 	STOP_ENGINE_ON_ERROR_KEY          = "STOP_ENGINE_ON_ERROR"
-	PROPERTY_DELIMITER_FORMAT_KEY     = "FLOGO_PROPERTY_DELIMITER"
-	PROPERTY_DELIMITER_FORMAT_DEFAULT = `^\${*`
 )
 
 //GetFlogoConfigPath returns the flogo config path
@@ -83,14 +81,6 @@ func GetLogDateTimeFormat() string {
 		return logLevelEnv
 	}
 	return LOG_DATE_FORMAT_DEFAULT
-}
-
-func GetPropertyDelimiterFormat() string {
-	logLevelEnv := os.Getenv(PROPERTY_DELIMITER_FORMAT_KEY)
-	if len(logLevelEnv) > 0 {
-		return logLevelEnv
-	}
-	return PROPERTY_DELIMITER_FORMAT_DEFAULT
 }
 
 func StopEngineOnError() bool {
