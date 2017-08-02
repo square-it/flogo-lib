@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"github.com/TIBCOSoftware/flogo-lib/config"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"os"
 	"reflect"
 	"regexp"
 	"strings"
 	"sync"
-	"os"
 )
 
 var (
@@ -23,10 +23,10 @@ var (
 type Resolver interface {
 	//Resolve value for given name
 	Resolve(name string) interface{}
+	CanResolve(name string) bool
 }
 
 type DefaultResolver struct {
-	
 }
 
 // Default resolver resolves values from property bag and environment variable
@@ -34,6 +34,7 @@ func (resolver *DefaultResolver) Resolve(value string) interface{} {
 	if len(value) == 0 {
 		return value
 	}
+
 	// Value format: ${env.ENVVAR1}
 	if strings.Contains(value, "${env.") {
 		value = value[6 : len(value)-1]
@@ -41,11 +42,16 @@ func (resolver *DefaultResolver) Resolve(value string) interface{} {
 		return os.Getenv(value)
 	} else if strings.Contains(value, "${property.") {
 		// Value format: ${property.Prop1}
-		// This is property bag resolution
 		property := value[11 : len(value)-1]
+		logger.Debugf("Resolving  value for property : '%s'", property)
 		return Get(property)
 	}
+
 	return value
+}
+
+func (resolver *DefaultResolver) CanResolve(value string) bool {
+	return regex.MatchString(value)
 }
 
 // Get returns the value of the property for the given id
@@ -53,23 +59,24 @@ func Get(id string) interface{} {
 	mut.RLock()
 	defer mut.RUnlock()
 	prop, ok := props[id]
+
 	if !ok {
-		// Use resolver to resolve value
+		if resolver.CanResolve(id) {
+			// May be its an expression like ${property.propertyName}
+			// Let resolver resolve the value
+			return resolver.Resolve(id)
+		}
 		return prop
 	}
 
 	switch prop.(type) {
 	case string:
 		value := prop.(string)
-		// further resolution needed?
-		if regex.MatchString(value) {
-			if resolver != nil {
-				resolvedValue := resolver.Resolve(value)
-				if resolvedValue != nil {
-					logger.Debugf("Value is resolved by: '%s'", reflect.TypeOf(resolver).String())
-					return resolvedValue
-				}
-			}
+		if resolver.CanResolve(value) {
+			// Resolver can resolve the value
+			resolvedValue := resolver.Resolve(value)
+			logger.Debugf("Value is resolved by: '%s'", reflect.TypeOf(resolver).String())
+			return resolvedValue
 		}
 		// Its literal value
 		return value
@@ -97,13 +104,10 @@ func Register(id string, value interface{}) error {
 }
 
 func RegisterResolver(newresolver Resolver) {
-	mut.Lock()
-	defer mut.Unlock()
-
-	logger.Debugf("Registering property resolver: '%s'", reflect.TypeOf(newresolver).String())
-	resolver = newresolver
-}
-
-func GetResolver() Resolver {
-	return resolver
+	if newresolver != nil {
+		mut.Lock()
+		defer mut.Unlock()
+		logger.Debugf("Registering property resolver: '%s'", reflect.TypeOf(newresolver).String())
+		resolver = newresolver
+	}
 }
