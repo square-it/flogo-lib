@@ -58,25 +58,7 @@ func Get(id string) (interface{}, bool) {
 	mut.RLock()
 	defer mut.RUnlock()
 	prop, ok := props[id]
-	if !ok {
-		return prop, ok
-	}
-	return prop
-}
-
-func getValueFromResolver(prop interface{}) (interface{}, bool) {
-	switch prop.(type) {
-	case string:
-		value := prop.(string)
-		// Resolver can resolve the value
-		resolvedValue, ok := resolver.Resolve(value)
-		if ok {
-			logger.Debugf("Value is resolved by: '%s'", reflect.TypeOf(resolver).String())
-			return resolvedValue, ok
-		}
-		return prop, false
-	}
-	return prop, true
+	return prop, ok
 }
 
 // Resolve resolves the value expressions like ${property.Prop1}
@@ -87,11 +69,7 @@ func getValueFromResolver(prop interface{}) (interface{}, bool) {
 func Resolve(value string) (interface{}, bool) {
 	mut.RLock()
 	defer mut.RUnlock()
-	switch value.(type) {
-	case string:
-		return resolver.Resolve(value.(string))
-	}
-	return value, true
+	return resolver.Resolve(value)
 }
 
 // Register property with given value.
