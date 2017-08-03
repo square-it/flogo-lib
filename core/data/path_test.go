@@ -35,4 +35,12 @@ func TestGetAttrPath(t *testing.T) {
 	a = "{T1.v}"
 	name, path, pt = GetAttrPath(a)
 	fmt.Printf("Name: %s, Path: %s, PathType: %d\n", name, path, pt)
+	
+	a = "${property.Prop1}"
+	name, path, pt = GetAttrPath(a)
+	fmt.Printf("Name: %s, Path: %s, PathType: %d\n", name, path, pt)
+	
+	a = "${env.VAR1}"
+	name, path, pt = GetAttrPath(a)
+	fmt.Printf("Name: %s, Path: %s, PathType: %d\n", name, path, pt)
 }

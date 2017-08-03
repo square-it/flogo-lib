@@ -84,10 +84,13 @@ func getValueFromResolver(prop interface{}) (interface{}, bool) {
 // expressions, the resolved value is returned and the boolean is true.
 // Otherwise the returned value will be nil and the boolean will be false.
 
-func Resolve(name string) (interface{}, bool) {
+func Resolve(value interface{}) (interface{}, bool) {
 	mut.RLock()
 	defer mut.RUnlock()
-	return resolver.Resolve(name)
+	switch value.(type) {
+		case string: return resolver.Resolve(value.(string))
+	}
+	return value, true
 }
 
 // Register property with given value.
