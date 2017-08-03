@@ -42,7 +42,7 @@ func GetAttrPath(inAttrName string) (attrName string, attrPath string, pathType 
 				attrPath = inAttrName[idx+2:]
 			}
 		}
-	} else if inAttrName[0] == '$' && inAttrName[1] == '{' {
+	} else if strings.HasPrefix(inAttrName, "${") {
 		typeIdx := strings.Index(inAttrName, ".")
 		if typeIdx != -1 {
 			attrName = inAttrName[2 : typeIdx]

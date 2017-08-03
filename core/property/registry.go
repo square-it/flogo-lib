@@ -61,7 +61,7 @@ func Get(id string) (interface{}, bool) {
 	if !ok {
 		return prop, ok
 	}
-	return getValueFromResolver(prop)
+	return prop
 }
 
 func getValueFromResolver(prop interface{}) (interface{}, bool) {
@@ -84,11 +84,12 @@ func getValueFromResolver(prop interface{}) (interface{}, bool) {
 // expressions, the resolved value is returned and the boolean is true.
 // Otherwise the returned value will be nil and the boolean will be false.
 
-func Resolve(value interface{}) (interface{}, bool) {
+func Resolve(value string) (interface{}, bool) {
 	mut.RLock()
 	defer mut.RUnlock()
 	switch value.(type) {
-		case string: return resolver.Resolve(value.(string))
+	case string:
+		return resolver.Resolve(value.(string))
 	}
 	return value, true
 }
