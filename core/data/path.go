@@ -1,18 +1,19 @@
 package data
 
 import (
-	"strings"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 // PathType is the attribute value accessor path
 type PathType int
 
 const (
-	PT_SIMPLE PathType = 1
-	PT_MAP    PathType = 2
-	PT_ARRAY  PathType = 3
+	PT_SIMPLE   PathType = 1
+	PT_MAP      PathType = 2
+	PT_ARRAY    PathType = 3
+	PT_PROPERTY PathType = 4
 )
 
 // GetAttrPath splits the supplied attribute with path to its name and object path
@@ -39,6 +40,15 @@ func GetAttrPath(inAttrName string) (attrName string, attrPath string, pathType 
 			} else {
 				pathType = PT_MAP
 				attrPath = inAttrName[idx+2:]
+			}
+		}
+	} else if strings.HasPrefix(inAttrName, "${") {
+		typeIdx := strings.Index(inAttrName, ".")
+		if typeIdx != -1 {
+			attrName = inAttrName[2 : typeIdx]
+			if attrName == "property" || attrName == "env" {
+				pathType = PT_PROPERTY
+				attrPath = inAttrName
 			}
 		}
 	} else {
