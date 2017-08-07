@@ -31,18 +31,6 @@ func TestRegisterDuplicate(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-// TestRegisterEnvironmentOk register environment property
-func TestRegisterEnvironmentOk(t *testing.T) {
-	os.Setenv("TEST_FLOGO2", "my_test_value2")
-	defer os.Unsetenv("TEST_FLOGO2")
-
-	err := Register("id_environment", "${env.TEST_FLOGO2}")
-	assert.Nil(t, err)
-
-	value, _ := Get("id_environment")
-	assert.Equal(t, "my_test_value2", value)
-}
-
 // TestDefaultResolverOk resolves environment and property value
 func TestDefaultResolverOk(t *testing.T) {
 	os.Setenv("TEST_FLOGO2", "my_test_value2")
