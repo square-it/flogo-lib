@@ -48,7 +48,7 @@ func GetAttrPath(inAttrName string) (attrName string, attrPath string, pathType 
 			attrName = inAttrName[2 : typeIdx]
 			if attrName == "property" || attrName == "env" {
 				pathType = PT_PROPERTY
-				attrPath = inAttrName
+				attrPath = inAttrName[typeIdx+1:len(inAttrName)-1]
 			}
 		}
 	} else {
