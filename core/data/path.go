@@ -14,6 +14,8 @@ const (
 	PT_MAP      PathType = 2
 	PT_ARRAY    PathType = 3
 	PT_PROPERTY PathType = 4
+	PT_ACTIVITY PathType = 5
+	PT_TRIGGER  PathType = 6
 )
 
 // GetAttrPath splits the supplied attribute with path to its name and object path
@@ -43,13 +45,33 @@ func GetAttrPath(inAttrName string) (attrName string, attrPath string, pathType 
 			}
 		}
 	} else if strings.HasPrefix(inAttrName, "${") {
-		typeIdx := strings.Index(inAttrName, ".")
-		if typeIdx != -1 {
-			attrName = inAttrName[2 : typeIdx]
-			if attrName == "property" || attrName == "env" {
-				pathType = PT_PROPERTY
-				attrPath = inAttrName[typeIdx+1:len(inAttrName)-1]
-			}
+		// Get value between ${ and }
+		leftIdx := 2
+		rightIdx := strings.Index(inAttrName, "}")
+		fullExpr := inAttrName[leftIdx:rightIdx]
+		if len(fullExpr) == 0 {
+			panic(fmt.Sprintf("Invalid mapping expression [%s].", inAttrName))
+		}
+		dotIdx := strings.Index(fullExpr, ".")
+		if dotIdx == -1 {
+			panic(fmt.Sprintf("Unsupported mapping expression, missing type [%s].", inAttrName))
+		}
+		expType := fullExpr[:dotIdx]
+		switch expType {
+		case "property", "env":
+			pathType = PT_PROPERTY
+			attrName = expType
+			attrPath = fullExpr[dotIdx+1:]
+		case "activity":
+			pathType = PT_ACTIVITY
+			attrName = expType
+			attrPath = fullExpr[dotIdx+1:]
+		case "trigger":
+			pathType = PT_TRIGGER
+			attrName = expType
+			attrPath = fullExpr[dotIdx+1:]
+		default:
+			panic(fmt.Sprintf("Unsupported mapping expression type [%s].", expType))
 		}
 	} else {
 		idx := strings.Index(inAttrName, ".")
