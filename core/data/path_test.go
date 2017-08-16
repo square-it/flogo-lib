@@ -38,35 +38,37 @@ func TestGetAttrPath(t *testing.T) {
 	name, path, pt = GetAttrPath(a)
 	fmt.Printf("Name: %s, Path: %s, PathType: %d\n", name, path, pt)
 
+
+}
+
+func TestGetResolverType(t *testing.T) {
 	// Resolution of Property expression
-	a = "${property.Prop1}"
-	name, path, pt = GetAttrPath(a)
-	fmt.Printf("Name: %s, Path: %s, PathType: %d\n", name, path, pt)
-	assert.Equal(t, "property", name)
-	assert.Equal(t, "Prop1", path)
-	assert.Equal(t, pt, PT_PROPERTY)
+	a := "${property.Prop1}"
+	resType, err := GetResolverType(a)
+	assert.Nil(t, err)
+	assert.Equal(t, RES_PROPERTY, resType)
 
 	// Resolution of Environment expression
 	a = "${env.VAR1}"
-	name, path, pt = GetAttrPath(a)
-	fmt.Printf("Name: %s, Path: %s, PathType: %d\n", name, path, pt)
-	assert.Equal(t, "env", name)
-	assert.Equal(t, "VAR1", path)
-	assert.Equal(t, pt, PT_PROPERTY)
+	resType, err = GetResolverType(a)
+	assert.Nil(t, err)
+	assert.Equal(t, RES_PROPERTY, resType)
 
-	// Resolution of flat Activity expression
-	a = "${activity.myActivity}"
-	name, path, pt = GetAttrPath(a)
-	fmt.Printf("Name: %s, Path: %s, PathType: %d\n", name, path, pt)
-	assert.Equal(t, "activity", name)
-	assert.Equal(t, "myActivity", path)
-	assert.Equal(t, pt, PT_ACTIVITY)
+	// Resolution of first level Activity expression
+	a = "${activity.myStringAttribute}"
+	resType, err = GetResolverType(a)
+	assert.Nil(t, err)
+	assert.Equal(t, RES_ACTIVITY, resType)
+
+	// Resolution of second level Activity expression
+	a = "${activity.myMapAttribute.myMapKey}"
+	resType, err = GetResolverType(a)
+	assert.Nil(t, err)
+	assert.Equal(t, RES_ACTIVITY, resType)
 
 	// Resolution of flat Trigger expression
 	a = "${trigger.myTrigger}"
-	name, path, pt = GetAttrPath(a)
-	fmt.Printf("Name: %s, Path: %s, PathType: %d\n", name, path, pt)
-	assert.Equal(t, "trigger", name)
-	assert.Equal(t, "myTrigger", path)
-	assert.Equal(t, pt, PT_TRIGGER)
+	resType, err = GetResolverType(a)
+	assert.Nil(t, err)
+	assert.Equal(t, RES_TRIGGER, resType)
 }
