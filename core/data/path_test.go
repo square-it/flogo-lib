@@ -38,6 +38,14 @@ func TestGetAttrPath(t *testing.T) {
 	name, path, pt = GetAttrPath(a)
 	fmt.Printf("Name: %s, Path: %s, PathType: %d\n", name, path, pt)
 
+
+	// Resolution of old Trigger activity expression
+	a = "{T.pathParams}.myParam"
+	name, path, pt = GetAttrPath(a)
+	assert.Equal(t, "{T.pathParams}", name)
+	assert.Equal(t, "myParam", path)
+	assert.Equal(t, PT_MAP, pt)
+
 	// Resolution of activity expression
 	a = "${activity.my_activityid.mystring}"
 	name, path, pt = GetAttrPath(a)
@@ -62,9 +70,15 @@ func TestGetAttrPath(t *testing.T) {
 }
 
 func TestGetResolverType(t *testing.T) {
-	// Resolution of Property expression
-	a := "${property.Prop1}"
+	// Resolution of Old Trigger expression
+	a := "{T.pathParams}.myParam"
 	resType, err := GetResolverType(a)
+	assert.Nil(t, err)
+	assert.Equal(t, RES_DEFAULT, resType)
+
+	// Resolution of Property expression
+	a = "${property.Prop1}"
+	resType, err = GetResolverType(a)
 	assert.Nil(t, err)
 	assert.Equal(t, RES_PROPERTY, resType)
 
