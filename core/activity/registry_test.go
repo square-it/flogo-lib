@@ -8,7 +8,7 @@ import (
 
 func TestResolver(t *testing.T){
 	// Resolve myStringAttribute
-	myStringAttribute := data.NewAttribute("myStringAttribute", data.STRING, "attr value")
+	myStringAttribute := data.NewAttribute("${activity.myActivity.myStringAttribute}", data.STRING, "attr value")
 	scope := data.NewSimpleScope([]*data.Attribute{myStringAttribute}, nil)
 
 	resolver := newResolver(scope)

@@ -77,6 +77,22 @@ func GetAttrPath(inAttrName string) (attrName string, attrPath string, pathType 
 				attrPath = inAttrName[idx+2:]
 			}
 		}
+	} else if strings.HasPrefix(inAttrName, "${"){
+		idx := strings.Index(inAttrName, "}")
+
+		if idx == nameLen-1 {
+			attrName = inAttrName
+		} else {
+			attrName = inAttrName[:idx+1]
+
+			if inAttrName[idx+1] == '[' {
+				pathType = PT_ARRAY
+				attrPath = inAttrName[idx+2 : nameLen-1]
+			} else {
+				pathType = PT_MAP
+				attrPath = inAttrName[idx+2:]
+			}
+		}
 	} else {
 		idx := strings.Index(inAttrName, ".")
 
@@ -170,8 +186,10 @@ func GetAttrValue(attrName, attrPath string, pathType PathType, scope Scope) (in
 			attrValue, exists = valMap[attrPath]
 		} else if tv.Type == ARRAY && pathType == PT_ARRAY {
 			//assigning part of array
-			idx, _ := strconv.Atoi(attrPath)
-			//todo handle err
+			idx, err := strconv.Atoi(attrPath)
+			if err != nil{
+				return nil, false
+			}
 			valArray := attrValue.([]interface{})
 			attrValue = valArray[idx]
 		} else {

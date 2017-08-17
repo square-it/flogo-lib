@@ -5,7 +5,6 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/expr"
-	"strings"
 )
 
 var (
@@ -23,14 +22,6 @@ func newResolver(scope data.Scope) expr.Resolver {
 }
 
 func (r *resolver) Resolve(path string) (interface{}, bool){
-	// Trim wrapper ${activity. }
-	path = strings.TrimSuffix(strings.TrimPrefix(path, "${activity."),"}")
-	// Trim activity name
-	idx := strings.Index(path, ".")
-	if idx == -1 || len(path) < idx + 1 {
-		return nil, false
-	}
-	path = path[idx + 1:]
 	attrName, attrPath, pathType := data.GetAttrPath(path)
 	return data.GetAttrValue(attrName, attrPath, pathType, r.scope)
 }

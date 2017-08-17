@@ -38,6 +38,26 @@ func TestGetAttrPath(t *testing.T) {
 	name, path, pt = GetAttrPath(a)
 	fmt.Printf("Name: %s, Path: %s, PathType: %d\n", name, path, pt)
 
+	// Resolution of activity expression
+	a = "${activity.my_activityid.mystring}"
+	name, path, pt = GetAttrPath(a)
+	assert.Equal(t, "${activity.my_activityid.mystring}", name)
+	assert.Equal(t, "", path)
+	assert.Equal(t, PT_SIMPLE, pt)
+
+	// Resolution of activity expression
+	a = "${activity.my_activityid.mymap}.mypath"
+	name, path, pt = GetAttrPath(a)
+	assert.Equal(t, "${activity.my_activityid.mymap}", name)
+	assert.Equal(t, "mypath", path)
+	assert.Equal(t, PT_MAP, pt)
+
+	// Resolution of activity expression
+	a = "${activity.my_activityid.myarray}[0]"
+	name, path, pt = GetAttrPath(a)
+	assert.Equal(t, "${activity.my_activityid.myarray}", name)
+	assert.Equal(t, "0", path)
+	assert.Equal(t, PT_ARRAY, pt)
 
 }
 
