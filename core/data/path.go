@@ -13,9 +13,9 @@ type PathType int
 type ResolverType int
 
 const (
-	PT_SIMPLE   PathType = 1
-	PT_MAP      PathType = 2
-	PT_ARRAY    PathType = 3
+	PT_SIMPLE PathType = 1
+	PT_MAP    PathType = 2
+	PT_ARRAY  PathType = 3
 
 	RES_DEFAULT ResolverType = iota
 	RES_PROPERTY
@@ -25,10 +25,8 @@ const (
 
 func GetResolverType(inAttrName string) (ResolverType, error) {
 	if strings.HasPrefix(inAttrName, "${") {
-		// Get value between ${ and }
 		leftIdx := 2
-		rightIdx := strings.Index(inAttrName, "}")
-		fullExpr := inAttrName[leftIdx:rightIdx]
+		fullExpr := inAttrName[leftIdx:]
 		if len(fullExpr) == 0 {
 			return 0, fmt.Errorf("Invalid mapping expression [%s].", inAttrName)
 		}
@@ -77,7 +75,7 @@ func GetAttrPath(inAttrName string) (attrName string, attrPath string, pathType 
 				attrPath = inAttrName[idx+2:]
 			}
 		}
-	} else if strings.HasPrefix(inAttrName, "${"){
+	} else if strings.HasPrefix(inAttrName, "${") {
 		idx := strings.Index(inAttrName, "}")
 
 		if idx == nameLen-1 {
@@ -174,9 +172,9 @@ func GetMapValue(valueMap map[string]interface{}, path string) interface{} {
 	return tmpObj
 }
 
-func GetAttrValue(attrName, attrPath string, pathType PathType, scope Scope) (interface{}, bool){
+func GetAttrValue(attrName, attrPath string, pathType PathType, scope Scope) (interface{}, bool) {
 	tv, exists := scope.GetAttr(attrName)
-	if tv == nil{
+	if tv == nil {
 		return nil, false
 	}
 	attrValue := tv.Value
@@ -187,7 +185,7 @@ func GetAttrValue(attrName, attrPath string, pathType PathType, scope Scope) (in
 		} else if tv.Type == ARRAY && pathType == PT_ARRAY {
 			//assigning part of array
 			idx, err := strconv.Atoi(attrPath)
-			if err != nil{
+			if err != nil {
 				return nil, false
 			}
 			valArray := attrValue.([]interface{})

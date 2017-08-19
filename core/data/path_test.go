@@ -89,13 +89,19 @@ func TestGetResolverType(t *testing.T) {
 	assert.Equal(t, RES_PROPERTY, resType)
 
 	// Resolution of first level Activity expression
-	a = "${activity.myStringAttribute}"
+	a = "${activity.myactivityId.myAttributeName}"
 	resType, err = GetResolverType(a)
 	assert.Nil(t, err)
 	assert.Equal(t, RES_ACTIVITY, resType)
 
-	// Resolution of second level Activity expression
-	a = "${activity.myMapAttribute.myMapKey}"
+	// Resolution of second level Activity expression map
+	a = "${activity.myactivityId.myMapAttributeName}.mapkey"
+	resType, err = GetResolverType(a)
+	assert.Nil(t, err)
+	assert.Equal(t, RES_ACTIVITY, resType)
+
+	// Resolution of second level Activity expression array
+	a = "${activity.myactivityId.myMapAttributeName}[0]"
 	resType, err = GetResolverType(a)
 	assert.Nil(t, err)
 	assert.Equal(t, RES_ACTIVITY, resType)
