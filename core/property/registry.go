@@ -2,26 +2,21 @@ package property
 
 import (
 	"fmt"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"os"
 	"reflect"
 	"strings"
 	"sync"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/expr"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 var (
 	props = make(map[string]interface{})
 	mut   = sync.RWMutex{}
 	// Default Resolver
-	resolver Resolver = &DefaultResolver{}
+	resolver expr.Resolver = &DefaultResolver{}
 )
-
-// Resolve value sourced from Enviornment variable or any other configuration management services
-type Resolver interface {
-	// Resolve value for given name
-	// Returns resolved value and true ortherwise nil and false in case it can not resolve the value.
-	Resolve(name string) (interface{}, bool)
-}
 
 // Default resolver to resolve property and envioronment variable values.
 type DefaultResolver struct {
@@ -103,7 +98,7 @@ func Register(id string, value interface{}) error {
 
 // Register new resolver with the engine.
 // It will override default resolver.
-func RegisterResolver(newresolver Resolver) {
+func RegisterResolver(newresolver expr.Resolver) {
 	if newresolver != nil {
 		mut.Lock()
 		defer mut.Unlock()

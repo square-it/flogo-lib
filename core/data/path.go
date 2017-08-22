@@ -9,12 +9,45 @@ import (
 // PathType is the attribute value accessor path
 type PathType int
 
+// ResolverType is the type of the resolver for the attribute name
+type ResolverType int
+
 const (
-	PT_SIMPLE   PathType = 1
-	PT_MAP      PathType = 2
-	PT_ARRAY    PathType = 3
-	PT_PROPERTY PathType = 4
+	PT_SIMPLE PathType = 1
+	PT_MAP    PathType = 2
+	PT_ARRAY  PathType = 3
+
+	RES_DEFAULT ResolverType = iota
+	RES_PROPERTY
+	RES_ACTIVITY
+	RES_TRIGGER
 )
+
+func GetResolverType(inAttrName string) (ResolverType, error) {
+	if strings.HasPrefix(inAttrName, "${") {
+		leftIdx := 2
+		fullExpr := inAttrName[leftIdx:]
+		if len(fullExpr) == 0 {
+			return 0, fmt.Errorf("Invalid mapping expression [%s].", inAttrName)
+		}
+		dotIdx := strings.Index(fullExpr, ".")
+		if dotIdx == -1 {
+			return 0, fmt.Errorf("Unsupported mapping expression, missing type [%s].", inAttrName)
+		}
+		expType := fullExpr[:dotIdx]
+		switch expType {
+		case "property", "env":
+			return RES_PROPERTY, nil
+		case "activity":
+			return RES_ACTIVITY, nil
+		case "trigger":
+			return RES_TRIGGER, nil
+		default:
+			return 0, fmt.Errorf("Unsupported mapping expression type [%s].", expType)
+		}
+	}
+	return RES_DEFAULT, nil
+}
 
 // GetAttrPath splits the supplied attribute with path to its name and object path
 func GetAttrPath(inAttrName string) (attrName string, attrPath string, pathType PathType) {
@@ -43,12 +76,19 @@ func GetAttrPath(inAttrName string) (attrName string, attrPath string, pathType 
 			}
 		}
 	} else if strings.HasPrefix(inAttrName, "${") {
-		typeIdx := strings.Index(inAttrName, ".")
-		if typeIdx != -1 {
-			attrName = inAttrName[2 : typeIdx]
-			if attrName == "property" || attrName == "env" {
-				pathType = PT_PROPERTY
-				attrPath = inAttrName[typeIdx+1:len(inAttrName)-1]
+		idx := strings.Index(inAttrName, "}")
+
+		if idx == nameLen-1 {
+			attrName = inAttrName
+		} else {
+			attrName = inAttrName[:idx+1]
+
+			if inAttrName[idx+1] == '[' {
+				pathType = PT_ARRAY
+				attrPath = inAttrName[idx+2 : nameLen-1]
+			} else {
+				pathType = PT_MAP
+				attrPath = inAttrName[idx+2:]
 			}
 		}
 	} else {
@@ -130,4 +170,32 @@ func GetMapValue(valueMap map[string]interface{}, path string) interface{} {
 	}
 
 	return tmpObj
+}
+
+func GetAttrValue(attrName, attrPath string, pathType PathType, scope Scope) (interface{}, bool) {
+	tv, exists := scope.GetAttr(attrName)
+	if tv == nil {
+		return nil, false
+	}
+	attrValue := tv.Value
+	if exists && len(attrPath) > 0 {
+		if tv.Type == PARAMS {
+			valMap := attrValue.(map[string]string)
+			attrValue, exists = valMap[attrPath]
+		} else if tv.Type == ARRAY && pathType == PT_ARRAY {
+			//assigning part of array
+			idx, err := strconv.Atoi(attrPath)
+			if err != nil {
+				return nil, false
+			}
+			valArray := attrValue.([]interface{})
+			attrValue = valArray[idx]
+		} else {
+			//for now assume if we have a path, attr is "object"
+			valMap := attrValue.(map[string]interface{})
+			attrValue = GetMapValue(valMap, attrPath)
+			//attrValue, exists = valMap[attrPath]
+		}
+	}
+	return attrValue, exists
 }

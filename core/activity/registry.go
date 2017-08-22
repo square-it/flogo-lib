@@ -3,6 +3,8 @@ package activity
 import (
 	"sync"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/TIBCOSoftware/flogo-lib/core/expr"
 )
 
 var (
@@ -10,12 +12,26 @@ var (
 	activities   = make(map[string]Activity)
 )
 
+// Resolver resolves the activity for a given scope and path
+type resolver struct {
+	scope data.Scope
+}
+
+func newResolver(scope data.Scope) expr.Resolver {
+	return &resolver{scope: scope}
+}
+
+func (r *resolver) Resolve(path string) (interface{}, bool){
+	attrName, attrPath, pathType := data.GetAttrPath(path)
+	return data.GetAttrValue(attrName, attrPath, pathType, r.scope)
+}
+
 // Register registers the specified activity
 func Register(activity Activity) {
 	activitiesMu.Lock()
 	defer activitiesMu.Unlock()
 
-	logger.Debugf("Registering actvitiy: '%s'", activity.Metadata().ID)
+	logger.Debugf("Registering activity: '%s'", activity.Metadata().ID)
 
 	if activity == nil {
 		panic("activity.Register: activity is nil")
@@ -56,4 +72,9 @@ func Activities() []Activity {
 func Get(id string) Activity {
 	//var curActivities = activities
 	return activities[id]
+}
+
+// Resolve will resolve the activity for the given path
+func Resolve(scope data.Scope, path string) (interface{}, bool){
+	return newResolver(scope).Resolve(path)
 }
