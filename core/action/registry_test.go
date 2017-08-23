@@ -21,11 +21,11 @@ func (a *MockAction) Run(context context.Context, uri string, options interface{
 	return nil
 }
 
-func clearFactory (){
+func clearFactory() {
 	factories = make(map[string]Factory)
 }
 
-func clearActions (){
+func clearActions() {
 	actions = make(map[string]Action)
 }
 
@@ -152,7 +152,7 @@ func TestGetActionOk(t *testing.T) {
 	err := Register("myinstanceId", a)
 	assert.Nil(t, err)
 
-	myInstance :=  Get("myinstanceId")
+	myInstance := Get("myinstanceId")
 	assert.NotNil(t, myInstance)
 
 	myUnknownInstance := Get("myunknowninstanceId")

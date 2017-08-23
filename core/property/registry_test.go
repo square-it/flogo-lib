@@ -1,8 +1,8 @@
 package property
 
 import (
-	"testing"
 	"os"
+	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -37,7 +37,7 @@ func TestDefaultResolverOk(t *testing.T) {
 	defer os.Unsetenv("TEST_FLOGO2")
 	Register("id_test", "a value")
 	value, _ := Resolve("${property.id_test}")
-    assert.Equal(t, "a value", value)
+	assert.Equal(t, "a value", value)
 	value, _ = Resolve("${env.TEST_FLOGO2}")
 	assert.Equal(t, "my_test_value2", value)
 }

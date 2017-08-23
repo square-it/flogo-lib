@@ -5,8 +5,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"fmt"
+	"github.com/stretchr/testify/assert"
 )
 
 // TestConcurrentGetLoggerOk tests that the GetLogger function is concurrent
@@ -20,7 +20,7 @@ func TestConcurrentGetLoggerOk(t *testing.T) {
 		w.Add(1)
 		go func(i int) {
 			defer w.Done()
-			defer func (){
+			defer func() {
 				if r := recover(); r != nil {
 					recovered = r
 				}

@@ -1,10 +1,10 @@
 package activity
 
 import (
-	"sync"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/expr"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"sync"
 )
 
 var (
@@ -21,7 +21,7 @@ func newResolver(scope data.Scope) expr.Resolver {
 	return &resolver{scope: scope}
 }
 
-func (r *resolver) Resolve(path string) (interface{}, bool){
+func (r *resolver) Resolve(path string) (interface{}, bool) {
 	attrName, attrPath, pathType := data.GetAttrPath(path)
 	return data.GetAttrValue(attrName, attrPath, pathType, r.scope)
 }
@@ -75,6 +75,6 @@ func Get(id string) Activity {
 }
 
 // Resolve will resolve the activity for the given path
-func Resolve(scope data.Scope, path string) (interface{}, bool){
+func Resolve(scope data.Scope, path string) (interface{}, bool) {
 	return newResolver(scope).Resolve(path)
 }

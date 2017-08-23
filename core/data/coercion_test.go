@@ -98,7 +98,6 @@ func TestCoerceToBoolean(t *testing.T) {
 	assert.Equal(t, false, cval, "not equal")
 }
 
-
 func TestUnmarshComplexObject(t *testing.T) {
 	complexStr := `{"metadata":"this is metdata string","value":""}`
 	complexObject, err := CoerceToComplexObject(complexStr)
@@ -106,4 +105,3 @@ func TestUnmarshComplexObject(t *testing.T) {
 	assert.NotNil(t, complexObject)
 	assert.NotEqual(t, "", complexObject.Value)
 }
-
