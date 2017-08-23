@@ -30,4 +30,3 @@ type ResultHandler interface {
 
 	Done()
 }
-

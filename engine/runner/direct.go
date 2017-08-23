@@ -7,7 +7,6 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 )
 
-
 // DirectRunner runs an action synchronously
 type DirectRunner struct {
 }

@@ -38,7 +38,6 @@ func TestGetAttrPath(t *testing.T) {
 	name, path, pt = GetAttrPath(a)
 	fmt.Printf("Name: %s, Path: %s, PathType: %d\n", name, path, pt)
 
-
 	// Resolution of old Trigger activity expression
 	a = "{T.pathParams}.myParam"
 	name, path, pt = GetAttrPath(a)

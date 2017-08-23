@@ -22,10 +22,9 @@ func (t *MockTrigger) Init(actionRunner action.Runner) {
 	//Noop
 }
 
-func (t *MockTrigger) Start() error { return nil }
-func (t *MockTrigger) Stop() error  { return nil }
-func (t *MockTrigger) Metadata() *Metadata  { return nil }
-
+func (t *MockTrigger) Start() error        { return nil }
+func (t *MockTrigger) Stop() error         { return nil }
+func (t *MockTrigger) Metadata() *Metadata { return nil }
 
 //TestAddFactoryEmptyRef
 func TestAddFactoryEmptyRef(t *testing.T) {

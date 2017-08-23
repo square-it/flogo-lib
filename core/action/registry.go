@@ -1,10 +1,10 @@
 package action
 
 import (
-	"sync"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"fmt"
 	"errors"
+	"fmt"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"sync"
 )
 
 var (

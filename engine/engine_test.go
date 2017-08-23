@@ -1,9 +1,9 @@
 package engine
 
 import (
+	"github.com/TIBCOSoftware/flogo-lib/app"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"github.com/TIBCOSoftware/flogo-lib/app"
 )
 
 //TestNewEngineErrorNoApp
