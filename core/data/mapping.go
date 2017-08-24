@@ -30,3 +30,10 @@ type MappingDef struct {
 type Mapper interface {
 	Apply(inputScope Scope, outputScope Scope) error
 }
+
+// MapperDef represents a Mapper, which is a collection of mappings
+type MapperDef struct {
+	//todo possibly add optional lang/mapper type so we can fast fail on unsupported mappings/mapper combo
+	Mappings []*MappingDef
+}
+

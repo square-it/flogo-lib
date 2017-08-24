@@ -9,6 +9,7 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/expr"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
 var (
@@ -17,6 +18,10 @@ var (
 	// Default Resolver
 	resolver expr.Resolver = &DefaultResolver{}
 )
+
+func init() {
+	data.SetResolver(data.RES_PROPERTY, ResolveProperty)
+}
 
 // Default resolver to resolve property and envioronment variable values.
 type DefaultResolver struct {
@@ -65,6 +70,10 @@ func Resolve(value string) (interface{}, bool) {
 	mut.RLock()
 	defer mut.RUnlock()
 	return resolver.Resolve(value)
+}
+
+func ResolveProperty(scope data.Scope, path string) (interface{}, bool) {
+	return Resolve(path)
 }
 
 // Register property with given value.

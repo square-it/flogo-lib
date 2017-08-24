@@ -14,6 +14,10 @@ var (
 	reg        = &registry{}
 )
 
+func init() {
+	data.SetResolver(data.RES_TRIGGER, Resolve)
+}
+
 type Registry interface {
 	AddFactory(ref string, f Factory) error
 	GetFactories() map[string]Factory

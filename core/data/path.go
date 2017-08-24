@@ -13,15 +13,20 @@ type PathType int
 type ResolverType int
 
 const (
-	PT_SIMPLE PathType = 1
-	PT_MAP    PathType = 2
-	PT_ARRAY  PathType = 3
-
 	RES_DEFAULT ResolverType = iota
+	RES_ENV
 	RES_PROPERTY
 	RES_ACTIVITY
 	RES_TRIGGER
+
+	PT_SIMPLE PathType = 1
+	PT_MAP    PathType = 2
+	PT_ARRAY  PathType = 3
 )
+
+var resolvers = make([]Resolver, 5, 5)
+
+type Resolver func(scope Scope, path string) (interface{}, bool)
 
 func GetResolverType(inAttrName string) (ResolverType, error) {
 	if strings.HasPrefix(inAttrName, "${") {
@@ -47,6 +52,14 @@ func GetResolverType(inAttrName string) (ResolverType, error) {
 		}
 	}
 	return RES_DEFAULT, nil
+}
+
+func SetResolver(rt ResolverType, resolver Resolver) {
+	resolvers[rt] = resolver
+}
+
+func GetResolver(rt ResolverType) Resolver{
+	return resolvers[rt]
 }
 
 // GetAttrPath splits the supplied attribute with path to its name and object path

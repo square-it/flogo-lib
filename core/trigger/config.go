@@ -2,6 +2,7 @@ package trigger
 
 import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper"
 )
 
 // Config is the configuration for a Trigger
@@ -12,10 +13,6 @@ type Config struct {
 	Settings map[string]interface{} `json:"settings"`
 	Outputs  map[string]interface{} `json:"outputs"`
 	Handlers []*HandlerConfig       `json:"handlers"`
-
-	//deprecated
-	//Settings map[string]string `json:"settings"`
-	Endpoints []*EndpointConfig `json:"endpoints"`
 }
 
 func (c *Config) FixUp(metadata *Metadata) {
@@ -41,6 +38,7 @@ func (c *Config) FixUp(metadata *Metadata) {
 
 		hc.parent = c
 
+		// fix up outputs
 		for name, value := range hc.Outputs {
 
 			attr, ok := metadata.Outputs[name]
@@ -55,6 +53,11 @@ func (c *Config) FixUp(metadata *Metadata) {
 				}
 			}
 		}
+
+		// create mappers
+		if hc.OutputMappings != nil {
+			hc.outputMapper = mapper.GetFactory().NewMapper(&data.MapperDef{Mappings: hc.OutputMappings})
+		}
 	}
 }
 
@@ -68,6 +71,9 @@ type HandlerConfig struct {
 	ActionId string                 `json:"actionId"`
 	Settings map[string]interface{} `json:"settings"`
 	Outputs  map[string]interface{} `json:"outputs"`
+
+	OutputMappings  []*data.MappingDef `json:"outputMappings,omitempty"`
+	outputMapper data.Mapper
 }
 
 func (hc *HandlerConfig) GetSetting(setting string) string {
@@ -85,11 +91,6 @@ func (hc *HandlerConfig) GetOutput(name string) interface{} {
 	return value
 }
 
-// EndpointConfig is the configuration for a specific endpoint for the
-// Trigger // Deprecated
-type EndpointConfig struct {
-	ActionId   string            `json:"actionId"`
-	ActionType string            `json:"actionType"`
-	ActionURI  string            `json:"actionURI"`
-	Settings   map[string]string `json:"settings"`
+func (hc *HandlerConfig) GetOutputMapper() data.Mapper {
+	return hc.outputMapper
 }

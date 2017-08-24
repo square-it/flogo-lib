@@ -12,6 +12,10 @@ var (
 	activities   = make(map[string]Activity)
 )
 
+func init() {
+	data.SetResolver(data.RES_ACTIVITY, Resolve)
+}
+
 // Resolver resolves the activity for a given scope and path
 type resolver struct {
 	scope data.Scope
