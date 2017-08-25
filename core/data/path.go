@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 // PathType is the attribute value accessor path
@@ -190,6 +191,9 @@ func GetAttrValue(attrName, attrPath string, pathType PathType, scope Scope) (in
 			}
 			valArray := attrValue.([]interface{})
 			attrValue = valArray[idx]
+		} else if tv.Type == COMPLEX_OBJECT && pathType == PT_MAP {
+			// Resolve jsonpath
+			attrValue, exists = GetComplexObjectValue(attrValue, attrPath)
 		} else {
 			//for now assume if we have a path, attr is "object"
 			valMap := attrValue.(map[string]interface{})
@@ -198,4 +202,12 @@ func GetAttrValue(attrName, attrPath string, pathType PathType, scope Scope) (in
 		}
 	}
 	return attrValue, exists
+}
+
+func GetComplexObjectValue(attrValue interface{}, attrPath string) (interface{}, bool){
+	// This should never happen
+	if attrValue == nil{
+		return nil, false
+	}
+
 }
