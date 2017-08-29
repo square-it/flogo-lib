@@ -2,9 +2,10 @@ package data
 
 import (
 	"fmt"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"strconv"
 	"strings"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/TIBCOSoftware/flogo-lib/json"
 )
 
 // PathType is the attribute value accessor path
@@ -192,8 +193,14 @@ func GetAttrValue(attrName, attrPath string, pathType PathType, scope Scope) (in
 			valArray := attrValue.([]interface{})
 			attrValue = valArray[idx]
 		} else if tv.Type == COMPLEX_OBJECT && pathType == PT_MAP {
+			// Parse complex object
+			co, err := CoerceToComplexObject(attrValue)
+			if err != nil{
+				logger.Error(err)
+				return nil, false
+			}
 			// Resolve jsonpath
-			attrValue, exists = GetComplexObjectValue(attrValue, attrPath)
+			attrValue, exists = GetComplexObjectValue(co, attrPath)
 		} else {
 			//for now assume if we have a path, attr is "object"
 			valMap := attrValue.(map[string]interface{})
@@ -204,10 +211,28 @@ func GetAttrValue(attrName, attrPath string, pathType PathType, scope Scope) (in
 	return attrValue, exists
 }
 
-func GetComplexObjectValue(attrValue interface{}, attrPath string) (interface{}, bool){
+func GetComplexObjectValue(attrValue *ComplexObject, attrPath string) (interface{}, bool) {
 	// This should never happen
-	if attrValue == nil{
+	if attrValue == nil {
+		logger.Error(fmt.Errorf("Error trying to resolve complex object value, nil value found"))
 		return nil, false
 	}
 
+	if len(attrPath) == 0{
+		logger.Error(fmt.Errorf("Error trying to resolve complex object value, empty json path found"))
+		return nil, false
+	}
+
+	attrValueStr, ok := attrValue.Value.(string)
+	if !ok{
+		logger.Error(fmt.Errorf("Error trying to resolve complex object value, invalid mapping type '%T' for attribute '%+v'", attrValue.Value, attrValue.Value))
+		return nil, false
+	}
+
+	resValue, err := json.GetFieldValue(attrValueStr, attrPath)
+	if err != nil{
+		logger.Error(err)
+		return nil, false
+	}
+	return resValue, true
 }
