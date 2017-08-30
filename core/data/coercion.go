@@ -304,3 +304,51 @@ func handleComplex(complex *ComplexObject) *ComplexObject {
 	}
 	return complex
 }
+
+var mapHelper *MapHelper = &MapHelper{}
+
+func GetMapHelper() *MapHelper {
+	return mapHelper
+}
+
+type MapHelper struct {
+}
+
+func (h *MapHelper) GetInt(data map[string]interface{}, key string) (int, bool) {
+	mapVal, exists := data[key]
+	if exists {
+		value, ok := mapVal.(int)
+
+		if ok {
+			return value, true
+		}
+	}
+
+	return 0, false
+}
+
+func (h *MapHelper) GetString(data map[string]interface{}, key string) (string, bool) {
+	mapVal, exists := data[key]
+	if exists {
+		value, ok := mapVal.(string)
+
+		if ok {
+			return value, true
+		}
+	}
+
+	return "", false
+}
+
+func (h *MapHelper) GetBool(data map[string]interface{}, key string) (bool, bool) {
+	mapVal, exists := data[key]
+	if exists {
+		value, ok := mapVal.(bool)
+
+		if ok {
+			return value, true
+		}
+	}
+
+	return false, false
+}

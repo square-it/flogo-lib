@@ -28,16 +28,39 @@ func (runner *DirectRunner) Stop() error {
 	return nil
 }
 
-// Run the specified action
-func (runner *DirectRunner) Run(context context.Context, action action.Action, uri string, options interface{}) (code int, data interface{}, err error) {
+//Run
+//Deprecated
+func (runner *DirectRunner) Run(ctx context.Context, act action.Action, uri string, options interface{}) (code int, data interface{}, err error) {
 
-	if action == nil {
+	newOptions := make(map[string]interface{})
+	newOptions["deprecated_options"] = options
+	code, ndata, err := runner.RunAction(ctx, uri, NewOldTAInputGenerator(ctx), newOptions)
+
+	if len(ndata) != 0 {
+		defData, ok := ndata["default"]
+
+		if ok {
+			data = defData
+		}
+	}
+
+	return code, data, err
+}
+
+// Run the specified action
+func (runner *DirectRunner) RunAction(ctx context.Context, actionID string, inputGenerator action.InputGenerator, options map[string]interface{}) (code int, data map[string]interface{}, err error) {
+
+	act := action.Get(actionID)
+
+	if act == nil {
 		return 0, nil, errors.New("Action not found")
 	}
 
 	handler := &SyncResultHandler{done: make(chan bool, 1)}
 
-	err = action.Run(context, uri, options, handler)
+	inputs := inputGenerator.GenerateInputs(GetActionOutputMetadata(act))
+
+	err = act.Run(ctx, inputs, options, handler)
 
 	if err != nil {
 		return 0, nil, err
@@ -52,12 +75,12 @@ func (runner *DirectRunner) Run(context context.Context, action action.Action, u
 type SyncResultHandler struct {
 	done chan (bool)
 	code int
-	data interface{}
+	data map[string]interface{}
 	err  error
 }
 
 // HandleResult implements action.ResultHandler.HandleResult
-func (rh *SyncResultHandler) HandleResult(code int, data interface{}, err error) {
+func (rh *SyncResultHandler) HandleResult(code int, data map[string]interface{}, err error) {
 	rh.code = code
 	rh.data = data
 	rh.err = err
@@ -69,6 +92,6 @@ func (rh *SyncResultHandler) Done() {
 }
 
 // Result returns the latest Result set on the handler
-func (rh *SyncResultHandler) Result() (code int, data interface{}, err error) {
+func (rh *SyncResultHandler) Result() (code int, data map[string]interface{}, err error) {
 	return rh.code, rh.data, rh.err
 }

@@ -94,23 +94,42 @@ func (runner *PooledRunner) Stop() error {
 	return nil
 }
 
-// Run implements action.Runner.Run
-func (runner *PooledRunner) Run(context context.Context, action action.Action, uri string, options interface{}) (code int, data interface{}, err error) {
+func (runner *PooledRunner) Run(ctx context.Context, act action.Action, uri string, options interface{}) (code int, data interface{}, err error) {
 
-	if action == nil {
+	newOptions := make(map[string]interface{})
+	newOptions["deprecated_options"] = options
+	code, ndata, err := runner.RunAction(ctx, uri, NewOldTAInputGenerator(ctx), newOptions )
+
+	if len(ndata) != 0 {
+		defData, ok := ndata["default"]
+
+		if ok {
+			data = defData
+		}
+	}
+
+	return code, data, err
+}
+
+// Run implements action.Runner.Run
+func (runner *PooledRunner) RunAction(ctx context.Context, actionID string, inputGenerator action.InputGenerator, options map[string]interface{}) (code int, data map[string]interface{}, err error) {
+
+	act := action.Get(actionID)
+
+	if act == nil {
 		return 0, nil, errors.New("Action not found")
 	}
 
 	if runner.active {
 
-		data := &ActionData{context: context, action: action, uri: uri, options: options, rc: make(chan *ActionResult, 1)}
+		data := &ActionData{context: ctx, action: act, inputGenerator: inputGenerator, options: options, arc: make(chan *ActionResult, 1)}
 		work := ActionWorkRequest{ReqType: RtRun, actionData: data}
 
 		runner.workQueue <- work
-		logger.Debugf("Run Action '%s' queued", uri)
+		logger.Debugf("Run Action '%s' queued", actionID)
 
-		reply := <-data.rc
-		logger.Debugf("Run Action '%s' complete", uri)
+		reply := <-data.arc
+		logger.Debugf("Run Action '%s' complete", actionID)
 
 		return reply.code, reply.data, reply.err
 	}

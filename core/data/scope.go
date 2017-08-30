@@ -7,7 +7,6 @@ import (
 
 // Scope is a set of attributes that are accessible
 type Scope interface {
-
 	// GetAttr gets the specified attribute
 	GetAttr(name string) (attr *Attribute, exists bool)
 
@@ -143,4 +142,57 @@ var (
 // GetGlobalScope gets the global scope the application
 func GetGlobalScope() MutableScope {
 	return globalScope
+}
+
+// FixedScope is an implementation of a empty scope fixed to a particular set of metadata
+type FixedScope struct {
+	attrs    map[string]*Attribute
+	metadata map[string]*Attribute
+}
+
+// NewFixedScope creates a new SimpleScope
+func NewFixedScope(metadata []*Attribute) *FixedScope {
+
+	scope := &FixedScope{
+		metadata: make(map[string]*Attribute),
+		attrs:    make(map[string]*Attribute),
+	}
+
+	for _, attr := range metadata {
+		scope.metadata[attr.Name] = attr
+	}
+
+	return scope
+}
+
+// GetAttr implements Scope.GetAttr
+func (s *FixedScope) GetAttr(name string) (attr *Attribute, exists bool) {
+
+	attr, found := s.attrs[name]
+	return attr, found
+}
+
+// GetAttrs gets the attributes set in the scope
+func (s *FixedScope) GetAttrs() map[string]*Attribute {
+	return s.attrs
+}
+
+// SetAttrValue implements Scope.SetAttrValue
+func (s *FixedScope) SetAttrValue(name string, value interface{}) error {
+
+	attr, found := s.attrs[name]
+
+	if found {
+		attr.Value = value
+		return nil
+	} else {
+		metaAttr, found := s.metadata[name]
+		if found {
+			attr = NewAttribute(name, metaAttr.Type, value)
+			s.attrs[name] = attr
+			return nil
+		}
+	}
+
+	return errors.New("attribute not in scope")
 }

@@ -27,17 +27,17 @@ type ActionWorkRequest struct {
 
 // ActionData action related data to pass along in a ActionWorkRequest
 type ActionData struct {
-	context context.Context
-	action  action.Action
-	uri     string
-	options interface{}
-	rc      chan (*ActionResult)
+	context        context.Context
+	action         action.Action
+	inputGenerator action.InputGenerator
+	options        map[string]interface{}
+	arc            chan (*ActionResult)
 }
 
 // ActionResult is a simple struct to hold the results for an Action
 type ActionResult struct {
 	code int
-	data interface{}
+	data map[string]interface{}
 	err  error
 }
 
@@ -84,7 +84,7 @@ func (w ActionWorker) Start() {
 
 					err := fmt.Errorf("Unsupported work request type: '%d'", work.ReqType)
 					actionData := work.actionData
-					actionData.rc <- &ActionResult{err: err}
+					actionData.arc <- &ActionResult{err: err}
 
 				case RtRun:
 
@@ -92,12 +92,16 @@ func (w ActionWorker) Start() {
 
 					handler := &AsyncResultHandler{result: make(chan *ActionResult), done: make(chan bool, 1)}
 
-					err := actionData.action.Run(actionData.context, actionData.uri, actionData.options, handler)
+					act := actionData.action
+
+					inputs := actionData.inputGenerator.GenerateInputs(GetActionOutputMetadata(act))
+
+					err := act.Run(actionData.context, inputs, actionData.options, handler)
 
 					if err != nil {
 						logger.Debugf("worker-%d: Action Run error: %s\n", w.ID, err.Error())
 						// error so just return
-						actionData.rc <- &ActionResult{err: err}
+						actionData.arc <- &ActionResult{err: err}
 					} else {
 						done := false
 						//wait for reply
@@ -105,10 +109,10 @@ func (w ActionWorker) Start() {
 							select {
 							case result := <-handler.result:
 								logger.Debugf("*** Worker received result: %v\n", result)
-								actionData.rc <- result
+								actionData.arc <- result
 							case <-handler.done:
 								if !handler.replied {
-									actionData.rc <- &ActionResult{}
+									actionData.arc <- &ActionResult{}
 								}
 								done = true
 							}
@@ -144,7 +148,7 @@ type AsyncResultHandler struct {
 }
 
 // HandleResult implements action.ResultHandler.HandleResult
-func (rh *AsyncResultHandler) HandleResult(code int, data interface{}, err error) {
+func (rh *AsyncResultHandler) HandleResult(code int, data map[string]interface{}, err error) {
 	rh.replied = true
 	rh.result <- &ActionResult{code: code, data: data, err: err}
 }

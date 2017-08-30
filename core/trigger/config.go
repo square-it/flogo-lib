@@ -72,25 +72,71 @@ type HandlerConfig struct {
 	Settings map[string]interface{} `json:"settings"`
 	Outputs  map[string]interface{} `json:"outputs"`
 
-	OutputMappings  []*data.MappingDef `json:"outputMappings,omitempty"`
-	outputMapper data.Mapper
+	OutputMappings []*data.MappingDef `json:"outputMappings,omitempty"`
+	outputMapper   data.Mapper
 }
 
 func (hc *HandlerConfig) GetSetting(setting string) string {
 	return hc.Settings[setting].(string)
 }
 
-func (hc *HandlerConfig) GetOutput(name string) interface{} {
+func (hc *HandlerConfig) GetOutput(name string) (interface{}, bool) {
 
-	value, ok := hc.Outputs[name]
+	value, exists := hc.Outputs[name]
 
-	if !ok {
-		value, ok = hc.parent.Outputs[name]
+	if !exists {
+		value, exists = hc.parent.Outputs[name]
 	}
 
-	return value
+	return value, exists
 }
 
 func (hc *HandlerConfig) GetOutputMapper() data.Mapper {
 	return hc.outputMapper
+}
+
+type TriggerActionInputGenerator struct {
+	handlerConfig  *HandlerConfig
+	triggerOutputs []*data.Attribute
+}
+
+func NewTriggerActionInputGenerator(metadata *Metadata, config *HandlerConfig, outputs map[string]interface{}) *TriggerActionInputGenerator {
+
+	outAttrs := metadata.Outputs
+
+	attrs := make([]*data.Attribute, 0, len(outAttrs))
+
+	for name, outAttr := range outAttrs {
+		value, exists := outputs[name]
+
+		if !exists {
+			value, exists = config.GetOutput(name)
+		}
+
+		//todo if complex_object, handle referenced metadata
+
+		if exists {
+			attrs = append(attrs, data.NewAttribute(name, outAttr.Type, value))
+		}
+	}
+
+	return &TriggerActionInputGenerator{handlerConfig: config, triggerOutputs: attrs}
+}
+
+func (ig *TriggerActionInputGenerator) GenerateInputs(inputMetadata []*data.Attribute) map[string]interface{} {
+
+	outputMapper := ig.handlerConfig.GetOutputMapper()
+	inScope := data.NewSimpleScope(ig.triggerOutputs, nil)
+	outScope := data.NewFixedScope(inputMetadata)
+
+	outputMapper.Apply(inScope, outScope)
+
+	attrs := outScope.GetAttrs()
+	inputs := make(map[string]interface{}, len(attrs))
+
+	for name, attr := range attrs {
+		inputs[name] = attr.Value
+	}
+
+	return inputs
 }
