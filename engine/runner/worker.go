@@ -94,7 +94,7 @@ func (w ActionWorker) Start() {
 
 					act := actionData.action
 
-					inputs := actionData.inputGenerator.GenerateInputs(GetActionOutputMetadata(act))
+					inputs := actionData.inputGenerator.GenerateInputs(action.GetConfigInputMetadata(act))
 
 					err := act.Run(actionData.context, inputs, actionData.options, handler)
 

@@ -1,11 +1,11 @@
 package runner
 
 import (
+	"context"
+
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"context"
-	"github.com/TIBCOSoftware/flogo-lib/core/action"
 )
 
 type OldTAInputGenerator struct {
@@ -29,17 +29,17 @@ func (ig *OldTAInputGenerator) GenerateInputs(inputMetadata map[string]*data.Att
 
 			for _, attr := range triggerAttrs {
 
-				logger.Debugf(" Attr:%s, Type:%s, Value:%v", attr.Name, attr.Type.String(), attr.Value)
+				logger.Debugf(" Attr: %s, Type: %s, Value: %v", attr.Name, attr.Type.String(), attr.Value)
 
 				// Keep Temporarily, for short term backwards compatibility
 				attrName1 := "{T." + attr.Name + "}"
-				attrs[attrName1] = attr.Value
+				attrs[attrName1] = data.NewAttribute(attrName1, attr.Type, attr.Value)
 
 				attrName2 := "{TriggerData." + attr.Name + "}"
-				attrs[attrName2] = attr.Value
+				attrs[attrName2] = data.NewAttribute(attrName2, attr.Type, attr.Value)
 
 				attrName3 := "${trigger." + attr.Name + "}"
-				attrs[attrName3] = attr.Value
+				attrs[attrName3] = data.NewAttribute(attrName3, attr.Type, attr.Value)
 			}
 		}
 
@@ -48,15 +48,3 @@ func (ig *OldTAInputGenerator) GenerateInputs(inputMetadata map[string]*data.Att
 
 	return nil
 }
-
-func GetActionOutputMetadata(act action.Action) map[string]*data.Attribute {
-
-	if act.Config() != nil {
-		if act.Config().Metadata != nil {
-			return act.Config().Metadata.Outputs
-		}
-	}
-
-	return nil
-}
-

@@ -58,7 +58,7 @@ func (runner *DirectRunner) RunAction(ctx context.Context, actionID string, inpu
 
 	handler := &SyncResultHandler{done: make(chan bool, 1)}
 
-	inputs := inputGenerator.GenerateInputs(GetActionOutputMetadata(act))
+	inputs := inputGenerator.GenerateInputs(action.GetConfigInputMetadata(act))
 
 	err = act.Run(ctx, inputs, options, handler)
 

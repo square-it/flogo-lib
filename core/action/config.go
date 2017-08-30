@@ -18,3 +18,15 @@ type ConfigMetadata struct {
 	Inputs  map[string]*data.Attribute `json:"inputs"`
 	Outputs map[string]*data.Attribute `json:"outputs"`
 }
+
+
+func GetConfigInputMetadata(act Action) map[string]*data.Attribute {
+
+	if act.Config() != nil {
+		if act.Config().Metadata != nil {
+			return act.Config().Metadata.Inputs
+		}
+	}
+
+	return nil
+}

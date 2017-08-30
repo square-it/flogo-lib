@@ -352,3 +352,30 @@ func (h *MapHelper) GetBool(data map[string]interface{}, key string) (bool, bool
 
 	return false, false
 }
+
+func (h *MapHelper) ToAttributes(data map[string]interface{}, metadata map[string]*Attribute, ignoreExtras bool) []*Attribute {
+
+	size := len(metadata)
+	if !ignoreExtras {
+		size = len(data)
+	}
+	attrs := make([]*Attribute, 0, size)
+
+	//todo do special handling for complex_object metadata (merge or ref it)
+	for key, value := range data {
+		mdAttr, exists := metadata[key]
+
+		if !exists {
+			if !ignoreExtras {
+				attrs = append(attrs,NewAttribute(key, ANY, value))
+			}
+		} else {
+			attrs = append(attrs,NewAttribute(key, mdAttr.Type, value))
+		}
+	}
+
+	return attrs
+}
+
+
+
