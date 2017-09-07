@@ -2,8 +2,6 @@ package trigger
 
 import (
 	"fmt"
-	"github.com/TIBCOSoftware/flogo-lib/core/data"
-	"github.com/TIBCOSoftware/flogo-lib/core/expr"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"sync"
 )

@@ -3,7 +3,6 @@ package activity
 import (
 	"sync"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
