@@ -212,6 +212,15 @@ func CoerceToParams(val interface{}) (map[string]string, error) {
 	switch t := val.(type) {
 	case map[string]string:
 		return t, nil
+	case string:
+		m := make(map[string]string)
+		if t != "" {
+			err := json.Unmarshal([]byte(t), &m)
+			if err != nil {
+				return nil, fmt.Errorf("Unable to coerce %#v to params", val)
+			}
+		}
+		return m, nil
 	case map[string]interface{}:
 
 		var m = make(map[string]string, len(t))

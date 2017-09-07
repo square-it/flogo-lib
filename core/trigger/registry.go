@@ -14,10 +14,6 @@ var (
 	reg        = &registry{}
 )
 
-func init() {
-	data.SetResolver(data.RES_TRIGGER, Resolve)
-}
-
 type Registry interface {
 	AddFactory(ref string, f Factory) error
 	GetFactories() map[string]Factory
@@ -28,20 +24,6 @@ type Registry interface {
 type registry struct {
 	factories map[string]Factory
 	instances map[string]*TriggerInstance
-}
-
-// Resolver resolves the trigger for a given scope and path
-type resolver struct {
-	scope data.Scope
-}
-
-func newResolver(scope data.Scope) expr.Resolver {
-	return &resolver{scope: scope}
-}
-
-func (r *resolver) Resolve(path string) (interface{}, bool) {
-	attrName, attrPath, pathType := data.GetAttrPath(path)
-	return data.GetAttrValue(attrName, attrPath, pathType, r.scope)
 }
 
 func GetRegistry() Registry {
@@ -199,9 +181,4 @@ func GetTriggerInstanceInfo() []TriggerInstanceInfo {
 		})
 	}
 	return list
-}
-
-// Resolve will resolve the activity for the given path
-func Resolve(scope data.Scope, path string) (interface{}, bool) {
-	return newResolver(scope).Resolve(path)
 }

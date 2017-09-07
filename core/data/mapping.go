@@ -19,10 +19,10 @@ type MappingDef struct {
 	//Type the mapping type
 	Type MappingType `json:"type"`
 
-	//Value the mapping value to execute to determine the result (lhs)
-	Value string `json:"value"`
+	//Value the mapping value to execute to determine the result (rhs)
+	Value interface{} `json:"value"`
 
-	//Result the name of attribute to place the result of the mapping in (rhs)
+	//Result the name of attribute to place the result of the mapping in (lhs)
 	MapTo string `json:"mapTo"`
 }
 

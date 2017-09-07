@@ -6,62 +6,162 @@ import (
 	"strconv"
 	"strings"
 	"github.com/TIBCOSoftware/flogo-lib/json"
+	"errors"
 )
 
 // PathType is the attribute value accessor path
 type PathType int
 
-// ResolverType is the type of the resolver for the attribute name
-type ResolverType int
-
 const (
-	RES_DEFAULT ResolverType = iota
-	RES_ENV
-	RES_PROPERTY
-	RES_ACTIVITY
-	RES_TRIGGER
-
 	PT_SIMPLE PathType = 1
 	PT_MAP    PathType = 2
 	PT_ARRAY  PathType = 3
 )
 
-var resolvers = make([]Resolver, 5, 5)
+func PathGetValue(value interface{}, path string) (interface{}, error) {
 
-type Resolver func(scope Scope, path string) (interface{}, bool)
-
-func GetResolverType(inAttrName string) (ResolverType, error) {
-	if strings.HasPrefix(inAttrName, "${") {
-		leftIdx := 2
-		fullExpr := inAttrName[leftIdx:]
-		if len(fullExpr) == 0 {
-			return 0, fmt.Errorf("Invalid mapping expression [%s].", inAttrName)
-		}
-		dotIdx := strings.Index(fullExpr, ".")
-		if dotIdx == -1 {
-			return 0, fmt.Errorf("Unsupported mapping expression, missing type [%s].", inAttrName)
-		}
-		expType := fullExpr[:dotIdx]
-		switch expType {
-		case "property", "env":
-			return RES_PROPERTY, nil
-		case "activity":
-			return RES_ACTIVITY, nil
-		case "trigger":
-			return RES_TRIGGER, nil
-		default:
-			return 0, fmt.Errorf("Unsupported mapping expression type [%s].", expType)
-		}
+	if path == "" {
+		return value, nil
 	}
-	return RES_DEFAULT, nil
+
+	var newVal interface{}
+	var err error
+	var newPath string
+
+	if strings.HasPrefix(path, ".") {
+		if objVal, ok := value.(map[string]interface{}); ok {
+			newVal, newPath, err = pathGetSetObjValue(objVal, path, nil, false)
+		} else if paramsVal, ok := value.(map[string]string); ok {
+			newVal, newPath, err = pathGetSetParamsValue(paramsVal, path, nil, false)
+		} else {
+			return nil, fmt.Errorf("Unable to evaluate path: %s", path)
+		}
+	} else if strings.HasPrefix(path, "[") {
+		newVal, newPath, err = pathGetSetArrayValue(value, path, nil, false)
+	} else {
+		return nil, fmt.Errorf("Unable to evaluate path: %s", path)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	return PathGetValue(newVal, newPath)
 }
 
-func SetResolver(rt ResolverType, resolver Resolver) {
-	resolvers[rt] = resolver
+func PathSetValue(attrValue interface{}, path string, value interface{}) error {
+	if path == "" || attrValue == nil {
+		return nil
+	}
+
+	var newVal interface{}
+	var err error
+	var newPath string
+
+	if strings.HasPrefix(path, ".") {
+
+		if objVal, ok := attrValue.(map[string]interface{}); ok {
+			newVal, newPath, err = pathGetSetObjValue(objVal, path, value, true)
+		} else if paramsVal, ok := attrValue.(map[string]string); ok {
+			newVal, newPath, err = pathGetSetParamsValue(paramsVal, path, value, true)
+		} else {
+			return fmt.Errorf("Unable to evaluate path: %s", path)
+		}
+	} else if strings.HasPrefix(path, "[") {
+		newVal, newPath, err = pathGetSetArrayValue(attrValue, path, value, true)
+	} else {
+		return fmt.Errorf("Unable to evaluate path: %s", path)
+	}
+
+	if err != nil {
+		return err
+	}
+	return PathSetValue(newVal, newPath, value)
 }
 
-func GetResolver(rt ResolverType) Resolver{
-	return resolvers[rt]
+func getMapKey(s string) (string, int) {
+	i := 0
+
+	for i < len(s) {
+
+		if s[i] == '.' || s[i] == '[' {
+			return s[:i], i + 1
+		}
+
+		i += 1
+	}
+
+	return s, len(s) + 1
+}
+
+func pathGetSetArrayValue(obj interface{}, path string, value interface{}, set bool) (interface{}, string, error) {
+
+	arrValue, valid := obj.([]interface{})
+	if !valid {
+		return nil, path, errors.New("'" + path + "' not an array")
+	}
+
+	closeIdx := strings.Index(path, "]")
+
+	if closeIdx == -1 {
+		return nil, path, errors.New("'" + path + "' not an array")
+	}
+
+	arrayIdx, err := strconv.Atoi(path[1:closeIdx])
+	if err != nil {
+		return nil, path, errors.New("Invalid array index: " + path[1:closeIdx])
+	}
+
+	if arrayIdx >= len(arrValue) {
+		return nil, path, errors.New("Array index '" + path + "' out of range.")
+	}
+
+	if set && closeIdx == len(path)-1 {
+		arrValue[arrayIdx] = value
+		return nil, "", nil
+	}
+
+	return arrValue[arrayIdx], path[closeIdx+1:], nil
+}
+
+func pathGetSetObjValue(objValue map[string]interface{}, path string, value interface{}, set bool) (interface{}, string, error) {
+
+	key, npIdx := getMapKey(path[1:])
+	if set && key == path[1:] {
+		//end of path so set the value
+		objValue[key] = value
+		return nil, "", nil
+	}
+
+	val, found := objValue[key]
+
+	if !found {
+		return nil, "", errors.New("Invalid path '" + path + "'. path not found.")
+	}
+
+	return val, path[npIdx:], nil
+}
+
+func pathGetSetParamsValue(params map[string]string, path string, value interface{}, set bool) (interface{}, string, error) {
+
+	key, _ := getMapKey(path[1:])
+	if set && key == path[1:] {
+		//end of path so set the value
+		paramVal, err := CoerceToString(value)
+
+		if err != nil {
+			return nil, "", err
+		}
+		params[key] = paramVal
+		return nil, "", nil
+	}
+
+	val, found := params[key]
+
+	if !found {
+		return nil, "", errors.New("Invalid path '" + path + "'. path not found.")
+	}
+
+	return val, "", nil
 }
 
 // GetAttrPath splits the supplied attribute with path to its name and object path
@@ -84,7 +184,7 @@ func GetAttrPath(inAttrName string) (attrName string, attrPath string, pathType 
 
 			if inAttrName[idx+1] == '[' {
 				pathType = PT_ARRAY
-				attrPath = inAttrName[idx+2 : nameLen-1]
+				attrPath = inAttrName[idx+2: nameLen-1]
 			} else {
 				pathType = PT_MAP
 				attrPath = inAttrName[idx+2:]
@@ -100,7 +200,7 @@ func GetAttrPath(inAttrName string) (attrName string, attrPath string, pathType 
 
 			if inAttrName[idx+1] == '[' {
 				pathType = PT_ARRAY
-				attrPath = inAttrName[idx+2 : nameLen-1]
+				attrPath = inAttrName[idx+2: nameLen-1]
 			} else {
 				pathType = PT_MAP
 				attrPath = inAttrName[idx+2:]
@@ -118,7 +218,7 @@ func GetAttrPath(inAttrName string) (attrName string, attrPath string, pathType 
 			} else {
 				pathType = PT_ARRAY
 				attrName = inAttrName[:idx]
-				attrPath = inAttrName[idx+1 : nameLen-1]
+				attrPath = inAttrName[idx+1: nameLen-1]
 			}
 		} else {
 			pathType = PT_MAP
@@ -149,7 +249,7 @@ func GetMapValue(valueMap map[string]interface{}, path string) interface{} {
 			switch tmpObj[arrayName].(type) {
 			case []interface{}:
 				//Array
-				arrayIdx, _ := strconv.Atoi(pc[bIdx+1 : len(pc)-1])
+				arrayIdx, _ := strconv.Atoi(pc[bIdx+1: len(pc)-1])
 				if arrayIdx >= len(tmpObj[arrayName].([]interface{})) {
 
 					//todo return error instead of panic
@@ -208,7 +308,7 @@ func GetAttrValue(attrName, attrPath string, pathType PathType, scope Scope) (in
 		} else if tv.Type == COMPLEX_OBJECT && pathType == PT_MAP {
 			// Parse complex object
 			co, err := CoerceToComplexObject(attrValue)
-			if err != nil{
+			if err != nil {
 				logger.Error(err)
 				return nil, false
 			}
@@ -231,19 +331,19 @@ func GetComplexObjectValue(attrValue *ComplexObject, attrPath string) (interface
 		return nil, false
 	}
 
-	if len(attrPath) == 0{
+	if len(attrPath) == 0 {
 		logger.Error(fmt.Errorf("Error trying to resolve complex object value, empty json path found"))
 		return nil, false
 	}
 
 	attrValueStr, ok := attrValue.Value.(string)
-	if !ok{
+	if !ok {
 		logger.Error(fmt.Errorf("Error trying to resolve complex object value, invalid mapping type '%T' for attribute '%+v'", attrValue.Value, attrValue.Value))
 		return nil, false
 	}
 
 	resValue, err := json.GetFieldValue(attrValueStr, attrPath)
-	if err != nil{
+	if err != nil {
 		logger.Error(err)
 		return nil, false
 	}
