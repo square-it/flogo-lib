@@ -60,12 +60,10 @@ func (e *EngineConfig) Init(directRunner bool, defaultLogLevel string) error {
 	if !e.initialized {
 		e.initialized = true
 
-		e.LogLevel = config.GetLogLevelWithDefault(defaultLogLevel)
-		level,err := logger.GetLevelForName(e.LogLevel)
-
-		if err == nil {
-			logger.SetLogLevel(level)
+		if defaultLogLevel != "" {
+			config.SetDefaultLogLevel(defaultLogLevel)
 		}
+		e.LogLevel = config.GetLogLevel()
 
 		if directRunner {
 			e.actionRunner = runner.NewDirect()
