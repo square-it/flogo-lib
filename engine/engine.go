@@ -18,16 +18,21 @@ import (
 
 // Interface for the engine behaviour
 type Engine interface {
-	Start()
-	Stop()
+	Init(directRunner bool) error
+	Start() error
+	Stop() error
 }
 
 // EngineConfig is the type for the Engine Configuration
 type EngineConfig struct {
 	App            *app.Config
+	initialized    bool
 	LogLevel       string
-	runner         action.Runner
+	actionRunner   action.Runner
 	serviceManager *util.ServiceManager
+
+	actions  map[string]action.Action
+	triggers map[string]*trigger.TriggerInstance
 }
 
 // New creates a new Engine
@@ -47,74 +52,86 @@ func New(app *app.Config) (Engine, error) {
 
 	logLevel := config.GetLogLevel()
 
-	runnerType := config.GetRunnerType()
+	return &EngineConfig{App: app, LogLevel: logLevel, serviceManager: util.GetDefaultServiceManager()}, nil
+}
 
-	var r action.Runner
-	// Todo document this values for engine configuration
-	if runnerType == "DIRECT" {
-		r = runner.NewDirect()
-	} else {
-		runnerConfig := defaultRunnerConfig()
-		r = runner.NewPooled(runnerConfig.Pooled)
+func (e *EngineConfig) Init(directRunner bool) error {
+
+	if !e.initialized {
+		e.initialized = true
+
+		if directRunner {
+			e.actionRunner = runner.NewDirect()
+		} else {
+			runnerConfig := defaultRunnerConfig()
+			e.actionRunner = runner.NewPooled(runnerConfig.Pooled)
+		}
+
+		// Initialize the properties
+		for id, value := range e.App.Properties {
+			property.Register(id, value)
+		}
+
+		instanceHelper := app.NewInstanceHelper(e.App, trigger.Factories(), action.Factories())
+
+		// Create the trigger instances
+		tInstances, err := instanceHelper.CreateTriggers()
+		if err != nil {
+			errorMsg := fmt.Sprintf("Engine: Error Creating trigger instances - %s", err.Error())
+			logger.Error(errorMsg)
+			panic(errorMsg)
+		}
+
+		// Initialize and register the triggers
+		for key, value := range tInstances {
+			triggerInterface := value.Interf
+
+			//Init
+			triggerInterface.Init(e.actionRunner)
+			//Register
+			trigger.RegisterInstance(key, value)
+		}
+
+		e.triggers = tInstances
+
+		// Create the action instances
+		actions, err := instanceHelper.CreateActions()
+		if err != nil {
+			errorMsg := fmt.Sprintf("Engine: Error Creating action instances - %s", err.Error())
+			logger.Error(errorMsg)
+			panic(errorMsg)
+		}
+
+		// Initialize and register the actions,
+		for key, value := range actions {
+			action.Register(key, value)
+			//do we need an init?
+		}
+
+		e.actions = actions
 	}
 
-	return &EngineConfig{App: app, LogLevel: logLevel, runner: r, serviceManager: util.GetDefaultServiceManager()}, nil
+	return nil
 }
 
 //Start initializes and starts the Triggers and initializes the Actions
-func (e *EngineConfig) Start() {
+func (e *EngineConfig) Start() error {
 	logger.Info("Engine: Starting...")
 
-	// Initialize the properties
-	for id, value := range e.App.Properties {
-		property.Register(id, value)
-	}
+	runnerType := config.GetRunnerType()
 
-	instanceHelper := app.NewInstanceHelper(e.App, trigger.Factories(), action.Factories())
+	// Todo document RunnerType for engine configuration
+	e.Init(runnerType == "DIRECT")
 
-	// Create the trigger instances
-	tInstances, err := instanceHelper.CreateTriggers()
-	if err != nil {
-		errorMsg := fmt.Sprintf("Engine: Error Creating trigger instances - %s", err.Error())
-		logger.Error(errorMsg)
-		panic(errorMsg)
-	}
+	actionRunner := e.actionRunner.(interface{})
 
-	// Initialize and register the triggers
-	for key, value := range tInstances {
-		triggerInterface := value.Interf
-
-		//Init
-		triggerInterface.Init(e.runner)
-		//Register
-		trigger.RegisterInstance(key, value)
-	}
-
-	// Create the action instances
-	actions, err := instanceHelper.CreateActions()
-	if err != nil {
-		errorMsg := fmt.Sprintf("Engine: Error Creating action instances - %s", err.Error())
-		logger.Error(errorMsg)
-		panic(errorMsg)
-	}
-
-	// Initialize and register the actions,
-	for key, value := range actions {
-
-		action.Register(key, value)
-		//do we need an init? or start
-	}
-
-	runner := e.runner.(interface{})
-	managedRunner, ok := runner.(util.Managed)
-
-	if ok {
+	if managedRunner, ok := actionRunner.(util.Managed); ok {
 		util.StartManaged("ActionRunner Service", managedRunner)
 	}
 
 	logger.Info("Engine: Starting Services...")
 
-	err = e.serviceManager.Start()
+	err := e.serviceManager.Start()
 
 	if err != nil {
 		logger.Error("Engine: Error Starting Services - " + err.Error())
@@ -123,7 +140,7 @@ func (e *EngineConfig) Start() {
 	}
 
 	// Start the triggers
-	for key, value := range tInstances {
+	for key, value := range e.triggers {
 		err := util.StartManaged(fmt.Sprintf("Trigger [ '%s' ]", key), value.Interf)
 		if err != nil {
 			logger.Infof("Trigger [%s] failed to start due to error [%s]", key, err.Error())
@@ -142,9 +159,10 @@ func (e *EngineConfig) Start() {
 	}
 
 	logger.Info("Engine: Started")
+	return nil
 }
 
-func (e *EngineConfig) Stop() {
+func (e *EngineConfig) Stop() error {
 	logger.Info("Engine: Stopping...")
 
 	// Stop Triggers
@@ -165,10 +183,9 @@ func (e *EngineConfig) Stop() {
 		util.StopManaged("Trigger [ "+tConfig.Id+" ]", tInterf)
 	}
 
-	runner := e.runner.(interface{})
-	managedRunner, ok := runner.(util.Managed)
+	actionRunner := e.actionRunner.(interface{})
 
-	if ok {
+	if managedRunner, ok := actionRunner.(util.Managed); ok {
 		util.StopManaged("ActionRunner", managedRunner)
 	}
 
@@ -184,4 +201,5 @@ func (e *EngineConfig) Stop() {
 	}
 
 	logger.Info("Engine: Stopped")
+	return nil
 }
