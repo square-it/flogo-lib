@@ -75,6 +75,18 @@ func GetLogLevel() string {
 	return LOG_LEVEL_DEFAULT
 }
 
+//GetLogLevelWithDefault returns the log level, with an optional alternative default
+func GetLogLevelWithDefault(defaultLogLevel string) string {
+	logLevelEnv := os.Getenv(LOG_LEVEL_KEY)
+	if len(logLevelEnv) > 0 {
+		return logLevelEnv
+	}
+	if len(defaultLogLevel) > 0 {
+		return defaultLogLevel
+	}
+	return LOG_LEVEL_DEFAULT
+}
+
 func GetLogDateTimeFormat() string {
 	logLevelEnv := os.Getenv(LOG_DATE_FORMAT_KEY)
 	if len(logLevelEnv) > 0 {
