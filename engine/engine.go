@@ -18,7 +18,7 @@ import (
 
 // Interface for the engine behaviour
 type Engine interface {
-	Init(directRunner bool, defaultLogLevel string) error
+	Init(directRunner bool) error
 	Start() error
 	Stop() error
 }
@@ -50,20 +50,15 @@ func New(app *app.Config) (Engine, error) {
 		return nil, errors.New("Error: No App version provided")
 	}
 
-	//logLevel := config.GetLogLevel()
+	logLevel := config.GetLogLevel()
 
-	return &EngineConfig{App: app, serviceManager: util.GetDefaultServiceManager()}, nil
+	return &EngineConfig{App: app, serviceManager: util.GetDefaultServiceManager(), LogLevel:logLevel}, nil
 }
 
-func (e *EngineConfig) Init(directRunner bool, defaultLogLevel string) error {
+func (e *EngineConfig) Init(directRunner bool) error {
 
 	if !e.initialized {
 		e.initialized = true
-
-		if defaultLogLevel != "" {
-			config.SetDefaultLogLevel(defaultLogLevel)
-		}
-		e.LogLevel = config.GetLogLevel()
 
 		if directRunner {
 			e.actionRunner = runner.NewDirect()
@@ -123,10 +118,9 @@ func (e *EngineConfig) Init(directRunner bool, defaultLogLevel string) error {
 func (e *EngineConfig) Start() error {
 	logger.Info("Engine: Starting...")
 
-	runnerType := config.GetRunnerType()
-
 	// Todo document RunnerType for engine configuration
-	e.Init(runnerType == "DIRECT", "")
+	runnerType := config.GetRunnerType()
+	e.Init(runnerType == "DIRECT")
 
 	actionRunner := e.actionRunner.(interface{})
 
