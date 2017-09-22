@@ -50,7 +50,9 @@ func (e *lookupExpr) Eval(scope data.Scope) (interface{}, error) {
 		//data.RES_TRIGGER
 		//data.RES_SCOPE
 		resolve := data.GetResolver(resType)
-		value, exists = resolve(scope, attrName)
+		if resolve != nil {
+			value, exists = resolve(scope, attrName)
+		}
 		if !exists {
 			err := fmt.Errorf("Could not resolve '%s' in the current scope", e.rep)
 			logger.Error(err.Error())
@@ -69,41 +71,34 @@ func (e *lookupExpr) Eval(scope data.Scope) (interface{}, error) {
 	return value, nil
 }
 
-func NewAssignExpr(exprRep string, value interface{}) data.Expr {
-	return &assignExpr{rep: exprRep, value:value}
+func NewAssignExpr(assignTo string, value interface{}) data.Expr {
+
+	attrName, attrPath, _ := data.PathDeconstruct(assignTo)
+	return &assignExpr{assignAttrName: attrName, assignAttrPath: attrPath, value:value}
 }
 
 type assignExpr struct {
-	rep string
-	value interface{}
+	assignAttrName string
+	assignAttrPath string
+	value    interface{}
 }
 
 func (e *assignExpr) Eval(scope data.Scope) (interface{}, error) {
 
-	resType, attrName, path, err := data.GetResolutionInfo(e.rep)
+	var err error
 
-	if err != nil {
-		return nil, err
-	}
-
-	if resType == data.RES_DEFAULT {
-		fmt.Printf("AttrName: %s, Path: %s\n", attrName, path)
-	} else if resType != data.RES_SCOPE {
-		return nil, fmt.Errorf("Cannot assign to: %s\n", e.rep)
-	}
-
-	if path == "" {
+	if e.assignAttrPath == "" {
 		//simple assignment
-		err = scope.SetAttrValue(attrName, e.value)
+		err = scope.SetAttrValue(e.assignAttrName, e.value)
 		return nil, err
 	}
 
-	attr, exists := scope.GetAttr(attrName)
+	attr, exists := scope.GetAttr(e.assignAttrName)
 
 	if !exists {
-		return nil, fmt.Errorf("Attribute '%s' does not exists\n", attrName)
+		return nil, fmt.Errorf("Attribute '%s' does not exists\n", e.assignAttrName)
 	}
 
-	err = data.PathSetValue(attr.Value, path, e.value)
+	err = data.PathSetValue(attr.Value, e.assignAttrPath, e.value)
 	return nil, err
 }

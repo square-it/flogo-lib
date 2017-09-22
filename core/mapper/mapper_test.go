@@ -10,18 +10,12 @@ func TestLiteralMapper(t *testing.T) {
 
 	factory := GetFactory()
 
-	mapping1 := &data.MappingDef{Type: data.MtLiteral, Value: "1", MapTo: "${Simple}"}
-	mapping2 := &data.MappingDef{Type: data.MtLiteral, Value: 2, MapTo: "${Obj}.key"}
-	mapping3 := &data.MappingDef{Type: data.MtLiteral, Value: 3, MapTo: "${Array}[2]"}
-	mapping4 := &data.MappingDef{Type: data.MtLiteral, Value: "4", MapTo: "${Params}.paramKey"}
+	mapping1 := &data.MappingDef{Type: data.MtLiteral, Value: "1", MapTo: "Simple"}
+	mapping2 := &data.MappingDef{Type: data.MtLiteral, Value: 2, MapTo: "Obj.key"}
+	mapping3 := &data.MappingDef{Type: data.MtLiteral, Value: 3, MapTo: "Array[2]"}
+	mapping4 := &data.MappingDef{Type: data.MtLiteral, Value: "4", MapTo: "Params.paramKey"}
 
-	mapping5 := &data.MappingDef{Type: data.MtLiteral, Value: "1", MapTo: "Simple2"}
-	mapping6 := &data.MappingDef{Type: data.MtLiteral, Value: 2, MapTo: "Obj2.key"}
-	mapping7 := &data.MappingDef{Type: data.MtLiteral, Value: 3, MapTo: "Array2[2]"}
-	mapping8 := &data.MappingDef{Type: data.MtLiteral, Value: "4", MapTo: "Params2.paramKey"}
-
-	mappings := []*data.MappingDef{mapping1, mapping2, mapping3, mapping4,
-		mapping5, mapping6, mapping7, mapping8}
+	mappings := []*data.MappingDef{mapping1, mapping2, mapping3, mapping4}
 
 	mapper := factory.NewMapper(&data.MapperDef{Mappings: mappings})
 
@@ -30,12 +24,7 @@ func TestLiteralMapper(t *testing.T) {
 	attr3 := &data.Attribute{Name: "Array", Type: data.ARRAY}
 	attr4 := &data.Attribute{Name: "Params", Type: data.PARAMS}
 
-	attr5 := &data.Attribute{Name: "Simple2", Type: data.INTEGER}
-	attr6 := &data.Attribute{Name: "Obj2", Type: data.OBJECT}
-	attr7 := &data.Attribute{Name: "Array2", Type: data.ARRAY}
-	attr8 := &data.Attribute{Name: "Params2", Type: data.PARAMS}
-
-	md := []*data.Attribute{attr1, attr2, attr3, attr4, attr5, attr6, attr7, attr8}
+	md := []*data.Attribute{attr1, attr2, attr3, attr4}
 	outScope := data.NewFixedScope(md)
 
 	objVal, _ := data.CoerceToObject("{\"key1\":5}")
@@ -80,10 +69,10 @@ func TestAssignMapper(t *testing.T) {
 
 	factory := GetFactory()
 
-	mapping1 := &data.MappingDef{Type: data.MtAssign, Value: "${SimpleI}", MapTo: "${SimpleO}"}
-	mapping2 := &data.MappingDef{Type: data.MtAssign, Value: "${ObjI}.key", MapTo: "${ObjO}.key"}
-	mapping3 := &data.MappingDef{Type: data.MtAssign, Value: "${ArrayI}[2]", MapTo: "${ArrayO}[2]"}
-	mapping4 := &data.MappingDef{Type: data.MtAssign, Value: "${ParamsI}.paramKey", MapTo: "${ParamsO}.paramKey"}
+	mapping1 := &data.MappingDef{Type: data.MtAssign, Value: "${SimpleI}", MapTo: "SimpleO"}
+	mapping2 := &data.MappingDef{Type: data.MtAssign, Value: "${ObjI}.key", MapTo: "ObjO.key"}
+	mapping3 := &data.MappingDef{Type: data.MtAssign, Value: "${ArrayI}[2]", MapTo: "ArrayO[2]"}
+	mapping4 := &data.MappingDef{Type: data.MtAssign, Value: "${ParamsI}.paramKey", MapTo: "ParamsO.paramKey"}
 
 	mappings := []*data.MappingDef{mapping1, mapping2, mapping3, mapping4}
 
