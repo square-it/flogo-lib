@@ -11,16 +11,23 @@ type Config struct {
 	Id       string                 `json:"id"`
 	Ref      string                 `json:"ref"`
 	Settings map[string]interface{} `json:"settings"`
-	Outputs  map[string]interface{} `json:"outputs"`
+	Output   map[string]interface{} `json:"output"`
 	Handlers []*HandlerConfig       `json:"handlers"`
+	//for backwards compatibility
+	Outputs  map[string]interface{} `json:"outputs"`
 }
 
 func (c *Config) FixUp(metadata *Metadata) {
 
-	// fix up top-level outputs
-	for name, value := range c.Outputs {
+	//for backwards compatibility
+	if len(c.Output) == 0 {
+		c.Output = c.Outputs
+	}
 
-		attr, ok := metadata.Outputs[name]
+	// fix up top-level outputs
+	for name, value := range c.Output {
+
+		attr, ok := metadata.Output[name]
 
 		if ok {
 			newValue, err := data.CoerceToValue(value, attr.Type)
@@ -28,7 +35,7 @@ func (c *Config) FixUp(metadata *Metadata) {
 			if err != nil {
 				//todo handle error
 			} else {
-				c.Outputs[name] = newValue
+				c.Output[name] = newValue
 			}
 		}
 	}
@@ -38,10 +45,15 @@ func (c *Config) FixUp(metadata *Metadata) {
 
 		hc.parent = c
 
-		// fix up outputs
-		for name, value := range hc.Outputs {
+		//for backwards compatibility
+		if len(hc.Output) == 0 {
+			hc.Output = hc.Outputs
+		}
 
-			attr, ok := metadata.Outputs[name]
+		// fix up outputs
+		for name, value := range hc.Output {
+
+			attr, ok := metadata.Output[name]
 
 			if ok {
 				newValue, err := data.CoerceToValue(value, attr.Type)
@@ -49,7 +61,7 @@ func (c *Config) FixUp(metadata *Metadata) {
 				if err != nil {
 					//todo handle error
 				} else {
-					hc.Outputs[name] = newValue
+					hc.Output[name] = newValue
 				}
 			}
 		}
@@ -70,10 +82,15 @@ type HandlerConfig struct {
 	parent   *Config
 	ActionId string                 `json:"actionId"`
 	Settings map[string]interface{} `json:"settings"`
-	Outputs  map[string]interface{} `json:"outputs"`
+	Output   map[string]interface{} `json:"output"`
 
 	OutputMappings []*data.MappingDef `json:"outputMappings,omitempty"`
 	outputMapper   data.Mapper
+	ReplyMappings []*data.MappingDef `json:"replyMappings,omitempty"`
+	replyMapper   data.Mapper
+
+	//for backwards compatibility
+	Outputs  map[string]interface{} `json:"outputs"`
 }
 
 func (hc *HandlerConfig) GetSetting(setting string) string {
@@ -82,10 +99,10 @@ func (hc *HandlerConfig) GetSetting(setting string) string {
 
 func (hc *HandlerConfig) GetOutput(name string) (interface{}, bool) {
 
-	value, exists := hc.Outputs[name]
+	value, exists := hc.Output[name]
 
 	if !exists {
-		value, exists = hc.parent.Outputs[name]
+		value, exists = hc.parent.Output[name]
 	}
 
 	return value, exists
@@ -102,7 +119,7 @@ type TriggerActionInputGenerator struct {
 
 func NewTriggerActionInputGenerator(metadata *Metadata, config *HandlerConfig, outputs map[string]interface{}) *TriggerActionInputGenerator {
 
-	outAttrs := metadata.Outputs
+	outAttrs := metadata.Output
 
 	attrs := make([]*data.Attribute, 0, len(outAttrs))
 

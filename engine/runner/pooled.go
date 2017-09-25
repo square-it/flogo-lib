@@ -98,13 +98,16 @@ func (runner *PooledRunner) Run(ctx context.Context, act action.Action, uri stri
 
 	newOptions := make(map[string]interface{})
 	newOptions["deprecated_options"] = options
-	code, ndata, err := runner.RunAction(ctx, uri, NewOldTAInputGenerator(ctx), newOptions )
+	ndata, err := runner.RunAction(ctx, uri, NewOldTAInputGenerator(ctx), newOptions )
 
 	if len(ndata) != 0 {
 		defData, ok := ndata["default"]
-
 		if ok {
 			data = defData
+		}
+		defCode, ok := ndata["code"]
+		if ok {
+			code = defCode.(int)
 		}
 	}
 
@@ -112,12 +115,12 @@ func (runner *PooledRunner) Run(ctx context.Context, act action.Action, uri stri
 }
 
 // Run implements action.Runner.Run
-func (runner *PooledRunner) RunAction(ctx context.Context, actionID string, inputGenerator action.InputGenerator, options map[string]interface{}) (code int, data map[string]interface{}, err error) {
+func (runner *PooledRunner) RunAction(ctx context.Context, actionID string, inputGenerator action.InputGenerator, options map[string]interface{}) (results map[string]interface{}, err error) {
 
 	act := action.Get(actionID)
 
 	if act == nil {
-		return 0, nil, errors.New("Action not found")
+		return nil, errors.New("Action not found")
 	}
 
 	if runner.active {
@@ -131,9 +134,9 @@ func (runner *PooledRunner) RunAction(ctx context.Context, actionID string, inpu
 		reply := <-data.arc
 		logger.Debugf("Run Action '%s' complete", actionID)
 
-		return reply.code, reply.data, reply.err
+		return reply.results, reply.err
 	}
 
 	//Run rejected
-	return 0, nil, errors.New("Runner not active")
+	return nil, errors.New("Runner not active")
 }

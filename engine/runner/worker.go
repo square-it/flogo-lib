@@ -36,9 +36,8 @@ type ActionData struct {
 
 // ActionResult is a simple struct to hold the results for an Action
 type ActionResult struct {
-	code int
-	data map[string]interface{}
-	err  error
+	results map[string]interface{}
+	err     error
 }
 
 // A ActionWorker handles WorkRequest, work requests consist of start, restart
@@ -148,9 +147,9 @@ type AsyncResultHandler struct {
 }
 
 // HandleResult implements action.ResultHandler.HandleResult
-func (rh *AsyncResultHandler) HandleResult(code int, data map[string]interface{}, err error) {
+func (rh *AsyncResultHandler) HandleResult(results map[string]interface{}, err error) {
 	rh.replied = true
-	rh.result <- &ActionResult{code: code, data: data, err: err}
+	rh.result <- &ActionResult{results: results, err: err}
 }
 
 // Done implements action.ResultHandler.Done

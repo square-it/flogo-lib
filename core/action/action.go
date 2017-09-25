@@ -28,7 +28,7 @@ type Runner interface {
 	Run(context context.Context, action Action, uri string, options interface{}) (code int, data interface{}, err error)
 
 	//Run the specified Action
-	RunAction(context context.Context, actionID string, inputGenerator InputGenerator, options map[string]interface{}) (code int, data map[string]interface{}, err error)
+	RunAction(context context.Context, actionID string, inputGenerator InputGenerator, options map[string]interface{}) (results map[string]interface{}, err error)
 }
 
 //TODO REVIEW - Need a way to package the output of the trigger, its metadata, and the corresponding mapper
@@ -39,7 +39,8 @@ type InputGenerator interface {
 
 // ResultHandler used to handle results from the Action
 type ResultHandler interface {
-	HandleResult(code int, data map[string]interface{}, err error)
+
+	HandleResult(results map[string]interface{}, err error)
 
 	Done()
 }

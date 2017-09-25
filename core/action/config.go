@@ -15,16 +15,26 @@ type Config struct {
 
 // Metadata is the configuration metadata for the Action
 type ConfigMetadata struct {
-	Inputs  map[string]*data.Attribute `json:"inputs"`
-	Outputs map[string]*data.Attribute `json:"outputs"`
+	Input  map[string]*data.Attribute `json:"input"`
+	Output map[string]*data.Attribute `json:"output"`
 }
-
 
 func GetConfigInputMetadata(act Action) map[string]*data.Attribute {
 
 	if act.Config() != nil {
 		if act.Config().Metadata != nil {
-			return act.Config().Metadata.Inputs
+			return act.Config().Metadata.Input
+		}
+	}
+
+	return nil
+}
+
+func GetConfigOutputMetadata(act Action) map[string]*data.Attribute {
+
+	if act.Config() != nil {
+		if act.Config().Metadata != nil {
+			return act.Config().Metadata.Output
 		}
 	}
 

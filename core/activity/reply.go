@@ -4,5 +4,5 @@ package activity
 type ReplyHandler interface {
 
 	// Reply is used to reply with the results of the instance execution
-	Reply(replyCode int, replyData map[string]interface{}, err error)
+	Reply(replyData map[string]interface{}, err error)
 }

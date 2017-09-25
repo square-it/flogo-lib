@@ -9,8 +9,8 @@ import (
 // Metadata is the metadata for the Activity
 type Metadata struct {
 	ID      string
-	Inputs  map[string]*data.Attribute
-	Outputs map[string]*data.Attribute
+	Input   map[string]*data.Attribute
+	Output  map[string]*data.Attribute
 }
 
 // NewMetadata creates the metadata object from its json representation
@@ -24,39 +24,15 @@ func NewMetadata(jsonMetadata string) *Metadata {
 	return md
 }
 
-// MarshalJSON overrides the default MarshalJSON for TaskEnv
-func (md *Metadata) MarshalJSON() ([]byte, error) {
-
-	inputs := make([]*data.Attribute, 0, len(md.Inputs))
-
-	for _, value := range md.Inputs {
-		inputs = append(inputs, value)
-	}
-
-	outputs := make([]*data.Attribute, 0, len(md.Outputs))
-
-	for _, value := range md.Outputs {
-		outputs = append(outputs, value)
-	}
-
-	return json.Marshal(&struct {
-		Name    string            `json:"name"`
-		Ref     string            `json:"ref"`
-		Inputs  []*data.Attribute `json:"inputs"`
-		Outputs []*data.Attribute `json:"outputs"`
-	}{
-		Name:    md.ID,
-		Inputs:  inputs,
-		Outputs: outputs,
-	})
-}
-
 // UnmarshalJSON overrides the default UnmarshalJSON for TaskEnv
 func (md *Metadata) UnmarshalJSON(b []byte) error {
 
 	ser := &struct {
 		Name    string            `json:"name"`
 		Ref     string            `json:"ref"`
+		Input   []*data.Attribute `json:"input"`
+		Output  []*data.Attribute `json:"output"`
+		//for backwards compatibility
 		Inputs  []*data.Attribute `json:"inputs"`
 		Outputs []*data.Attribute `json:"outputs"`
 	}{}
@@ -73,15 +49,29 @@ func (md *Metadata) UnmarshalJSON(b []byte) error {
 		md.ID = ser.Name
 	}
 
-	md.Inputs = make(map[string]*data.Attribute, len(ser.Inputs))
-	md.Outputs = make(map[string]*data.Attribute, len(ser.Outputs))
+	md.Input = make(map[string]*data.Attribute, len(ser.Inputs))
+	md.Output = make(map[string]*data.Attribute, len(ser.Outputs))
 
-	for _, attr := range ser.Inputs {
-		md.Inputs[attr.Name] = attr
+	if len(ser.Input) > 0 {
+		for _, attr := range ser.Input {
+			md.Input[attr.Name] = attr
+		}
+	} else {
+		// for backwards compatibility
+		for _, attr := range ser.Inputs {
+			md.Input[attr.Name] = attr
+		}
 	}
 
-	for _, attr := range ser.Outputs {
-		md.Outputs[attr.Name] = attr
+	if len(ser.Output) > 0 {
+		for _, attr := range ser.Output {
+			md.Output[attr.Name] = attr
+		}
+	} else {
+		// for backwards compatibility
+		for _, attr := range ser.Outputs {
+			md.Output[attr.Name] = attr
+		}
 	}
 
 	return nil
