@@ -77,7 +77,7 @@ func (md *Metadata) UnmarshalJSON(b []byte) error {
 	}
 
 	if len(ser.Output) > 0 {
-		for _, attr := range ser.Outputs {
+		for _, attr := range ser.Output {
 			md.Output[attr.Name] = attr
 		}
 	} else {

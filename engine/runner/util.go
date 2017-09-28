@@ -34,16 +34,18 @@ func (ig *OldTAInputGenerator) GenerateInputs(inputMetadata map[string]*data.Att
 			for _, attr := range triggerAttrs {
 
 				logger.Debugf(" Attr: %s, Type: %s, Value: %v", attr.Name, attr.Type.String(), attr.Value)
+				attrName := "_T." + attr.Name
 
-				// Keep Temporarily, for short term backwards compatibility
-				attrName1 := "{T." + attr.Name + "}"
-				attrs[attrName1] = data.NewAttribute(attrName1, attr.Type, attr.Value)
+				attrs[attrName] = data.NewAttribute(attrName, attr.Type, attr.Value)
 
-				attrName2 := "{TriggerData." + attr.Name + "}"
-				attrs[attrName2] = data.NewAttribute(attrName2, attr.Type, attr.Value)
-
-				attrName3 := "${trigger." + attr.Name + "}"
-				attrs[attrName3] = data.NewAttribute(attrName3, attr.Type, attr.Value)
+				//// Keep Temporarily, for short ttterm backwards compatibility
+				//attrName1 := "{T." + attr.Name + "}"
+				//
+				//attrName2 := "{TriggerData." + attr.Name + "}"
+				//attrs[attrName2] = data.NewAttribute(attrName2, attr.Type, attr.Value)
+				//
+				//attrName3 := "${trigger." + attr.Name + "}"
+				//attrs[attrName3] = data.NewAttribute(attrName3, attr.Type, attr.Value)
 			}
 		}
 
