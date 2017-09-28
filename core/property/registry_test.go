@@ -33,12 +33,41 @@ func TestRegisterDuplicate(t *testing.T) {
 
 // TestDefaultResolverOk resolves environment and property value
 func TestDefaultResolverOk(t *testing.T) {
-	os.Setenv("TEST_FLOGO2", "my_test_value2")
-	defer os.Unsetenv("TEST_FLOGO2")
+
 	Register("id_test", "a value")
 
-	value, _ := Resolve("${property.id_test}")
+	value, _ := Resolve("id_test")
 	assert.Equal(t, "a value", value)
-	value, _ = Resolve("${env.TEST_FLOGO2}")
+}
+
+func TestPropertyResolution(t *testing.T) {
+	Register("id_test", "a value")
+
+	value, set := ResolveProperty(nil, "id_test")
+	assert.True(t, set)
+	assert.Equal(t, "a value", value)
+}
+
+func TestPropertyResolutionNotSet(t *testing.T) {
+	Register("id_test", "a value")
+
+	_, set := ResolveEnv(nil, "id_test_NS")
+	assert.False(t, set)
+}
+
+func TestEnvResolution(t *testing.T) {
+	os.Setenv("TEST_FLOGO2", "my_test_value2")
+	defer os.Unsetenv("TEST_FLOGO2")
+
+	value, set := ResolveEnv(nil, "TEST_FLOGO2")
+	assert.True(t, set)
 	assert.Equal(t, "my_test_value2", value)
+}
+
+func TestEnvResolutionNotSet(t *testing.T) {
+	os.Setenv("TEST_FLOGO2", "my_test_value2")
+	defer os.Unsetenv("TEST_FLOGO2")
+
+	_, set := ResolveEnv(nil, "TEST_FLOGO_NS")
+	assert.False(t, set)
 }
