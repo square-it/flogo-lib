@@ -1,4 +1,4 @@
-package activity
+package action
 
 import (
 	"encoding/json"
@@ -9,8 +9,7 @@ import (
 // Metadata is the metadata for the Activity
 type Metadata struct {
 	ID      string
-	Input   map[string]*data.Attribute
-	Output  map[string]*data.Attribute
+	Options map[string]*data.Attribute
 }
 
 // NewMetadata creates the metadata object from its json representation
@@ -24,17 +23,32 @@ func NewMetadata(jsonMetadata string) *Metadata {
 	return md
 }
 
+// MarshalJSON overrides the default MarshalJSON for TaskEnv
+func (md *Metadata) MarshalJSON() ([]byte, error) {
+
+	options := make([]*data.Attribute, 0, len(md.Options))
+
+	for _, value := range md.Options {
+		options = append(options, value)
+	}
+
+	return json.Marshal(&struct {
+		Name    string            `json:"name"`
+		Ref     string            `json:"ref"`
+		Options []*data.Attribute `json:"options"`
+	}{
+		Name:    md.ID,
+		Options: options,
+	})
+}
+
 // UnmarshalJSON overrides the default UnmarshalJSON for TaskEnv
 func (md *Metadata) UnmarshalJSON(b []byte) error {
 
 	ser := &struct {
 		Name    string            `json:"name"`
 		Ref     string            `json:"ref"`
-		Input   []*data.Attribute `json:"input"`
-		Output  []*data.Attribute `json:"output"`
-		//for backwards compatibility
-		Inputs  []*data.Attribute `json:"inputs"`
-		Outputs []*data.Attribute `json:"outputs"`
+		Options []*data.Attribute `json:"options"`
 	}{}
 
 	if err := json.Unmarshal(b, ser); err != nil {
@@ -49,29 +63,10 @@ func (md *Metadata) UnmarshalJSON(b []byte) error {
 		md.ID = ser.Name
 	}
 
-	md.Input = make(map[string]*data.Attribute, len(ser.Inputs))
-	md.Output = make(map[string]*data.Attribute, len(ser.Outputs))
+	md.Options = make(map[string]*data.Attribute, len(ser.Options))
 
-	if len(ser.Input) > 0 {
-		for _, attr := range ser.Input {
-			md.Input[attr.Name] = attr
-		}
-	} else {
-		// for backwards compatibility
-		for _, attr := range ser.Inputs {
-			md.Input[attr.Name] = attr
-		}
-	}
-
-	if len(ser.Output) > 0 {
-		for _, attr := range ser.Output {
-			md.Output[attr.Name] = attr
-		}
-	} else {
-		// for backwards compatibility
-		for _, attr := range ser.Outputs {
-			md.Output[attr.Name] = attr
-		}
+	for _, attr := range ser.Options {
+		md.Options[attr.Name] = attr
 	}
 
 	return nil

@@ -8,14 +8,23 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
 type MockFullAction struct {
 	mock.Mock
 }
 
-func (m *MockFullAction) Run(context context.Context, uri string, options interface{}, handler action.ResultHandler) error {
-	args := m.Called(context, uri, options, handler)
+func (m *MockFullAction) Config() *action.Config {
+	return nil
+}
+
+func (m *MockFullAction) Metadata() *action.Metadata {
+	return nil
+}
+
+func (m *MockFullAction) Run(context context.Context, inputs map[string]interface{}, options map[string]interface{}, handler action.ResultHandler) error {
+	args := m.Called(context, inputs, options, handler)
 	return args.Error(0)
 }
 
@@ -24,10 +33,20 @@ type MockResultAction struct {
 	mock.Mock
 }
 
-func (m *MockResultAction) Run(context context.Context, uri string, options interface{}, handler action.ResultHandler) error {
-	args := m.Called(context, uri, options, handler)
+func (m *MockResultAction) Config() *action.Config {
+	return nil
+}
+
+func (m *MockResultAction) Metadata() *action.Metadata {
+	return nil
+}
+
+func (m *MockResultAction) Run(context context.Context, inputs map[string]interface{}, options map[string]interface{}, handler action.ResultHandler) error {
+	args := m.Called(context, inputs, options, handler)
 	go func() {
-		handler.HandleResult(0, "mock", nil)
+		resultData, _ := data.CoerceToObject("{\"data\":\"mock\"}")
+		resultData["code"] = 200
+		handler.HandleResult(resultData, nil)
 		handler.Done()
 	}()
 	return args.Error(0)
@@ -84,7 +103,7 @@ func TestRunErrorInAction(t *testing.T) {
 	err := runner.Start()
 	assert.Nil(t, err)
 	a := new(MockFullAction)
-	a.On("Run", nil, mock.AnythingOfType("string"), nil, mock.AnythingOfType("*runner.AsyncResultHandler")).Return(errors.New("Error in action"))
+	a.On("Run", nil,  mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("*runner.AsyncResultHandler")).Return(errors.New("Error in action"))
 	_, _, err = runner.Run(nil, a, "mockAction", nil)
 	assert.NotNil(t, err)
 	assert.Equal(t, "Error in action", err.Error())
@@ -98,10 +117,10 @@ func TestRunOk(t *testing.T) {
 	err := runner.Start()
 	assert.Nil(t, err)
 	a := new(MockResultAction)
-	a.On("Run", nil, mock.AnythingOfType("string"), nil, mock.AnythingOfType("*runner.AsyncResultHandler")).Return(nil)
+	a.On("Run", nil,  mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("*runner.AsyncResultHandler")).Return(nil)
 	code, data, err := runner.Run(nil, a, "mockAction", nil)
 	assert.Nil(t, err)
-	assert.Equal(t, 0, code)
+	assert.Equal(t, 200, code)
 	assert.Equal(t, "mock", data)
 }
 

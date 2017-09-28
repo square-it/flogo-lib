@@ -1,30 +1,15 @@
 package activity
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/core/data"
-	"github.com/TIBCOSoftware/flogo-lib/core/expr"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"sync"
+
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 var (
 	activitiesMu sync.Mutex
 	activities   = make(map[string]Activity)
 )
-
-// Resolver resolves the activity for a given scope and path
-type resolver struct {
-	scope data.Scope
-}
-
-func newResolver(scope data.Scope) expr.Resolver {
-	return &resolver{scope: scope}
-}
-
-func (r *resolver) Resolve(path string) (interface{}, bool) {
-	attrName, attrPath, pathType := data.GetAttrPath(path)
-	return data.GetAttrValue(attrName, attrPath, pathType, r.scope)
-}
 
 // Register registers the specified activity
 func Register(activity Activity) {
@@ -72,9 +57,4 @@ func Activities() []Activity {
 func Get(id string) Activity {
 	//var curActivities = activities
 	return activities[id]
-}
-
-// Resolve will resolve the activity for the given path
-func Resolve(scope data.Scope, path string) (interface{}, bool) {
-	return newResolver(scope).Resolve(path)
 }

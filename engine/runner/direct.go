@@ -28,19 +28,65 @@ func (runner *DirectRunner) Stop() error {
 	return nil
 }
 
-// Run the specified action
-func (runner *DirectRunner) Run(context context.Context, action action.Action, uri string, options interface{}) (code int, data interface{}, err error) {
+//Run
+//Deprecated
+func (runner *DirectRunner) Run(ctx context.Context, act action.Action, uri string, options interface{}) (code int, data interface{}, err error) {
 
-	if action == nil {
+	if act == nil {
 		return 0, nil, errors.New("Action not found")
+	}
+
+	newOptions := make(map[string]interface{})
+	newOptions["deprecated_options"] = options
+
+	handler := &SyncResultHandler{done: make(chan bool, 1)}
+
+	inputGenerator := NewOldTAInputGenerator(ctx)
+	inputs := inputGenerator.GenerateInputs(action.GetConfigInputMetadata(act))
+
+	err = act.Run(ctx, inputs, newOptions, handler)
+
+	if err != nil {
+		return 0, nil, err
+	}
+
+	<-handler.done
+
+	ndata, err  := handler.Result()
+
+	//ndata, err := runner.RunAction(ctx, uri, NewOldTAInputGenerator(ctx), newOptions)
+
+	if len(ndata) != 0 {
+		defData, ok := ndata["data"]
+		if ok {
+			data = defData
+		}
+		defCode, ok := ndata["code"]
+		if ok {
+			code = defCode.(int)
+		}
+	}
+
+	return code, data, err
+}
+
+// Run the specified action
+func (runner *DirectRunner) RunAction(ctx context.Context, actionID string, inputGenerator action.InputGenerator, options map[string]interface{}) (results map[string]interface{}, err error) {
+
+	act := action.Get(actionID)
+
+	if act == nil {
+		return nil, errors.New("Action not found")
 	}
 
 	handler := &SyncResultHandler{done: make(chan bool, 1)}
 
-	err = action.Run(context, uri, options, handler)
+	inputs := inputGenerator.GenerateInputs(action.GetConfigInputMetadata(act))
+
+	err = act.Run(ctx, inputs, options, handler)
 
 	if err != nil {
-		return 0, nil, err
+		return nil, err
 	}
 
 	<-handler.done
@@ -51,14 +97,12 @@ func (runner *DirectRunner) Run(context context.Context, action action.Action, u
 // SyncResultHandler simple result handler to use in synchronous case
 type SyncResultHandler struct {
 	done chan (bool)
-	code int
-	data interface{}
+	data map[string]interface{}
 	err  error
 }
 
 // HandleResult implements action.ResultHandler.HandleResult
-func (rh *SyncResultHandler) HandleResult(code int, data interface{}, err error) {
-	rh.code = code
+func (rh *SyncResultHandler) HandleResult(data map[string]interface{}, err error) {
 	rh.data = data
 	rh.err = err
 }
@@ -69,6 +113,6 @@ func (rh *SyncResultHandler) Done() {
 }
 
 // Result returns the latest Result set on the handler
-func (rh *SyncResultHandler) Result() (code int, data interface{}, err error) {
-	return rh.code, rh.data, rh.err
+func (rh *SyncResultHandler) Result() (data map[string]interface{}, err error) {
+	return rh.data, rh.err
 }

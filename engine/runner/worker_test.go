@@ -13,7 +13,7 @@ func TestWorkerInvalidRequestType(t *testing.T) {
 	worker.Start()
 
 	rc := make(chan *ActionResult)
-	actionData := &ActionData{rc: rc}
+	actionData := &ActionData{arc: rc}
 
 	// Create some work
 	invalidWorkRequest := ActionWorkRequest{ReqType: -1, actionData: actionData}
@@ -22,7 +22,7 @@ func TestWorkerInvalidRequestType(t *testing.T) {
 	worker.Work <- invalidWorkRequest
 
 	// Check work result
-	result := <-actionData.rc
+	result := <-actionData.arc
 
 	assert.NotNil(t, result.err)
 	assert.Equal(t, "Unsupported work request type: '-1'", result.err.Error())
@@ -36,9 +36,9 @@ func TestWorkerErrorInAction(t *testing.T) {
 	rc := make(chan *ActionResult)
 
 	action := new(MockFullAction)
-	action.On("Run", nil, mock.AnythingOfType("string"), nil, mock.AnythingOfType("*runner.AsyncResultHandler")).Return(errors.New("Error in action"))
+	action.On("Run", nil,  mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("*runner.AsyncResultHandler")).Return(errors.New("Error in action"))
 
-	actionData := &ActionData{rc: rc, action: action}
+	actionData := &ActionData{arc: rc, action: action}
 
 	// Create some work
 	errorWorkRequest := ActionWorkRequest{ReqType: RtRun, actionData: actionData}
@@ -47,7 +47,7 @@ func TestWorkerErrorInAction(t *testing.T) {
 	worker.Work <- errorWorkRequest
 
 	// Check work result
-	result := <-actionData.rc
+	result := <-actionData.arc
 
 	assert.NotNil(t, result.err)
 	assert.Equal(t, "Error in action", result.err.Error())
@@ -61,9 +61,9 @@ func TestWorkerStartOk(t *testing.T) {
 	rc := make(chan *ActionResult)
 
 	action := new(MockResultAction)
-	action.On("Run", nil, mock.AnythingOfType("string"), nil, mock.AnythingOfType("*runner.AsyncResultHandler")).Return(nil)
+	action.On("Run", nil, mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("*runner.AsyncResultHandler")).Return(nil)
 
-	actionData := &ActionData{rc: rc, action: action}
+	actionData := &ActionData{arc: rc, action: action}
 
 	// Create some work
 	okWorkRequest := ActionWorkRequest{ReqType: RtRun, actionData: actionData}
@@ -72,11 +72,12 @@ func TestWorkerStartOk(t *testing.T) {
 	worker.Work <- okWorkRequest
 
 	// Check work result
-	result := <-actionData.rc
+	result := <-actionData.arc
 
 	assert.Nil(t, result.err)
 	assert.NotNil(t, result)
-	assert.Equal(t, "mock", result.data)
+	assert.Equal(t, 200, result.results["code"])
+	assert.Equal(t, "mock", result.results["data"])
 }
 
 func createDefaultWorker() ActionWorker {

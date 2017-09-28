@@ -3,21 +3,32 @@ package runner
 import (
 	"context"
 	"errors"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
 type MockAction struct {
 	mock.Mock
 }
 
-func (m *MockAction) Run(context context.Context, uri string, options interface{}, handler action.ResultHandler) error {
-	args := m.Called(context, uri, options)
+func (m *MockAction) Config() *action.Config {
+	return nil
+}
+
+func (m *MockAction) Metadata() *action.Metadata {
+	return nil
+}
+
+func (m *MockAction) Run(context context.Context, inputs map[string]interface{}, options map[string]interface{}, handler action.ResultHandler) error {
+	args := m.Called(context, inputs, options, handler)
 	if handler != nil {
-		handler.HandleResult(0, "mock", nil)
+		resultData, _ := data.CoerceToObject("{\"data\":\"mock\"}")
+		resultData["code"] = 200
+		handler.HandleResult(resultData, nil)
 		handler.Done()
 	}
 	return args.Error(0)
@@ -25,10 +36,13 @@ func (m *MockAction) Run(context context.Context, uri string, options interface{
 
 //Test that Result returns the expected values
 func TestResultOk(t *testing.T) {
-	rh := &SyncResultHandler{code: 1, data: "mock data", err: errors.New("New Error")}
-	code, data, err := rh.Result()
-	assert.Equal(t, 1, code)
-	assert.Equal(t, "mock data", data)
+
+	resultData, _ := data.CoerceToObject("{\"data\":\"mock data\"}")
+	resultData["code"] = 1
+	rh := &SyncResultHandler{data: resultData, err: errors.New("New Error")}
+	data, err := rh.Result()
+	assert.Equal(t, 1, data["code"])
+	assert.Equal(t, "mock data", data["data"])
 	assert.NotNil(t, err)
 }
 
@@ -62,7 +76,7 @@ func TestDirectRunErr(t *testing.T) {
 	assert.NotNil(t, runner)
 	// Mock Action
 	mockAction := new(MockAction)
-	mockAction.On("Run", nil, "", nil).Return(errors.New("Action Error"))
+	mockAction.On("Run", nil, mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("*runner.SyncResultHandler")).Return(errors.New("Action Error"))
 	_, _, err := runner.Run(nil, mockAction, "", nil)
 	assert.NotNil(t, err)
 }
@@ -73,9 +87,10 @@ func TestDirectRunOk(t *testing.T) {
 	assert.NotNil(t, runner)
 	// Mock Action
 	mockAction := new(MockAction)
-	mockAction.On("Run", nil, "", nil).Return(nil)
+
+	mockAction.On("Run", nil, mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("*runner.SyncResultHandler")).Return(nil)
 	code, data, err := runner.Run(nil, mockAction, "", nil)
 	assert.Nil(t, err)
-	assert.Equal(t, 0, code)
+	assert.Equal(t, 200, code)
 	assert.Equal(t, "mock", data)
 }

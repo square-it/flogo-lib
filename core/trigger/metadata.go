@@ -11,7 +11,8 @@ type Metadata struct {
 	ID       string
 	Handler  *HandlerMetadata
 	Settings map[string]*data.Attribute
-	Outputs  map[string]*data.Attribute
+	Output   map[string]*data.Attribute
+	Reply    map[string]*data.Attribute
 }
 
 // EndpointMetadata is the metadata for a Trigger Endpoint
@@ -30,35 +31,6 @@ func NewMetadata(jsonMetadata string) *Metadata {
 	return md
 }
 
-//// MarshalJSON overrides the default MarshalJSON for TaskEnv
-//func (md *Metadata) MarshalJSON() ([]byte, error) {
-//
-//	settings := make([]*data.Attribute, 0, len(md.Settings))
-//
-//	for _, value := range md.Settings {
-//		settings = append(settings, value)
-//	}
-//
-//	outputs := make([]*data.Attribute, 0, len(md.Outputs))
-//
-//	for _, value := range md.Outputs {
-//		outputs = append(outputs, value)
-//	}
-//
-//	return json.Marshal(&struct {
-//		Name     string            `json:"name"`
-//		Ref      string            `json:"ref"`
-//		Endpoint EndpointMetadata  `json:"endpoint"`
-//		Settings []*data.Attribute `json:"settings"`
-//		Outputs  []*data.Attribute `json:"outputs"`
-//	}{
-//		Name:     md.ID,
-//		Endpoint: md.Endpoint,
-//		Settings: settings,
-//		Outputs:  outputs,
-//	})
-//}
-
 // UnmarshalJSON overrides the default UnmarshalJSON for Metadata
 func (md *Metadata) UnmarshalJSON(b []byte) error {
 
@@ -66,8 +38,11 @@ func (md *Metadata) UnmarshalJSON(b []byte) error {
 		Name     string            `json:"name"`
 		Ref      string            `json:"ref"`
 		Handler  *HandlerMetadata  `json:"handler"`
-		Endpoint *HandlerMetadata  `json:"endpoint"`
 		Settings []*data.Attribute `json:"settings"`
+		Output   []*data.Attribute `json:"output"`
+		Reply    []*data.Attribute `json:"reply"`
+		//for backwards compatibility
+		Endpoint *HandlerMetadata  `json:"endpoint"`
 		Outputs  []*data.Attribute `json:"outputs"`
 	}{}
 
@@ -95,14 +70,21 @@ func (md *Metadata) UnmarshalJSON(b []byte) error {
 	}
 
 	md.Settings = make(map[string]*data.Attribute, len(ser.Settings))
-	md.Outputs = make(map[string]*data.Attribute, len(ser.Outputs))
+	md.Output = make(map[string]*data.Attribute, len(ser.Outputs))
 
 	for _, attr := range ser.Settings {
 		md.Settings[attr.Name] = attr
 	}
 
-	for _, attr := range ser.Outputs {
-		md.Outputs[attr.Name] = attr
+	if len(ser.Output) > 0 {
+		for _, attr := range ser.Outputs {
+			md.Output[attr.Name] = attr
+		}
+	} else {
+		// for backwards compatibility
+		for _, attr := range ser.Outputs {
+			md.Output[attr.Name] = attr
+		}
 	}
 
 	return nil
@@ -111,9 +93,9 @@ func (md *Metadata) UnmarshalJSON(b []byte) error {
 // OutputsToAttrs converts the supplied output data to attributes
 func (md *Metadata) OutputsToAttrs(outputData map[string]interface{}, coerce bool) ([]*data.Attribute, error) {
 
-	attrs := make([]*data.Attribute, 0, len(md.Outputs))
+	attrs := make([]*data.Attribute, 0, len(md.Output))
 
-	for k, a := range md.Outputs {
+	for k, a := range md.Output {
 		v, _ := outputData[k]
 
 		if coerce {

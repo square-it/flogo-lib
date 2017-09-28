@@ -212,6 +212,15 @@ func CoerceToParams(val interface{}) (map[string]string, error) {
 	switch t := val.(type) {
 	case map[string]string:
 		return t, nil
+	case string:
+		m := make(map[string]string)
+		if t != "" {
+			err := json.Unmarshal([]byte(t), &m)
+			if err != nil {
+				return nil, fmt.Errorf("Unable to coerce %#v to params", val)
+			}
+		}
+		return m, nil
 	case map[string]interface{}:
 
 		var m = make(map[string]string, len(t))
@@ -304,3 +313,78 @@ func handleComplex(complex *ComplexObject) *ComplexObject {
 	}
 	return complex
 }
+
+var mapHelper *MapHelper = &MapHelper{}
+
+func GetMapHelper() *MapHelper {
+	return mapHelper
+}
+
+type MapHelper struct {
+}
+
+func (h *MapHelper) GetInt(data map[string]interface{}, key string) (int, bool) {
+	mapVal, exists := data[key]
+	if exists {
+		value, ok := mapVal.(int)
+
+		if ok {
+			return value, true
+		}
+	}
+
+	return 0, false
+}
+
+func (h *MapHelper) GetString(data map[string]interface{}, key string) (string, bool) {
+	mapVal, exists := data[key]
+	if exists {
+		value, ok := mapVal.(string)
+
+		if ok {
+			return value, true
+		}
+	}
+
+	return "", false
+}
+
+func (h *MapHelper) GetBool(data map[string]interface{}, key string) (bool, bool) {
+	mapVal, exists := data[key]
+	if exists {
+		value, ok := mapVal.(bool)
+
+		if ok {
+			return value, true
+		}
+	}
+
+	return false, false
+}
+
+func (h *MapHelper) ToAttributes(data map[string]interface{}, metadata map[string]*Attribute, ignoreExtras bool) []*Attribute {
+
+	size := len(metadata)
+	if !ignoreExtras {
+		size = len(data)
+	}
+	attrs := make([]*Attribute, 0, size)
+
+	//todo do special handling for complex_object metadata (merge or ref it)
+	for key, value := range data {
+		mdAttr, exists := metadata[key]
+
+		if !exists {
+			if !ignoreExtras {
+				attrs = append(attrs,NewAttribute(key, ANY, value))
+			}
+		} else {
+			attrs = append(attrs,NewAttribute(key, mdAttr.Type, value))
+		}
+	}
+
+	return attrs
+}
+
+
+

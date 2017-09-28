@@ -17,7 +17,15 @@ func (f *MockFactory) New(config *Config) Action {
 type MockAction struct {
 }
 
-func (a *MockAction) Run(context context.Context, uri string, options interface{}, handler ResultHandler) error {
+func (m *MockAction) Config() *Config {
+	return nil
+}
+
+func (m *MockAction) Metadata() *Metadata {
+	return nil
+}
+
+func (m *MockAction) Run(context context.Context, inputs map[string]interface{}, options map[string]interface{}, handler ResultHandler) error {
 	return nil
 }
 

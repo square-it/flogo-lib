@@ -94,27 +94,68 @@ func (runner *PooledRunner) Stop() error {
 	return nil
 }
 
-// Run implements action.Runner.Run
-func (runner *PooledRunner) Run(context context.Context, action action.Action, uri string, options interface{}) (code int, data interface{}, err error) {
+//Deprecated
+func (runner *PooledRunner) Run(ctx context.Context, act action.Action, uri string, options interface{}) (code int, data interface{}, err error) {
 
-	if action == nil {
+	if act == nil {
 		return 0, nil, errors.New("Action not found")
+	}
+
+	newOptions := make(map[string]interface{})
+	newOptions["deprecated_options"] = options
+
+	if runner.active {
+
+		actionData := &ActionData{context: ctx, action: act, inputGenerator: NewOldTAInputGenerator(ctx), options: newOptions, arc: make(chan *ActionResult, 1)}
+		work := ActionWorkRequest{ReqType: RtRun, actionData: actionData}
+
+		runner.workQueue <- work
+		reply := <-actionData.arc
+
+		ndata := reply.results
+		err := reply.err
+		//return reply.results, reply.err
+
+		if len(ndata) != 0 {
+			defData, ok := ndata["data"]
+			if ok {
+				data = defData
+			}
+			defCode, ok := ndata["code"]
+			if ok {
+				code = defCode.(int)
+			}
+		}
+
+		return code, data, err
+	}
+
+	return 0, nil, errors.New("Runner not active")
+}
+
+// Run implements action.Runner.Run
+func (runner *PooledRunner) RunAction(ctx context.Context, actionID string, inputGenerator action.InputGenerator, options map[string]interface{}) (results map[string]interface{}, err error) {
+
+	act := action.Get(actionID)
+
+	if act == nil {
+		return nil, errors.New("Action not found")
 	}
 
 	if runner.active {
 
-		data := &ActionData{context: context, action: action, uri: uri, options: options, rc: make(chan *ActionResult, 1)}
+		data := &ActionData{context: ctx, action: act, inputGenerator: inputGenerator, options: options, arc: make(chan *ActionResult, 1)}
 		work := ActionWorkRequest{ReqType: RtRun, actionData: data}
 
 		runner.workQueue <- work
-		logger.Debugf("Run Action '%s' queued", uri)
+		logger.Debugf("Run Action '%s' queued", actionID)
 
-		reply := <-data.rc
-		logger.Debugf("Run Action '%s' complete", uri)
+		reply := <-data.arc
+		logger.Debugf("Run Action '%s' complete", actionID)
 
-		return reply.code, reply.data, reply.err
+		return reply.results, reply.err
 	}
 
 	//Run rejected
-	return 0, nil, errors.New("Runner not active")
+	return nil, errors.New("Runner not active")
 }
