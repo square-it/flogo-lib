@@ -22,6 +22,8 @@ const (
 	STOP_ENGINE_ON_ERROR_KEY    = "STOP_ENGINE_ON_ERROR"
 )
 
+var defaultLogLevel = LOG_LEVEL_DEFAULT
+
 //GetFlogoConfigPath returns the flogo config path
 func GetFlogoConfigPath() string {
 	flogoConfigPathEnv := os.Getenv(APP_CONFIG_LOCATION_KEY)
@@ -66,13 +68,17 @@ func GetRunnerQueueSize() int {
 	return queueSize
 }
 
+func SetDefaultLogLevel(logLevel string) {
+	defaultLogLevel = logLevel
+}
+
 //GetLogLevel returns the log level
 func GetLogLevel() string {
 	logLevelEnv := os.Getenv(LOG_LEVEL_KEY)
 	if len(logLevelEnv) > 0 {
 		return logLevelEnv
 	}
-	return LOG_LEVEL_DEFAULT
+	return defaultLogLevel
 }
 
 func GetLogDateTimeFormat() string {
