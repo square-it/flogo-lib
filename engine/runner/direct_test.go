@@ -26,7 +26,7 @@ func (m *MockAction) Metadata() *action.Metadata {
 func (m *MockAction) Run(context context.Context, inputs map[string]interface{}, options map[string]interface{}, handler action.ResultHandler) error {
 	args := m.Called(context, inputs, options, handler)
 	if handler != nil {
-		resultData, _ := data.CoerceToObject("{\"default\":\"mock\"}")
+		resultData, _ := data.CoerceToObject("{\"data\":\"mock\"}")
 		resultData["code"] = 200
 		handler.HandleResult(resultData, nil)
 		handler.Done()
@@ -37,12 +37,12 @@ func (m *MockAction) Run(context context.Context, inputs map[string]interface{},
 //Test that Result returns the expected values
 func TestResultOk(t *testing.T) {
 
-	resultData, _ := data.CoerceToObject("{\"default\":\"mock data\"}")
+	resultData, _ := data.CoerceToObject("{\"data\":\"mock data\"}")
 	resultData["code"] = 1
 	rh := &SyncResultHandler{data: resultData, err: errors.New("New Error")}
 	data, err := rh.Result()
 	assert.Equal(t, 1, data["code"])
-	assert.Equal(t, "mock data", data["default"])
+	assert.Equal(t, "mock data", data["data"])
 	assert.NotNil(t, err)
 }
 

@@ -44,8 +44,8 @@ func (m *MockResultAction) Metadata() *action.Metadata {
 func (m *MockResultAction) Run(context context.Context, inputs map[string]interface{}, options map[string]interface{}, handler action.ResultHandler) error {
 	args := m.Called(context, inputs, options, handler)
 	go func() {
-		resultData, _ := data.CoerceToObject("{\"default\":\"mock\"}")
-		resultData["code"] = 0
+		resultData, _ := data.CoerceToObject("{\"data\":\"mock\"}")
+		resultData["code"] = 200
 		handler.HandleResult(resultData, nil)
 		handler.Done()
 	}()
@@ -120,7 +120,7 @@ func TestRunOk(t *testing.T) {
 	a.On("Run", nil,  mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("*runner.AsyncResultHandler")).Return(nil)
 	code, data, err := runner.Run(nil, a, "mockAction", nil)
 	assert.Nil(t, err)
-	assert.Equal(t, 0, code)
+	assert.Equal(t, 200, code)
 	assert.Equal(t, "mock", data)
 }
 

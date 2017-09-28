@@ -57,7 +57,7 @@ func (runner *DirectRunner) Run(ctx context.Context, act action.Action, uri stri
 	//ndata, err := runner.RunAction(ctx, uri, NewOldTAInputGenerator(ctx), newOptions)
 
 	if len(ndata) != 0 {
-		defData, ok := ndata["default"]
+		defData, ok := ndata["data"]
 		if ok {
 			data = defData
 		}

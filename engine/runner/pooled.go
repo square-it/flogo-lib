@@ -117,7 +117,7 @@ func (runner *PooledRunner) Run(ctx context.Context, act action.Action, uri stri
 		//return reply.results, reply.err
 
 		if len(ndata) != 0 {
-			defData, ok := ndata["default"]
+			defData, ok := ndata["data"]
 			if ok {
 				data = defData
 			}

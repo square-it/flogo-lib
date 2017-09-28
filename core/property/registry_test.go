@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
 // TestRegisterEmptyId register with empty id
@@ -37,8 +36,6 @@ func TestDefaultResolverOk(t *testing.T) {
 	os.Setenv("TEST_FLOGO2", "my_test_value2")
 	defer os.Unsetenv("TEST_FLOGO2")
 	Register("id_test", "a value")
-
-	data.GetResolutionInfo()
 
 	value, _ := Resolve("${property.id_test}")
 	assert.Equal(t, "a value", value)
