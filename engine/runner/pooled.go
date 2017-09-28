@@ -94,24 +94,43 @@ func (runner *PooledRunner) Stop() error {
 	return nil
 }
 
+//Deprecated
 func (runner *PooledRunner) Run(ctx context.Context, act action.Action, uri string, options interface{}) (code int, data interface{}, err error) {
+
+	if act == nil {
+		return 0, nil, errors.New("Action not found")
+	}
 
 	newOptions := make(map[string]interface{})
 	newOptions["deprecated_options"] = options
-	ndata, err := runner.RunAction(ctx, uri, NewOldTAInputGenerator(ctx), newOptions )
 
-	if len(ndata) != 0 {
-		defData, ok := ndata["default"]
-		if ok {
-			data = defData
+	if runner.active {
+
+		actionData := &ActionData{context: ctx, action: act, inputGenerator: NewOldTAInputGenerator(ctx), options: newOptions, arc: make(chan *ActionResult, 1)}
+		work := ActionWorkRequest{ReqType: RtRun, actionData: actionData}
+
+		runner.workQueue <- work
+		reply := <-actionData.arc
+
+		ndata := reply.results
+		err := reply.err
+		//return reply.results, reply.err
+
+		if len(ndata) != 0 {
+			defData, ok := ndata["default"]
+			if ok {
+				data = defData
+			}
+			defCode, ok := ndata["code"]
+			if ok {
+				code = defCode.(int)
+			}
 		}
-		defCode, ok := ndata["code"]
-		if ok {
-			code = defCode.(int)
-		}
+
+		return code, data, err
 	}
 
-	return code, data, err
+	return 0, nil, errors.New("Runner not active")
 }
 
 // Run implements action.Runner.Run

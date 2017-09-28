@@ -32,9 +32,29 @@ func (runner *DirectRunner) Stop() error {
 //Deprecated
 func (runner *DirectRunner) Run(ctx context.Context, act action.Action, uri string, options interface{}) (code int, data interface{}, err error) {
 
+	if act == nil {
+		return 0, nil, errors.New("Action not found")
+	}
+
 	newOptions := make(map[string]interface{})
 	newOptions["deprecated_options"] = options
-	ndata, err := runner.RunAction(ctx, uri, NewOldTAInputGenerator(ctx), newOptions)
+
+	handler := &SyncResultHandler{done: make(chan bool, 1)}
+
+	inputGenerator := NewOldTAInputGenerator(ctx)
+	inputs := inputGenerator.GenerateInputs(action.GetConfigInputMetadata(act))
+
+	err = act.Run(ctx, inputs, newOptions, handler)
+
+	if err != nil {
+		return 0, nil, err
+	}
+
+	<-handler.done
+
+	ndata, err  := handler.Result()
+
+	//ndata, err := runner.RunAction(ctx, uri, NewOldTAInputGenerator(ctx), newOptions)
 
 	if len(ndata) != 0 {
 		defData, ok := ndata["default"]

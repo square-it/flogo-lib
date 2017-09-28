@@ -19,6 +19,10 @@ func NewOldTAInputGenerator(ctx context.Context) *OldTAInputGenerator {
 
 func (ig *OldTAInputGenerator) GenerateInputs(inputMetadata map[string]*data.Attribute) map[string]interface{} {
 
+	if ig.ctx == nil {
+		return nil
+	}
+
 	triggerAttrs, ok := trigger.FromContext(ig.ctx)
 
 	if ok {
