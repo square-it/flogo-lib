@@ -84,7 +84,15 @@ func (t *MockAction) Stop() error {
 	return nil
 }
 
-func (t *MockAction) Run(context context.Context, uri string, options interface{}, handler action.ResultHandler) error {
+func (m *MockAction) Config() *action.Config {
+	return nil
+}
+
+func (m *MockAction) Metadata() *action.Metadata {
+	return nil
+}
+
+func (m *MockAction) Run(context context.Context, inputs map[string]interface{}, options map[string]interface{}, handler action.ResultHandler) error {
 	return nil
 }
 

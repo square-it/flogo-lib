@@ -17,3 +17,5 @@ func Resolve(scope data.Scope, value string) (interface{}, bool) {
 
 	return attr.Value, true
 }
+
+//todo add a "add to scope"
