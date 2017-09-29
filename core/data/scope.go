@@ -202,7 +202,7 @@ func (s *FixedScope) SetAttrValue(name string, value interface{}) error {
 	} else {
 		metaAttr, found := s.metadata[name]
 		if found {
-			attr = NewAttribute(name, metaAttr.Type, value)
+			attr := NewAttribute(name, metaAttr.Type, value)
 			s.attrs[name] = attr
 			return nil
 		}
