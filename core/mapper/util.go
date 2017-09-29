@@ -99,6 +99,16 @@ func (e *assignExpr) Eval(scope data.Scope) (interface{}, error) {
 		return nil, fmt.Errorf("Attribute '%s' does not exists\n", e.assignAttrName)
 	}
 
+	//temporary hack
+	if attr.Value == nil {
+		switch attr.Type {
+		case data.OBJECT:
+			attr.Value = make(map[string]interface{})
+		case data.PARAMS:
+			attr.Value = make(map[string]string)
+		}
+	}
+
 	err = data.PathSetValue(attr.Value, e.assignAttrPath, e.value)
 	return nil, err
 }
