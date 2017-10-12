@@ -13,8 +13,9 @@ type Config struct {
 	Settings map[string]interface{} `json:"settings"`
 	Output   map[string]interface{} `json:"output"`
 	Handlers []*HandlerConfig       `json:"handlers"`
+
 	//for backwards compatibility
-	Outputs  map[string]interface{} `json:"outputs"`
+	Outputs map[string]interface{} `json:"outputs"`
 }
 
 func (c *Config) FixUp(metadata *Metadata) {
@@ -67,8 +68,20 @@ func (c *Config) FixUp(metadata *Metadata) {
 		}
 
 		// create mappers
-		if hc.OutputMappings != nil {
-			hc.outputMapper = mapper.GetFactory().NewMapper(&data.MapperDef{Mappings: hc.OutputMappings})
+		if hc.ActionMappings != nil {
+			if hc.ActionMappings.Input != nil {
+				hc.actionInputMapper = mapper.GetFactory().NewMapper(&data.MapperDef{Mappings: hc.ActionMappings.Input})
+			}
+			if hc.ActionMappings.Output != nil {
+				hc.actionOutputMapper = mapper.GetFactory().NewMapper(&data.MapperDef{Mappings: hc.ActionMappings.Output})
+			}
+		} else {
+			if hc.ActionInputMappings != nil {
+				hc.actionInputMapper = mapper.GetFactory().NewMapper(&data.MapperDef{Mappings: hc.ActionInputMappings})
+			}
+			if hc.ActionOutputMappings != nil {
+				hc.actionOutputMapper = mapper.GetFactory().NewMapper(&data.MapperDef{Mappings: hc.ActionOutputMappings})
+			}
 		}
 	}
 }
@@ -79,18 +92,23 @@ func (c *Config) GetSetting(setting string) string {
 
 // HandlerConfig is the configuration for the Trigger Handler
 type HandlerConfig struct {
-	parent   *Config
-	ActionId string                 `json:"actionId"`
-	Settings map[string]interface{} `json:"settings"`
-	Output   map[string]interface{} `json:"output"`
-
-	OutputMappings []*data.MappingDef `json:"outputMappings,omitempty"`
-	outputMapper   data.Mapper
-	ReplyMappings []*data.MappingDef `json:"replyMappings,omitempty"`
-	replyMapper   data.Mapper
+	parent             *Config
+	ActionId           string                 `json:"actionId"`
+	Settings           map[string]interface{} `json:"settings"`
+	Output             map[string]interface{} `json:"output"`
+	ActionMappings     *Mappings `json:"actionMappings,omitempty"`
+	actionInputMapper  data.Mapper
+	actionOutputMapper data.Mapper
 
 	//for backwards compatibility
-	Outputs  map[string]interface{} `json:"outputs"`
+	Outputs              map[string]interface{} `json:"outputs"`
+	ActionOutputMappings []*data.MappingDef `json:"actionOutputMappings,omitempty"`
+	ActionInputMappings  []*data.MappingDef `json:"actionInputMappings,omitempty"`
+}
+
+type Mappings struct {
+	Input  []*data.MappingDef `json:"input,omitempty"`
+	Output []*data.MappingDef `json:"output,omitempty"`
 }
 
 func (hc *HandlerConfig) GetSetting(setting string) string {
@@ -108,8 +126,12 @@ func (hc *HandlerConfig) GetOutput(name string) (interface{}, bool) {
 	return value, exists
 }
 
-func (hc *HandlerConfig) GetOutputMapper() data.Mapper {
-	return hc.outputMapper
+func (hc *HandlerConfig) GetActionOutputMapper() data.Mapper {
+	return hc.actionOutputMapper
+}
+
+func (hc *HandlerConfig) GetActionInputMapper() data.Mapper {
+	return hc.actionInputMapper
 }
 
 type TriggerActionInputGenerator struct {
@@ -142,7 +164,7 @@ func NewTriggerActionInputGenerator(metadata *Metadata, config *HandlerConfig, o
 
 func (ig *TriggerActionInputGenerator) GenerateInputs(inputMetadata []*data.Attribute) map[string]interface{} {
 
-	outputMapper := ig.handlerConfig.GetOutputMapper()
+	outputMapper := ig.handlerConfig.GetActionOutputMapper()
 	inScope := data.NewSimpleScope(ig.triggerOutputs, nil)
 	outScope := data.NewFixedScope(inputMetadata)
 
