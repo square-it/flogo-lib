@@ -111,8 +111,21 @@ type Mappings struct {
 	Output []*data.MappingDef `json:"output,omitempty"`
 }
 
+//todo revisit this method, what should we return if there is an error or dne
 func (hc *HandlerConfig) GetSetting(setting string) string {
-	return hc.Settings[setting].(string)
+	val, exists := hc.Settings[setting]
+
+	if !exists || val == nil {
+		return ""
+	}
+
+	strVal, err :=  data.CoerceToString(val)
+
+	if err != nil {
+		return ""
+	}
+
+	return strVal
 }
 
 func (hc *HandlerConfig) GetOutput(name string) (interface{}, bool) {
