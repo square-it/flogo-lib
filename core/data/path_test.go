@@ -68,11 +68,12 @@ import (
 //}
 
 func TestGetResolverType(t *testing.T) {
+
 	// Resolution of Old Trigger expression
 	a := "{T.pathParams}.myParam"
 	resType, err := GetResolverType(a)
 	assert.Nil(t, err)
-	assert.Equal(t, RES_DEFAULT, resType)
+	assert.Equal(t, RES_SCOPE, resType)
 
 	// Resolution of Property expression
 	a = "${property.Prop1}"
@@ -109,6 +110,18 @@ func TestGetResolverType(t *testing.T) {
 	resType, err = GetResolverType(a)
 	assert.Nil(t, err)
 	assert.Equal(t, RES_TRIGGER, resType)
+
+	// Resolution of flat Trigger expression
+	a = "${myVar}"
+	resType, err = GetResolverType(a)
+	assert.Nil(t, err)
+	assert.Equal(t, RES_SCOPE, resType)
+
+	// Resolution of flat Trigger expression
+	a = "myVar"
+	resType, err = GetResolverType(a)
+	assert.Nil(t, err)
+	assert.Equal(t, RES_SCOPE, resType)
 }
 
 func TestGetResolutionInfo(t *testing.T) {
@@ -116,7 +129,7 @@ func TestGetResolutionInfo(t *testing.T) {
 	a := "{T.pathParams}.myParam"
 	resType, toResolve, path, err := GetResolutionInfo(a)
 	assert.Nil(t, err)
-	assert.Equal(t, RES_DEFAULT, resType)
+	assert.Equal(t, RES_SCOPE, resType)
 
 	// Resolution of Property expression
 	a = "${property.Prop1}"

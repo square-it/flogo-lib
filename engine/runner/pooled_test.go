@@ -23,7 +23,7 @@ func (m *MockFullAction) Metadata() *action.Metadata {
 	return nil
 }
 
-func (m *MockFullAction) Run(context context.Context, inputs map[string]interface{}, options map[string]interface{}, handler action.ResultHandler) error {
+func (m *MockFullAction) Run(context context.Context, inputs []*data.Attribute, options map[string]interface{}, handler action.ResultHandler) error {
 	args := m.Called(context, inputs, options, handler)
 	return args.Error(0)
 }
@@ -41,7 +41,7 @@ func (m *MockResultAction) Metadata() *action.Metadata {
 	return nil
 }
 
-func (m *MockResultAction) Run(context context.Context, inputs map[string]interface{}, options map[string]interface{}, handler action.ResultHandler) error {
+func (m *MockResultAction) Run(context context.Context, inputs []*data.Attribute, options map[string]interface{}, handler action.ResultHandler) error {
 	args := m.Called(context, inputs, options, handler)
 	go func() {
 		resultData, _ := data.CoerceToObject("{\"data\":\"mock\"}")
@@ -103,7 +103,7 @@ func TestRunErrorInAction(t *testing.T) {
 	err := runner.Start()
 	assert.Nil(t, err)
 	a := new(MockFullAction)
-	a.On("Run", nil,  mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("*runner.AsyncResultHandler")).Return(errors.New("Error in action"))
+	a.On("Run", nil,  mock.AnythingOfType("[]*data.Attribute"), mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("*runner.AsyncResultHandler")).Return(errors.New("Error in action"))
 	_, _, err = runner.Run(nil, a, "mockAction", nil)
 	assert.NotNil(t, err)
 	assert.Equal(t, "Error in action", err.Error())
@@ -117,7 +117,7 @@ func TestRunOk(t *testing.T) {
 	err := runner.Start()
 	assert.Nil(t, err)
 	a := new(MockResultAction)
-	a.On("Run", nil,  mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("*runner.AsyncResultHandler")).Return(nil)
+	a.On("Run", nil,  mock.AnythingOfType("[]*data.Attribute"), mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("*runner.AsyncResultHandler")).Return(nil)
 	code, data, err := runner.Run(nil, a, "mockAction", nil)
 	assert.Nil(t, err)
 	assert.Equal(t, 200, code)

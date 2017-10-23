@@ -98,7 +98,7 @@ func (runner *PooledRunner) Stop() error {
 func (runner *PooledRunner) Run(ctx context.Context, act action.Action, uri string, options interface{}) (code int, data interface{}, err error) {
 
 	if act == nil {
-		return 0, nil, errors.New("Action not found")
+		return 0, nil, errors.New("Action not specified")
 	}
 
 	newOptions := make(map[string]interface{})
@@ -106,7 +106,7 @@ func (runner *PooledRunner) Run(ctx context.Context, act action.Action, uri stri
 
 	if runner.active {
 
-		actionData := &ActionData{context: ctx, action: act, inputGenerator: NewOldTAInputGenerator(ctx), options: newOptions, arc: make(chan *ActionResult, 1)}
+		actionData := &ActionData{context: ctx, action: act, options: newOptions, arc: make(chan *ActionResult, 1)}
 		work := ActionWorkRequest{ReqType: RtRun, actionData: actionData}
 
 		runner.workQueue <- work
@@ -134,24 +134,22 @@ func (runner *PooledRunner) Run(ctx context.Context, act action.Action, uri stri
 }
 
 // Run implements action.Runner.Run
-func (runner *PooledRunner) RunAction(ctx context.Context, actionID string, inputGenerator action.InputGenerator, options map[string]interface{}) (results map[string]interface{}, err error) {
-
-	act := action.Get(actionID)
+func (runner *PooledRunner) RunAction(ctx context.Context, act action.Action, options map[string]interface{}) (results map[string]interface{}, err error) {
 
 	if act == nil {
-		return nil, errors.New("Action not found")
+		return nil, errors.New("Action not specified")
 	}
 
 	if runner.active {
 
-		data := &ActionData{context: ctx, action: act, inputGenerator: inputGenerator, options: options, arc: make(chan *ActionResult, 1)}
+		data := &ActionData{context: ctx, action: act, options: options, arc: make(chan *ActionResult, 1)}
 		work := ActionWorkRequest{ReqType: RtRun, actionData: data}
 
 		runner.workQueue <- work
-		logger.Debugf("Run Action '%s' queued", actionID)
+		logger.Debugf("Run Action '%s' queued", act.Config().Id)
 
 		reply := <-data.arc
-		logger.Debugf("Run Action '%s' complete", actionID)
+		logger.Debugf("Run Action '%s' complete", act.Config().Id)
 
 		return reply.results, reply.err
 	}

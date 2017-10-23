@@ -5,6 +5,8 @@ import (
 	"errors"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
+	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 // DirectRunner runs an action synchronously
@@ -33,7 +35,7 @@ func (runner *DirectRunner) Stop() error {
 func (runner *DirectRunner) Run(ctx context.Context, act action.Action, uri string, options interface{}) (code int, data interface{}, err error) {
 
 	if act == nil {
-		return 0, nil, errors.New("Action not found")
+		return 0, nil, errors.New("Action not specified")
 	}
 
 	newOptions := make(map[string]interface{})
@@ -41,8 +43,18 @@ func (runner *DirectRunner) Run(ctx context.Context, act action.Action, uri stri
 
 	handler := &SyncResultHandler{done: make(chan bool, 1)}
 
-	inputGenerator := NewOldTAInputGenerator(ctx)
-	inputs := inputGenerator.GenerateInputs(action.GetConfigInputMetadata(act))
+	var ctxData *trigger.ContextData
+
+	if ctx != nil {
+		var exists bool
+		ctxData, exists = trigger.ExtractContextData(ctx)
+
+		if !exists {
+			logger.Warn("Trigger data not applied to context")
+		}
+	}
+
+	inputs := generateInputs(act, ctxData)
 
 	err = act.Run(ctx, inputs, newOptions, handler)
 
@@ -52,9 +64,7 @@ func (runner *DirectRunner) Run(ctx context.Context, act action.Action, uri stri
 
 	<-handler.done
 
-	ndata, err  := handler.Result()
-
-	//ndata, err := runner.RunAction(ctx, uri, NewOldTAInputGenerator(ctx), newOptions)
+	ndata, err := handler.Result()
 
 	if len(ndata) != 0 {
 		defData, ok := ndata["data"]
@@ -71,17 +81,21 @@ func (runner *DirectRunner) Run(ctx context.Context, act action.Action, uri stri
 }
 
 // Run the specified action
-func (runner *DirectRunner) RunAction(ctx context.Context, actionID string, inputGenerator action.InputGenerator, options map[string]interface{}) (results map[string]interface{}, err error) {
-
-	act := action.Get(actionID)
+func (runner *DirectRunner) RunAction(ctx context.Context, act action.Action, options map[string]interface{}) (results map[string]interface{}, err error) {
 
 	if act == nil {
-		return nil, errors.New("Action not found")
+		return nil, errors.New("Action not specified")
 	}
 
 	handler := &SyncResultHandler{done: make(chan bool, 1)}
 
-	inputs := inputGenerator.GenerateInputs(action.GetConfigInputMetadata(act))
+	ctxData, exists := trigger.ExtractContextData(ctx)
+
+	if !exists {
+		logger.Warn("Trigger data not applied to context")
+	}
+
+	inputs := generateInputs(act, ctxData)
 
 	err = act.Run(ctx, inputs, options, handler)
 

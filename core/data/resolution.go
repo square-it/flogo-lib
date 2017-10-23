@@ -23,30 +23,33 @@ type Resolver func(scope Scope, path string) (interface{}, bool)
 
 func GetResolverType(inAttrName string) (ResolverType, error) {
 	if strings.HasPrefix(inAttrName, "${") {
-		leftIdx := 2
-		fullExpr := inAttrName[leftIdx:]
-		if len(fullExpr) == 0 {
-			return 0, fmt.Errorf("Invalid mapping expression [%s].", inAttrName)
+
+		closeIdx := strings.Index(inAttrName, "}")
+
+		if len(inAttrName) < 4 || closeIdx == -1 {
+			return 0, fmt.Errorf("Invalid resolution expression [%s].", inAttrName)
 		}
-		dotIdx := strings.Index(fullExpr, ".")
-		if dotIdx == -1 {
-			return 0, fmt.Errorf("Unsupported mapping expression, missing type [%s].", inAttrName)
-		}
-		expType := fullExpr[:dotIdx]
-		switch expType {
-		case "property":
-			return RES_PROPERTY, nil
-		case "env":
-			return RES_ENV, nil
-		case "activity":
-			return RES_ACTIVITY, nil
-		case "trigger":
-			return RES_TRIGGER, nil
-		default:
-			return 0, fmt.Errorf("Unsupported mapping expression type [%s].", expType)
+
+		toResolve := inAttrName[2:closeIdx]
+
+		dotIdx := strings.Index(toResolve, ".")
+		if dotIdx != -1 {
+			resType := toResolve[:dotIdx]
+			switch resType {
+			case "property":
+				return RES_PROPERTY, nil
+			case "env":
+				return RES_ENV, nil
+			case "activity":
+				return RES_ACTIVITY, nil
+			case "trigger":
+				return RES_TRIGGER, nil
+			default:
+				return RES_DEFAULT, fmt.Errorf("Unsupported resolver type [%s].", resType)
+			}
 		}
 	}
-	return RES_DEFAULT, nil
+	return RES_SCOPE, nil
 }
 
 func GetResolutionInfo(inAttrName string) (ResolverType, string, string, error) {
@@ -91,10 +94,10 @@ func GetResolutionInfo(inAttrName string) (ResolverType, string, string, error) 
 	idx := strings.IndexFunc(inAttrName,isSep)
 
 	if idx == -1 {
-		return RES_DEFAULT, inAttrName, "", nil
+		return RES_SCOPE, inAttrName, "", nil
 	}
 
-	return RES_DEFAULT, inAttrName[:idx],inAttrName[idx:], nil
+	return RES_SCOPE, inAttrName[:idx],inAttrName[idx:], nil
 }
 
 func isSep(r rune) bool  {
