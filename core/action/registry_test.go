@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
 type MockFactory struct {
@@ -25,7 +26,7 @@ func (m *MockAction) Metadata() *Metadata {
 	return nil
 }
 
-func (m *MockAction) Run(context context.Context, inputs map[string]interface{}, options map[string]interface{}, handler ResultHandler) error {
+func (m *MockAction) Run(context context.Context, inputs []*data.Attribute, options map[string]interface{}, handler ResultHandler) error {
 	return nil
 }
 

@@ -7,6 +7,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/stretchr/testify/assert"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
 //TestCreateTriggersOk
@@ -92,7 +93,7 @@ func (m *MockAction) Metadata() *action.Metadata {
 	return nil
 }
 
-func (m *MockAction) Run(context context.Context, inputs map[string]interface{}, options map[string]interface{}, handler action.ResultHandler) error {
+func (m *MockAction) Run(context context.Context, inputs []*data.Attribute, options map[string]interface{}, handler action.ResultHandler) error {
 	return nil
 }
 
