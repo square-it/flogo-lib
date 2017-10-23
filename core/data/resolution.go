@@ -91,10 +91,10 @@ func GetResolutionInfo(inAttrName string) (ResolverType, string, string, error) 
 	idx := strings.IndexFunc(inAttrName,isSep)
 
 	if idx == -1 {
-		return RES_DEFAULT, inAttrName, "", nil
+		return RES_SCOPE, inAttrName, "", nil
 	}
 
-	return RES_DEFAULT, inAttrName[:idx],inAttrName[idx:], nil
+	return RES_SCOPE, inAttrName[:idx],inAttrName[idx:], nil
 }
 
 func isSep(r rune) bool  {

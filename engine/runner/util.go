@@ -1,56 +1,85 @@
 package runner
 
 import (
-	"context"
-
+	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
-type OldTAInputGenerator struct {
-	ctx context.Context
+
+/*
+func NewTriggerActionInputGenerator(metadata *Metadata, config *HandlerConfig, outputs map[string]interface{}) *TriggerActionInputGenerator {
+
+	outAttrs := metadata.Output
+
+	attrs := make([]*data.Attribute, 0, len(outAttrs))
+
+	for name, outAttr := range outAttrs {
+		value, exists := outputs[name]
+
+		if !exists {
+			value, exists = config.GetOutput(name)
+		}
+
+		//todo if complex_object, handle referenced metadata
+
+		if exists {
+			attrs = append(attrs, data.NewAttribute(name, outAttr.Type, value))
+		}
+	}
+
+	return &TriggerActionInputGenerator{handlerConfig: config, triggerOutputs: attrs}
 }
 
-func NewOldTAInputGenerator(ctx context.Context) *OldTAInputGenerator {
+ */
+func generateInputs(act action.Action, ctxData *trigger.ContextData) ([]*data.Attribute) {
 
-	return &OldTAInputGenerator{ctx: ctx}
-}
-
-func (ig *OldTAInputGenerator) GenerateInputs(inputMetadata []*data.Attribute) map[string]interface{} {
-
-	if ig.ctx == nil {
+	if ctxData == nil || ctxData.Attrs == nil {
 		return nil
 	}
 
-	triggerAttrs, ok := trigger.FromContext(ig.ctx)
+	inputMetadata := action.GetConfigInputMetadata(act)
 
-	if ok {
-		attrs := make(map[string]interface{})
+	if ctxData.HandlerCfg != nil && inputMetadata != nil {
 
-		if len(triggerAttrs) > 0 {
-			logger.Debug("Run Attributes:")
+		outputMapper := ctxData.HandlerCfg.GetActionInputMapper()
 
-			for _, attr := range triggerAttrs {
+		outScope := data.NewFixedScope(inputMetadata)
+		inScope := data.NewSimpleScope(ctxData.Attrs, nil)
+
+		outputMapper.Apply(inScope, outScope)
+
+		attrs := outScope.GetAttrs()
+
+		inputs := make([]*data.Attribute, 0, len(inputMetadata))
+
+		for _, attr := range attrs {
+			inputs = append(inputs, attr)
+		}
+
+		return inputs
+
+	} else {
+		// for backwards compatibility make trigger outputs map directly to action inputs
+
+		if len(ctxData.Attrs) > 0 {
+			logger.Debug("No mapping specified, adding trigger outputs as inputs to action")
+
+			inputs := make([]*data.Attribute, 0, len(ctxData.Attrs))
+
+			for _, attr := range ctxData.Attrs {
 
 				logger.Debugf(" Attr: %s, Type: %s, Value: %v", attr.Name, attr.Type.String(), attr.Value)
 				attrName := "_T." + attr.Name
 
-				attrs[attrName] = data.NewAttribute(attrName, attr.Type, attr.Value)
-
-				//// Keep Temporarily, for short ttterm backwards compatibility
-				//attrName1 := "{T." + attr.Name + "}"
-				//
-				//attrName2 := "{TriggerData." + attr.Name + "}"
-				//attrs[attrName2] = data.NewAttribute(attrName2, attr.Type, attr.Value)
-				//
-				//attrName3 := "${trigger." + attr.Name + "}"
-				//attrs[attrName3] = data.NewAttribute(attrName3, attr.Type, attr.Value)
+				inputs = append(inputs, data.NewAttribute(attrName, attr.Type, attr.Value))
 			}
-		}
 
-		return attrs
+			return inputs
+		}
 	}
 
 	return nil
 }
+

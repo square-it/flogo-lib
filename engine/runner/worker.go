@@ -6,6 +6,7 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 )
 
 // Based off: http://nesv.github.io/golang/2014/02/25/worker-queues-in-go.html
@@ -29,7 +30,6 @@ type ActionWorkRequest struct {
 type ActionData struct {
 	context        context.Context
 	action         action.Action
-	inputGenerator action.InputGenerator
 	options        map[string]interface{}
 	arc            chan (*ActionResult)
 }
@@ -93,10 +93,18 @@ func (w ActionWorker) Start() {
 
 					act := actionData.action
 
-					var inputs map[string]interface{}
-					if actionData.inputGenerator != nil {
-						inputs = actionData.inputGenerator.GenerateInputs(action.GetConfigInputMetadata(act))
+					var ctxData *trigger.ContextData
+
+					if actionData.context != nil {
+						var exists bool
+						ctxData, exists = trigger.ExtractContextData(actionData.context)
+
+						if !exists {
+							logger.Warn("Trigger data not applied to context")
+						}
 					}
+
+					inputs := generateInputs(act, ctxData)
 
 					err := act.Run(actionData.context, inputs, actionData.options, handler)
 
