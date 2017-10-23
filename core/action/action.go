@@ -15,7 +15,7 @@ type Action interface {
 	Metadata() *Metadata
 
 	// Run this Action
-	Run(context context.Context, inputs map[string]interface{}, options map[string]interface{}, handler ResultHandler) error
+	Run(context context.Context, inputs []*data.Attribute, options map[string]interface{}, handler ResultHandler) error
 }
 
 // Factory is used to create new instances for an action
@@ -28,13 +28,7 @@ type Runner interface {
 	Run(context context.Context, action Action, uri string, options interface{}) (code int, data interface{}, err error)
 
 	//Run the specified Action
-	RunAction(context context.Context, actionID string, inputGenerator InputGenerator, options map[string]interface{}) (results map[string]interface{}, err error)
-}
-
-//TODO REVIEW - Need a way to package the output of the trigger, its metadata, and the corresponding mapper
-//TODO        - so it doesn't get evaluated until Action.Run, probably needs a better name
-type InputGenerator interface {
-	GenerateInputs(inputMetadata []*data.Attribute) map[string]interface{}
+	RunAction(ctx context.Context, act Action, options map[string]interface{}) (results map[string]interface{}, err error)
 }
 
 // ResultHandler used to handle results from the Action

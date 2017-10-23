@@ -65,7 +65,13 @@ func CoerceToString(val interface{}) (string, error) {
 		}
 		return string(b), nil
 	default:
-		return "", fmt.Errorf("Unable to Coerce %#v to string", t)
+		b, err := json.Marshal(t)
+		if err != nil {
+			return "", fmt.Errorf("Unable to Coerce %#v to string", t)
+		}
+		return string(b), nil
+
+		//return "", fmt.Errorf("Unable to Coerce %#v to string", t)
 	}
 }
 
