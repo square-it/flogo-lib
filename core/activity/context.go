@@ -1,11 +1,13 @@
 package activity
 
+import "github.com/TIBCOSoftware/flogo-lib/core/action"
+
 // Context describes the execution context for an Activity.
 // It provides access to attributes, task and Flow information.
 type Context interface {
 
-	// FlowDetails returns the details fo the Flow Instance
-	FlowDetails() FlowDetails
+	// FlowDetails gets the action.Context under with the activity is executing
+	ActionContext() action.Context
 
 	// TaskName returns the name of the Task the Activity is currently executing
 	TaskName() string
@@ -18,8 +20,13 @@ type Context interface {
 
 	// SetOutput sets the value of the specified output attribute
 	SetOutput(name string, value interface{})
+
+	//Deprecated
+	// FlowDetails returns the details fo the Flow Instance
+	FlowDetails() FlowDetails
 }
 
+// Deprecated
 // FlowDetails details of the flow that is being executed
 type FlowDetails interface {
 
