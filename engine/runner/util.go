@@ -17,7 +17,7 @@ func NewOldTAInputGenerator(ctx context.Context) *OldTAInputGenerator {
 	return &OldTAInputGenerator{ctx: ctx}
 }
 
-func (ig *OldTAInputGenerator) GenerateInputs(inputMetadata map[string]*data.Attribute) map[string]interface{} {
+func (ig *OldTAInputGenerator) GenerateInputs(inputMetadata []*data.Attribute) map[string]interface{} {
 
 	if ig.ctx == nil {
 		return nil

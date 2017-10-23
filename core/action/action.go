@@ -34,7 +34,7 @@ type Runner interface {
 //TODO REVIEW - Need a way to package the output of the trigger, its metadata, and the corresponding mapper
 //TODO        - so it doesn't get evaluated until Action.Run, probably needs a better name
 type InputGenerator interface {
-	GenerateInputs(inputMetadata map[string]*data.Attribute) map[string]interface{}
+	GenerateInputs(inputMetadata []*data.Attribute) map[string]interface{}
 }
 
 // ResultHandler used to handle results from the Action
