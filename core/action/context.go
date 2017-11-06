@@ -21,10 +21,11 @@ type Context interface {
 	// todo see which reply makes more sense
 	ReplyWithAttrs(replyData map[string]*data.Attribute, err error)
 
+	Return(data map[string]*data.Attribute, err error)
+
 	//todo rename, essentially the flow's attrs for now
 	WorkingData() data.Scope
 
-	//todo add a complete method
 
 	//Map with action specific properties
 }

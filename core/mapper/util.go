@@ -112,3 +112,26 @@ func (e *assignExpr) Eval(scope data.Scope) (interface{}, error) {
 	err = data.PathSetValue(attr.Value, e.assignAttrPath, e.value)
 	return nil, err
 }
+
+
+func NewBasicMapperFromAnyArray(mappings []interface{}) (data.Mapper, error) {
+
+	var mappingDefs []*data.MappingDef
+
+	for _, mapping := range mappings {
+
+		mappingObject := mapping.(map[string]interface{})
+
+		mappingType := int(mappingObject["type"].(float64))
+		value := mappingObject["value"]
+		mapTo := mappingObject["mapTo"].(string)
+
+		mappingDef := &data.MappingDef{Type:data.MappingType(mappingType), MapTo:mapTo, Value:value}
+		mappingDefs = append(mappingDefs, mappingDef)
+	}
+
+	mapperDef := &data.MapperDef{Mappings:mappingDefs}
+	basicMapper := NewBasicMapper(mapperDef)
+
+	return basicMapper, nil
+}
