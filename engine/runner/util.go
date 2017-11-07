@@ -71,8 +71,9 @@ func generateInputs(act action.Action, ctxData *trigger.ContextData) ([]*data.At
 			for _, attr := range ctxData.Attrs {
 
 				logger.Debugf(" Attr: %s, Type: %s, Value: %v", attr.Name, attr.Type.String(), attr.Value)
-				attrName := "_T." + attr.Name
+				inputs = append(inputs, data.NewAttribute( attr.Name, attr.Type, attr.Value))
 
+				attrName := "_T." + attr.Name
 				inputs = append(inputs, data.NewAttribute(attrName, attr.Type, attr.Value))
 			}
 
