@@ -26,9 +26,8 @@ func (m *MockAction) Metadata() *action.Metadata {
 func (m *MockAction) Run(context context.Context, inputs []*data.Attribute, options map[string]interface{}, handler action.ResultHandler) error {
 	args := m.Called(context, inputs, options, handler)
 	if handler != nil {
-		mockData,_ :=data.CoerceToObject("{\"data\":\"mock\"}")
 		resultData := map[string]*data.Attribute {
-			"data":data.NewAttribute("data", data.OBJECT, mockData ),
+			"data":data.NewAttribute("data", data.STRING, "mock" ),
 			"code":data.NewAttribute("code", data.INTEGER, 200),
 		}
 		handler.HandleResult(resultData, nil)
