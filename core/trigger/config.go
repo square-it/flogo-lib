@@ -111,6 +111,10 @@ type Mappings struct {
 	Output []*data.MappingDef `json:"output,omitempty"`
 }
 
+func (hc *HandlerConfig) GetTriggerConfig() *Config{
+	return hc.parent
+}
+
 //todo revisit this method, what should we return if there is an error or dne
 func (hc *HandlerConfig) GetSetting(setting string) string {
 	val, exists := hc.Settings[setting]

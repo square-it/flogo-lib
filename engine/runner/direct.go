@@ -78,6 +78,8 @@ func (runner *DirectRunner) Run(ctx context.Context, act action.Action, uri stri
 		}
 	}
 
+
+
 	return code, data, err
 }
 
@@ -106,7 +108,13 @@ func (runner *DirectRunner) RunAction(ctx context.Context, act action.Action, op
 
 	<-handler.done
 
-	return handler.Result()
+	actionOutput, err :=  handler.Result()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return generateOutputs(act, ctxData, actionOutput), nil
 }
 
 // SyncResultHandler simple result handler to use in synchronous case
@@ -114,12 +122,17 @@ type SyncResultHandler struct {
 	done       chan (bool)
 	resultData map[string]*data.Attribute
 	err        error
+	set        bool
 }
 
 // HandleResult implements action.ResultHandler.HandleResult
 func (rh *SyncResultHandler) HandleResult(resultData map[string]*data.Attribute, err error) {
-	rh.resultData = resultData
-	rh.err = err
+
+	if !rh.set {
+		rh.set = true
+		rh.resultData = resultData
+		rh.err = err
+	}
 }
 
 // Done implements action.ResultHandler.Done
