@@ -39,7 +39,7 @@ func TestResultOk(t *testing.T) {
 
 	resultData, _ := data.CoerceToObject("{\"data\":\"mock data\"}")
 	resultData["code"] = 1
-	rh := &SyncResultHandler{data: resultData, err: errors.New("New Error")}
+	rh := &SyncResultHandler{resultData: resultData, err: errors.New("New Error")}
 	data, err := rh.Result()
 	assert.Equal(t, 1, data["code"])
 	assert.Equal(t, "mock data", data["data"])
