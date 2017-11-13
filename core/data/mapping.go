@@ -14,6 +14,8 @@ const (
 	MtExpression MappingType = 3
 )
 
+
+
 // MappingDef is a simple structure that defines a mapping
 type MappingDef struct {
 	//Type the mapping type

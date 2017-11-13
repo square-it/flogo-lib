@@ -7,6 +7,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
 // Based off: http://nesv.github.io/golang/2014/02/25/worker-queues-in-go.html
@@ -36,7 +37,7 @@ type ActionData struct {
 
 // ActionResult is a simple struct to hold the results for an Action
 type ActionResult struct {
-	results map[string]interface{}
+	results map[string]*data.Attribute
 	err     error
 }
 
@@ -158,7 +159,7 @@ type AsyncResultHandler struct {
 }
 
 // HandleResult implements action.ResultHandler.HandleResult
-func (rh *AsyncResultHandler) HandleResult(results map[string]interface{}, err error) {
+func (rh *AsyncResultHandler) HandleResult(results map[string]*data.Attribute, err error) {
 	rh.replied = true
 	rh.result <- &ActionResult{results: results, err: err}
 }

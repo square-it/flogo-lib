@@ -7,6 +7,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
 // DirectRunner runs an action synchronously
@@ -69,19 +70,21 @@ func (runner *DirectRunner) Run(ctx context.Context, act action.Action, uri stri
 	if len(ndata) != 0 {
 		defData, ok := ndata["data"]
 		if ok {
-			data = defData
+			data = defData.Value
 		}
 		defCode, ok := ndata["code"]
 		if ok {
-			code = defCode.(int)
+			code = defCode.Value.(int)
 		}
 	}
+
+
 
 	return code, data, err
 }
 
 // Run the specified action
-func (runner *DirectRunner) RunAction(ctx context.Context, act action.Action, options map[string]interface{}) (results map[string]interface{}, err error) {
+func (runner *DirectRunner) RunAction(ctx context.Context, act action.Action, options map[string]interface{}) (results map[string]*data.Attribute, err error) {
 
 	if act == nil {
 		return nil, errors.New("Action not specified")
@@ -105,20 +108,31 @@ func (runner *DirectRunner) RunAction(ctx context.Context, act action.Action, op
 
 	<-handler.done
 
-	return handler.Result()
+	actionOutput, err :=  handler.Result()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return generateOutputs(act, ctxData, actionOutput), nil
 }
 
 // SyncResultHandler simple result handler to use in synchronous case
 type SyncResultHandler struct {
-	done chan (bool)
-	data map[string]interface{}
-	err  error
+	done       chan (bool)
+	resultData map[string]*data.Attribute
+	err        error
+	set        bool
 }
 
 // HandleResult implements action.ResultHandler.HandleResult
-func (rh *SyncResultHandler) HandleResult(data map[string]interface{}, err error) {
-	rh.data = data
-	rh.err = err
+func (rh *SyncResultHandler) HandleResult(resultData map[string]*data.Attribute, err error) {
+
+	if !rh.set {
+		rh.set = true
+		rh.resultData = resultData
+		rh.err = err
+	}
 }
 
 // Done implements action.ResultHandler.Done
@@ -127,6 +141,6 @@ func (rh *SyncResultHandler) Done() {
 }
 
 // Result returns the latest Result set on the handler
-func (rh *SyncResultHandler) Result() (data map[string]interface{}, err error) {
-	return rh.data, rh.err
+func (rh *SyncResultHandler) Result() (resultData map[string]*data.Attribute, err error) {
+	return rh.resultData, rh.err
 }

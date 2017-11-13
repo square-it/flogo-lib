@@ -63,6 +63,18 @@ func newSimpleScope(attrs []*Attribute, parentScope Scope) *SimpleScope {
 	return scope
 }
 
+// NewSimpleScopeFromMap creates a new SimpleScope
+func NewSimpleScopeFromMap(attrs map[string]*Attribute, parentScope Scope) *SimpleScope {
+
+	scope := &SimpleScope{
+		parentScope: parentScope,
+		attrs:       attrs,
+	}
+
+	return scope
+}
+
+
 // GetAttr implements Scope.GetAttr
 func (s *SimpleScope) GetAttr(name string) (attr *Attribute, exists bool) {
 
@@ -174,6 +186,16 @@ func NewFixedScope(metadata []*Attribute) *FixedScope {
 
 	for _, attr := range metadata {
 		scope.metadata[attr.Name] = attr
+	}
+
+	return scope
+}
+
+func NewFixedScopeFromMap(metadata map[string]*Attribute) *FixedScope {
+
+	scope := &FixedScope{
+		metadata: metadata,
+		attrs:    make(map[string]*Attribute),
 	}
 
 	return scope

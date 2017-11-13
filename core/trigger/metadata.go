@@ -41,6 +41,7 @@ func (md *Metadata) UnmarshalJSON(b []byte) error {
 		Settings []*data.Attribute `json:"settings"`
 		Output   []*data.Attribute `json:"output"`
 		Reply    []*data.Attribute `json:"reply"`
+
 		//for backwards compatibility
 		Endpoint *HandlerMetadata  `json:"endpoint"`
 		Outputs  []*data.Attribute `json:"outputs"`

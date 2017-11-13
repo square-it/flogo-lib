@@ -8,31 +8,6 @@ import (
 )
 
 
-/*
-func NewTriggerActionInputGenerator(metadata *Metadata, config *HandlerConfig, outputs map[string]interface{}) *TriggerActionInputGenerator {
-
-	outAttrs := metadata.Output
-
-	attrs := make([]*data.Attribute, 0, len(outAttrs))
-
-	for name, outAttr := range outAttrs {
-		value, exists := outputs[name]
-
-		if !exists {
-			value, exists = config.GetOutput(name)
-		}
-
-		//todo if complex_object, handle referenced metadata
-
-		if exists {
-			attrs = append(attrs, data.NewAttribute(name, outAttr.Type, value))
-		}
-	}
-
-	return &TriggerActionInputGenerator{handlerConfig: config, triggerOutputs: attrs}
-}
-
- */
 func generateInputs(act action.Action, ctxData *trigger.ContextData) ([]*data.Attribute) {
 
 	if ctxData == nil || ctxData.Attrs == nil {
@@ -79,6 +54,31 @@ func generateInputs(act action.Action, ctxData *trigger.ContextData) ([]*data.At
 
 			return inputs
 		}
+	}
+
+	return nil
+}
+
+func generateOutputs(act action.Action, ctxData *trigger.ContextData, actionResults map[string]*data.Attribute) (map [string]*data.Attribute) {
+
+	if len(actionResults) == 0 {
+		return nil
+	}
+
+	outputMetadata := action.GetConfigOutputMetadata(act)
+
+	if ctxData.HandlerCfg != nil && outputMetadata != nil {
+
+		outputMapper := ctxData.HandlerCfg.GetActionOutputMapper()
+
+		triggerId := ctxData.HandlerCfg.GetTriggerConfig().Id
+		triggerMd := trigger.Instance(triggerId).Interf.Metadata()
+		outScope := data.NewFixedScopeFromMap(triggerMd.Reply)
+		inScope := data.NewSimpleScopeFromMap(actionResults, nil)
+
+		outputMapper.Apply(inScope, outScope)
+
+		return outScope.GetAttrs()
 	}
 
 	return nil

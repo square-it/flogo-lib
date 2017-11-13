@@ -6,6 +6,7 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
 // PooledRunner is a action runner that queues and runs a action in a worker pool
@@ -119,11 +120,11 @@ func (runner *PooledRunner) Run(ctx context.Context, act action.Action, uri stri
 		if len(ndata) != 0 {
 			defData, ok := ndata["data"]
 			if ok {
-				data = defData
+				data = defData.Value
 			}
 			defCode, ok := ndata["code"]
 			if ok {
-				code = defCode.(int)
+				code = defCode.Value.(int)
 			}
 		}
 
@@ -134,7 +135,7 @@ func (runner *PooledRunner) Run(ctx context.Context, act action.Action, uri stri
 }
 
 // Run implements action.Runner.Run
-func (runner *PooledRunner) RunAction(ctx context.Context, act action.Action, options map[string]interface{}) (results map[string]interface{}, err error) {
+func (runner *PooledRunner) RunAction(ctx context.Context, act action.Action, options map[string]interface{}) (results map[string]*data.Attribute, err error) {
 
 	if act == nil {
 		return nil, errors.New("Action not specified")

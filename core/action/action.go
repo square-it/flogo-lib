@@ -28,13 +28,13 @@ type Runner interface {
 	Run(context context.Context, action Action, uri string, options interface{}) (code int, data interface{}, err error)
 
 	//Run the specified Action
-	RunAction(ctx context.Context, act Action, options map[string]interface{}) (results map[string]interface{}, err error)
+	RunAction(ctx context.Context, act Action, options map[string]interface{}) (results map[string]*data.Attribute, err error)
 }
 
 // ResultHandler used to handle results from the Action
 type ResultHandler interface {
 
-	HandleResult(results map[string]interface{}, err error)
+	HandleResult(results map[string]*data.Attribute, err error)
 
 	Done()
 }

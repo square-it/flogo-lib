@@ -44,8 +44,10 @@ func (m *MockResultAction) Metadata() *action.Metadata {
 func (m *MockResultAction) Run(context context.Context, inputs []*data.Attribute, options map[string]interface{}, handler action.ResultHandler) error {
 	args := m.Called(context, inputs, options, handler)
 	go func() {
-		resultData, _ := data.CoerceToObject("{\"data\":\"mock\"}")
-		resultData["code"] = 200
+		resultData := map[string]*data.Attribute {
+			"data":data.NewAttribute("data", data.STRING, "mock" ),
+			"code":data.NewAttribute("code", data.INTEGER, 200),
+		}
 		handler.HandleResult(resultData, nil)
 		handler.Done()
 	}()
