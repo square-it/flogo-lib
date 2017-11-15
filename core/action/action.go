@@ -25,6 +25,7 @@ type Factory interface {
 
 // Runner runs actions
 type Runner interface {
+	//DEPRECATED
 	Run(context context.Context, action Action, uri string, options interface{}) (code int, data interface{}, err error)
 
 	//Run the specified Action
