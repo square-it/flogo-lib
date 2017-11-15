@@ -11,6 +11,7 @@ type Metadata struct {
 	ID      string
 	Input   map[string]*data.Attribute
 	Output  map[string]*data.Attribute
+	ProducesResult bool
 }
 
 // NewMetadata creates the metadata object from its json representation
@@ -32,6 +33,8 @@ func (md *Metadata) UnmarshalJSON(b []byte) error {
 		Ref     string            `json:"ref"`
 		Input   []*data.Attribute `json:"input"`
 		Output  []*data.Attribute `json:"output"`
+		Return  bool              `json:"return"`
+		Reply   bool              `json:"reply"`
 		//for backwards compatibility
 		Inputs  []*data.Attribute `json:"inputs"`
 		Outputs []*data.Attribute `json:"outputs"`
@@ -49,6 +52,7 @@ func (md *Metadata) UnmarshalJSON(b []byte) error {
 		md.ID = ser.Name
 	}
 
+	md.ProducesResult = ser.Reply || ser.Return
 	md.Input = make(map[string]*data.Attribute, len(ser.Inputs))
 	md.Output = make(map[string]*data.Attribute, len(ser.Outputs))
 
