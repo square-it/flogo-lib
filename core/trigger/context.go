@@ -21,8 +21,8 @@ func NewContext(parentCtx context.Context, attrs []*data.Attribute) context.Cont
 	return context.WithValue(parentCtx, ctxDataKey, ctxData)
 }
 
-func NewContextData(attrs []*data.Attribute, config *HandlerConfig) *ContextData {
-	return &ContextData{Attrs:attrs, HandlerCfg:config}
+func NewInitialContext(attrs []*data.Attribute, config *HandlerConfig) context.Context {
+	return context.WithValue(context.Background(), ctxDataKey,  &ContextData{Attrs: attrs, HandlerCfg: config})
 }
 
 // NewContext returns a new Context that carries the trigger data.
