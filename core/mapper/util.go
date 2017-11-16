@@ -113,8 +113,7 @@ func (e *assignExpr) Eval(scope data.Scope) (interface{}, error) {
 	return nil, err
 }
 
-
-func NewBasicMapperFromAnyArray(mappings []interface{}) (data.Mapper, error) {
+func NewMapperDefFromAnyArray(mappings []interface{}) (*data.MapperDef, error) {
 
 	var mappingDefs []*data.MappingDef
 
@@ -130,8 +129,5 @@ func NewBasicMapperFromAnyArray(mappings []interface{}) (data.Mapper, error) {
 		mappingDefs = append(mappingDefs, mappingDef)
 	}
 
-	mapperDef := &data.MapperDef{Mappings:mappingDefs}
-	basicMapper := NewBasicMapper(mapperDef)
-
-	return basicMapper, nil
+	return &data.MapperDef{Mappings:mappingDefs}, nil
 }
