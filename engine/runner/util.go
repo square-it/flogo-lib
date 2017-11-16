@@ -81,6 +81,6 @@ func generateOutputs(act action.Action, ctxData *trigger.ContextData, actionResu
 		return outScope.GetAttrs()
 	}
 
-	return nil
+	return actionResults
 }
 
