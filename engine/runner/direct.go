@@ -67,18 +67,18 @@ func (runner *DirectRunner) Run(ctx context.Context, act action.Action, uri stri
 
 	ndata, err := handler.Result()
 
+	results := generateOutputs(act, ctxData, ndata)
+
 	if len(ndata) != 0 {
-		defData, ok := ndata["data"]
+		defData, ok := results["data"]
 		if ok {
 			data = defData.Value
 		}
-		defCode, ok := ndata["code"]
+		defCode, ok := results["code"]
 		if ok {
 			code = defCode.Value.(int)
 		}
 	}
-
-
 
 	return code, data, err
 }

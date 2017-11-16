@@ -72,6 +72,7 @@ func (md *Metadata) UnmarshalJSON(b []byte) error {
 
 	md.Settings = make(map[string]*data.Attribute, len(ser.Settings))
 	md.Output = make(map[string]*data.Attribute, len(ser.Outputs))
+	md.Reply = make(map[string]*data.Attribute, len(ser.Reply))
 
 	for _, attr := range ser.Settings {
 		md.Settings[attr.Name] = attr
@@ -86,6 +87,10 @@ func (md *Metadata) UnmarshalJSON(b []byte) error {
 		for _, attr := range ser.Outputs {
 			md.Output[attr.Name] = attr
 		}
+	}
+
+	for _, attr := range ser.Reply {
+		md.Reply[attr.Name] = attr
 	}
 
 	return nil

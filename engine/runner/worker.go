@@ -120,6 +120,7 @@ func (w ActionWorker) Start() {
 							select {
 							case result := <-handler.result:
 								logger.Debugf("*** Worker received result: %v\n", result)
+								result.results = generateOutputs(act, ctxData, result.results)
 								actionData.arc <- result
 							case <-handler.done:
 								if !handler.replied {
