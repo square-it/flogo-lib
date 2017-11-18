@@ -24,6 +24,12 @@ func (r *BasicResolver) Resolve(toResolve string, scope Scope) (value interface{
 	} else if strings.HasPrefix(toResolve, "$") {
 		details, err = GetResolutionDetails(toResolve[1:])
 	} else {
+
+		if scope == nil {
+			//todo is this what we should do in this circumstance? or throw an error?
+			return toResolve, nil
+		}
+
 		return SimpleScopeResolve(toResolve, scope)
 	}
 
