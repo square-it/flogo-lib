@@ -9,11 +9,11 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	"github.com/TIBCOSoftware/flogo-lib/config"
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
-	"github.com/TIBCOSoftware/flogo-lib/core/property"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/TIBCOSoftware/flogo-lib/util"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
 // Interface for the engine behaviour
@@ -67,10 +67,14 @@ func (e *EngineConfig) Init(directRunner bool) error {
 			e.actionRunner = runner.NewPooled(runnerConfig.Pooled)
 		}
 
+
+		propProvider := &app.PropertyProvider{}
 		// Initialize the properties
 		for id, value := range e.App.Properties {
-			property.Register(id, value)
+			propProvider.SetProperty(id, value)
 		}
+
+		data.SetPropertyProvider(propProvider)
 
 		instanceHelper := app.NewInstanceHelper(e.App, trigger.Factories(), action.Factories())
 

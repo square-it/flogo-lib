@@ -26,5 +26,7 @@ type Context interface {
 
 	//Map with action specific details/properties, flowId, etc.
 	//GetDetails() map[string]string
+
+	GetResolver() data.Resolver
 }
 

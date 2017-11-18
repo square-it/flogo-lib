@@ -304,3 +304,4 @@ func TestPathSetValue(t *testing.T) {
 	//assert.Nil(t, err)
 	//////todo check if map
 }
+
