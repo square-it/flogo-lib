@@ -12,9 +12,10 @@ const (
 
 	// MtExpression denotes a expression execution to perform mapping
 	MtExpression MappingType = 3
+
+	// MtObject denotes a object construction mapping
+	MtObject MappingType = 4
 )
-
-
 
 // MappingDef is a simple structure that defines a mapping
 type MappingDef struct {

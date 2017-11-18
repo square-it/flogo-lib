@@ -70,17 +70,17 @@ func (c *Config) FixUp(metadata *Metadata) {
 		// create mappers
 		if hc.ActionMappings != nil {
 			if hc.ActionMappings.Input != nil {
-				hc.actionInputMapper = mapper.GetFactory().NewMapper(&data.MapperDef{Mappings: hc.ActionMappings.Input})
+				hc.actionInputMapper = mapper.GetFactory().NewMapper(&data.MapperDef{Mappings: hc.ActionMappings.Input}, nil)
 			}
 			if hc.ActionMappings.Output != nil {
-				hc.actionOutputMapper = mapper.GetFactory().NewMapper(&data.MapperDef{Mappings: hc.ActionMappings.Output})
+				hc.actionOutputMapper = mapper.GetFactory().NewMapper(&data.MapperDef{Mappings: hc.ActionMappings.Output}, nil)
 			}
 		} else {
 			if hc.ActionInputMappings != nil {
-				hc.actionInputMapper = mapper.GetFactory().NewMapper(&data.MapperDef{Mappings: hc.ActionInputMappings})
+				hc.actionInputMapper = mapper.GetFactory().NewMapper(&data.MapperDef{Mappings: hc.ActionInputMappings}, nil)
 			}
 			if hc.ActionOutputMappings != nil {
-				hc.actionOutputMapper = mapper.GetFactory().NewMapper(&data.MapperDef{Mappings: hc.ActionOutputMappings})
+				hc.actionOutputMapper = mapper.GetFactory().NewMapper(&data.MapperDef{Mappings: hc.ActionOutputMappings}, nil)
 			}
 		}
 	}

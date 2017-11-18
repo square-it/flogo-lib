@@ -31,6 +31,9 @@ func NewContextWithData(parentCtx context.Context, contextData *ContextData) con
 }
 
 func ExtractContextData(ctx context.Context) (*ContextData, bool) {
+	if ctx == nil {
+		return nil, false
+	}
 	ctxDataVal := ctx.Value(ctxDataKey)
 	if ctxDataVal == nil {
 		return nil, false

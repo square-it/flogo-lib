@@ -5,19 +5,19 @@ import (
 	"sync"
 )
 
-func init() {
-	SetResolver(RES_SCOPE, Resolve)
-}
+//func init() {
+//	SetResolver(RES_SCOPE, Resolve)
+//}
 
 // Resolve will resolve a value in the given scope
-func Resolve(scope Scope, value string) (interface{}, bool) {
-	attr, ok := scope.GetAttr(value)
-	if !ok {
-		return nil, false
-	}
-
-	return attr.Value, true
-}
+//func Resolve(scope Scope, value string) (interface{}, bool) {
+//	attr, ok := scope.GetAttr(value)
+//	if !ok {
+//		return nil, false
+//	}
+//
+//	return attr.Value, true
+//}
 
 // Scope is a set of attributes that are accessible
 type Scope interface {
