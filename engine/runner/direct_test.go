@@ -72,7 +72,7 @@ func TestDirectStopOk(t *testing.T) {
 func TestDirectRunNilAction(t *testing.T) {
 	runner := NewDirect()
 	assert.NotNil(t, runner)
-	_, _, err := runner.Run(nil, nil, "", nil)
+	_, err := runner.RunAction(nil, nil, nil)
 	assert.NotNil(t, err)
 }
 
@@ -83,12 +83,51 @@ func TestDirectRunErr(t *testing.T) {
 	// Mock Action
 	mockAction := new(MockAction)
 	mockAction.On("Run", nil, mock.AnythingOfType("[]*data.Attribute"), mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("*runner.SyncResultHandler")).Return(errors.New("Action Error"))
-	_, _, err := runner.Run(nil, mockAction, "", nil)
+	_, err := runner.RunAction(nil, mockAction, nil)
 	assert.NotNil(t, err)
 }
 
 //Test Run method ok
 func TestDirectRunOk(t *testing.T) {
+	runner := NewDirect()
+	assert.NotNil(t, runner)
+	// Mock Action
+	mockAction := new(MockAction)
+
+	mockAction.On("Run", nil, mock.AnythingOfType("[]*data.Attribute"), mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("*runner.SyncResultHandler")).Return(nil)
+	results, err := runner.RunAction(nil, mockAction, nil)
+	assert.Nil(t, err)
+	assert.NotNil(t, results)
+	code, ok := results["code"]
+	assert.True(t,ok)
+	data, ok := results["data"]
+	assert.True(t,ok)
+	assert.Equal(t, 200, code.Value)
+	assert.Equal(t, "mock", data.Value)
+}
+
+
+//Test Run method with a nil action
+func TestDirectRunNilActionOld(t *testing.T) {
+	runner := NewDirect()
+	assert.NotNil(t, runner)
+	_, _, err := runner.Run(nil, nil, "", nil)
+	assert.NotNil(t, err)
+}
+
+//Test Run method with error running action
+func TestDirectRunErrOld(t *testing.T) {
+	runner := NewDirect()
+	assert.NotNil(t, runner)
+	// Mock Action
+	mockAction := new(MockAction)
+	mockAction.On("Run", nil, mock.AnythingOfType("[]*data.Attribute"), mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("*runner.SyncResultHandler")).Return(errors.New("Action Error"))
+	_, _, err := runner.Run(nil, mockAction, "", nil)
+	assert.NotNil(t, err)
+}
+
+//Test Run method ok
+func TestDirectRunOkOld(t *testing.T) {
 	runner := NewDirect()
 	assert.NotNil(t, runner)
 	// Mock Action

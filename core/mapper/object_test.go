@@ -1,7 +1,10 @@
 package mapper
 
-import "testing"
+import (
+	"testing"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
+)
 
 func Test_evalExpr(t *testing.T) {
-	evalExpr("{{1}}", nil)
+	evalExpr("{{1}}", nil, &data.BasicResolver{})
 }

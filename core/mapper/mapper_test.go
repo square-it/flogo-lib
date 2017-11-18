@@ -2,6 +2,7 @@ package mapper
 
 import (
 	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
@@ -17,7 +18,7 @@ func TestLiteralMapper(t *testing.T) {
 
 	mappings := []*data.MappingDef{mapping1, mapping2, mapping3, mapping4}
 
-	mapper := factory.NewMapper(&data.MapperDef{Mappings: mappings})
+	mapper := factory.NewMapper(&data.MapperDef{Mappings: mappings}, nil)
 
 	attr1 := &data.Attribute{Name: "Simple", Type: data.INTEGER}
 	attr2 := &data.Attribute{Name: "Obj", Type: data.OBJECT}
@@ -49,18 +50,17 @@ func TestLiteralMapper(t *testing.T) {
 	err := mapper.Apply(nil, outScope)
 	assert.Nil(t, err)
 
-	expr := NewLookupExpr("${Obj}.key")
-	newVal, err := expr.Eval(outScope)
+	resolver := &data.BasicResolver{}
+
+	newVal, err := resolver.Resolve("Obj.key", outScope)
 	assert.Nil(t, err)
 	assert.Equal(t, 2, newVal)
 
-	expr = NewLookupExpr("${Array}[2]")
-	newVal, err = expr.Eval(outScope)
+	newVal, err = resolver.Resolve("Array[2]", outScope)
 	assert.Nil(t, err)
 	assert.Equal(t, 3, newVal)
 
-	expr = NewLookupExpr("${Params}.paramKey")
-	newVal, err = expr.Eval(outScope)
+	newVal, err = resolver.Resolve("Params.paramKey", outScope)
 	assert.Nil(t, err)
 	assert.Equal(t, "4", newVal)
 }
@@ -69,14 +69,14 @@ func TestAssignMapper(t *testing.T) {
 
 	factory := GetFactory()
 
-	mapping1 := &data.MappingDef{Type: data.MtAssign, Value: "${SimpleI}", MapTo: "SimpleO"}
-	mapping2 := &data.MappingDef{Type: data.MtAssign, Value: "${ObjI}.key", MapTo: "ObjO.key"}
-	mapping3 := &data.MappingDef{Type: data.MtAssign, Value: "${ArrayI}[2]", MapTo: "ArrayO[2]"}
-	mapping4 := &data.MappingDef{Type: data.MtAssign, Value: "${ParamsI}.paramKey", MapTo: "ParamsO.paramKey"}
+	mapping1 := &data.MappingDef{Type: data.MtAssign, Value: "SimpleI", MapTo: "SimpleO"}
+	mapping2 := &data.MappingDef{Type: data.MtAssign, Value: "ObjI.key", MapTo: "ObjO.key"}
+	mapping3 := &data.MappingDef{Type: data.MtAssign, Value: "ArrayI[2]", MapTo: "ArrayO[2]"}
+	mapping4 := &data.MappingDef{Type: data.MtAssign, Value: "ParamsI.paramKey", MapTo: "ParamsO.paramKey"}
 
 	mappings := []*data.MappingDef{mapping1, mapping2, mapping3, mapping4}
 
-	mapper := factory.NewMapper(&data.MapperDef{Mappings: mappings})
+	mapper := factory.NewMapper(&data.MapperDef{Mappings: mappings}, nil)
 
 	attrI1 := &data.Attribute{Name: "SimpleI", Type: data.INTEGER}
 	attrI2 := &data.Attribute{Name: "ObjI", Type: data.OBJECT}
@@ -117,18 +117,17 @@ func TestAssignMapper(t *testing.T) {
 	err := mapper.Apply(inScope, outScope)
 	assert.Nil(t, err)
 
-	expr := NewLookupExpr("${ObjO}.key")
-	newVal, err := expr.Eval(outScope)
+	resolver := &data.BasicResolver{}
+
+	newVal, err := resolver.Resolve("ObjO.key", outScope)
 	assert.Nil(t, err)
 	assert.Equal(t, 1.0, newVal)
 
-	expr = NewLookupExpr("${ArrayO}[2]")
-	newVal, err = expr.Eval(outScope)
+	newVal, err = resolver.Resolve("ArrayO[2]", outScope)
 	assert.Nil(t, err)
 	assert.Equal(t, 3.0, newVal)
 
-	expr = NewLookupExpr("${ParamsO}.paramKey")
-	newVal, err = expr.Eval(outScope)
+	newVal, err = resolver.Resolve("ParamsO.paramKey", outScope)
 	assert.Nil(t, err)
 	assert.Equal(t, "val1", newVal)
 }

@@ -65,6 +65,11 @@ func generateOutputs(act action.Action, ctxData *trigger.ContextData, actionResu
 		return nil
 	}
 
+	if ctxData == nil {
+		//for backwards compatibility
+		return actionResults
+	}
+
 	outputMetadata := action.GetConfigOutputMetadata(act)
 
 	if ctxData.HandlerCfg != nil && outputMetadata != nil {
