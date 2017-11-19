@@ -83,6 +83,6 @@ func evalExpr(exprString string, scope data.Scope, resolver data.Resolver) (inte
 
 	fmt.Printf(exprStr)
 	//support just assign for now
-
-	return resolver.Resolve(exprStr, scope)
+	//todo: optimization - trim whitspace when first creating object mapping
+	return resolver.Resolve( strings.TrimSpace(exprStr), scope)
 }
