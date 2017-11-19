@@ -67,8 +67,7 @@ func (e *EngineConfig) Init(directRunner bool) error {
 			e.actionRunner = runner.NewPooled(runnerConfig.Pooled)
 		}
 
-
-		propProvider := &app.PropertyProvider{}
+		propProvider := app.GetPropertyProvider()
 		// Initialize the properties
 		for id, value := range e.App.Properties {
 			propProvider.SetProperty(id, value)

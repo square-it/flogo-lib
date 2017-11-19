@@ -1,5 +1,16 @@
 package app
 
+
+var propertyProvider *PropertyProvider
+
+func init() {
+	propertyProvider = &PropertyProvider{properties:make(map[string]interface{})}
+}
+
+func GetPropertyProvider() *PropertyProvider {
+	return propertyProvider
+}
+
 type PropertyProvider struct {
 	properties map[string]interface{}
 }
