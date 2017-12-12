@@ -82,7 +82,6 @@ func (a *Attribute) UnmarshalJSON(data []byte) error {
 	a.dataType, _ = ToTypeEnum(ser.Type)
 	val, err := CoerceToValue(ser.Value, a.dataType)
 
-	return err
 	if err != nil {
 		return err
 	} else {
