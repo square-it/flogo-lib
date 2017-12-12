@@ -51,8 +51,8 @@ func TestResultOk(t *testing.T) {
 
 	rh := &SyncResultHandler{resultData: resultData, err: errors.New("New Error")}
 	data, err := rh.Result()
-	assert.Equal(t, 1, data["code"].Value)
-	assert.Equal(t, "mock data", data["data"].Value)
+	assert.Equal(t, 1, data["code"].Value())
+	assert.Equal(t, "mock data", data["data"].Value())
 	assert.NotNil(t, err)
 }
 
@@ -106,8 +106,8 @@ func TestDirectRunOk(t *testing.T) {
 	assert.True(t, ok)
 	data, ok := results["data"]
 	assert.True(t, ok)
-	assert.Equal(t, 200, code.Value)
-	assert.Equal(t, "mock", data.Value)
+	assert.Equal(t, 200, code.Value())
+	assert.Equal(t, "mock", data.Value())
 }
 
 //Test Run method with a nil action

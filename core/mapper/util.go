@@ -44,7 +44,7 @@ func (e *assignExpr) Eval(scope data.Scope) (interface{}, error) {
 		}
 	}
 
-	err = data.PathSetValue(attr.Value, e.assignAttrPath, e.value)
+	err = data.PathSetValue(attr.Value(), e.assignAttrPath, e.value)
 	return nil, err
 }
 

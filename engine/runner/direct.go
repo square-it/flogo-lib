@@ -72,7 +72,7 @@ func (runner *DirectRunner) Run(ctx context.Context, act action.Action, uri stri
 	if len(ndata) != 0 {
 		defData, ok := results["data"]
 		if ok {
-			data = defData.Value
+			data = defData.Value()
 		}
 		defCode, ok := results["code"]
 		if ok {
