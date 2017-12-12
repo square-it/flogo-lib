@@ -77,7 +77,7 @@ func SimpleScopeResolve(toResolve string, scope Scope) (value interface{}, err e
 		if !found {
 			return nil, fmt.Errorf("could not resolve '%s'", toResolve)
 		}
-		value, err := PathGetValue(attr.Value, toResolve[idx:])
+		value, err := PathGetValue(attr.Value(), toResolve[idx:])
 		if err != nil {
 			logger.Error(err.Error())
 			return nil, err
@@ -90,7 +90,7 @@ func SimpleScopeResolve(toResolve string, scope Scope) (value interface{}, err e
 			return nil, fmt.Errorf("could not resolve '%s'", toResolve)
 		}
 
-		return attr.Value, nil
+		return attr.Value(), nil
 	}
 }
 

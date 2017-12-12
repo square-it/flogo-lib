@@ -57,7 +57,7 @@ func newSimpleScope(attrs []*Attribute, parentScope Scope) *SimpleScope {
 	}
 
 	for _, attr := range attrs {
-		scope.attrs[attr.Name] = attr
+		scope.attrs[attr.Name()] = attr
 	}
 
 	return scope
@@ -73,7 +73,6 @@ func NewSimpleScopeFromMap(attrs map[string]*Attribute, parentScope Scope) *Simp
 
 	return scope
 }
-
 
 // GetAttr implements Scope.GetAttr
 func (s *SimpleScope) GetAttr(name string) (attr *Attribute, exists bool) {
@@ -97,7 +96,7 @@ func (s *SimpleScope) SetAttrValue(name string, value interface{}) error {
 	attr, found := s.attrs[name]
 
 	if found {
-		attr.Value = value
+		attr.SetValue(value)
 		return nil
 	}
 
@@ -110,9 +109,10 @@ func (s *SimpleScope) AddAttr(name string, valueType Type, value interface{}) *A
 	attr, found := s.attrs[name]
 
 	if found {
-		attr.Value = value
+		attr.SetValue(value)
 	} else {
-		attr = NewAttribute(name, valueType, value)
+		//todo handle error, add error to AddAttr signature
+		attr, _ = NewAttribute(name, valueType, value)
 		s.attrs[name] = attr
 	}
 
@@ -185,7 +185,7 @@ func NewFixedScope(metadata []*Attribute) *FixedScope {
 	}
 
 	for _, attr := range metadata {
-		scope.metadata[attr.Name] = attr
+		scope.metadata[attr.Name()] = attr
 	}
 
 	return scope
@@ -219,14 +219,14 @@ func (s *FixedScope) SetAttrValue(name string, value interface{}) error {
 	attr, found := s.attrs[name]
 
 	if found {
-		attr.Value = value
+		attr.SetValue(value)
 		return nil
 	} else {
 		metaAttr, found := s.metadata[name]
 		if found {
-			attr := NewAttribute(name, metaAttr.Type, value)
+			attr, err := NewAttribute(name, metaAttr.Type(), value)
 			s.attrs[name] = attr
-			return nil
+			return err
 		}
 	}
 

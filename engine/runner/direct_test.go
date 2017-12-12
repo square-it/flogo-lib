@@ -26,9 +26,11 @@ func (m *MockAction) Metadata() *action.Metadata {
 func (m *MockAction) Run(context context.Context, inputs []*data.Attribute, options map[string]interface{}, handler action.ResultHandler) error {
 	args := m.Called(context, inputs, options, handler)
 	if handler != nil {
-		resultData := map[string]*data.Attribute {
-			"data":data.NewAttribute("data", data.STRING, "mock" ),
-			"code":data.NewAttribute("code", data.INTEGER, 200),
+		dataAttr, _ := data.NewAttribute("data", data.STRING, "mock")
+		codeAttr, _ := data.NewAttribute("code", data.INTEGER, 200)
+		resultData := map[string]*data.Attribute{
+			"data": dataAttr,
+			"code": codeAttr,
 		}
 		handler.HandleResult(resultData, nil)
 		handler.Done()
@@ -40,15 +42,17 @@ func (m *MockAction) Run(context context.Context, inputs []*data.Attribute, opti
 func TestResultOk(t *testing.T) {
 
 	//mockData,_ :=data.CoerceToObject("{\"data\":\"mock data \"}")
-	resultData := map[string]*data.Attribute {
-		"data":data.NewAttribute("data", data.STRING, "mock data" ),
-		"code":data.NewAttribute("code", data.INTEGER, 1),
+	dataAttr, _ := data.NewAttribute("data", data.STRING, "mock data")
+	codeAttr, _ := data.NewAttribute("code", data.INTEGER, 1)
+	resultData := map[string]*data.Attribute{
+		"data": dataAttr,
+		"code": codeAttr,
 	}
 
 	rh := &SyncResultHandler{resultData: resultData, err: errors.New("New Error")}
 	data, err := rh.Result()
-	assert.Equal(t, 1, data["code"].Value)
-	assert.Equal(t, "mock data", data["data"].Value)
+	assert.Equal(t, 1, data["code"].Value())
+	assert.Equal(t, "mock data", data["data"].Value())
 	assert.NotNil(t, err)
 }
 
@@ -99,13 +103,12 @@ func TestDirectRunOk(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, results)
 	code, ok := results["code"]
-	assert.True(t,ok)
+	assert.True(t, ok)
 	data, ok := results["data"]
-	assert.True(t,ok)
-	assert.Equal(t, 200, code.Value)
-	assert.Equal(t, "mock", data.Value)
+	assert.True(t, ok)
+	assert.Equal(t, 200, code.Value())
+	assert.Equal(t, "mock", data.Value())
 }
-
 
 //Test Run method with a nil action
 func TestDirectRunNilActionOld(t *testing.T) {

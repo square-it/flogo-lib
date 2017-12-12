@@ -76,8 +76,8 @@ func TestWorkerStartOk(t *testing.T) {
 
 	assert.Nil(t, result.err)
 	assert.NotNil(t, result)
-	assert.Equal(t, 200, result.results["code"].Value)
-	assert.Equal(t, "mock", result.results["data"].Value)
+	assert.Equal(t, 200, result.results["code"].Value())
+	assert.Equal(t, "mock", result.results["data"].Value())
 }
 
 func createDefaultWorker() ActionWorker {

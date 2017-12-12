@@ -35,16 +35,16 @@ func (e *assignExpr) Eval(scope data.Scope) (interface{}, error) {
 	}
 
 	//temporary hack
-	if attr.Value == nil {
-		switch attr.Type {
+	if attr.Value() == nil {
+		switch attr.Type() {
 		case data.OBJECT:
-			attr.Value = make(map[string]interface{})
+			attr.SetValue(make(map[string]interface{}))
 		case data.PARAMS:
-			attr.Value = make(map[string]string)
+			attr.SetValue(make(map[string]string))
 		}
 	}
 
-	err = data.PathSetValue(attr.Value, e.assignAttrPath, e.value)
+	err = data.PathSetValue(attr.Value(), e.assignAttrPath, e.value)
 	return nil, err
 }
 

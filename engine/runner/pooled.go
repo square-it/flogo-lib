@@ -120,11 +120,11 @@ func (runner *PooledRunner) Run(ctx context.Context, act action.Action, uri stri
 		if len(ndata) != 0 {
 			defData, ok := ndata["data"]
 			if ok {
-				data = defData.Value
+				data = defData.Value()
 			}
 			defCode, ok := ndata["code"]
-			if ok && defCode.Value != nil {
-				code = defCode.Value.(int)
+			if ok && defCode.Value() != nil {
+				code = defCode.Value().(int)
 			}
 		}
 

@@ -164,6 +164,8 @@ func CoerceToObject(val interface{}) (map[string]interface{}, error) {
 			}
 		}
 		return m, nil
+	case nil:
+		return nil, nil
 	default:
 		return nil, fmt.Errorf("Unable to coerce %#v to map[string]interface{}", val)
 	}
@@ -190,6 +192,8 @@ func CoerceToArray(val interface{}) ([]interface{}, error) {
 			}
 		}
 		return a, nil
+	case nil:
+		return nil, nil
 	default:
 		return nil, fmt.Errorf("Unable to coerce %#v to []interface{}", val)
 	}
@@ -268,6 +272,8 @@ func CoerceToParams(val interface{}) (map[string]string, error) {
 			m[mKey] = mVal
 		}
 		return m, nil
+	case nil:
+		return nil, nil
 	default:
 		return nil, fmt.Errorf("Unable to coerce %#v to map[string]string", val)
 	}
@@ -378,7 +384,7 @@ func (h *MapHelper) ToAttributes(data map[string]interface{}, metadata []*Attrib
 
 	metadataMap := make(map[string]*Attribute)
 	for _, attr := range metadata {
-		metadataMap[attr.Name] = attr
+		metadataMap[attr.Name()] = attr
 	}
 
 	//todo do special handling for complex_object metadata (merge or ref it)
@@ -387,15 +393,15 @@ func (h *MapHelper) ToAttributes(data map[string]interface{}, metadata []*Attrib
 
 		if !exists {
 			if !ignoreExtras {
-				attrs = append(attrs,NewAttribute(key, ANY, value))
+				//todo handle error
+				attr, _ := NewAttribute(key, ANY, value)
+				attrs = append(attrs, attr)
 			}
 		} else {
-			attrs = append(attrs,NewAttribute(key, mdAttr.Type, value))
+			attr, _ := NewAttribute(key, mdAttr.Type(), value)
+			attrs = append(attrs, attr)
 		}
 	}
 
 	return attrs
 }
-
-
-

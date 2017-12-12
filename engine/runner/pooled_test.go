@@ -44,9 +44,11 @@ func (m *MockResultAction) Metadata() *action.Metadata {
 func (m *MockResultAction) Run(context context.Context, inputs []*data.Attribute, options map[string]interface{}, handler action.ResultHandler) error {
 	args := m.Called(context, inputs, options, handler)
 	go func() {
-		resultData := map[string]*data.Attribute {
-			"data":data.NewAttribute("data", data.STRING, "mock" ),
-			"code":data.NewAttribute("code", data.INTEGER, 200),
+		dataAttr, _ := data.NewAttribute("data", data.STRING, "mock")
+		codeAttr, _ := data.NewAttribute("code", data.INTEGER, 200)
+		resultData := map[string]*data.Attribute{
+			"data": dataAttr,
+			"code": codeAttr,
 		}
 		handler.HandleResult(resultData, nil)
 		handler.Done()
@@ -105,7 +107,7 @@ func TestRunErrorInAction(t *testing.T) {
 	err := runner.Start()
 	assert.Nil(t, err)
 	a := new(MockFullAction)
-	a.On("Run", nil,  mock.AnythingOfType("[]*data.Attribute"), mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("*runner.AsyncResultHandler")).Return(errors.New("Error in action"))
+	a.On("Run", nil, mock.AnythingOfType("[]*data.Attribute"), mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("*runner.AsyncResultHandler")).Return(errors.New("Error in action"))
 	_, _, err = runner.Run(nil, a, "mockAction", nil)
 	assert.NotNil(t, err)
 	assert.Equal(t, "Error in action", err.Error())
@@ -119,7 +121,7 @@ func TestRunOk(t *testing.T) {
 	err := runner.Start()
 	assert.Nil(t, err)
 	a := new(MockResultAction)
-	a.On("Run", nil,  mock.AnythingOfType("[]*data.Attribute"), mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("*runner.AsyncResultHandler")).Return(nil)
+	a.On("Run", nil, mock.AnythingOfType("[]*data.Attribute"), mock.AnythingOfType("map[string]interface {}"), mock.AnythingOfType("*runner.AsyncResultHandler")).Return(nil)
 	code, data, err := runner.Run(nil, a, "mockAction", nil)
 	assert.Nil(t, err)
 	assert.Equal(t, 200, code)
