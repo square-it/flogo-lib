@@ -124,7 +124,7 @@ func (runner *PooledRunner) Run(ctx context.Context, act action.Action, uri stri
 			}
 			defCode, ok := ndata["code"]
 			if ok && defCode.Value != nil {
-				code = defCode.Value.(int)
+				code = defCode.Value().(int)
 			}
 		}
 

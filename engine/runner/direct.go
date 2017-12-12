@@ -76,7 +76,7 @@ func (runner *DirectRunner) Run(ctx context.Context, act action.Action, uri stri
 		}
 		defCode, ok := results["code"]
 		if ok {
-			code = defCode.Value.(int)
+			code = defCode.Value().(int)
 		}
 	}
 
@@ -108,7 +108,7 @@ func (runner *DirectRunner) RunAction(ctx context.Context, act action.Action, op
 
 	<-handler.done
 
-	actionOutput, err :=  handler.Result()
+	actionOutput, err := handler.Result()
 
 	if err != nil {
 		return nil, err

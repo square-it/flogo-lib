@@ -75,28 +75,29 @@ func (md *Metadata) UnmarshalJSON(b []byte) error {
 	md.Reply = make(map[string]*data.Attribute, len(ser.Reply))
 
 	for _, attr := range ser.Settings {
-		md.Settings[attr.Name] = attr
+		md.Settings[attr.Name()] = attr
 	}
 
 	if len(ser.Output) > 0 {
 		for _, attr := range ser.Output {
-			md.Output[attr.Name] = attr
+			md.Output[attr.Name()] = attr
 		}
 	} else {
 		// for backwards compatibility
 		for _, attr := range ser.Outputs {
-			md.Output[attr.Name] = attr
+			md.Output[attr.Name()] = attr
 		}
 	}
 
 	for _, attr := range ser.Reply {
-		md.Reply[attr.Name] = attr
+		md.Reply[attr.Name()] = attr
 	}
 
 	return nil
 }
 
 // OutputsToAttrs converts the supplied output data to attributes
+// todo remove coerce option, coercion now happens by default
 func (md *Metadata) OutputsToAttrs(outputData map[string]interface{}, coerce bool) ([]*data.Attribute, error) {
 
 	attrs := make([]*data.Attribute, 0, len(md.Output))
@@ -104,16 +105,22 @@ func (md *Metadata) OutputsToAttrs(outputData map[string]interface{}, coerce boo
 	for k, a := range md.Output {
 		v, _ := outputData[k]
 
-		if coerce {
-			var err error
-			v, err = data.CoerceToValue(v, a.Type)
+		//if coerce {
+		//	var err error
+		//	v, err = data.CoerceToValue(v, a.Type)
+		//
+		//	if err != nil {
+		//		return nil, err
+		//	}
+		//}
 
-			if err != nil {
-				return nil, err
-			}
+		var err error
+		attr, err := data.NewAttribute(a.Name(), a.Type(), v)
+		attrs = append(attrs, attr)
+
+		if err != nil {
+			return nil, err
 		}
-
-		attrs = append(attrs, data.NewAttribute(a.Name, a.Type, v))
 	}
 
 	return attrs, nil

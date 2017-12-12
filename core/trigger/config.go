@@ -31,7 +31,7 @@ func (c *Config) FixUp(metadata *Metadata) {
 		attr, ok := metadata.Output[name]
 
 		if ok {
-			newValue, err := data.CoerceToValue(value, attr.Type)
+			newValue, err := data.CoerceToValue(value, attr.Type())
 
 			if err != nil {
 				//todo handle error
@@ -57,7 +57,7 @@ func (c *Config) FixUp(metadata *Metadata) {
 			attr, ok := metadata.Output[name]
 
 			if ok {
-				newValue, err := data.CoerceToValue(value, attr.Type)
+				newValue, err := data.CoerceToValue(value, attr.Type())
 
 				if err != nil {
 					//todo handle error
@@ -96,14 +96,14 @@ type HandlerConfig struct {
 	ActionId           string                 `json:"actionId"`
 	Settings           map[string]interface{} `json:"settings"`
 	Output             map[string]interface{} `json:"output"`
-	ActionMappings     *Mappings `json:"actionMappings,omitempty"`
+	ActionMappings     *Mappings              `json:"actionMappings,omitempty"`
 	actionInputMapper  data.Mapper
 	actionOutputMapper data.Mapper
 
 	//for backwards compatibility
 	Outputs              map[string]interface{} `json:"outputs"`
-	ActionOutputMappings []*data.MappingDef `json:"actionOutputMappings,omitempty"`
-	ActionInputMappings  []*data.MappingDef `json:"actionInputMappings,omitempty"`
+	ActionOutputMappings []*data.MappingDef     `json:"actionOutputMappings,omitempty"`
+	ActionInputMappings  []*data.MappingDef     `json:"actionInputMappings,omitempty"`
 }
 
 type Mappings struct {
@@ -111,7 +111,7 @@ type Mappings struct {
 	Output []*data.MappingDef `json:"output,omitempty"`
 }
 
-func (hc *HandlerConfig) GetTriggerConfig() *Config{
+func (hc *HandlerConfig) GetTriggerConfig() *Config {
 	return hc.parent
 }
 
@@ -123,7 +123,7 @@ func (hc *HandlerConfig) GetSetting(setting string) string {
 		return ""
 	}
 
-	strVal, err :=  data.CoerceToString(val)
+	strVal, err := data.CoerceToString(val)
 
 	if err != nil {
 		return ""

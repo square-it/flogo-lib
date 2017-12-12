@@ -8,9 +8,9 @@ import (
 
 // Metadata is the metadata for the Activity
 type Metadata struct {
-	ID      string
-	Input   map[string]*data.Attribute
-	Output  map[string]*data.Attribute
+	ID             string
+	Input          map[string]*data.Attribute
+	Output         map[string]*data.Attribute
 	ProducesResult bool
 }
 
@@ -29,12 +29,12 @@ func NewMetadata(jsonMetadata string) *Metadata {
 func (md *Metadata) UnmarshalJSON(b []byte) error {
 
 	ser := &struct {
-		Name    string            `json:"name"`
-		Ref     string            `json:"ref"`
-		Input   []*data.Attribute `json:"input"`
-		Output  []*data.Attribute `json:"output"`
-		Return  bool              `json:"return"`
-		Reply   bool              `json:"reply"`
+		Name   string            `json:"name"`
+		Ref    string            `json:"ref"`
+		Input  []*data.Attribute `json:"input"`
+		Output []*data.Attribute `json:"output"`
+		Return bool              `json:"return"`
+		Reply  bool              `json:"reply"`
 		//for backwards compatibility
 		Inputs  []*data.Attribute `json:"inputs"`
 		Outputs []*data.Attribute `json:"outputs"`
@@ -58,23 +58,23 @@ func (md *Metadata) UnmarshalJSON(b []byte) error {
 
 	if len(ser.Input) > 0 {
 		for _, attr := range ser.Input {
-			md.Input[attr.Name] = attr
+			md.Input[attr.Name()] = attr
 		}
 	} else {
 		// for backwards compatibility
 		for _, attr := range ser.Inputs {
-			md.Input[attr.Name] = attr
+			md.Input[attr.Name()] = attr
 		}
 	}
 
 	if len(ser.Output) > 0 {
 		for _, attr := range ser.Output {
-			md.Output[attr.Name] = attr
+			md.Output[attr.Name()] = attr
 		}
 	} else {
 		// for backwards compatibility
 		for _, attr := range ser.Outputs {
-			md.Output[attr.Name] = attr
+			md.Output[attr.Name()] = attr
 		}
 	}
 
