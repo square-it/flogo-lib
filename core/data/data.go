@@ -24,6 +24,16 @@ func NewAttribute(name string, dataType Type, value interface{}) (*Attribute, er
 	return &attr, err
 }
 
+// NewZeroAttribute constructs a new attribute
+func NewZeroAttribute(name string, dataType Type) *Attribute {
+	var attr Attribute
+	attr.name = name
+	attr.dataType = dataType
+	attr.value, _ = CoerceToValue(nil, dataType)
+
+	return &attr
+}
+
 // CloneAttribute clones the given attribute assigning a new name
 func CloneAttribute(name string, oldAttr *Attribute) *Attribute {
 	var attr Attribute
