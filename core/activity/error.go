@@ -2,9 +2,10 @@ package activity
 
 // Error is an activity error
 type Error struct {
-	errorStr  string
-	errorCode string
-	errorData interface{}
+	activityName string
+	errorStr     string
+	errorCode    string
+	errorData    interface{}
 }
 
 func NewError(errorText string, code string, errorData interface{}) *Error {
@@ -14,6 +15,16 @@ func NewError(errorText string, code string, errorData interface{}) *Error {
 // Error implements error.Error()
 func (e *Error) Error() string {
 	return e.errorStr
+}
+
+// ActivityName the activity name
+func (e *Error) ActivityName() string {
+	return e.activityName
+}
+
+// Set the activity name
+func (e *Error) SetActivityName(name string) {
+	e.activityName = name
 }
 
 // Data returns any associated error data
