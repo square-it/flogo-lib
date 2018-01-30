@@ -12,6 +12,12 @@ type Resolver interface {
 	Resolve(toResolve string, scope Scope) (value interface{}, err error)
 }
 
+var resolver = &BasicResolver{}
+
+func GetBasicResolver() Resolver {
+	return resolver
+}
+
 type BasicResolver struct {
 }
 

@@ -3,6 +3,7 @@ package trigger
 import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper"
+	"strings"
 )
 
 // Config is the configuration for a Trigger
@@ -86,8 +87,46 @@ func (c *Config) FixUp(metadata *Metadata) {
 	}
 }
 
+//todo fix up GetSetting - handle resolution errors
 func (c *Config) GetSetting(setting string) string {
-	return c.Settings[setting].(string)
+	return getSettingWithResolver(c.Settings, setting)
+}
+
+//todo handle errors
+func getSettingWithResolver(settings map[string]interface{}, setting string) string {
+
+	val, exists := settings[setting]
+
+	if !exists || val == nil {
+		return ""
+	}
+
+	strVal, err := data.CoerceToString(val)
+
+	if err != nil || strVal == "" {
+		return ""
+	}
+
+	if strVal[0] == '$' {
+
+		v, err := data.GetBasicResolver().Resolve(strVal, nil)
+		if err != nil {
+			if strings.HasPrefix(err.Error(),"unsupported resolver") {
+				return strVal
+			}
+			return ""
+		}
+
+		vStr, err := data.CoerceToString(v)
+		if err != nil {
+			return ""
+		}
+
+		return vStr
+
+	} else {
+		return strVal
+	}
 }
 
 // HandlerConfig is the configuration for the Trigger Handler
@@ -117,19 +156,7 @@ func (hc *HandlerConfig) GetTriggerConfig() *Config {
 
 //todo revisit this method, what should we return if there is an error or dne
 func (hc *HandlerConfig) GetSetting(setting string) string {
-	val, exists := hc.Settings[setting]
-
-	if !exists || val == nil {
-		return ""
-	}
-
-	strVal, err := data.CoerceToString(val)
-
-	if err != nil {
-		return ""
-	}
-
-	return strVal
+	return getSettingWithResolver(hc.Settings, setting)
 }
 
 func (hc *HandlerConfig) GetOutput(name string) (interface{}, bool) {
