@@ -106,3 +106,9 @@ type ComplexObject struct {
 	Metadata string      `json:"metadata"`
 	Value    interface{} `json:"value"`
 }
+
+type IOMetadata struct {
+	Input  []*Attribute `json:"input"`
+	Output []*Attribute `json:"output"`
+}
+

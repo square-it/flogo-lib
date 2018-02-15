@@ -7,16 +7,10 @@ import (
 
 // Config is the configuration for the Action
 type Config struct {
-	Id       string          `json:"id"`
-	Ref      string          `json:"ref"`
-	Data     json.RawMessage `json:"data"`
-	Metadata *ConfigMetadata `json:"metadata"`
-}
-
-// Metadata is the configuration metadata for the Action
-type ConfigMetadata struct {
-	Input  []*data.Attribute `json:"input"`
-	Output []*data.Attribute `json:"output"`
+	Id       string           `json:"id"`
+	Ref      string           `json:"ref"`
+	Data     json.RawMessage  `json:"data"`
+	Metadata *data.IOMetadata `json:"metadata"`
 }
 
 func GetConfigInputMetadata(act Action) []*data.Attribute {

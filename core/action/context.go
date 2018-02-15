@@ -13,7 +13,7 @@ type Context interface {
 	Ref() string
 
 	// Get metadata of the action instance
-	InstanceMetadata() *ConfigMetadata
+	//InstanceMetadata() *ConfigMetadata
 
 	// Reply is used to reply with the results of the instance execution
 	Reply(replyData map[string]*data.Attribute, err error)
