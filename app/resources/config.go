@@ -3,10 +3,10 @@ package resources
 import "encoding/json"
 
 type ResourcesConfig struct {
-	Resources []*ResourceSetConfig `json:"resources"`
+	Resources []*ResourceConfig `json:"resources"`
 }
 
-type ResourceSetConfig struct {
-	Type string `json:"type"`
-	Entries []json.RawMessage `json:"entries"`
+type ResourceConfig struct {
+	ID   string          `json:"id"`
+	Data json.RawMessage `json:"data"`
 }

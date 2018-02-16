@@ -12,12 +12,11 @@ type Context interface {
 	// FlowDetails gets the action.Context under with the activity is executing
 	ActivityHost() Host
 
-	// TaskName returns the name of the Task the Activity is currently executing
-	//Deprecated
-	TaskName() string
-
 	//Name the name of the activity that is currently executing
 	Name() string
+
+	// GetSetting gets the value of the specified setting
+	GetSetting(name string) interface{}
 
 	// GetInput gets the value of the specified input attribute
 	GetInput(name string) interface{}
@@ -27,6 +26,10 @@ type Context interface {
 
 	// SetOutput sets the value of the specified output attribute
 	SetOutput(name string, value interface{})
+
+	// TaskName returns the name of the Task the Activity is currently executing
+	//Deprecated
+	TaskName() string
 
 	//Deprecated
 	// FlowDetails returns the details fo the Flow Instance
@@ -48,9 +51,10 @@ type Context interface {
 //}
 
 type Host interface {
-	// ID returns the ID of the Action Instance
+	// ID returns the ID of the Activity Host
 	ID() string
 
+	// Name the name of the Activity Host
 	Name() string
 
 	// The action reference

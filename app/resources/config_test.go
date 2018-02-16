@@ -13,28 +13,19 @@ const resJSON = `
   "resources":
   [
     {
-      "type": "flow",
-      "entries":[
-      {
-        "id":"myflow"
+      "id": "flow:myflow",
+      "data":{
       }
-      ]
     },
     {
-      "type": "schema",
-      "entries": [
-      {
-        "id":"myschema1"
+      "id": "schema:myschema",
+      "data":{
       }
-      ]
     },
     {
-      "type": "sharedconfig",
-      "entries":[
-      {
-        "id":"myconfiguration1"
+      "id": "connection:myConnection",
+      "data":{
       }
-      ]
     }
   ]
 }
