@@ -16,7 +16,10 @@ type Context interface {
 	Name() string
 
 	// GetSetting gets the value of the specified setting
-	GetSetting(name string) interface{}
+	GetSetting(setting string) (value interface{}, exists bool)
+
+	// GetInitValue gets the specified initialization value
+	GetInitValue(key string) (value interface{}, exists bool)
 
 	// GetInput gets the value of the specified input attribute
 	GetInput(name string) interface{}
@@ -36,21 +39,20 @@ type Context interface {
 	//FlowDetails() FlowDetails
 }
 
-// Deprecated
-// FlowDetails details of the flow that is being executed
-//type FlowDetails interface {
-//
-//	// ID returns the ID of the Flow Instance
-//	ID() string
-//
-//	// FlowName returns the name of the Flow
-//	Name() string
-//
-//	// ReplyHandler returns the reply handler for the flow Instance
-//	ReplyHandler() ReplyHandler
-//}
+type InitContext interface {
+
+	// GetSetting gets the value of the specified setting
+	GetSetting(setting string) (value interface{}, exists bool)
+
+	// GetResolver gets the resolver associated with the activity host
+	GetResolver() data.Resolver
+
+	// SetInitValue sets the value associated with this initialization
+	SetInitValue(key string, value interface{})
+}
 
 type Host interface {
+
 	// ID returns the ID of the Activity Host
 	ID() string
 
@@ -72,8 +74,23 @@ type Host interface {
 	//todo rename, essentially the flow's attrs for now
 	WorkingData() data.Scope
 
+	// GetResolver gets the resolver associated with the activity host
+	GetResolver() data.Resolver
+
 	//Map with action specific details/properties, flowId, etc.
 	//GetDetails() map[string]string
-
-	GetResolver() data.Resolver
 }
+
+// Deprecated
+// FlowDetails details of the flow that is being executed
+//type FlowDetails interface {
+//
+//	// ID returns the ID of the Flow Instance
+//	ID() string
+//
+//	// FlowName returns the name of the Flow
+//	Name() string
+//
+//	// ReplyHandler returns the reply handler for the flow Instance
+//	ReplyHandler() ReplyHandler
+//}

@@ -1,12 +1,13 @@
-package resources
+package resource
 
 import "encoding/json"
 
 type ResourcesConfig struct {
-	Resources []*ResourceConfig `json:"resources"`
+	Resources []*Config `json:"resources"`
 }
 
-type ResourceConfig struct {
+type Config struct {
 	ID   string          `json:"id"`
+	Compressed bool      `json:"compressed"`
 	Data json.RawMessage `json:"data"`
 }
