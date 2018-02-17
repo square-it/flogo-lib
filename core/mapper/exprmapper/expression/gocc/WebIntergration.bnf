@@ -1,0 +1,139 @@
+/*
+    This file use to describe all function and expression that support in Web Integrator.
+    The are BNF standard expression
+
+    Author: Tracy Li
+ */
+
+!whitespace : ' ' | '\t' | '\n' | '\r' ;
+
+_digit : '0'-'9' ;
+
+int64 : _digit {_digit} ;
+_character_digit:  'a'-'z' | 'A'-'Z' | '0'-'9' | ':' | '.' | '_' | '-';
+
+/*Expression Operator*/
+_operator_charactor : '>' | '<' | '|' | '&' | '!' | '=' | '+' | '-' | '*' | '/' | ' ';
+//_operator_str : 'a'-'z' | 'A'-'Z' ;
+//operator_str : {_operator_str} ;
+operator_charactor : {_operator_charactor} ;
+
+//Web Integrator string which contain .
+_wirefbracketArray : '[' {_digit} ']';
+_wirefbracketDouble : '[' '"' {.} '"' ']';
+_wirefbracketSingle : '[' '\'' {.} '\'' ']';
+_wirefbracket : _wirefbracketDouble | _wirefbracketSingle | _wirefbracketArray;
+_wiref : 'a'-'z' | 'A'-'Z' | '.' | '0'-'9' | '-' | '[' | ']' | '_' | ' ' | '$' | _wirefbracket;
+_wistring : {_wiref};
+
+//Static function name, such as concat, substring, len etc...
+function_name : {_character_digit} ;
+
+//space : {_whitespace} ;
+//Static function parameter delimitor
+delimitor_param : ',' ;
+
+_quotedpair : '\\' . ;
+
+//Double quotes strings
+doublequotes_string : '"' {_quotedpair | .} '"';
+singlequote_string : '\'' {_quotedpair |.} '\'' ;
+//Web Integrator Ref string, such as" $A3.Input.Query.Result
+wi_argument : '$' _wistring ;
+
+
+<< import "github.com/TIBCOSoftware/flogo-lib/core/mapper/expression/expression/direction" >>
+
+
+/*
+
+    Describe Web Integrator function rules.
+    Example:
+        1. concat("This","is",concat("my","first"),"gocc",concat("lexer","and","parser"),concat("go","program","!!!"))
+           Result:Thisismyfirstgocclexerandparsergoprogram!!!
+        2. concat("Beijing",String(int64(Len("lixingwang"))))
+           Result: Beijing10
+ */
+Func :
+    Func1
+    | Expr
+    ;
+Func1
+	: function_name "(" Args ")"   << direction.NewFunction($0, $2) >>
+	| function_name "()"   << direction.NewFunction($0, "") >>
+//	| function_name "(" space Args space ")"   << direction.NewFunction($0, $3) >>
+
+	;
+Args
+	: DoubleQString          <<direction.NewArgument($0)>>
+    | SingleQString          <<direction.NewArgument($0)>>
+	| Int             <<direction.NewArgument($0)>>
+    | Bool            <<direction.NewArgument($0)>> 
+	| MappingRef      <<direction.NewArgument($0)>>
+	| Func1           <<direction.NewArgument($0)>>
+	| Args delimitor_param Args   <<direction.NewArguments($0, $2)>>
+    ;
+DoubleQString
+    : doublequotes_string      <<direction.NewDoubleQuoteStringLit($0)>>
+    ;
+SingleQString
+    : singlequote_string      <<direction.NewSingleQuoteStringLit($0)>>
+    ;
+
+Int
+    : int64           <<direction.NewIntLit($0)>>
+    ;
+MappingRef
+    : wi_argument     <<direction.NewMappingRef($0)>>
+    ;
+Bool
+    : "true"           <<direction.NewBool($0)>>
+    | "flase"          <<direction.NewBool($0)>>
+    ;
+/*
+    Expression which support operators so far
+        eq          -> =
+       	or          -> ||
+       	and         -> &
+       	ne          -> !=
+       	gt          -> >
+       	lt          -> <
+       	ge          -> >=
+       	le          -> <=
+       	+           -> +
+       	-           -> -
+       	*           -> *
+       	div         -> /
+       	idiv        -> /
+       	mod         -> mod
+       	|           -> |
+*/
+
+
+Expr
+    : Int                     <<direction.NewExpressionField($0)>>
+    | DoubleQString           <<direction.NewExpressionField($0)>>
+    | SingleQString           <<direction.NewExpressionField($0)>>
+    | MappingRef              <<direction.NewExpressionField($0)>>
+    | Func1                   <<direction.NewExpressionField($0)>>
+    | Expr Operator Expr      <<direction.NewExpression($0, $1, $2) >>
+    | TernaryExp
+    | "(" Expr ")"            <<direction.NewExpressionField($1) >>
+    ;
+
+Operator
+    : operator_charactor
+    ;
+TernaryExp
+    : Expr                          <<direction.NewExpressionField($0) >>
+    | TernaryExp "?" TernaryParam ":" TernaryParam  <<direction.NewTernaryExpression($0, $2, $4)>>
+    ;
+
+TernaryParam
+    :Int                     <<direction.NewExpressionField($0)>>
+    | DoubleQString          <<direction.NewExpressionField($0)>>
+    | SingleQString          <<direction.NewExpressionField($0)>>
+    | MappingRef             <<direction.NewExpressionField($0)>>
+    | Func
+    ;
+

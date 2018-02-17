@@ -1,0 +1,318 @@
+package ref
+
+import (
+	"errors"
+	"fmt"
+	"strings"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref/field"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/conversion"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/wijson"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
+)
+
+var log = logger.GetLogger("MappingRef")
+
+type MappingRef struct {
+	ref string
+}
+
+func NewMappingRef(ref string) *MappingRef {
+	return &MappingRef{ref: ref}
+}
+
+func (m *MappingRef) GetRef() string {
+	return m.ref
+}
+
+func (m *MappingRef) Eval(inputScope data.Scope, resovler data.Resolver) (interface{}, error) {
+	log.Debugf("Eval mapping field and ref: %s", m.ref)
+
+	if inputScope == nil {
+		return nil, errors.New("Input scope cannot nil while eval mapping ref")
+	}
+	value, err := m.GetValue(inputScope, resovler)
+	if err != nil {
+		log.Errorf("Get From from ref error %+v", err)
+	}
+
+	log.Debugf("Mapping ref eval result: %+v", value)
+	return value, err
+
+}
+
+func (m *MappingRef) GetValue(inputScope data.Scope, resovler data.Resolver) (interface{}, error) {
+
+	inStruct, err := m.getValueFromAttribute(inputScope, resovler)
+	if err != nil {
+		return nil, err
+	}
+	mappingFiled, err := m.GetFields()
+	if err != nil {
+		return nil, err
+	}
+
+	if mappingFiled == nil || len(mappingFiled.Fields) <= 0 {
+		value, err := conversion.ConvertToInterface(inStruct)
+		if err != nil {
+			value = inStruct
+		}
+		return value, nil
+	}
+	mappingValue, err := wijson.GetFieldValueFromIn(inStruct, mappingFiled)
+	if err != nil {
+		return nil, err
+	}
+	return mappingValue, nil
+}
+
+func (m *MappingRef) getValueFromAttribute(inputscope data.Scope, resolver data.Resolver) (interface{}, error) {
+
+	value, err := resolver.Resolve(m.ref, inputscope)
+	if err != nil {
+		return nil, err
+	}
+	//fieldName, err := m.GetRootField()
+	//if err != nil {
+	//	return nil, err
+	//}
+	//attribute, exist := inputscope.GetAttr(fieldName)
+	//log.Debugf("getValueFromAttribute ref %s and fieldName %s", m.ref, fieldName)
+	//if exist {
+	var relvalue interface{}
+	if value != nil {
+		switch t := value.(type) {
+		case *data.ComplexObject:
+			relvalue = t.Value
+		default:
+			relvalue = value
+		}
+	}
+
+	return relvalue, nil
+	//switch attribute.Type() {
+	//case data.COMPLEX_OBJECT:
+	//	complexObject := attribute.Value().(*data.ComplexObject)
+	//	value = complexObject.Value
+	//default:
+	//	//others just return the real value
+	//	value = attribute.Value
+	//}
+	//log.Debugf("getValueFromAttribute [%s]", value)
+	//return value, nil
+	//} else {
+	//	return nil, fmt.Errorf("Cannot found attribute %s", fieldName)
+	//}
+}
+
+func (m *MappingRef) GetValueFromOutputScope(outputtscope data.Scope) (interface{}, error) {
+	fieldName, err := m.GetFieldName()
+	if err != nil {
+		return nil, err
+	}
+	log.Debugf("GetValueFromOutputScope field name %s", fieldName)
+
+	attribute, exist := outputtscope.GetAttr(fieldName)
+	log.Debugf("GetValueFromOutputScope field name %s and exist %t ", fieldName, exist)
+
+	if exist {
+		complexObject := attribute.Value().(*data.ComplexObject)
+		object := complexObject.Value
+		//Convert the object to exist struct.
+		//TODO return interface rather than string
+		if object == nil {
+			return "{}", nil
+		}
+		return object, nil
+	}
+	return nil, fmt.Errorf("Cannot found attribute %s", fieldName)
+}
+
+func (m *MappingRef) GetActivtyRootField() (string, error) {
+	if field.HasSpecialFields(m.ref) {
+		fields, err := field.GetAllspecialFields(m.ref)
+		if err != nil {
+			return "", err
+		}
+		activityNameRef := fields[0]
+		if strings.HasPrefix(activityNameRef, "$") {
+			activityName := activityNameRef[1:]
+			activityName = getActivityName(activityName)
+			fieldName := "_A." + activityName + "." + getFieldName(fields[1])
+			return fieldName, nil
+		}
+		return getFieldName(fields[0]), nil
+	}
+
+	if strings.HasPrefix(m.ref, "$") {
+		log.Debugf("Mapping ref %s", m.ref)
+		mappingFields := strings.Split(m.ref, ".")
+		//Which might like $A3.
+		//field := mappingFields[1]
+		var activityID string
+		if strings.HasPrefix(m.ref, "$") {
+			activityID = mappingFields[0][1:]
+		} else {
+			activityID = mappingFields[0]
+		}
+
+		//fieldName := "{" + activityID + "." + getFieldName(mappingFields[1]) + "}"
+		fieldName := "_A." + getActivityName(activityID) + "." + getFieldName(mappingFields[1])
+
+		log.Debugf("Field name now is: %s", fieldName)
+		return fieldName, nil
+	} else if strings.Index(m.ref, ".") > 0 {
+		log.Debugf("Mapping ref %s", m.ref)
+		mappingFields := strings.Split(m.ref, ".")
+		log.Debugf("Field name now is: %s", mappingFields[0])
+		return getFieldName(mappingFields[0]), nil
+	} else {
+		return m.ref, nil
+	}
+}
+
+func (m *MappingRef) GetFields() (*field.MappingField, error) {
+	hasArray := field.HasArray(m.ref)
+	if field.HasSpecialFields(m.ref) {
+		fields, err := field.GetAllspecialFields(m.ref)
+		if err != nil {
+			return nil, err
+		}
+		activityNameRef := fields[0]
+		if strings.HasPrefix(activityNameRef, "$") {
+			if strings.HasSuffix(fields[1], "]") {
+				//Root element is an array
+				arrayIndexPart := getArrayIndexPart(fields[1])
+				fields[1] = arrayIndexPart
+				return &field.MappingField{HasArray: hasArray, HasSpecialField: true, Fields: fields[1:]}, nil
+			} else {
+				return &field.MappingField{HasArray: hasArray, HasSpecialField: true, Fields: fields[2:]}, nil
+			}
+		}
+		return &field.MappingField{HasArray: hasArray, HasSpecialField: true, Fields: fields[1:]}, nil
+	}
+
+	if strings.HasPrefix(m.ref, "$") {
+		fieldArray := strings.Split(m.ref, ".")
+		if strings.HasSuffix(fieldArray[1], "]") {
+			//Root element is an array
+			arrayIndexPart := getArrayIndexPart(fieldArray[1])
+			fieldArray[1] = arrayIndexPart
+			return &field.MappingField{HasArray: hasArray, HasSpecialField: false, Fields: fieldArray[1:]}, nil
+		} else {
+			return &field.MappingField{HasArray: hasArray, HasSpecialField: false, Fields: fieldArray[2:]}, nil
+		}
+	} else if strings.Index(m.ref, ".") >= 0 {
+		return &field.MappingField{HasArray: hasArray, HasSpecialField: false, Fields: strings.Split(m.ref, ".")[1:]}, nil
+	} else {
+		return &field.MappingField{HasArray: hasArray, HasSpecialField: false, Fields: []string{m.ref}}, nil
+	}
+}
+
+func (m *MappingRef) GetFieldName() (string, error) {
+	if field.HasSpecialFields(m.ref) {
+		fields, err := field.GetAllspecialFields(m.ref)
+		if err != nil {
+			return "", err
+		}
+		activityNameRef := fields[0]
+		if strings.HasPrefix(activityNameRef, "$") {
+			return getFieldName(fields[1]), nil
+		}
+		return getFieldName(fields[0]), nil
+	}
+
+	if strings.HasPrefix(m.ref, "$") || strings.Index(m.ref, ".") > 0 {
+		log.Debugf("Mapping ref %s", m.ref)
+		mappingFields := strings.Split(m.ref, ".")
+		if strings.HasPrefix(m.ref, "$") {
+			return getFieldName(mappingFields[1]), nil
+
+		}
+		log.Debugf("Field name now is: %s", mappingFields[0])
+		return getFieldName(mappingFields[0]), nil
+
+	}
+	return getFieldName(m.ref), nil
+}
+
+func (m *MappingRef) GetActivityId() (string, error) {
+
+	dotIndex := strings.Index(m.ref, ".")
+
+	if dotIndex == -1 {
+		return "", fmt.Errorf("invalid resolution expression [%s]", m.ref)
+	}
+
+	firstItemIndex := strings.Index(m.ref[:dotIndex], "[")
+
+	if firstItemIndex != -1 {
+		return m.ref[firstItemIndex+1 : dotIndex-1], nil
+	}
+	return "", nil
+}
+
+//
+//func GetResolutionDetails(toResolve string) (*string, error) {
+//
+//
+//	dotIdx := strings.Index(toResolve, ".")
+//
+//	if dotIdx == -1 {
+//		return nil, fmt.Errorf("invalid resolution expression [%s]", toResolve)
+//	}
+//
+//	details := &ResolutionDetails{}
+//	itemIdx := strings.Index(toResolve[:dotIdx], "[")
+//
+//	if itemIdx != -1 {
+//		details.Item = toResolve[itemIdx+1:dotIdx-1]
+//		details.ResolverName = toResolve[:itemIdx]
+//	} else {
+//		details.ResolverName = toResolve[:dotIdx]
+//
+//		//special case for activity without brackets
+//		if strings.HasPrefix(toResolve, "activity") {
+//			nextDot := strings.Index(toResolve[dotIdx+1:], ".") + dotIdx + 1
+//			details.Item = toResolve[dotIdx+1:nextDot]
+//			dotIdx = nextDot
+//		}
+//	}
+//
+//	pathIdx := strings.IndexFunc(toResolve[dotIdx+1:], isSep)
+//
+//	if pathIdx != -1 {
+//		pathStart := pathIdx + dotIdx + 1
+//		details.Path = toResolve[pathStart:]
+//		details.Property = toResolve[dotIdx+1:pathStart]
+//	} else {
+//		details.Property = toResolve[dotIdx+1:]
+//	}
+//
+//	return details, nil
+//}
+
+func getFieldName(fieldname string) string {
+	if strings.Index(fieldname, "[") > 0 && strings.Index(fieldname, "]") > 0 {
+		return fieldname[:strings.Index(fieldname, "[")]
+	}
+	return fieldname
+}
+
+func getActivityName(fieldname string) string {
+	//$activity[name]
+	startIndex := strings.Index(fieldname, "[")
+	endIndex := strings.Index(fieldname, "]")
+
+	return fieldname[startIndex+1 : endIndex]
+}
+
+//getArrayIndexPart get array part of the string. such as name[0] return [0]
+func getArrayIndexPart(fieldName string) string {
+	if strings.Index(fieldName, "[") >= 0 {
+		return fieldName[strings.Index(fieldName, "[") : strings.Index(fieldName, "]")+1]
+	}
+	return ""
+}
