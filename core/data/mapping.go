@@ -15,6 +15,8 @@ const (
 
 	// MtObject denotes a object construction mapping
 	MtObject MappingType = 4
+
+	MTARRAY MappingType = 5
 )
 
 // MappingDef is a simple structure that defines a mapping
