@@ -70,17 +70,25 @@ func (m *MappingRef) GetValue(inputScope data.Scope, resovler data.Resolver) (in
 
 func (m *MappingRef) getValueFromAttribute(inputscope data.Scope, resolver data.Resolver) (interface{}, error) {
 
-	value, err := resolver.Resolve(m.ref, inputscope)
+	log.Debugf("Get value from attribute ref [%s]", m.ref)
+	resolutionDetails, err := data.GetResolutionDetails(m.ref)
+	if err != nil {
+		return nil, fmt.Errorf("Get activity name and root field error, %s", err.Error())
+	}
+	//Only need activity and field name
+	resolutionDetails.Path = ""
+	var newRef string
+	if strings.Index(resolutionDetails.Property, ".") >= 0 {
+		newRef = resolutionDetails.ResolverName + "['" + resolutionDetails.Property + "']"
+	}else {
+		newRef = resolutionDetails.ResolverName + "." + resolutionDetails.Property
+	}
+
+	log.Debugf("Activity and root field name is: %s", newRef)
+	value, err := resolver.Resolve(newRef, inputscope)
 	if err != nil {
 		return nil, err
 	}
-	//fieldName, err := m.GetRootField()
-	//if err != nil {
-	//	return nil, err
-	//}
-	//attribute, exist := inputscope.GetAttr(fieldName)
-	//log.Debugf("getValueFromAttribute ref %s and fieldName %s", m.ref, fieldName)
-	//if exist {
 	var relvalue interface{}
 	if value != nil {
 		switch t := value.(type) {
@@ -92,19 +100,6 @@ func (m *MappingRef) getValueFromAttribute(inputscope data.Scope, resolver data.
 	}
 
 	return relvalue, nil
-	//switch attribute.Type() {
-	//case data.COMPLEX_OBJECT:
-	//	complexObject := attribute.Value().(*data.ComplexObject)
-	//	value = complexObject.Value
-	//default:
-	//	//others just return the real value
-	//	value = attribute.Value
-	//}
-	//log.Debugf("getValueFromAttribute [%s]", value)
-	//return value, nil
-	//} else {
-	//	return nil, fmt.Errorf("Cannot found attribute %s", fieldName)
-	//}
 }
 
 func (m *MappingRef) GetValueFromOutputScope(outputtscope data.Scope) (interface{}, error) {
@@ -305,8 +300,11 @@ func getActivityName(fieldname string) string {
 	//$activity[name]
 	startIndex := strings.Index(fieldname, "[")
 	endIndex := strings.Index(fieldname, "]")
-
-	return fieldname[startIndex+1 : endIndex]
+	if startIndex >= 0 {
+		return fieldname[startIndex+1 : endIndex]
+	}else {
+		return fieldname
+	}
 }
 
 //getArrayIndexPart get array part of the string. such as name[0] return [0]

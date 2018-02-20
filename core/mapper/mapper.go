@@ -79,7 +79,10 @@ func (m *BasicMapper) Mappings() []*data.MappingDef {
 // return error
 func (m *BasicMapper) Apply(inputScope data.Scope, outputScope data.Scope) error {
 
-	m.UpdateMapping()
+	if err := m.UpdateMapping(); err != nil {
+		return fmt.Errorf("Update mapping ref error %s", err.Error())
+	}
+
 	//todo validate types
 	for _, mapping := range m.mappings {
 
@@ -167,7 +170,7 @@ func (m *BasicMapper) UpdateMapping() error {
 
 		switch mappingDef.Type {
 		//Array mapping
-		case 4:
+		case data.MTARRAY:
 			//Update Array Mapping
 			arrayMapping, err := exprmapper.ParseArrayMapping(mapping.Value)
 			if err != nil {

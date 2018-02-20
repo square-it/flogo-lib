@@ -62,3 +62,37 @@ func TestGetAllSpecialSingleQuote(t *testing.T) {
 	assert.Equal(t, []string{"data", "Array1"}, res)
 
 }
+
+func TestGetAllSpecial(t *testing.T) {
+	path := "$activity[namesss]['data']['Array1']"
+
+	res, err := GetAllspecialFields(path)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"$activity[namesss]","data", "Array1"}, res)
+
+
+	path = "$trigger[namesss]['data']['Array1']"
+
+	res, err = GetAllspecialFields(path)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"$trigger[namesss]","data", "Array1"}, res)
+
+
+	path = "$trigger['data']['Array1']"
+
+	res, err = GetAllspecialFields(path)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"$trigger","data", "Array1"}, res)
+
+	path = "$property['data']['Array1']"
+
+	res, err = GetAllspecialFields(path)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"$property","data", "Array1"}, res)
+
+	path = "$env['data']['Array1']"
+
+	res, err = GetAllspecialFields(path)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"$env","data", "Array1"}, res)
+}
