@@ -20,7 +20,12 @@ type MappingRef struct {
 }
 
 func NewMappingRef(ref string) *MappingRef {
-	return &MappingRef{ref: ref}
+	//Compatible TriggerData, the $TriggerData might in function or expression
+	if strings.Index(ref, "$TriggerData") >=0  {
+		return &MappingRef{ref: strings.Replace(ref, "$TriggerData", "$trigger", -1)}
+	}else {
+		return &MappingRef{ref: ref}
+	}
 }
 
 func (m *MappingRef) GetRef() string {
