@@ -1,9 +1,11 @@
 package trigger
 
 import (
+	"strings"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper"
-	"strings"
 )
 
 // Config is the configuration for a Trigger
@@ -111,7 +113,7 @@ func getSettingWithResolver(settings map[string]interface{}, setting string) str
 
 		v, err := data.GetBasicResolver().Resolve(strVal, nil)
 		if err != nil {
-			if strings.HasPrefix(err.Error(),"unsupported resolver") {
+			if strings.HasPrefix(err.Error(), "unsupported resolver") {
 				return strVal
 			}
 			return ""
@@ -131,15 +133,17 @@ func getSettingWithResolver(settings map[string]interface{}, setting string) str
 
 // HandlerConfig is the configuration for the Trigger Handler
 type HandlerConfig struct {
-	parent             *Config
-	ActionId           string                 `json:"actionId"`
-	Settings           map[string]interface{} `json:"settings"`
-	Output             map[string]interface{} `json:"output"`
-	ActionMappings     *Mappings              `json:"actionMappings,omitempty"`
+	parent   *Config
+	Settings map[string]interface{} `json:"settings"`
+	Output   map[string]interface{} `json:"output"`
+	Action   *action.Config
+
+	//for backwards compatibility
+	ActionId           string           `json:"actionId"`
+	ActionMappings     *data.IOMappings `json:"actionMappings,omitempty"`
 	actionInputMapper  data.Mapper
 	actionOutputMapper data.Mapper
 
-	//for backwards compatibility
 	Outputs              map[string]interface{} `json:"outputs"`
 	ActionOutputMappings []*data.MappingDef     `json:"actionOutputMappings,omitempty"`
 	ActionInputMappings  []*data.MappingDef     `json:"actionInputMappings,omitempty"`

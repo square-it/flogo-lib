@@ -1,5 +1,6 @@
 package data
 
+
 // MappingType is an enum for possible MappingDef Types
 type MappingType int
 
@@ -40,3 +41,7 @@ type MapperDef struct {
 	Mappings []*MappingDef
 }
 
+type IOMappings struct {
+	Input  []*MappingDef `json:"input,omitempty"`
+	Output []*MappingDef `json:"output,omitempty"`
+}

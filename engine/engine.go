@@ -36,23 +36,25 @@ type EngineConfig struct {
 }
 
 // New creates a new Engine
-func New(app *app.Config) (Engine, error) {
+func New(appCfg *app.Config) (Engine, error) {
 	// App is required
-	if app == nil {
-		return nil, errors.New("Error: No App configuration provided")
+	if appCfg == nil {
+		return nil, errors.New("no App configuration provided")
 	}
 	// Name is required
-	if len(app.Name) == 0 {
-		return nil, errors.New("Error: No App name provided")
+	if len(appCfg.Name) == 0 {
+		return nil, errors.New("no App name provided")
 	}
 	// Version is required
-	if len(app.Version) == 0 {
-		return nil, errors.New("Error: No App version provided")
+	if len(appCfg.Version) == 0 {
+		return nil, errors.New("no App version provided")
 	}
+
+	app.FixupApp(appCfg)
 
 	logLevel := config.GetLogLevel()
 
-	return &EngineConfig{App: app, serviceManager: util.GetDefaultServiceManager(), LogLevel:logLevel}, nil
+	return &EngineConfig{App: appCfg, serviceManager: util.GetDefaultServiceManager(), LogLevel:logLevel}, nil
 }
 
 func (e *EngineConfig) Init(directRunner bool) error {

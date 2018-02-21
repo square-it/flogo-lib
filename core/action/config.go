@@ -2,15 +2,22 @@ package action
 
 import (
 	"encoding/json"
+
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
 // Config is the configuration for the Action
 type Config struct {
-	Id       string           `json:"id"`
 	Ref      string           `json:"ref"`
 	Data     json.RawMessage  `json:"data"`
+	Mappings *data.IOMappings `json:"mappings"`
+
+	//Deprecated
+	Id string `json:"id"`
+	//Deprecated
 	Metadata *data.IOMetadata `json:"metadata"`
+	//Deprecated
+	OldData json.RawMessage
 }
 
 func GetConfigInputMetadata(act Action) []*data.Attribute {
