@@ -22,7 +22,7 @@ type MappingRef struct {
 func NewMappingRef(ref string) *MappingRef {
 	//Compatible TriggerData, the $TriggerData might in function or expression
 	if strings.Index(ref, "$TriggerData") >=0  {
-		return &MappingRef{ref: strings.Replace(ref, "$TriggerData", "$trigger", -1)}
+		return &MappingRef{ref: strings.Replace(ref, "$TriggerData", "$flow", -1)}
 	}else {
 		return &MappingRef{ref: ref}
 	}
