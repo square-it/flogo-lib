@@ -50,7 +50,7 @@ func New(appCfg *app.Config) (Engine, error) {
 		return nil, errors.New("no App version provided")
 	}
 
-	app.FixupApp(appCfg)
+	app.FixUpApp(appCfg)
 
 	logLevel := config.GetLogLevel()
 

@@ -59,7 +59,7 @@ func (d *defaultConfigProvider) GetApp() (*Config, error) {
 	return app, nil
 }
 
-func FixupApp(cfg *Config) {
+func FixUpApp(cfg *Config) {
 
 	if cfg.Resources != nil || cfg.Actions == nil {
 		//already new app format
@@ -71,8 +71,8 @@ func FixupApp(cfg *Config) {
 		idToAction[act.Id] = act
 	}
 
-	for _, trigger := range cfg.Triggers {
-		for _, handler := range trigger.Handlers {
+	for _, trg := range cfg.Triggers {
+		for _, handler := range trg.Handlers {
 
 			oldAction := idToAction[handler.ActionId]
 
@@ -92,4 +92,6 @@ func FixupApp(cfg *Config) {
 			newAction.Metadata = oldAction.Metadata
 		}
 	}
+
+	cfg.Actions = nil
 }
