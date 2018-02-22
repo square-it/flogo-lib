@@ -9,12 +9,13 @@ import (
 type Action interface {
 
 	//Config get the Action's config
-	Config() *Config
+	//Config() *Config
 
 	//Metadata get the Action's metadata
 	Metadata() *Metadata
 
-
+	//IOMetadata get the Action's IO metadata
+	IOMetadata() *data.IOMetadata
 
 	// Run this Action
 	//Run(context context.Context, inputs []*data.Attribute, options map[string]interface{}) (map[string]*data.Attribute, error)
@@ -26,7 +27,7 @@ type Action interface {
 type SyncAction interface {
 	Action
 
-	Run(context context.Context, inputs []*data.Attribute, options map[string]interface{}) (map[string]*data.Attribute, error)
+	Run(context context.Context, inputs map[string]*data.Attribute) (map[string]*data.Attribute, error)
 }
 
 // Action is an action to perform as a result of a trigger
@@ -34,12 +35,14 @@ type AsyncAction interface {
 	Action
 
 	// Run this Action
-	Run(context context.Context, inputs []*data.Attribute, options map[string]interface{}, handler ResultHandler) error
+	Run(context context.Context, inputs map[string]*data.Attribute, handler ResultHandler) error
 }
 
 // Factory is used to create new instances for an action
 type Factory interface {
-	New(config *Config) Action
+
+	//New create a new Action
+	New(config *Config) (Action, error)
 }
 
 // Runner runs actions
@@ -52,7 +55,7 @@ type Runner interface {
 	RunAction(ctx context.Context, act Action, options map[string]interface{}) (results map[string]*data.Attribute, err error)
 
 
-	RunAction2(ctx context.Context, act Action, inputs []*data.Attribute) (results map[string]*data.Attribute, err error)
+	RunAction2(ctx context.Context, act Action, inputs map[string]*data.Attribute) (results map[string]*data.Attribute, err error)
 
 }
 

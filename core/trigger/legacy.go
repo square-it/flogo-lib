@@ -58,7 +58,7 @@ func (lr *LegacyRunner) RunAction(ctx context.Context, act action.Action, option
 	return trgHandler.Handle(ctx, trgData)
 }
 
-func (*LegacyRunner) RunAction2(ctx context.Context, act action.Action, inputs []*data.Attribute) (results map[string]*data.Attribute, err error) {
+func (*LegacyRunner) RunAction2(ctx context.Context, act action.Action, inputs map[string]*data.Attribute) (results map[string]*data.Attribute, err error) {
 	//only called by handler so not needed
 
 	return nil, errors.New("not supported")

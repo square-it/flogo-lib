@@ -43,7 +43,7 @@ func (runner *DirectRunner) RunAction(ctx context.Context, act action.Action, op
 }
 
 // Run the specified action
-func (runner *DirectRunner) RunAction2(ctx context.Context, act action.Action, inputs []*data.Attribute) (results map[string]*data.Attribute, err error) {
+func (runner *DirectRunner) RunAction2(ctx context.Context, act action.Action, inputs map[string]*data.Attribute) (results map[string]*data.Attribute, err error) {
 
 	if act == nil {
 		return nil, errors.New("Action not specified")
@@ -51,13 +51,13 @@ func (runner *DirectRunner) RunAction2(ctx context.Context, act action.Action, i
 
 	if !act.Metadata().Async {
 		syncAct := act.(action.SyncAction)
-		return syncAct.Run(ctx, inputs, nil)
+		return syncAct.Run(ctx, inputs)
 	} else {
 		asyncAct := act.(action.AsyncAction)
 
 		handler := &SyncResultHandler{done: make(chan bool, 1)}
 
-		err = asyncAct.Run(ctx, inputs, nil, handler)
+		err = asyncAct.Run(ctx, inputs, handler)
 
 		if err != nil {
 			return nil, err

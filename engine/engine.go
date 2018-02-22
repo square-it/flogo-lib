@@ -77,6 +77,16 @@ func (e *EngineConfig) Init(directRunner bool) error {
 
 		data.SetPropertyProvider(propProvider)
 
+		actionFactories := action.Factories()
+		for _, factory := range actionFactories {
+			if initializable, ok := factory.(util.Initializable); ok {
+
+				if err:=initializable.Init(); err != nil {
+					return err
+				}
+			}
+		}
+
 		triggers, err := app.CreateTriggers(e.App.Triggers, e.actionRunner)
 
 		if err != nil {
@@ -86,6 +96,7 @@ func (e *EngineConfig) Init(directRunner bool) error {
 		}
 
 		e.triggers = triggers
+
 
 		//instanceHelper := app.NewInstanceHelper(e.App, trigger.Factories(), action.Factories())
 		//
@@ -166,7 +177,7 @@ func (e *EngineConfig) Start() error {
 			//value.Error = err
 			logger.Debugf("StackTrace: %s", debug.Stack())
 			if config.StopEngineOnError() {
-				logger.Debugf("{%s=true}. Stopping engine", config.STOP_ENGINE_ON_ERROR_KEY)
+				logger.Debugf("{%s=true}. Stopping engine", config.ENV_STOP_ENGINE_ON_ERROR_KEY)
 				logger.Info("Engine: Stopped")
 				os.Exit(1)
 			}

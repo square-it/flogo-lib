@@ -102,20 +102,20 @@ func (h *Handler) dataToAttrs(triggerData map[string]interface{}) ([]*data.Attri
 	return attrs, nil
 }
 
-func (h *Handler) generateInputs(triggerData map[string]interface{}) ([]*data.Attribute, error) {
+func (h *Handler) generateInputs(triggerData map[string]interface{}) (map[string]*data.Attribute, error) {
 
 	if len(triggerData) == 0 {
 		return nil, nil
 	}
 
-	inputMetadata := action.GetConfigInputMetadata(h.act)
+	inputMetadata := h.act.IOMetadata().Input
 	triggerAttrs, _ := h.dataToAttrs(triggerData)
 
 	if len(triggerAttrs) == 0 {
 		return nil, nil
 	}
 
-	var inputs []*data.Attribute
+	var inputs map[string]*data.Attribute
 
 	if h.actionInputMapper != nil && inputMetadata != nil {
 
@@ -129,27 +129,26 @@ func (h *Handler) generateInputs(triggerData map[string]interface{}) ([]*data.At
 
 		attrs := outScope.GetAttrs()
 
-		inputs = make([]*data.Attribute, 0, len(inputMetadata))
+		inputs = make(map[string]*data.Attribute, len(inputMetadata))
 
 		for _, attr := range attrs {
-			inputs = append(inputs, attr)
+			inputs[attr.Name()] = attr
 		}
 	} else {
 		// for backwards compatibility make trigger outputs map directly to action inputs
 
 		logger.Debug("No mapping specified, adding trigger outputs as inputs to action")
 
-		inputs := make([]*data.Attribute, 0, len(triggerAttrs))
+		inputs := make(map[string]*data.Attribute, len(triggerAttrs))
 
 		for _, attr := range triggerAttrs {
 
 			logger.Debugf(" Attr: %s, Type: %s, Value: %v", attr.Name(), attr.Type().String(), attr.Value())
 			//inputs = append(inputs, data.NewAttribute( attr.Name, attr.Type, attr.Value))
-			inputs = append(inputs, attr)
+			inputs[attr.Name()] = attr
 
 			attrName := "_T." + attr.Name()
-
-			inputs = append(inputs, data.CloneAttribute(attrName, attr))
+			inputs[attrName] =  data.CloneAttribute(attrName, attr)
 		}
 	}
 
@@ -167,7 +166,7 @@ func (h *Handler) generateOutputs(actionResults map[string]*data.Attribute) (map
 		return actionResults, nil
 	}
 
-	outputMetadata := action.GetConfigOutputMetadata(h.act)
+	outputMetadata := h.act.IOMetadata().Output
 
 	if outputMetadata != nil {
 

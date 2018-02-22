@@ -30,7 +30,7 @@ type ActionWorkRequest struct {
 type ActionData struct {
 	context context.Context
 	action  action.Action
-	inputs  []*data.Attribute
+	inputs  map[string]*data.Attribute
 	arc     chan *ActionResult
 
 	options map[string]interface{}
@@ -95,13 +95,13 @@ func (w ActionWorker) Start() {
 
 					if ! actionData.action.Metadata().Async {
 						syncAct := actionData.action.(action.SyncAction)
-						results, err := syncAct.Run(actionData.context, actionData.inputs, nil)
+						results, err := syncAct.Run(actionData.context, actionData.inputs)
 						logger.Debugf("*** Worker received result: %v\n", results)
 						actionData.arc <- &ActionResult{results: results, err: err}
 					} else {
 						asyncAct := actionData.action.(action.AsyncAction)
 
-						err := asyncAct.Run(actionData.context, actionData.inputs, nil, handler)
+						err := asyncAct.Run(actionData.context, actionData.inputs, handler)
 
 						if err != nil {
 							logger.Debugf("worker-%d: Action Run error: %s\n", w.ID, err.Error())

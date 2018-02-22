@@ -20,24 +20,24 @@ type Config struct {
 	OldData json.RawMessage
 }
 
-func GetConfigInputMetadata(act Action) []*data.Attribute {
-
-	if act.Config() != nil {
-		if act.Config().Metadata != nil {
-			return act.Config().Metadata.Input
-		}
-	}
-
-	return nil
-}
-
-func GetConfigOutputMetadata(act Action) []*data.Attribute {
-
-	if act.Config() != nil {
-		if act.Config().Metadata != nil {
-			return act.Config().Metadata.Output
-		}
-	}
-
-	return nil
-}
+//func GetConfigInputMetadata(act Action) []*data.Attribute {
+//
+//	if act.Config() != nil {
+//		if act.Config().Metadata != nil {
+//			return act.Config().Metadata.Input
+//		}
+//	}
+//
+//	return nil
+//}
+//
+//func GetConfigOutputMetadata(act Action) []*data.Attribute {
+//
+//	if act.Config() != nil {
+//		if act.Config().Metadata != nil {
+//			return act.Config().Metadata.Output
+//		}
+//	}
+//
+//	return nil
+//}
