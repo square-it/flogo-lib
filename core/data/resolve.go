@@ -184,3 +184,40 @@ func GetResolutionDetailsOld(toResolve string) (*ResolutionDetails, error) {
 func isSep(r rune) bool {
 	return r == '.' || r == '['
 }
+
+
+func GetValueWithResolver(valueMap map[string]interface{}, key string) (interface{}, bool) {
+
+	val, exists := valueMap[key]
+
+	if !exists {
+		return nil, false
+	}
+
+	strVal, ok := val.(string)
+
+	if ok {
+		if strVal == "" {
+			return "", true
+		}
+
+		if strVal[0] == '$' {
+
+			v, err := GetBasicResolver().Resolve(strVal, nil)
+			if err != nil {
+				if strings.HasPrefix(err.Error(), "unsupported resolver") {
+					return val, true
+				}
+				//todo double check this case
+				return val, true
+			}
+
+			return v, true
+		} else {
+			return val, true
+		}
+	}
+
+	return val, true
+}
+

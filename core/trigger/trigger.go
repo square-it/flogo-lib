@@ -19,19 +19,22 @@ type Trigger interface {
 	Metadata() *Metadata
 
 	// Init sets up the trigger, it is called before Start()
+	//DEPRECATED
 	Init(actionRunner action.Runner)
 }
 
-// Trigger is object that triggers/starts flow instances and
-// is managed by an engine
-type TriggerDeprecated interface {
-	util.Managed
+// Init interface should be implemented by all Triggers, the Initialize method
+// will eventually move up to Trigger to replace the deprecated "Init" method
+type Init interface {
 
-	// TriggerMetadata returns the metadata of the trigger
-	Metadata() *Metadata
+	// Init initialize the Activity for a particular configuration
+	Initialize(ctx InitContext) error
+}
 
-	// Init sets up the trigger, it is called before Start()
-	Init(config *Config, actionRunner action.Runner)
+type InitContext interface {
+
+	// GetHandlers gets the handlers associated with the trigger
+	GetHandlers() ([]*Handler)
 }
 
 type Status string

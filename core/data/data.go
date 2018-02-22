@@ -112,3 +112,9 @@ type IOMetadata struct {
 	Output []*Attribute `json:"output"`
 }
 
+type DynamicIOMetadata interface {
+
+	InputMetadata()  []*Attribute
+
+	OutputMetadata() []*Attribute
+}

@@ -90,3 +90,63 @@ func (h *InstanceHelper) CreateActions() (map[string]action.Action, error) {
 
 	return actions, nil
 }
+
+func CreateTriggers(tConfigs []*trigger.Config, runner action.Runner) (map[string]trigger.Trigger, error) {
+
+	triggers := make(map[string]trigger.Trigger, len(tConfigs))
+	legacyRunner := trigger.NewLegacyRunner(runner)
+
+	for _, tConfig := range tConfigs {
+
+		_, exists := triggers[tConfig.Id]
+		if exists {
+			return nil, fmt.Errorf("Trigger with id '%s' already registered, trigger ids have to be unique", tConfig.Id)
+		}
+
+		factory := trigger.GetFactory(tConfig.Ref)
+
+		if factory == nil {
+			return nil, fmt.Errorf("Trigger Factory '%s' not registered", tConfig.Ref)
+		}
+
+		tgr := factory.New(tConfig)
+
+		if tgr == nil {
+			return nil, fmt.Errorf("Cannot create Trigger nil for id '%s'", tConfig.Id)
+		}
+
+		initCtx := &initContext{handlers:make([]*trigger.Handler, 0, len(tConfig.Handlers))}
+
+		//create handlers for that trigger and init
+		for _, hConfig := range tConfig.Handlers {
+
+			h := trigger.NewHandler(hConfig, nil, tgr.Metadata().Output, tgr.Metadata().Reply, runner)
+			initCtx.handlers = append(initCtx.handlers, h)
+			trigger.RegisterHandler(hConfig, h)
+		}
+
+		newTrg, ok := tgr.(trigger.Init)
+		if ok {
+
+			err := newTrg.Initialize(initCtx)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+
+			tgr.Init(legacyRunner)
+		}
+	}
+
+	return triggers, nil
+}
+
+type initContext struct {
+	handlers []*trigger.Handler
+}
+
+func (ctx *initContext) GetHandlers() ([]*trigger.Handler) {
+	return ctx.handlers
+}
+
+

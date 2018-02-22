@@ -16,5 +16,5 @@ type Activity interface {
 type Init interface {
 
 	// Init initialize the Activity for a particular configuration
-	Init(ctx InitContext) error
+	Initialize(ctx InitContext) error
 }

@@ -10,6 +10,8 @@ import (
 type Metadata struct {
 	ID      string
 	Options map[string]*data.Attribute
+	Dynamic bool
+	Async   bool
 }
 
 // NewMetadata creates the metadata object from its json representation

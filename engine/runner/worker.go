@@ -6,7 +6,6 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
@@ -29,10 +28,12 @@ type ActionWorkRequest struct {
 
 // ActionData action related data to pass along in a ActionWorkRequest
 type ActionData struct {
-	context        context.Context
-	action         action.Action
-	options        map[string]interface{}
-	arc            chan (*ActionResult)
+	context context.Context
+	action  action.Action
+	inputs  []*data.Attribute
+	arc     chan *ActionResult
+
+	options map[string]interface{}
 }
 
 // ActionResult is a simple struct to hold the results for an Action
@@ -92,41 +93,34 @@ func (w ActionWorker) Start() {
 
 					handler := &AsyncResultHandler{result: make(chan *ActionResult), done: make(chan bool, 1)}
 
-					act := actionData.action
-
-					var ctxData *trigger.ContextData
-
-					if actionData.context != nil {
-						var exists bool
-						ctxData, exists = trigger.ExtractContextData(actionData.context)
-
-						if !exists {
-							logger.Warn("Trigger data not applied to context")
-						}
-					}
-
-					inputs := generateInputs(act, ctxData)
-
-					err := act.Run(actionData.context, inputs, actionData.options, handler)
-
-					if err != nil {
-						logger.Debugf("worker-%d: Action Run error: %s\n", w.ID, err.Error())
-						// error so just return
-						actionData.arc <- &ActionResult{err: err}
+					if ! actionData.action.Metadata().Async {
+						syncAct := actionData.action.(action.SyncAction)
+						results, err := syncAct.Run(actionData.context, actionData.inputs, nil)
+						logger.Debugf("*** Worker received result: %v\n", results)
+						actionData.arc <- &ActionResult{results: results, err: err}
 					} else {
-						done := false
-						//wait for reply
-						for !done {
-							select {
-							case result := <-handler.result:
-								logger.Debugf("*** Worker received result: %v\n", result)
-								result.results = generateOutputs(act, ctxData, result.results)
-								actionData.arc <- result
-							case <-handler.done:
-								if !handler.replied {
-									actionData.arc <- &ActionResult{}
+						asyncAct := actionData.action.(action.AsyncAction)
+
+						err := asyncAct.Run(actionData.context, actionData.inputs, nil, handler)
+
+						if err != nil {
+							logger.Debugf("worker-%d: Action Run error: %s\n", w.ID, err.Error())
+							// error so just return
+							actionData.arc <- &ActionResult{err: err}
+						} else {
+							done := false
+							//wait for reply
+							for !done {
+								select {
+								case result := <-handler.result:
+									logger.Debugf("*** Worker received result: %v\n", result)
+									actionData.arc <- result
+								case <-handler.done:
+									if !handler.replied {
+										actionData.arc <- &ActionResult{}
+									}
+									done = true
 								}
-								done = true
 							}
 						}
 					}

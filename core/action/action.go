@@ -14,6 +14,25 @@ type Action interface {
 	//Metadata get the Action's metadata
 	Metadata() *Metadata
 
+
+
+	// Run this Action
+	//Run(context context.Context, inputs []*data.Attribute, options map[string]interface{}) (map[string]*data.Attribute, error)
+
+	// Run this Action
+	//Run(context context.Context, inputs []*data.Attribute, options map[string]interface{}, handler ResultHandler) error
+}
+
+type SyncAction interface {
+	Action
+
+	Run(context context.Context, inputs []*data.Attribute, options map[string]interface{}) (map[string]*data.Attribute, error)
+}
+
+// Action is an action to perform as a result of a trigger
+type AsyncAction interface {
+	Action
+
 	// Run this Action
 	Run(context context.Context, inputs []*data.Attribute, options map[string]interface{}, handler ResultHandler) error
 }
@@ -26,10 +45,15 @@ type Factory interface {
 // Runner runs actions
 type Runner interface {
 	//DEPRECATED
-	Run(context context.Context, action Action, uri string, options interface{}) (code int, data interface{}, err error)
+	Run(context context.Context, act Action, uri string, options interface{}) (code int, data interface{}, err error)
 
 	//Run the specified Action
+	//DEPRECATED
 	RunAction(ctx context.Context, act Action, options map[string]interface{}) (results map[string]*data.Attribute, err error)
+
+
+	RunAction2(ctx context.Context, act Action, inputs []*data.Attribute) (results map[string]*data.Attribute, err error)
+
 }
 
 // ResultHandler used to handle results from the Action

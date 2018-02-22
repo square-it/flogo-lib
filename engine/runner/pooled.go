@@ -98,44 +98,17 @@ func (runner *PooledRunner) Stop() error {
 //Deprecated
 func (runner *PooledRunner) Run(ctx context.Context, act action.Action, uri string, options interface{}) (code int, data interface{}, err error) {
 
-	if act == nil {
-		return 0, nil, errors.New("Action not specified")
-	}
-
-	newOptions := make(map[string]interface{})
-	newOptions["deprecated_options"] = options
-
-	if runner.active {
-
-		actionData := &ActionData{context: ctx, action: act, options: newOptions, arc: make(chan *ActionResult, 1)}
-		work := ActionWorkRequest{ReqType: RtRun, actionData: actionData}
-
-		runner.workQueue <- work
-		reply := <-actionData.arc
-
-		ndata := reply.results
-		err := reply.err
-		//return reply.results, reply.err
-
-		if len(ndata) != 0 {
-			defData, ok := ndata["data"]
-			if ok {
-				data = defData.Value()
-			}
-			defCode, ok := ndata["code"]
-			if ok && defCode.Value() != nil {
-				code = defCode.Value().(int)
-			}
-		}
-
-		return code, data, err
-	}
-
-	return 0, nil, errors.New("Runner not active")
+	return 0,nil, errors.New("unsupported")
 }
 
 // Run implements action.Runner.Run
 func (runner *PooledRunner) RunAction(ctx context.Context, act action.Action, options map[string]interface{}) (results map[string]*data.Attribute, err error) {
+
+	return nil, errors.New("unsupported")
+}
+
+
+func (runner *PooledRunner) RunAction2(ctx context.Context, act action.Action, inputs []*data.Attribute) (results map[string]*data.Attribute, err error) {
 
 	if act == nil {
 		return nil, errors.New("Action not specified")
@@ -143,14 +116,14 @@ func (runner *PooledRunner) RunAction(ctx context.Context, act action.Action, op
 
 	if runner.active {
 
-		data := &ActionData{context: ctx, action: act, options: options, arc: make(chan *ActionResult, 1)}
-		work := ActionWorkRequest{ReqType: RtRun, actionData: data}
+		actionData := &ActionData{context: ctx, action: act, inputs: inputs, arc: make(chan *ActionResult, 1)}
+		work := ActionWorkRequest{ReqType: RtRun, actionData: actionData}
 
 		runner.workQueue <- work
-		logger.Debugf("Run Action '%s' queued", act.Config().Id)
+		logger.Debugf("Run Action '%s' queued", act.Metadata().ID)
 
-		reply := <-data.arc
-		logger.Debugf("Run Action '%s' complete", act.Config().Id)
+		reply := <-actionData.arc
+		logger.Debugf("Run Action '%s' complete", act.Metadata().ID)
 
 		return reply.results, reply.err
 	}
@@ -158,3 +131,4 @@ func (runner *PooledRunner) RunAction(ctx context.Context, act action.Action, op
 	//Run rejected
 	return nil, errors.New("Runner not active")
 }
+
