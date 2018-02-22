@@ -108,7 +108,7 @@ func (runner *PooledRunner) RunAction(ctx context.Context, act action.Action, op
 }
 
 
-func (runner *PooledRunner) RunAction2(ctx context.Context, act action.Action, inputs map[string]*data.Attribute) (results map[string]*data.Attribute, err error) {
+func (runner *PooledRunner) Execute(ctx context.Context, act action.Action, inputs map[string]*data.Attribute) (results map[string]*data.Attribute, err error) {
 
 	if act == nil {
 		return nil, errors.New("Action not specified")

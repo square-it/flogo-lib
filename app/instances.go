@@ -5,6 +5,7 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
+	"github.com/TIBCOSoftware/flogo-lib/app/resource"
 )
 
 //InstanceHelper helps to create the instances for a given id
@@ -93,9 +94,10 @@ import (
 
 func CreateTriggers(tConfigs []*trigger.Config, runner action.Runner) (map[string]trigger.Trigger, error) {
 
-	triggers := make(map[string]trigger.Trigger, len(tConfigs))
+	//triggers := make(map[string]trigger.Trigger, len(tConfigs))
 	legacyRunner := trigger.NewLegacyRunner(runner)
 
+	triggers := make(map[string]trigger.Trigger)
 	for _, tConfig := range tConfigs {
 
 		_, exists := triggers[tConfig.Id]
@@ -109,9 +111,9 @@ func CreateTriggers(tConfigs []*trigger.Config, runner action.Runner) (map[strin
 			return nil, fmt.Errorf("Trigger Factory '%s' not registered", tConfig.Ref)
 		}
 
-		tgr := triggerFactory.New(tConfig)
+		trg := triggerFactory.New(tConfig)
 
-		if tgr == nil {
+		if trg == nil {
 			return nil, fmt.Errorf("cannot create Trigger nil for id '%s'", tConfig.Id)
 		}
 
@@ -132,12 +134,12 @@ func CreateTriggers(tConfigs []*trigger.Config, runner action.Runner) (map[strin
 				return nil, err
 			}
 
-			handler := trigger.NewHandler(hConfig, act, tgr.Metadata().Output, tgr.Metadata().Reply, runner)
+			handler := trigger.NewHandler(hConfig, act, trg.Metadata().Output, trg.Metadata().Reply, runner)
 			initCtx.handlers = append(initCtx.handlers, handler)
 			trigger.RegisterHandler(hConfig, handler)
 		}
 
-		newTrg, ok := tgr.(trigger.Init)
+		newTrg, ok := trg.(trigger.Init)
 		if ok {
 
 			err := newTrg.Initialize(initCtx)
@@ -146,12 +148,33 @@ func CreateTriggers(tConfigs []*trigger.Config, runner action.Runner) (map[strin
 			}
 		} else {
 
-			tgr.Init(legacyRunner)
+			trg.Init(legacyRunner)
 		}
+		
+		triggers[tConfig.Id] = trg
 	}
 
 	return triggers, nil
 }
+
+
+func RegisterResources(rConfigs []*resource.Config) error {
+
+	if len(rConfigs) == 0 {
+		return nil
+	}
+
+	for _, rConfig := range rConfigs {
+		err := resource.Load(rConfig)
+		if err != nil {
+			return err
+		}
+
+	}
+
+	return nil
+}
+
 
 type initContext struct {
 	handlers []*trigger.Handler

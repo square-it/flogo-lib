@@ -17,7 +17,7 @@ type Config struct {
 	//Deprecated
 	Metadata *data.IOMetadata `json:"metadata"`
 	//Deprecated
-	OldData json.RawMessage
+	//OldData json.RawMessage
 }
 
 //func GetConfigInputMetadata(act Action) []*data.Attribute {

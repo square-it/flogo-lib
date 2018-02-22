@@ -24,13 +24,16 @@ type Action interface {
 	//Run(context context.Context, inputs []*data.Attribute, options map[string]interface{}, handler ResultHandler) error
 }
 
+// SyncAction is a synchronous action to perform as a result of a trigger
 type SyncAction interface {
 	Action
 
+	// Run this Action
 	Run(context context.Context, inputs map[string]*data.Attribute) (map[string]*data.Attribute, error)
 }
 
-// Action is an action to perform as a result of a trigger
+// AsyncAction is an asynchronous action to perform as a result of a trigger, the action can asynchronously
+// return results as it runs.  It returns immediately, but will continue to run.
 type AsyncAction interface {
 	Action
 
@@ -54,15 +57,16 @@ type Runner interface {
 	//DEPRECATED
 	RunAction(ctx context.Context, act Action, options map[string]interface{}) (results map[string]*data.Attribute, err error)
 
-
-	RunAction2(ctx context.Context, act Action, inputs map[string]*data.Attribute) (results map[string]*data.Attribute, err error)
-
+	//Execute the specified Action
+	Execute(ctx context.Context, act Action, inputs map[string]*data.Attribute) (results map[string]*data.Attribute, err error)
 }
 
 // ResultHandler used to handle results from the Action
 type ResultHandler interface {
 
+	// HandleResult invoked when there are results available
 	HandleResult(results map[string]*data.Attribute, err error)
 
+	// Done indicates that the action has completed
 	Done()
 }

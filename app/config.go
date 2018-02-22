@@ -88,7 +88,7 @@ func FixUpApp(cfg *Config) {
 				}
 			}
 
-			newAction.OldData = oldAction.Data
+			newAction.Data = oldAction.Data
 			newAction.Metadata = oldAction.Metadata
 
 			handler.Action = newAction

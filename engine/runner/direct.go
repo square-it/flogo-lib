@@ -43,7 +43,7 @@ func (runner *DirectRunner) RunAction(ctx context.Context, act action.Action, op
 }
 
 // Run the specified action
-func (runner *DirectRunner) RunAction2(ctx context.Context, act action.Action, inputs map[string]*data.Attribute) (results map[string]*data.Attribute, err error) {
+func (runner *DirectRunner) Execute(ctx context.Context, act action.Action, inputs map[string]*data.Attribute) (results map[string]*data.Attribute, err error) {
 
 	if act == nil {
 		return nil, errors.New("Action not specified")

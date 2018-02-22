@@ -87,6 +87,8 @@ func (e *EngineConfig) Init(directRunner bool) error {
 			}
 		}
 
+		app.RegisterResources(e.App.Resources)
+
 		triggers, err := app.CreateTriggers(e.App.Triggers, e.actionRunner)
 
 		if err != nil {
@@ -96,7 +98,6 @@ func (e *EngineConfig) Init(directRunner bool) error {
 		}
 
 		e.triggers = triggers
-
 
 		//instanceHelper := app.NewInstanceHelper(e.App, trigger.Factories(), action.Factories())
 		//
@@ -166,6 +167,9 @@ func (e *EngineConfig) Start() error {
 
 	// Start the triggers
 
+
+	logger.Info("Engine: Starting Triggers...")
+
 	var failed []string
 
 	for key, value := range e.triggers {
@@ -194,6 +198,8 @@ func (e *EngineConfig) Start() error {
 			delete(e.triggers, triggerId)
 		}
 	}
+
+	logger.Info("Engine: Triggers Started")
 
 	logger.Info("Engine: Started")
 	return nil

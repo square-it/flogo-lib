@@ -72,7 +72,7 @@ func (h *Handler) Handle(ctx context.Context, triggerData map[string]interface{}
 		return nil, err
 	}
 
-	results, err := h.runner.RunAction2(ctx, h.act, inputs)
+	results, err := h.runner.Execute(ctx, h.act, inputs)
 
 	if err != nil {
 		return nil, err
@@ -108,7 +108,6 @@ func (h *Handler) generateInputs(triggerData map[string]interface{}) (map[string
 		return nil, nil
 	}
 
-	inputMetadata := h.act.IOMetadata().Input
 	triggerAttrs, _ := h.dataToAttrs(triggerData)
 
 	if len(triggerAttrs) == 0 {
@@ -116,6 +115,13 @@ func (h *Handler) generateInputs(triggerData map[string]interface{}) (map[string
 	}
 
 	var inputs map[string]*data.Attribute
+
+	if h.act.IOMetadata() == nil {
+		for _, attr := range triggerAttrs {
+			inputs[attr.Name()] = attr
+		}
+	}
+	inputMetadata := h.act.IOMetadata().Input
 
 	if h.actionInputMapper != nil && inputMetadata != nil {
 

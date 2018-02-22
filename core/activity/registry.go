@@ -7,6 +7,7 @@ import (
 )
 
 var (
+	//todo do we need a mutex, all currently loaded at startup
 	activitiesMu sync.Mutex
 	activities   = make(map[string]Activity)
 )
