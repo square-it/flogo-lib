@@ -25,7 +25,7 @@ func TestWorkerInvalidRequestType(t *testing.T) {
 	result := <-actionData.arc
 
 	assert.NotNil(t, result.err)
-	assert.Equal(t, "Unsupported work request type: '-1'", result.err.Error())
+	assert.Equal(t, "unsupported work request type: '-1'", result.err.Error())
 }
 
 //TestWorkerErrorInAction returns an error when the action returns error
