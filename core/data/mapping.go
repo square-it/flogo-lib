@@ -1,5 +1,10 @@
 package data
 
+import (
+	"encoding/json"
+	"errors"
+)
+
 // MappingType is an enum for possible MappingDef Types
 type MappingType int
 
@@ -20,13 +25,13 @@ const (
 // MappingDef is a simple structure that defines a mapping
 type MappingDef struct {
 	//Type the mapping type
-	Type MappingType `json:"type"`
+	Type MappingType
 
 	//Value the mapping value to execute to determine the result (rhs)
-	Value interface{} `json:"value"`
+	Value interface{}
 
 	//Result the name of attribute to place the result of the mapping in (lhs)
-	MapTo string `json:"mapTo"`
+	MapTo string
 }
 
 // Mapper is a constructs that maps values from one scope to another
@@ -43,4 +48,37 @@ type MapperDef struct {
 type IOMappings struct {
 	Input  []*MappingDef `json:"input,omitempty"`
 	Output []*MappingDef `json:"output,omitempty"`
+}
+
+func (md *MappingDef) UnmarshalJSON(b []byte) error {
+
+	ser := &struct {
+		Type  interface{} `json:"type"`
+		Value interface{} `json:"value"`
+		MapTo string      `json:"mapTo"`
+	}{}
+
+	if err := json.Unmarshal(b, ser); err != nil {
+		return err
+	}
+
+	md.MapTo = ser.MapTo
+	md.Value = ser.Value
+
+	strType, _ := CoerceToString(ser.Type)
+
+	switch strType {
+	case "assign", "1":
+		md.Type = MtAssign
+	case "literal", "2":
+		md.Type = MtLiteral
+	case "expression", "3":
+		md.Type = MtExpression
+	case "object", "4":
+		md.Type = MtObject
+	default:
+		return errors.New("unsupported mapping type: " + strType)
+	}
+
+	return nil
 }
