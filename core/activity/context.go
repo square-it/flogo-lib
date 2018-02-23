@@ -36,7 +36,7 @@ type Context interface {
 
 	//Deprecated
 	// FlowDetails returns the details fo the Flow Instance
-	//FlowDetails() FlowDetails
+	FlowDetails() FlowDetails
 }
 
 type InitContext interface {
@@ -83,14 +83,14 @@ type Host interface {
 
 // Deprecated
 // FlowDetails details of the flow that is being executed
-//type FlowDetails interface {
-//
-//	// ID returns the ID of the Flow Instance
-//	ID() string
-//
-//	// FlowName returns the name of the Flow
-//	Name() string
-//
-//	// ReplyHandler returns the reply handler for the flow Instance
-//	ReplyHandler() ReplyHandler
-//}
+type FlowDetails interface {
+
+	// ID returns the ID of the Flow Instance
+	ID() string
+
+	// FlowName returns the name of the Flow
+	Name() string
+
+	//// ReplyHandler returns the reply handler for the flow Instance
+	//ReplyHandler() ReplyHandler
+}

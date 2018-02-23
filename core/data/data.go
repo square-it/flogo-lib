@@ -113,8 +113,7 @@ type IOMetadata struct {
 }
 
 type DynamicIOMetadata interface {
-
-	InputMetadata()  []*Attribute
+	InputMetadata() []*Attribute
 
 	OutputMetadata() []*Attribute
 }

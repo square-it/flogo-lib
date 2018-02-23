@@ -6,9 +6,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetType(t *testing.T) {
+func TestGetTypeFromID(t *testing.T) {
 
-	resType, err := GetType("res://flow:myflow")
+	resType, err := GetTypeFromID("flow:myflow")
 	assert.Nil(t, err)
 	assert.Equal(t, "flow", resType)
 }

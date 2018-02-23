@@ -3,25 +3,16 @@ package action
 import (
 	"context"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"fmt"
 )
 
 // Action is an action to perform as a result of a trigger
 type Action interface {
-
-	//Config get the Action's config
-	//Config() *Config
-
 	//Metadata get the Action's metadata
 	Metadata() *Metadata
 
 	//IOMetadata get the Action's IO metadata
 	IOMetadata() *data.IOMetadata
-
-	// Run this Action
-	//Run(context context.Context, inputs []*data.Attribute, options map[string]interface{}) (map[string]*data.Attribute, error)
-
-	// Run this Action
-	//Run(context context.Context, inputs []*data.Attribute, options map[string]interface{}, handler ResultHandler) error
 }
 
 // SyncAction is a synchronous action to perform as a result of a trigger
@@ -46,6 +37,16 @@ type Factory interface {
 
 	//New create a new Action
 	New(config *Config) (Action, error)
+}
+
+// GetMetadata method to ensure we have metadata, remove in future
+func GetMetadata(act Action) *Metadata {
+	if act.Metadata() == nil {
+		_,async := act.(AsyncAction)
+		return &Metadata{ID:fmt.Sprintf("%T", act), Async:async}
+	} else {
+		return act.Metadata()
+	}
 }
 
 // Runner runs actions

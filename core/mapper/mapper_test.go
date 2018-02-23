@@ -3,8 +3,8 @@ package mapper
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestLiteralMapper(t *testing.T) {

@@ -121,7 +121,7 @@ func GetResolutionDetails(toResolve string) (*ResolutionDetails, error) {
 	itemIdx := strings.Index(toResolve[:dotIdx], "[")
 
 	if itemIdx != -1 {
-		details.Item = toResolve[itemIdx+1:dotIdx-1]
+		details.Item = toResolve[itemIdx+1 : dotIdx-1]
 		details.ResolverName = toResolve[:itemIdx]
 	} else {
 		details.ResolverName = toResolve[:dotIdx]
@@ -129,7 +129,7 @@ func GetResolutionDetails(toResolve string) (*ResolutionDetails, error) {
 		//special case for activity without brackets
 		if strings.HasPrefix(toResolve, "activity") {
 			nextDot := strings.Index(toResolve[dotIdx+1:], ".") + dotIdx + 1
-			details.Item = toResolve[dotIdx+1:nextDot]
+			details.Item = toResolve[dotIdx+1 : nextDot]
 			dotIdx = nextDot
 		}
 	}
@@ -139,7 +139,7 @@ func GetResolutionDetails(toResolve string) (*ResolutionDetails, error) {
 	if pathIdx != -1 {
 		pathStart := pathIdx + dotIdx + 1
 		details.Path = toResolve[pathStart:]
-		details.Property = toResolve[dotIdx+1:pathStart]
+		details.Property = toResolve[dotIdx+1 : pathStart]
 	} else {
 		details.Property = toResolve[dotIdx+1:]
 	}
@@ -169,10 +169,10 @@ func GetResolutionDetailsOld(toResolve string) (*ResolutionDetails, error) {
 
 	if details.ResolverName == "activity" {
 		nextDot := strings.Index(toResolve[dotIdx+1:], ".") + dotIdx + 1
-		details.Item = toResolve[dotIdx+1:nextDot]
+		details.Item = toResolve[dotIdx+1 : nextDot]
 		dotIdx = nextDot
 	}
-	details.Property = toResolve[dotIdx+1:closeIdx]
+	details.Property = toResolve[dotIdx+1 : closeIdx]
 
 	if closeIdx+1 < len(toResolve) {
 		details.Path = toResolve[closeIdx+1:]
@@ -184,7 +184,6 @@ func GetResolutionDetailsOld(toResolve string) (*ResolutionDetails, error) {
 func isSep(r rune) bool {
 	return r == '.' || r == '['
 }
-
 
 func GetValueWithResolver(valueMap map[string]interface{}, key string) (interface{}, bool) {
 
@@ -220,4 +219,3 @@ func GetValueWithResolver(valueMap map[string]interface{}, key string) (interfac
 
 	return val, true
 }
-

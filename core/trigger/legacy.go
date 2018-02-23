@@ -11,14 +11,13 @@ import (
 
 var handlerMap map[*HandlerConfig]*Handler
 
-
 //DEPRECATED
 type LegacyRunner struct {
 	currentRunner action.Runner
 }
 
-func NewLegacyRunner(runner action.Runner) action.Runner{
-	return &LegacyRunner{currentRunner:runner}
+func NewLegacyRunner(runner action.Runner) action.Runner {
+	return &LegacyRunner{currentRunner: runner}
 }
 
 //RegisterHandler register handler for the specified configuration
@@ -29,7 +28,6 @@ func RegisterHandler(cfg *HandlerConfig, h *Handler) {
 	}
 	handlerMap[cfg] = h
 }
-
 
 func (lr *LegacyRunner) Run(ctx context.Context, act action.Action, uri string, options interface{}) (code int, data interface{}, err error) {
 
@@ -64,7 +62,7 @@ func (*LegacyRunner) Execute(ctx context.Context, act action.Action, inputs map[
 	return nil, errors.New("not supported")
 }
 
-func  (lr *LegacyRunner) getHandler(ctx context.Context, act action.Action) (*Handler, map[string]interface{}) {
+func (lr *LegacyRunner) getHandler(ctx context.Context, act action.Action) (*Handler, map[string]interface{}) {
 	var values map[string]interface{}
 	var handler *Handler
 
@@ -80,7 +78,7 @@ func  (lr *LegacyRunner) getHandler(ctx context.Context, act action.Action) (*Ha
 
 	if handler == nil {
 		logger.Warn("unable to find existing handler, creating new one")
-		handler =  NewHandler(nil, act, nil,  nil, lr.currentRunner)
+		handler = NewHandler(nil, act, nil, nil, lr.currentRunner)
 	}
 
 	return handler, values

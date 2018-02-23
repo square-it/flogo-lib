@@ -34,7 +34,7 @@ type Init interface {
 type InitContext interface {
 
 	// GetHandlers gets the handlers associated with the trigger
-	GetHandlers() ([]*Handler)
+	GetHandlers() []*Handler
 }
 
 type Status string

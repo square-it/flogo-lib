@@ -5,8 +5,8 @@ import (
 	"errors"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 // PooledRunner is a action runner that queues and runs a action in a worker pool
@@ -98,7 +98,7 @@ func (runner *PooledRunner) Stop() error {
 //Deprecated
 func (runner *PooledRunner) Run(ctx context.Context, act action.Action, uri string, options interface{}) (code int, data interface{}, err error) {
 
-	return 0,nil, errors.New("unsupported")
+	return 0, nil, errors.New("unsupported")
 }
 
 // Run implements action.Runner.Run
@@ -106,7 +106,6 @@ func (runner *PooledRunner) RunAction(ctx context.Context, act action.Action, op
 
 	return nil, errors.New("unsupported")
 }
-
 
 func (runner *PooledRunner) Execute(ctx context.Context, act action.Action, inputs map[string]*data.Attribute) (results map[string]*data.Attribute, err error) {
 
@@ -119,11 +118,13 @@ func (runner *PooledRunner) Execute(ctx context.Context, act action.Action, inpu
 		actionData := &ActionData{context: ctx, action: act, inputs: inputs, arc: make(chan *ActionResult, 1)}
 		work := ActionWorkRequest{ReqType: RtRun, actionData: actionData}
 
+		md := action.GetMetadata(act)
+
 		runner.workQueue <- work
-		logger.Debugf("Run Action '%s' queued", act.Metadata().ID)
+		logger.Debugf("Run Action '%s' queued", md.ID)
 
 		reply := <-actionData.arc
-		logger.Debugf("Run Action '%s' complete", act.Metadata().ID)
+		logger.Debugf("Run Action '%s' complete", md.ID)
 
 		return reply.results, reply.err
 	}
@@ -131,4 +132,3 @@ func (runner *PooledRunner) Execute(ctx context.Context, act action.Action, inpu
 	//Run rejected
 	return nil, errors.New("Runner not active")
 }
-

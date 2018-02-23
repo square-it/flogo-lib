@@ -1,6 +1,5 @@
 package data
 
-
 // MappingType is an enum for possible MappingDef Types
 type MappingType int
 

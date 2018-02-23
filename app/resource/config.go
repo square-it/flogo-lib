@@ -7,7 +7,7 @@ type ResourcesConfig struct {
 }
 
 type Config struct {
-	ID   string          `json:"id"`
-	Compressed bool      `json:"compressed"`
-	Data json.RawMessage `json:"data"`
+	ID         string          `json:"id"`
+	Compressed bool            `json:"compressed"`
+	Data       json.RawMessage `json:"data"`
 }

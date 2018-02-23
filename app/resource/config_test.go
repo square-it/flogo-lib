@@ -40,4 +40,3 @@ func TestDeserialize(t *testing.T) {
 
 	fmt.Printf("Resources: %v", defRep)
 }
-

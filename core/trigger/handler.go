@@ -1,11 +1,11 @@
 package trigger
 
 import (
+	"context"
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
-	"context"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 type Handler struct {
@@ -61,8 +61,6 @@ func (h *Handler) GetStringSetting(setting string) string {
 
 	return strVal
 }
-
-
 
 func (h *Handler) Handle(ctx context.Context, triggerData map[string]interface{}) (map[string]*data.Attribute, error) {
 
@@ -154,7 +152,7 @@ func (h *Handler) generateInputs(triggerData map[string]interface{}) (map[string
 			inputs[attr.Name()] = attr
 
 			attrName := "_T." + attr.Name()
-			inputs[attrName] =  data.CloneAttribute(attrName, attr)
+			inputs[attrName] = data.CloneAttribute(attrName, attr)
 		}
 	}
 

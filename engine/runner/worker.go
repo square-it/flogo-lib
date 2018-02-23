@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 // Based off: http://nesv.github.io/golang/2014/02/25/worker-queues-in-go.html
@@ -93,7 +93,9 @@ func (w ActionWorker) Start() {
 
 					handler := &AsyncResultHandler{result: make(chan *ActionResult), done: make(chan bool, 1)}
 
-					if ! actionData.action.Metadata().Async {
+					md := action.GetMetadata(actionData.action)
+
+					if !md.Async {
 						syncAct := actionData.action.(action.SyncAction)
 						results, err := syncAct.Run(actionData.context, actionData.inputs)
 						logger.Debugf("*** Worker received result: %v\n", results)

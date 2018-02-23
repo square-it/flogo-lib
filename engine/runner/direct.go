@@ -49,7 +49,9 @@ func (runner *DirectRunner) Execute(ctx context.Context, act action.Action, inpu
 		return nil, errors.New("Action not specified")
 	}
 
-	if !act.Metadata().Async {
+	md := action.GetMetadata(act)
+
+	if !md.Async {
 		syncAct := act.(action.SyncAction)
 		return syncAct.Run(ctx, inputs)
 	} else {

@@ -81,7 +81,7 @@ func (e *EngineConfig) Init(directRunner bool) error {
 		for _, factory := range actionFactories {
 			if initializable, ok := factory.(util.Initializable); ok {
 
-				if err:=initializable.Init(); err != nil {
+				if err := initializable.Init(); err != nil {
 					return err
 				}
 			}
@@ -98,44 +98,6 @@ func (e *EngineConfig) Init(directRunner bool) error {
 		}
 
 		e.triggers = triggers
-
-		//instanceHelper := app.NewInstanceHelper(e.App, trigger.Factories(), action.Factories())
-		//
-		//// Create the trigger instances
-		//tInstances, err := instanceHelper.CreateTriggers()
-		//if err != nil {
-		//	errorMsg := fmt.Sprintf("Engine: Error Creating trigger instances - %s", err.Error())
-		//	logger.Error(errorMsg)
-		//	panic(errorMsg)
-		//}
-		//
-		//// Initialize and register the triggers
-		//for key, value := range tInstances {
-		//	triggerInterface := value.Interf
-		//
-		//	//Init
-		//	triggerInterface.Init(e.actionRunner)
-		//	//Register
-		//	trigger.RegisterInstance(key, value)
-		//}
-		//
-		//e.triggers = tInstances
-		//
-		//// Create the action instances
-		//actions, err := instanceHelper.CreateActions()
-		//if err != nil {
-		//	errorMsg := fmt.Sprintf("Engine: Error Creating action instances - %s", err.Error())
-		//	logger.Error(errorMsg)
-		//	panic(errorMsg)
-		//}
-		//
-		//// Initialize and register the actions,
-		//for key, value := range actions {
-		//	action.Register(key, value)
-		//	//do we need an init?
-		//}
-		//
-		//e.actions = actions
 	}
 
 	return nil
@@ -167,7 +129,6 @@ func (e *EngineConfig) Start() error {
 
 	// Start the triggers
 
-
 	logger.Info("Engine: Starting Triggers...")
 
 	var failed []string
@@ -177,8 +138,6 @@ func (e *EngineConfig) Start() error {
 		if err != nil {
 			logger.Infof("Trigger [%s] failed to start due to error [%s]", key, err.Error())
 
-			//value.Status = trigger.Failed
-			//value.Error = err
 			logger.Debugf("StackTrace: %s", debug.Stack())
 			if config.StopEngineOnError() {
 				logger.Debugf("{%s=true}. Stopping engine", config.ENV_STOP_ENGINE_ON_ERROR_KEY)
@@ -188,7 +147,6 @@ func (e *EngineConfig) Start() error {
 			failed = append(failed, key)
 		} else {
 			logger.Infof("Trigger [%s] started", key)
-			//value.Status = trigger.Started
 		}
 	}
 
@@ -212,24 +170,7 @@ func (e *EngineConfig) Stop() error {
 	for tgrId, tgr := range e.triggers {
 		util.StopManaged("Trigger [ "+tgrId+" ]", tgr)
 	}
-
-	//tConfigs := e.App.Triggers
-	//
-	//for _, tConfig := range tConfigs {
-	//	// Get instance
-	//	tInst := trigger.Instance(tConfig.Id)
-	//	if tInst == nil {
-	//		//nothing to stop
-	//		continue
-	//	}
-	//	tInterf := tInst.Interf
-	//	if tInterf == nil {
-	//		//nothing to stop
-	//		continue
-	//	}
-	//	util.StopManaged("Trigger [ "+tConfig.Id+" ]", tInterf)
-	//}
-
+	
 	actionRunner := e.actionRunner.(interface{})
 
 	if managedRunner, ok := actionRunner.(util.Managed); ok {
