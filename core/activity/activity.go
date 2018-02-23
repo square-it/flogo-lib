@@ -1,5 +1,7 @@
 package activity
 
+import "github.com/TIBCOSoftware/flogo-lib/core/data"
+
 // Activity is an interface for defining a custom Activity Execution
 type Activity interface {
 
@@ -17,4 +19,8 @@ type Init interface {
 
 	// Init initialize the Activity for a particular configuration
 	Initialize(ctx InitContext) error
+}
+
+type DynamicIO interface {
+	IOMetadata(ctx Context) (*data.IOMetadata, error)
 }

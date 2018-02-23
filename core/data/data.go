@@ -108,12 +108,31 @@ type ComplexObject struct {
 }
 
 type IOMetadata struct {
-	Input  []*Attribute `json:"input"`
-	Output []*Attribute `json:"output"`
+	Input  map[string]*Attribute
+	Output map[string]*Attribute
 }
 
-type DynamicIOMetadata interface {
-	InputMetadata() []*Attribute
+func (md *IOMetadata) UnmarshalJSON(b []byte) error {
 
-	OutputMetadata() []*Attribute
+	ser := &struct {
+		Input    []*Attribute `json:"input"`
+		Output   []*Attribute `json:"output"`
+	}{}
+
+	if err := json.Unmarshal(b, ser); err != nil {
+		return err
+	}
+
+	md.Input = make(map[string]*Attribute, len(ser.Input))
+	md.Output = make(map[string]*Attribute, len(ser.Output))
+
+	for _, attr := range ser.Input {
+		md.Input[attr.Name()] = attr
+	}
+
+	for _, attr := range ser.Output {
+		md.Output[attr.Name()] = attr
+	}
+
+	return nil
 }

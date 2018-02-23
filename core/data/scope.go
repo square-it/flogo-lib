@@ -177,16 +177,14 @@ type FixedScope struct {
 }
 
 // NewFixedScope creates a new SimpleScope
-func NewFixedScope(metadata []*Attribute) *FixedScope {
+func NewFixedScope(metadata map[string]*Attribute) *FixedScope {
 
 	scope := &FixedScope{
 		metadata: make(map[string]*Attribute),
 		attrs:    make(map[string]*Attribute),
 	}
 
-	for _, attr := range metadata {
-		scope.metadata[attr.Name()] = attr
-	}
+	scope.metadata = metadata
 
 	return scope
 }

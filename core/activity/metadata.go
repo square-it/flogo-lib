@@ -13,6 +13,7 @@ type Metadata struct {
 	Input          map[string]*data.Attribute
 	Output         map[string]*data.Attribute
 	ProducesResult bool
+	DynamicIO      bool
 }
 
 // NewMetadata creates the metadata object from its json representation
@@ -38,6 +39,7 @@ func (md *Metadata) UnmarshalJSON(b []byte) error {
 		Output   []*data.Attribute `json:"output"`
 		Return   bool              `json:"return"`
 		Reply    bool              `json:"reply"`
+		DynamicIO bool             `json:"dynamicIO"`
 
 		//for backwards compatibility
 		Inputs  []*data.Attribute `json:"inputs"`
@@ -57,6 +59,7 @@ func (md *Metadata) UnmarshalJSON(b []byte) error {
 	}
 
 	md.ProducesResult = ser.Reply || ser.Return
+	md.DynamicIO = ser.DynamicIO
 
 	md.Settings = make(map[string]*data.Attribute, len(ser.Settings))
 	md.Input = make(map[string]*data.Attribute, len(ser.Inputs))
