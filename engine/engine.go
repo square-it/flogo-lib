@@ -134,7 +134,7 @@ func (e *EngineConfig) Start() error {
 	var failed []string
 
 	for key, value := range e.triggers {
-		err := util.StartManaged(fmt.Sprintf("Trigger [ '%s' ]", key), value)
+		err := util.StartManaged(fmt.Sprintf("Trigger [ %s ]", key), value)
 		if err != nil {
 			logger.Infof("Trigger [%s] failed to start due to error [%s]", key, err.Error())
 
@@ -146,7 +146,7 @@ func (e *EngineConfig) Start() error {
 			}
 			failed = append(failed, key)
 		} else {
-			logger.Infof("Trigger [%s] started", key)
+			logger.Infof("Trigger [ %s ]: Started", key)
 		}
 	}
 

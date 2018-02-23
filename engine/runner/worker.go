@@ -78,12 +78,12 @@ func (w ActionWorker) Start() {
 			select {
 			case work := <-w.Work:
 				// Receive a work request.
-				logger.Debugf("worker-%d: Received Request\n", w.ID)
+				logger.Debugf("Action-Worker-%d: Received Request", w.ID)
 
 				switch work.ReqType {
 				default:
 
-					err := fmt.Errorf("Unsupported work request type: '%d'", work.ReqType)
+					err := fmt.Errorf("unsupported work request type: '%d'", work.ReqType)
 					actionData := work.actionData
 					actionData.arc <- &ActionResult{err: err}
 
@@ -98,7 +98,7 @@ func (w ActionWorker) Start() {
 					if !md.Async {
 						syncAct := actionData.action.(action.SyncAction)
 						results, err := syncAct.Run(actionData.context, actionData.inputs)
-						logger.Debugf("*** Worker received result: %v\n", results)
+						logger.Debugf("Action-Worker-%d: Received result: %v",w.ID, results)
 						actionData.arc <- &ActionResult{results: results, err: err}
 					} else {
 						asyncAct := actionData.action.(action.AsyncAction)
@@ -106,7 +106,7 @@ func (w ActionWorker) Start() {
 						err := asyncAct.Run(actionData.context, actionData.inputs, handler)
 
 						if err != nil {
-							logger.Debugf("worker-%d: Action Run error: %s\n", w.ID, err.Error())
+							logger.Debugf("Action-Worker-%d: Action Run error: %s", w.ID, err.Error())
 							// error so just return
 							actionData.arc <- &ActionResult{err: err}
 						} else {
@@ -115,7 +115,7 @@ func (w ActionWorker) Start() {
 							for !done {
 								select {
 								case result := <-handler.result:
-									logger.Debugf("*** Worker received result: %v\n", result)
+									logger.Debugf("Action-Worker-%d: Received result: %#v", w.ID, result)
 									actionData.arc <- result
 								case <-handler.done:
 									if !handler.replied {
@@ -127,12 +127,12 @@ func (w ActionWorker) Start() {
 						}
 					}
 
-					logger.Debugf("worker-%d: Completed Request\n", w.ID)
+					logger.Debugf("Action-Worker-%d: Completed Request", w.ID)
 				}
 
 			case <-w.QuitChan:
 				// We have been asked to stop.
-				logger.Debugf("worker-%d stopping\n", w.ID)
+				logger.Debugf("Action-Worker-%d: Stopping", w.ID)
 				return
 			}
 		}

@@ -121,10 +121,10 @@ func (runner *PooledRunner) Execute(ctx context.Context, act action.Action, inpu
 		md := action.GetMetadata(act)
 
 		runner.workQueue <- work
-		logger.Debugf("Run Action '%s' queued", md.ID)
+		logger.Debugf("Action '%s' queued", md.ID)
 
 		reply := <-actionData.arc
-		logger.Debugf("Run Action '%s' complete", md.ID)
+		logger.Debugf("Action '%s' returned", md.ID)
 
 		return reply.results, reply.err
 	}

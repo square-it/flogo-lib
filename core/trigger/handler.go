@@ -114,14 +114,21 @@ func (h *Handler) generateInputs(triggerData map[string]interface{}) (map[string
 
 	var inputs map[string]*data.Attribute
 
-	if h.act.IOMetadata() == nil {
-		for _, attr := range triggerAttrs {
-			inputs[attr.Name()] = attr
-		}
-	}
-	inputMetadata := h.act.IOMetadata().Input
+	//if h.act.IOMetadata() == nil {
+	//	inputs = make(map[string]*data.Attribute, len(triggerAttrs))
+	//
+	//	for _, attr := range triggerAttrs {
+	//		inputs[attr.Name()] = attr
+	//	}
+	//
+	//	return inputs, nil
+	//}
+	//inputMetadata := h.act.IOMetadata().Input
 
-	if h.actionInputMapper != nil && inputMetadata != nil {
+	//todo verify this behavior
+	if h.actionInputMapper != nil &&  h.act.IOMetadata() != nil && h.act.IOMetadata().Input != nil {
+
+		inputMetadata := h.act.IOMetadata().Input
 
 		inScope := data.NewSimpleScope(triggerAttrs, nil)
 		outScope := data.NewFixedScope(inputMetadata)
@@ -143,7 +150,7 @@ func (h *Handler) generateInputs(triggerData map[string]interface{}) (map[string
 
 		logger.Debug("No mapping specified, adding trigger outputs as inputs to action")
 
-		inputs := make(map[string]*data.Attribute, len(triggerAttrs))
+		inputs = make(map[string]*data.Attribute, len(triggerAttrs))
 
 		for _, attr := range triggerAttrs {
 
