@@ -1,72 +1,52 @@
 package action
 
 import (
-	"errors"
 	"fmt"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"sync"
 )
 
 var (
-	factoryMu sync.Mutex
-	factories = make(map[string]Factory)
-	actionMu  sync.Mutex
+	actionFactories = make(map[string]Factory)
+
+	//Deprecated
 	actions   = make(map[string]Action)
 )
 
-func GetFactory(ref string) Factory {
-	factoryMu.Lock()
-	defer factoryMu.Unlock()
-
-	return factories[ref]
-}
-
-func RegisterFactory(ref string, factory Factory) error {
-	factoryMu.Lock()
-	defer factoryMu.Unlock()
-
-	logger.Debugf("Registering action factory: '%s'", ref)
+func RegisterFactory(ref string, f Factory) error {
 
 	if len(ref) == 0 {
-		return errors.New("RegisterFactory: ref is empty")
+		return fmt.Errorf("'ref' must be specified when registering an action factory")
 	}
 
-	if factory == nil {
-		return errors.New("RegisterFactory: factory is nil")
+	if f == nil {
+		return fmt.Errorf("cannot register 'nil' action factory")
 	}
 
-	if factories[ref] != nil {
-		return fmt.Errorf("RegisterFactory: already registered factory for ref '%s'", ref)
+	if actionFactories[ref] != nil {
+		return fmt.Errorf("action factory already registered for ref '%s'", ref)
 	}
 
-	factories[ref] = factory
+	actionFactories[ref] = f
 
 	return nil
 }
 
-func Factories() map[string]Factory {
-	factoryMu.Lock()
-	defer factoryMu.Unlock()
-
-	factoriesCopy := make(map[string]Factory, len(factories))
-
-	for k, v := range factories {
-		factoriesCopy[k] = v
-	}
-
-	return factoriesCopy
+func GetFactory(ref string) Factory {
+	return actionFactories[ref]
 }
 
+func Factories() map[string]Factory {
+	//todo return copy
+	return actionFactories
+}
+
+//DEPRECATED
 func Get(id string) Action {
-	actionMu.Lock()
-	defer actionMu.Unlock()
 
 	return actions[id]
 }
 
+//DEPRECATED
 func Register(id string, act Action) error {
-	actionMu.Lock()
-	defer actionMu.Unlock()
 
 	if len(id) == 0 {
 		return fmt.Errorf("error registering action, id is empty")
@@ -77,26 +57,17 @@ func Register(id string, act Action) error {
 	}
 
 	if actions[id] != nil {
-		return fmt.Errorf("Error registering action, action already registered for id '%s'", id)
+		return fmt.Errorf("error registering action, action already registered for id '%s'", id)
 	}
 
-	// copy on write to avoid synchronization on access
-	actionsCopy := make(map[string]Action, len(actions)+1)
 
-	for k, v := range actions {
-		actionsCopy[k] = v
-	}
-
-	actionsCopy[id] = act
-
-	actions = actionsCopy
+	actions[id] = act
 
 	return nil
 }
 
+//DEPRECATED
 func Actions() map[string]Action {
-	actionMu.Lock()
-	defer actionMu.Unlock()
 
 	actionsCopy := make(map[string]Action, len(actions))
 

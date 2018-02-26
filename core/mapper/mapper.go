@@ -1,8 +1,8 @@
 package mapper
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"fmt"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
 type Factory interface {
@@ -87,7 +87,7 @@ func (m *BasicMapper) Apply(inputScope data.Scope, outputScope data.Scope) error
 			var err error
 
 			if m.resolver != nil {
-				val, err = m.resolver.Resolve(toResolve,inputScope)
+				val, err = m.resolver.Resolve(toResolve, inputScope)
 				if err != nil {
 					return err
 				}

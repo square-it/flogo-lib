@@ -85,3 +85,11 @@ func StopManaged(name string, managed Managed) error {
 	logger.Debugf("%s: Stopped", name)
 	return nil
 }
+
+// Initializable is an interface that is implemented by an object that needs to be
+// initialized
+type Initializable interface {
+
+	// Initializes the object
+	Init() error
+}

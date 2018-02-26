@@ -78,7 +78,6 @@ func TestGetResolutionDetails(t *testing.T) {
 	assert.Equal(t, "[0]", details.Path)
 }
 
-
 func TestGetResolutionDetailsOld(t *testing.T) {
 
 	a := "${property.Prop1}"

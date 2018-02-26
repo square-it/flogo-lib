@@ -78,7 +78,7 @@ func (ec *Config) MarshalJSON() ([]byte, error) {
 	})
 }
 
-// UnmarshalJSON unmarshals EngineConfog from JSON
+// UnmarshalJSON unmarshal EngineConfig from JSON
 func (ec *Config) UnmarshalJSON(data []byte) error {
 
 	ser := &serEngineConfig{}

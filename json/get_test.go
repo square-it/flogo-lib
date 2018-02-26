@@ -4,8 +4,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/stretchr/testify/assert"
 )
 
 var jsonData = `{

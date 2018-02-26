@@ -106,3 +106,33 @@ type ComplexObject struct {
 	Metadata string      `json:"metadata"`
 	Value    interface{} `json:"value"`
 }
+
+type IOMetadata struct {
+	Input  map[string]*Attribute
+	Output map[string]*Attribute
+}
+
+func (md *IOMetadata) UnmarshalJSON(b []byte) error {
+
+	ser := &struct {
+		Input    []*Attribute `json:"input"`
+		Output   []*Attribute `json:"output"`
+	}{}
+
+	if err := json.Unmarshal(b, ser); err != nil {
+		return err
+	}
+
+	md.Input = make(map[string]*Attribute, len(ser.Input))
+	md.Output = make(map[string]*Attribute, len(ser.Output))
+
+	for _, attr := range ser.Input {
+		md.Input[attr.Name()] = attr
+	}
+
+	for _, attr := range ser.Output {
+		md.Output[attr.Name()] = attr
+	}
+
+	return nil
+}
