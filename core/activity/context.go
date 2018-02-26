@@ -39,18 +39,6 @@ type Context interface {
 	FlowDetails() FlowDetails
 }
 
-type InitContext interface {
-
-	// GetSetting gets the value of the specified setting
-	GetSetting(setting string) (value interface{}, exists bool)
-
-	// GetResolver gets the resolver associated with the activity host
-	GetResolver() data.Resolver
-
-	// SetInitValue sets the value associated with this initialization
-	SetInitValue(key string, value interface{})
-}
-
 type Host interface {
 
 	// ID returns the ID of the Activity Host
@@ -80,6 +68,18 @@ type Host interface {
 	//Map with action specific details/properties, flowId, etc.
 	//GetDetails() map[string]string
 }
+
+//type InitContext interface {
+//
+//	// GetSetting gets the value of the specified setting
+//	GetSetting(setting string) (value interface{}, exists bool)
+//
+//	// GetResolver gets the resolver associated with the activity host
+//	GetResolver() data.Resolver
+//
+//	// SetInitValue sets the value associated with this initialization
+//	SetInitValue(key string, value interface{})
+//}
 
 // Deprecated
 // FlowDetails details of the flow that is being executed

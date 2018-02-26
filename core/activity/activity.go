@@ -15,12 +15,17 @@ type Activity interface {
 
 // Init is an optional interface that can be implemented by an activity.  If implemented,
 // it will be invoked for each corresponding activity configuration that has settings.
-type Init interface {
+//type Init interface {
+//
+//	// Init initialize the Activity for a particular configuration
+//	Initialize(ctx InitContext) error
+//}
 
-	// Init initialize the Activity for a particular configuration
-	Initialize(ctx InitContext) error
-}
-
+// DynamicIO is an optional interface that can be implemented by an activity.  If implemented,
+// IOMetadata() will be invoked to determine the inputs/outputs of the activity instead of
+// relying on the static information from the Activity's Metadata
 type DynamicIO interface {
+
+	// IOMetadata get the input/output metadata
 	IOMetadata(ctx Context) (*data.IOMetadata, error)
 }
