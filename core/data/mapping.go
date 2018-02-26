@@ -78,6 +78,8 @@ func (md *MappingDef) UnmarshalJSON(b []byte) error {
 		md.Type = MtExpression
 	case "object", "4":
 		md.Type = MtObject
+	case "array", "5":
+		md.Type = MTARRAY
 	default:
 		return errors.New("unsupported mapping type: " + strType)
 	}
