@@ -140,9 +140,7 @@ func GetResolutionDetails(toResolve string) (*ResolutionDetails, error) {
 			return nil, fmt.Errorf("invalid resolution expression [%s]", toResolve)
 		}
 
-		details := &ResolutionDetails{}
 		itemIdx := strings.Index(toResolve[:dotIdx], "[")
-
 		if itemIdx != -1 {
 			details.Item = toResolve[itemIdx+1 : dotIdx-1]
 			details.ResolverName = toResolve[:itemIdx]
@@ -167,7 +165,7 @@ func GetResolutionDetails(toResolve string) (*ResolutionDetails, error) {
 			details.Property = toResolve[dotIdx+1:]
 		}
 	}
-	
+
 	return details, nil
 }
 
