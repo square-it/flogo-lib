@@ -9,13 +9,13 @@ import (
 func NewAssignExpr(assignTo string, value interface{}) data.Expr {
 
 	attrName, attrPath, _ := data.PathDeconstruct(assignTo)
-	return &assignExpr{assignAttrName: attrName, assignAttrPath: attrPath, value:value}
+	return &assignExpr{assignAttrName: attrName, assignAttrPath: attrPath, value: value}
 }
 
 type assignExpr struct {
 	assignAttrName string
 	assignAttrPath string
-	value    interface{}
+	value          interface{}
 }
 
 func (e *assignExpr) Eval(scope data.Scope) (interface{}, error) {
@@ -60,9 +60,9 @@ func NewMapperDefFromAnyArray(mappings []interface{}) (*data.MapperDef, error) {
 		value := mappingObject["value"]
 		mapTo := mappingObject["mapTo"].(string)
 
-		mappingDef := &data.MappingDef{Type:data.MappingType(mappingType), MapTo:mapTo, Value:value}
+		mappingDef := &data.MappingDef{Type: data.MappingType(mappingType), MapTo: mapTo, Value: value}
 		mappingDefs = append(mappingDefs, mappingDef)
 	}
 
-	return &data.MapperDef{Mappings:mappingDefs}, nil
+	return &data.MapperDef{Mappings: mappingDefs}, nil
 }

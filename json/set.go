@@ -2,9 +2,9 @@ package json
 
 import (
 	"encoding/json"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"strings"
 	"sync"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 type JSONData struct {

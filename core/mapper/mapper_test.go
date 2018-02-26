@@ -3,8 +3,8 @@ package mapper
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestLiteralMapper(t *testing.T) {
@@ -25,7 +25,7 @@ func TestLiteralMapper(t *testing.T) {
 	attr3, _ := data.NewAttribute("Array", data.ARRAY, nil)
 	attr4, _ := data.NewAttribute("Params", data.PARAMS, nil)
 
-	md := []*data.Attribute{attr1, attr2, attr3, attr4}
+	md := map[string]*data.Attribute{attr1.Name():attr1, attr2.Name():attr2, attr3.Name():attr3, attr4.Name():attr4}
 	outScope := data.NewFixedScope(md)
 
 	objVal, _ := data.CoerceToObject("{\"key1\":5}")
@@ -82,7 +82,7 @@ func TestAssignMapper(t *testing.T) {
 	attrI3, _ := data.NewAttribute("ArrayI", data.ARRAY, nil)
 	attrI4, _ := data.NewAttribute("ParamsI", data.PARAMS, nil)
 
-	mdI := []*data.Attribute{attrI1, attrI2, attrI3, attrI4}
+	mdI := map[string]*data.Attribute{attrI1.Name():attrI1, attrI2.Name():attrI2, attrI3.Name():attrI3, attrI4.Name():attrI4}
 	inScope := data.NewFixedScope(mdI)
 
 	attrO1, _ := data.NewAttribute("SimpleO", data.INTEGER, nil)
@@ -90,7 +90,7 @@ func TestAssignMapper(t *testing.T) {
 	attrO3, _ := data.NewAttribute("ArrayO", data.ARRAY, nil)
 	attrO4, _ := data.NewAttribute("ParamsO", data.PARAMS, nil)
 
-	mdO := []*data.Attribute{attrO1, attrO2, attrO3, attrO4}
+	mdO := map[string]*data.Attribute{attrO1.Name():attrO1, attrO2.Name():attrO2, attrO3.Name():attrO3, attrO4.Name():attrO4}
 	outScope := data.NewFixedScope(mdO)
 
 	inScope.SetAttrValue("SimpleI", 1)

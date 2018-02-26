@@ -19,17 +19,17 @@ func TestNewPooledConfigDefault(t *testing.T) {
 
 //TestNewPooledConfigOk
 func TestNewPooledConfigOverride(t *testing.T) {
-	previousWorkers := os.Getenv(config.RUNNER_WORKERS_KEY)
-	defer os.Setenv(config.RUNNER_WORKERS_KEY, previousWorkers)
-	previousQueue := os.Getenv(config.RUNNER_QUEUE_SIZE_KEY)
-	defer os.Setenv(config.RUNNER_QUEUE_SIZE_KEY, previousQueue)
+	previousWorkers := os.Getenv(config.ENV_RUNNER_WORKERS_KEY)
+	defer os.Setenv(config.ENV_RUNNER_WORKERS_KEY, previousWorkers)
+	previousQueue := os.Getenv(config.ENV_RUNNER_QUEUE_SIZE_KEY)
+	defer os.Setenv(config.ENV_RUNNER_QUEUE_SIZE_KEY, previousQueue)
 
 	newWorkersValue := 6
 	newQueueValue := 60
 
 	// Change values
-	os.Setenv(config.RUNNER_WORKERS_KEY, strconv.Itoa(newWorkersValue))
-	os.Setenv(config.RUNNER_QUEUE_SIZE_KEY, strconv.Itoa(newQueueValue))
+	os.Setenv(config.ENV_RUNNER_WORKERS_KEY, strconv.Itoa(newWorkersValue))
+	os.Setenv(config.ENV_RUNNER_QUEUE_SIZE_KEY, strconv.Itoa(newQueueValue))
 
 	pooledConfig := NewPooledConfig()
 

@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref/field"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 type Resolver interface {
@@ -114,7 +114,7 @@ func GetResolutionDetails(toResolve string) (*ResolutionDetails, error) {
 	details := &ResolutionDetails{}
 
 	if field.HasSpecialFields(toResolve) {
-		fields , err := field.GetAllspecialFields(toResolve)
+		fields, err := field.GetAllspecialFields(toResolve)
 		if err != nil {
 			return details, err
 		}
@@ -133,16 +133,18 @@ func GetResolutionDetails(toResolve string) (*ResolutionDetails, error) {
 		details.Property = fieldname
 
 		details.Path = strings.Join(fields[2:], ".")
-	}else {
+	} else {
 		dotIdx := strings.Index(toResolve, ".")
+
 		if dotIdx == -1 {
 			return nil, fmt.Errorf("invalid resolution expression [%s]", toResolve)
 		}
 
+		details := &ResolutionDetails{}
 		itemIdx := strings.Index(toResolve[:dotIdx], "[")
 
 		if itemIdx != -1 {
-			details.Item = toResolve[itemIdx+1:dotIdx-1]
+			details.Item = toResolve[itemIdx+1 : dotIdx-1]
 			details.ResolverName = toResolve[:itemIdx]
 		} else {
 			details.ResolverName = toResolve[:dotIdx]
@@ -150,7 +152,7 @@ func GetResolutionDetails(toResolve string) (*ResolutionDetails, error) {
 			//special case for activity without brackets
 			if strings.HasPrefix(toResolve, "activity") {
 				nextDot := strings.Index(toResolve[dotIdx+1:], ".") + dotIdx + 1
-				details.Item = toResolve[dotIdx+1:nextDot]
+				details.Item = toResolve[dotIdx+1 : nextDot]
 				dotIdx = nextDot
 			}
 		}
@@ -160,15 +162,14 @@ func GetResolutionDetails(toResolve string) (*ResolutionDetails, error) {
 		if pathIdx != -1 {
 			pathStart := pathIdx + dotIdx + 1
 			details.Path = toResolve[pathStart:]
-			details.Property = toResolve[dotIdx+1:pathStart]
+			details.Property = toResolve[dotIdx+1 : pathStart]
 		} else {
 			details.Property = toResolve[dotIdx+1:]
 		}
 	}
-
+	
 	return details, nil
 }
-
 
 func GetResolutionDetailsOld(toResolve string) (*ResolutionDetails, error) {
 
@@ -192,10 +193,10 @@ func GetResolutionDetailsOld(toResolve string) (*ResolutionDetails, error) {
 
 	if details.ResolverName == "activity" {
 		nextDot := strings.Index(toResolve[dotIdx+1:], ".") + dotIdx + 1
-		details.Item = toResolve[dotIdx+1:nextDot]
+		details.Item = toResolve[dotIdx+1 : nextDot]
 		dotIdx = nextDot
 	}
-	details.Property = toResolve[dotIdx+1:closeIdx]
+	details.Property = toResolve[dotIdx+1 : closeIdx]
 
 	if closeIdx+1 < len(toResolve) {
 		details.Path = toResolve[closeIdx+1:]
@@ -206,4 +207,39 @@ func GetResolutionDetailsOld(toResolve string) (*ResolutionDetails, error) {
 
 func isSep(r rune) bool {
 	return r == '.' || r == '['
+}
+
+func GetValueWithResolver(valueMap map[string]interface{}, key string) (interface{}, bool) {
+
+	val, exists := valueMap[key]
+
+	if !exists {
+		return nil, false
+	}
+
+	strVal, ok := val.(string)
+
+	if ok {
+		if strVal == "" {
+			return "", true
+		}
+
+		if strVal[0] == '$' {
+
+			v, err := GetBasicResolver().Resolve(strVal, nil)
+			if err != nil {
+				if strings.HasPrefix(err.Error(), "unsupported resolver") {
+					return val, true
+				}
+				//todo double check this case
+				return val, true
+			}
+
+			return v, true
+		} else {
+			return val, true
+		}
+	}
+
+	return val, true
 }
