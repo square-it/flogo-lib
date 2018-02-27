@@ -30,6 +30,8 @@ func CreateTriggers(tConfigs []*trigger.Config, runner action.Runner) (map[strin
 			return nil, fmt.Errorf("cannot create Trigger nil for id '%s'", tConfig.Id)
 		}
 
+		tConfig.FixUp(trg.Metadata())
+
 		initCtx := &initContext{handlers: make([]*trigger.Handler, 0, len(tConfig.Handlers))}
 
 		//create handlers for that trigger and init
