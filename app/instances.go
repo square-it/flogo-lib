@@ -10,8 +10,6 @@ import (
 
 func CreateTriggers(tConfigs []*trigger.Config, runner action.Runner) (map[string]trigger.Trigger, error) {
 
-	legacyRunner := trigger.NewLegacyRunner(runner)
-
 	triggers := make(map[string]trigger.Trigger)
 	for _, tConfig := range tConfigs {
 
@@ -63,7 +61,7 @@ func CreateTriggers(tConfigs []*trigger.Config, runner action.Runner) (map[strin
 				return nil, err
 			}
 		} else {
-
+			legacyRunner := trigger.NewLegacyRunner(runner, trg.Metadata())
 			trg.Init(legacyRunner)
 		}
 

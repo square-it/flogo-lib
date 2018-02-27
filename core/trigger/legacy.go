@@ -14,9 +14,10 @@ var handlerMap map[*HandlerConfig]*Handler
 //DEPRECATED
 type LegacyRunner struct {
 	currentRunner action.Runner
+	triggerMetadata *Metadata
 }
 
-func NewLegacyRunner(runner action.Runner) action.Runner {
+func NewLegacyRunner(runner action.Runner, metadata *Metadata) action.Runner {
 	return &LegacyRunner{currentRunner: runner}
 }
 
@@ -78,7 +79,7 @@ func (lr *LegacyRunner) getHandler(ctx context.Context, act action.Action) (*Han
 
 	if handler == nil {
 		logger.Warn("unable to find existing handler, creating new one")
-		handler = NewHandler(nil, act, nil, nil, lr.currentRunner)
+		handler = NewHandler(nil, act, lr.triggerMetadata.Output, lr.triggerMetadata.Reply, lr.currentRunner)
 	}
 
 	return handler, values
