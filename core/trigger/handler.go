@@ -24,12 +24,14 @@ type Handler struct {
 func NewHandler(config *HandlerConfig, act action.Action, outputMd map[string]*data.Attribute, replyMd map[string]*data.Attribute, runner action.Runner) *Handler {
 	handler := &Handler{config: config, act: act, outputMd: outputMd, replyMd: replyMd, runner: runner}
 
-	if config.Action.Mappings != nil {
-		if len(config.Action.Mappings.Input) > 0 {
-			handler.actionInputMapper = mapper.GetFactory().NewMapper(&data.MapperDef{Mappings: config.Action.Mappings.Input}, nil)
-		}
-		if len(config.Action.Mappings.Output) > 0 {
-			handler.actionOutputMapper = mapper.GetFactory().NewMapper(&data.MapperDef{Mappings: config.Action.Mappings.Output}, nil)
+	if config != nil {
+		if config.Action.Mappings != nil {
+			if len(config.Action.Mappings.Input) > 0 {
+				handler.actionInputMapper = mapper.GetFactory().NewMapper(&data.MapperDef{Mappings: config.Action.Mappings.Input}, nil)
+			}
+			if len(config.Action.Mappings.Output) > 0 {
+				handler.actionOutputMapper = mapper.GetFactory().NewMapper(&data.MapperDef{Mappings: config.Action.Mappings.Output}, nil)
+			}
 		}
 	}
 
@@ -37,6 +39,11 @@ func NewHandler(config *HandlerConfig, act action.Action, outputMd map[string]*d
 }
 
 func (h *Handler) GetSetting(setting string) (interface{}, bool) {
+
+	if h.config == nil {
+		return nil, false
+	}
+
 	val, exists := data.GetValueWithResolver(h.config.Settings, setting)
 
 	if !exists {

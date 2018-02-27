@@ -34,6 +34,14 @@ func CreateTriggers(tConfigs []*trigger.Config, runner action.Runner) (map[strin
 
 		initCtx := &initContext{handlers: make([]*trigger.Handler, 0, len(tConfig.Handlers))}
 
+		var legacyRunner *trigger.LegacyRunner
+
+		newTrg, isNew := trg.(trigger.Init)
+
+		if !isNew {
+			legacyRunner = trigger.NewLegacyRunner(runner, trg.Metadata())
+		}
+
 		//create handlers for that trigger and init
 		for _, hConfig := range tConfig.Handlers {
 
@@ -48,22 +56,21 @@ func CreateTriggers(tConfigs []*trigger.Config, runner action.Runner) (map[strin
 				return nil, err
 			}
 
-			action.Register(hConfig.ActionId, act)
-
 			handler := trigger.NewHandler(hConfig, act, trg.Metadata().Output, trg.Metadata().Reply, runner)
 			initCtx.handlers = append(initCtx.handlers, handler)
-			trigger.RegisterHandler(hConfig, handler)
+
+			if !isNew {
+				action.Register(hConfig.ActionId, act)
+				legacyRunner.RegisterHandler(handler)
+			}
 		}
 
-		newTrg, ok := trg.(trigger.Init)
-		if ok {
-
+		if isNew {
 			err := newTrg.Initialize(initCtx)
 			if err != nil {
 				return nil, err
 			}
 		} else {
-			legacyRunner := trigger.NewLegacyRunner(runner, trg.Metadata())
 			trg.Init(legacyRunner)
 		}
 
