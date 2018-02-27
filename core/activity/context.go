@@ -91,6 +91,6 @@ type FlowDetails interface {
 	// FlowName returns the name of the Flow
 	Name() string
 
-	//// ReplyHandler returns the reply handler for the flow Instance
-	//ReplyHandler() ReplyHandler
+	// ReplyHandler returns the reply handler for the flow Instance
+	ReplyHandler() ReplyHandler
 }
