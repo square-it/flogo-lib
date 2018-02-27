@@ -7,6 +7,8 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"golang.org/x/tools/cmd/guru/testdata/src/alias"
+	"unicode"
 )
 
 var handlerMap map[*HandlerConfig]*Handler
@@ -18,7 +20,7 @@ type LegacyRunner struct {
 }
 
 func NewLegacyRunner(runner action.Runner, metadata *Metadata) action.Runner {
-	return &LegacyRunner{currentRunner: runner}
+	return &LegacyRunner{currentRunner: runner, triggerMetadata:metadata}
 }
 
 //RegisterHandler register handler for the specified configuration
