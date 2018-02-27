@@ -7,29 +7,23 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"golang.org/x/tools/cmd/guru/testdata/src/alias"
-	"unicode"
 )
-
-var handlerMap map[*HandlerConfig]*Handler
 
 //DEPRECATED
 type LegacyRunner struct {
-	currentRunner action.Runner
+	currentRunner   action.Runner
 	triggerMetadata *Metadata
+	handlers        map[*HandlerConfig]*Handler
+	actToHandlers   map[action.Action]*Handler
 }
 
-func NewLegacyRunner(runner action.Runner, metadata *Metadata) action.Runner {
-	return &LegacyRunner{currentRunner: runner, triggerMetadata:metadata}
+func NewLegacyRunner(runner action.Runner, metadata *Metadata) *LegacyRunner {
+	return &LegacyRunner{currentRunner: runner, triggerMetadata: metadata, handlers: make(map[*HandlerConfig]*Handler), actToHandlers: make(map[action.Action]*Handler)}
 }
 
-//RegisterHandler register handler for the specified configuration
-//DEPRECATED
-func RegisterHandler(cfg *HandlerConfig, h *Handler) {
-	if handlerMap == nil {
-		handlerMap = make(map[*HandlerConfig]*Handler)
-	}
-	handlerMap[cfg] = h
+func (lr *LegacyRunner) RegisterHandler(h *Handler) {
+	lr.handlers[h.config] = h
+	lr.actToHandlers[h.act] = h
 }
 
 func (lr *LegacyRunner) Run(ctx context.Context, act action.Action, uri string, options interface{}) (code int, data interface{}, err error) {
@@ -73,14 +67,21 @@ func (lr *LegacyRunner) getHandler(ctx context.Context, act action.Action) (*Han
 		var exists bool
 		ctxData, exists := ExtractContextData(ctx)
 
-		if !exists {
+		if exists {
 			values = attrsToData(ctxData.Attrs)
-			handler = handlerMap[ctxData.HandlerCfg]
+			if ctxData.HandlerCfg != nil {
+				handler = lr.handlers[ctxData.HandlerCfg]
+			}
+
 		}
 	}
 
 	if handler == nil {
-		logger.Warn("unable to find existing handler, creating new one")
+		handler = lr.actToHandlers[act]
+	}
+
+	if handler == nil {
+		logger.Warn("Unable to determine handler, creating generic one")
 		handler = NewHandler(nil, act, lr.triggerMetadata.Output, lr.triggerMetadata.Reply, lr.currentRunner)
 	}
 
