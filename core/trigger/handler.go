@@ -89,18 +89,24 @@ func (h *Handler) Handle(ctx context.Context, triggerData map[string]interface{}
 }
 
 func (h *Handler) dataToAttrs(triggerData map[string]interface{}) ([]*data.Attribute, error) {
-
 	attrs := make([]*data.Attribute, 0, len(h.outputMd))
 
 	for k, a := range h.outputMd {
 		v, _ := triggerData[k]
 
-		var err error
-		attr, err := data.NewAttribute(a.Name(), a.Type(), v)
-		attrs = append(attrs, attr)
-
-		if err != nil {
-			return nil, err
+		switch t := v.(type) {
+		case *data.Attribute:
+			attr, err := data.NewAttribute(t.Name(), t.Type(), t.Value())
+			if err != nil {
+				return nil, err
+			}
+			attrs = append(attrs, attr)
+		default:
+			attr, err := data.NewAttribute(a.Name(), a.Type(), v)
+			if err != nil {
+				return nil, err
+			}
+			attrs = append(attrs, attr)
 		}
 	}
 
@@ -133,7 +139,7 @@ func (h *Handler) generateInputs(triggerData map[string]interface{}) (map[string
 	//inputMetadata := h.act.IOMetadata().Input
 
 	//todo verify this behavior
-	if h.actionInputMapper != nil &&  h.act.IOMetadata() != nil && h.act.IOMetadata().Input != nil {
+	if h.actionInputMapper != nil && h.act.IOMetadata() != nil && h.act.IOMetadata().Input != nil {
 
 		inputMetadata := h.act.IOMetadata().Input
 
