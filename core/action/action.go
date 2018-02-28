@@ -2,8 +2,9 @@ package action
 
 import (
 	"context"
-	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"fmt"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
 // Action is an action to perform as a result of a trigger
@@ -42,8 +43,8 @@ type Factory interface {
 // GetMetadata method to ensure we have metadata, remove in future
 func GetMetadata(act Action) *Metadata {
 	if act.Metadata() == nil {
-		_,async := act.(AsyncAction)
-		return &Metadata{ID:fmt.Sprintf("%T", act), Async:async}
+		_, async := act.(AsyncAction)
+		return &Metadata{ID: fmt.Sprintf("%T", act), Async: async}
 	} else {
 		return act.Metadata()
 	}

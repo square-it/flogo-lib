@@ -170,7 +170,7 @@ func (e *EngineConfig) Stop() error {
 	for tgrId, tgr := range e.triggers {
 		util.StopManaged("Trigger [ "+tgrId+" ]", tgr)
 	}
-	
+
 	actionRunner := e.actionRunner.(interface{})
 
 	if managedRunner, ok := actionRunner.(util.Managed); ok {

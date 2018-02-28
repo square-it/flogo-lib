@@ -31,7 +31,7 @@ func TestRegisterFactoryEmptyRef(t *testing.T) {
 
 	orig := triggerFactories
 	triggerFactories = make(map[string]Factory)
-	defer func() {triggerFactories = orig}()
+	defer func() { triggerFactories = orig }()
 
 	// Register factory
 	err := RegisterFactory("", nil)
@@ -45,7 +45,7 @@ func TestRegisterFactoryNilFactory(t *testing.T) {
 
 	orig := triggerFactories
 	triggerFactories = make(map[string]Factory)
-	defer func() {triggerFactories = orig}()
+	defer func() { triggerFactories = orig }()
 
 	// Register factory
 	err := RegisterFactory("github.com/mock", nil)
@@ -59,7 +59,7 @@ func TestAddFactoryDuplicated(t *testing.T) {
 
 	orig := triggerFactories
 	triggerFactories = make(map[string]Factory)
-	defer func() {triggerFactories = orig}()
+	defer func() { triggerFactories = orig }()
 
 	f := &MockFactory{}
 
@@ -78,7 +78,7 @@ func TestAddFactoryOk(t *testing.T) {
 
 	orig := triggerFactories
 	triggerFactories = make(map[string]Factory)
-	defer func() {triggerFactories = orig}()
+	defer func() { triggerFactories = orig }()
 
 	f := &MockFactory{}
 
@@ -93,7 +93,7 @@ func TestGetFactoriesOk(t *testing.T) {
 
 	orig := triggerFactories
 	triggerFactories = make(map[string]Factory)
-	defer func() {triggerFactories = orig}()
+	defer func() { triggerFactories = orig }()
 
 	f := &MockFactory{}
 

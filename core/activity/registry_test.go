@@ -1,10 +1,10 @@
 package activity
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"fmt"
 )
 
 type MockActivity struct {
@@ -49,7 +49,6 @@ func registerNil() (err error) {
 	Register(nil)
 	return nil
 }
-
 
 //TestRegisterDupActivity
 func TestRegisterDupActivity(t *testing.T) {

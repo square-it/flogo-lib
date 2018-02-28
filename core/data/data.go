@@ -115,8 +115,8 @@ type IOMetadata struct {
 func (md *IOMetadata) UnmarshalJSON(b []byte) error {
 
 	ser := &struct {
-		Input    []*Attribute `json:"input"`
-		Output   []*Attribute `json:"output"`
+		Input  []*Attribute `json:"input"`
+		Output []*Attribute `json:"output"`
 	}{}
 
 	if err := json.Unmarshal(b, ser); err != nil {

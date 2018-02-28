@@ -8,7 +8,7 @@ var (
 	actionFactories = make(map[string]Factory)
 
 	//Deprecated
-	actions   = make(map[string]Action)
+	actions = make(map[string]Action)
 )
 
 func RegisterFactory(ref string, f Factory) error {
@@ -59,7 +59,6 @@ func Register(id string, act Action) error {
 	if actions[id] != nil {
 		return fmt.Errorf("error registering action, action already registered for id '%s'", id)
 	}
-
 
 	actions[id] = act
 

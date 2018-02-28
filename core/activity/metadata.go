@@ -34,12 +34,12 @@ func (md *Metadata) UnmarshalJSON(b []byte) error {
 		Name string `json:"name"`
 		Ref  string `json:"ref"`
 
-		Settings []*data.Attribute `json:"settings"`
-		Input    []*data.Attribute `json:"input"`
-		Output   []*data.Attribute `json:"output"`
-		Return   bool              `json:"return"`
-		Reply    bool              `json:"reply"`
-		DynamicIO bool             `json:"dynamicIO"`
+		Settings  []*data.Attribute `json:"settings"`
+		Input     []*data.Attribute `json:"input"`
+		Output    []*data.Attribute `json:"output"`
+		Return    bool              `json:"return"`
+		Reply     bool              `json:"reply"`
+		DynamicIO bool              `json:"dynamicIO"`
 
 		//for backwards compatibility
 		Inputs  []*data.Attribute `json:"inputs"`
