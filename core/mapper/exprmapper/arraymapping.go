@@ -6,12 +6,12 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/conversion"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/wijson"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/util"
 )
 
 var arraylog = logger.GetLogger("array-mapping")
@@ -334,7 +334,7 @@ func ParseArrayMapping(data interface{}) (*ArrayMapping, error) {
 			return nil, err
 		}
 	case interface{}:
-		s, err := conversion.ConvertToString(t)
+		s, err := util.ConvertToString(t)
 		if err != nil {
 			return nil, fmt.Errorf("Convert array mapping value to string error, due to [%s]", err.Error())
 		}

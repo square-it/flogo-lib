@@ -6,7 +6,6 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref/field"
 
-	"fmt"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -234,7 +233,7 @@ func TestRootArray(t *testing.T) {
 	mappingField.Fields = []string{"[0]", "MessageId"}
 	value, err := GetFieldValueFromIn(jsonArray, mappingField)
 	assert.Nil(t, err)
-	fmt.Println("Value:%s", value)
+	assert.NotNil(t, value)
 }
 
 func TestRootArrayInvalid(t *testing.T) {

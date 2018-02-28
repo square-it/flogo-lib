@@ -10,7 +10,7 @@ import (
 	"fmt"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/function"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/util"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/util"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/witype"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"

@@ -8,9 +8,9 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref/field"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/conversion"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/wijson"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/util"
 )
 
 var log = logger.GetLogger("MappingRef")
@@ -60,7 +60,7 @@ func (m *MappingRef) GetValue(inputScope data.Scope, resovler data.Resolver) (in
 	}
 
 	if mappingFiled == nil || len(mappingFiled.Fields) <= 0 {
-		value, err := conversion.ConvertToInterface(inStruct)
+		value, err := util.ConvertToInterface(inStruct)
 		if err != nil {
 			value = inStruct
 		}
