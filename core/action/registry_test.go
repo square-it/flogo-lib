@@ -1,12 +1,11 @@
 package action
 
 import (
-	//"context"
+	"context"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
-	"context"
+	"github.com/stretchr/testify/assert"
 )
 
 type MockFactory struct {
@@ -36,7 +35,7 @@ func TestRegisterFactoryEmptyRef(t *testing.T) {
 
 	orig := actionFactories
 	actionFactories = make(map[string]Factory)
-	defer func() {actionFactories = orig}()
+	defer func() { actionFactories = orig }()
 
 	// Register factory
 	err := RegisterFactory("", nil)
@@ -50,7 +49,7 @@ func TestRegisterFactoryNilFactory(t *testing.T) {
 
 	orig := actionFactories
 	actionFactories = make(map[string]Factory)
-	defer func() {actionFactories = orig}()
+	defer func() { actionFactories = orig }()
 
 	// Register factory
 	err := RegisterFactory("github.com/mock", nil)
@@ -64,7 +63,7 @@ func TestAddFactoryDuplicated(t *testing.T) {
 
 	orig := actionFactories
 	actionFactories = make(map[string]Factory)
-	defer func() {actionFactories = orig}()
+	defer func() { actionFactories = orig }()
 
 	f := &MockFactory{}
 
@@ -83,7 +82,7 @@ func TestAddFactoryOk(t *testing.T) {
 
 	orig := actionFactories
 	actionFactories = make(map[string]Factory)
-	defer func() {actionFactories = orig}()
+	defer func() { actionFactories = orig }()
 
 	f := &MockFactory{}
 
@@ -98,7 +97,7 @@ func TestGetFactoriesOk(t *testing.T) {
 
 	orig := actionFactories
 	actionFactories = make(map[string]Factory)
-	defer func() {actionFactories = orig}()
+	defer func() { actionFactories = orig }()
 
 	f := &MockFactory{}
 

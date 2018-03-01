@@ -124,6 +124,10 @@ func pathGetSetObjValue(objValue map[string]interface{}, path string, value inte
 	val, found := objValue[key]
 
 	if !found {
+		if path == "." + key {
+			return nil, "", nil
+		}
+
 		return nil, "", errors.New("Invalid path '" + path + "'. path not found.")
 	}
 

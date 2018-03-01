@@ -32,6 +32,14 @@ func NewHandler(config *HandlerConfig, act action.Action, outputMd map[string]*d
 			if len(config.Action.Mappings.Output) > 0 {
 				handler.actionOutputMapper = mapper.GetFactory().NewMapper(&data.MapperDef{Mappings: config.Action.Mappings.Output}, nil)
 			}
+		} else if config.ActionMappings != nil {
+			// temporary for backwards compatibility
+			if len(config.ActionMappings.Input) > 0 {
+				handler.actionInputMapper = mapper.GetFactory().NewMapper(&data.MapperDef{Mappings: config.ActionMappings.Input}, nil)
+			}
+			if len(config.ActionMappings.Output) > 0 {
+				handler.actionOutputMapper = mapper.GetFactory().NewMapper(&data.MapperDef{Mappings: config.ActionMappings.Output}, nil)
+			}
 		}
 	}
 
@@ -137,6 +145,8 @@ func (h *Handler) generateInputs(triggerData map[string]interface{}) (map[string
 	//	return inputs, nil
 	//}
 	//inputMetadata := h.act.IOMetadata().Input
+
+	logger.Debugf("iomd %#v", h.act.IOMetadata())
 
 	//todo verify this behavior
 	if h.actionInputMapper != nil && h.act.IOMetadata() != nil && h.act.IOMetadata().Input != nil {

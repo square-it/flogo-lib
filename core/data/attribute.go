@@ -2,6 +2,7 @@ package data
 
 import (
 	"encoding/json"
+	"errors"
 )
 
 // Attribute is a simple structure used to define a data Attribute/property
@@ -13,6 +14,7 @@ type Attribute struct {
 
 // NewAttribute constructs a new attribute
 func NewAttribute(name string, dataType Type, value interface{}) (*Attribute, error) {
+
 	var attr Attribute
 	attr.name = name
 	attr.dataType = dataType
@@ -26,6 +28,7 @@ func NewAttribute(name string, dataType Type, value interface{}) (*Attribute, er
 
 // NewZeroAttribute constructs a new attribute
 func NewZeroAttribute(name string, dataType Type) *Attribute {
+
 	var attr Attribute
 	attr.name = name
 	attr.dataType = dataType
@@ -89,7 +92,13 @@ func (a *Attribute) UnmarshalJSON(data []byte) error {
 	}
 
 	a.name = ser.Name
-	a.dataType, _ = ToTypeEnum(ser.Type)
+	dt, exists := ToTypeEnum(ser.Type)
+
+	if !exists {
+		return errors.New("unknown data type: " + ser.Type)
+	}
+	a.dataType = dt
+
 	val, err := CoerceToValue(ser.Value, a.dataType)
 
 	if err != nil {
@@ -107,6 +116,7 @@ type ComplexObject struct {
 	Value    interface{} `json:"value"`
 }
 
+
 type IOMetadata struct {
 	Input  map[string]*Attribute
 	Output map[string]*Attribute
@@ -115,8 +125,8 @@ type IOMetadata struct {
 func (md *IOMetadata) UnmarshalJSON(b []byte) error {
 
 	ser := &struct {
-		Input    []*Attribute `json:"input"`
-		Output   []*Attribute `json:"output"`
+		Input  []*Attribute `json:"input"`
+		Output []*Attribute `json:"output"`
 	}{}
 
 	if err := json.Unmarshal(b, ser); err != nil {

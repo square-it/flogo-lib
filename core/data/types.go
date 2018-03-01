@@ -9,14 +9,14 @@ import (
 type Type int
 
 const (
-	STRING Type = iota + 1
+	ANY            Type = iota
+	STRING
 	INTEGER
 	NUMBER
 	BOOLEAN
 	OBJECT
 	ARRAY
 	PARAMS
-	ANY
 	COMPLEX_OBJECT
 
 	//For expression type
@@ -27,6 +27,7 @@ const (
 )
 
 var types = [...]string{
+	"any",
 	"string",
 	"integer",
 	"number",
@@ -43,6 +44,7 @@ var types = [...]string{
 }
 
 var typeMap = map[string]Type{
+	"any":            ANY,
 	"string":         STRING,
 	"integer":        INTEGER,
 	"number":         NUMBER,
@@ -50,7 +52,6 @@ var typeMap = map[string]Type{
 	"object":         OBJECT,
 	"array":          ARRAY,
 	"params":         PARAMS,
-	"any":            ANY,
 	"complex_object": COMPLEX_OBJECT,
 	"ref":            REF,
 	"arrayRef":       ARRAYREF,
@@ -59,7 +60,7 @@ var typeMap = map[string]Type{
 }
 
 func (t Type) String() string {
-	return types[t-1]
+	return types[t]
 }
 
 // ToTypeEnum get the data type that corresponds to the specified name
@@ -90,7 +91,7 @@ func GetType(val interface{}) (Type, error) {
 	case ComplexObject:
 		return COMPLEX_OBJECT, nil
 	default:
-		return 0, fmt.Errorf("Unable to determine type of %#v", t)
+		return ANY, fmt.Errorf("Unable to determine type of %#v", t)
 	}
 }
 

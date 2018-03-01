@@ -98,7 +98,7 @@ func (w ActionWorker) Start() {
 					if !md.Async {
 						syncAct := actionData.action.(action.SyncAction)
 						results, err := syncAct.Run(actionData.context, actionData.inputs)
-						logger.Debugf("Action-Worker-%d: Received result: %v",w.ID, results)
+						logger.Debugf("Action-Worker-%d: Received result: %v", w.ID, results)
 						actionData.arc <- &ActionResult{results: results, err: err}
 					} else {
 						asyncAct := actionData.action.(action.AsyncAction)

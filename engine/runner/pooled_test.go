@@ -93,7 +93,7 @@ func TestRunNilError(t *testing.T) {
 	assert.NotNil(t, runner)
 	err := runner.Start()
 	assert.Nil(t, err)
-	 _, err = runner.Execute(nil, nil,  nil)
+	_, err = runner.Execute(nil, nil, nil)
 	assert.NotNil(t, err)
 }
 
@@ -103,7 +103,7 @@ func TestRunInnactiveError(t *testing.T) {
 	runner := NewPooled(config)
 	assert.NotNil(t, runner)
 	a := new(MockFullAction)
-	 _, err := runner.Execute(nil, a, nil)
+	_, err := runner.Execute(nil, a, nil)
 	assert.NotNil(t, err)
 }
 
@@ -116,7 +116,7 @@ func TestRunErrorInAction(t *testing.T) {
 	assert.Nil(t, err)
 	a := new(MockFullAction)
 	a.On("Run", nil, mock.AnythingOfType("map[string]*data.Attribute"), mock.AnythingOfType("*runner.AsyncResultHandler")).Return(errors.New("Error in action"))
-	 _, err = runner.Execute(nil, a, nil)
+	_, err = runner.Execute(nil, a, nil)
 	assert.NotNil(t, err)
 	assert.Equal(t, "Error in action", err.Error())
 }
