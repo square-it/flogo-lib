@@ -8,7 +8,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref/field"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/wijson"
+	"github.com/TIBCOSoftware/flogo-lib/json"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/util"
 )
@@ -66,7 +66,7 @@ func (m *MappingRef) GetValue(inputScope data.Scope, resovler data.Resolver) (in
 		}
 		return value, nil
 	}
-	mappingValue, err := wijson.GetFieldValueFromIn(inStruct, mappingFiled)
+	mappingValue, err := json.GetFieldValueFromIn(inStruct, mappingFiled)
 	if err != nil {
 		return nil, err
 	}

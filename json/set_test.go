@@ -6,142 +6,194 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref/field"
+
+	"fmt"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSetArrayObject(t *testing.T) {
-	v, err := SetFieldValueFromString("4444555", jsonData, "City[0].Array[1].id")
+	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
+	mappingField.Fields = []string{"City[0]", "Array[1]", "id"}
+	v, err := SetFieldValueFromString("4444555", jsonData, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
-	logger.Debug("FInaly value:", v)
+	log.Debug("FInaly value:", v)
+
+}
+
+func TestSetRootChildArray(t *testing.T) {
+	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
+	mappingField.Fields = []string{"Emails[0]"}
+	v, err := SetFieldValueFromString("lixingwang@gmail.com", jsonData, mappingField)
+	assert.Nil(t, err)
+	assert.NotNil(t, v)
+	log.Debug("FInaly value:", v)
 
 }
 
 func TestSetRootArray(t *testing.T) {
-	v, err := SetFieldValueFromString("lixingwang@gmail.com", jsonData, "Emails[0]")
+	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
+	mappingField.Fields = []string{"[0]", "ss"}
+	v, err := SetFieldValueFromString("lixingwang@gmail.com", "{}", mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
-	logger.Debug("FInaly value:", v)
+	vv, _ := json.Marshal(v)
+	fmt.Println("FInaly value:", string(vv))
 
 }
 
 func TestSetObject(t *testing.T) {
-	v, err := SetFieldValueFromString("77479", jsonData, "ZipCode")
+	mappingField := &field.MappingField{HasArray: false, HasSpecialField: false}
+	mappingField.Fields = []string{"ZipCode"}
+	v, err := SetFieldValueFromString("77479", jsonData, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
-	logger.Debug("FInaly value:", v)
+	log.Debug("FInaly value:", v)
 }
 
 func TestSetEmptyField(t *testing.T) {
+	mappingField := &field.MappingField{HasArray: false, HasSpecialField: false}
+	mappingField.Fields = []string{"ZipCode]"}
 	jsond := "{}"
-	v, err := SetFieldValueFromString("77479", jsond, "ZipCode")
+	v, err := SetFieldValueFromString("77479", jsond, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
-	logger.Debug("FInaly value:", v)
+	log.Debug("FInaly value:", v)
 }
 
 func TestSetEmptyField3(t *testing.T) {
 	jsond := "{}"
-	v, err := SetFieldValueFromString("77479", jsond, "ZipCode[]")
+	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
+	mappingField.Fields = []string{"ZipCode[]"}
+	v, err := SetFieldValueFromString("77479", jsond, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
-	logger.Debug("FInaly value:", v)
+	log.Debug("FInaly value:", v)
 }
 
 func TestSetEmptyField4(t *testing.T) {
 	jsond := "{}"
-	v, err := SetFieldValueFromString("77479", jsond, "ZipCode[1]")
+	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
+	mappingField.Fields = []string{"ZipCode[1]"}
+	v, err := SetFieldValueFromString("77479", jsond, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
-	logger.Debug("FInaly value:", v)
+	log.Debug("FInaly value:", v)
 }
 
 func TestSetEmptyField5(t *testing.T) {
 	jsond := "{}"
-	v, err := SetFieldValueFromString("77479", jsond, "ZipCode[1]")
-	v2, err := SetFieldValue("77479", v, "ZipCode[0]")
+	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
+	mappingField.Fields = []string{"ZipCode[1]"}
+	v, err := SetFieldValueFromString("77479", jsond, mappingField)
+	mappingField.Fields = []string{"ZipCode[0]"}
+	v2, err := SetFieldValue("77479", v, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, v2)
-	logger.Debug("FInaly value:", v2)
+	log.Debug("FInaly value:", v2)
 }
 
 func TestSetEmptyArrayField(t *testing.T) {
 	jsond := "{}"
-	v, err := SetFieldValueFromString("id", jsond, "pet.id")
-	logger.Debug("ID value:", v)
+	v, err := SetFieldValueFromStringP("id", jsond, "pet.id")
+	log.Debug("ID value:", v)
 
-	v, err = SetFieldValue("name", v, "pet.name")
-	logger.Debug("Name value:", v)
+	v, err = SetFieldValueP("name", v, "pet.name")
+	log.Debug("Name value:", v)
 
-	v, err = SetFieldValue("url", v, "pet.photoUrls[0]")
+	v, err = SetFieldValueP("url", v, "pet.photoUrls[0]")
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
-	logger.Debug("FInaly value:", v)
+	log.Debug("FInaly value:", v)
 }
 
 func TestSetEmptyNestField1(t *testing.T) {
 	jsond := "{}"
-	v, err := SetFieldValueFromString("url", jsond, "pet.photoUrls[0]")
-	logger.Debug("First T ", v)
-	v, err = SetFieldValue("url2", v, "pet.photoUrls[1]")
+	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
+	mappingField.Fields = []string{"pet", "photoUrls[0]"}
+	v, err := SetFieldValueFromString("url", jsond, mappingField)
+	log.Debug("First T ", v)
+	mappingField.Fields = []string{"pet", "photoUrls[1]"}
+	v, err = SetFieldValue("url2", v, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
-	logger.Debug("FInaly value:", v)
+	log.Debug("FInaly value:", v)
 }
 
 func TestNameWithSpace(t *testing.T) {
 	jsond := "{}"
-	v, err := SetFieldValue("url", jsond, "pet name.photoUrls[0]")
-	logger.Debug("First T ", v)
-	v, err = SetFieldValue("url2", v, "pet name.photoUrls[1]")
+	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
+	mappingField.Fields = []string{"pet name", "photoUrls[0]"}
+
+	v, err := SetFieldValue("url", jsond, mappingField)
+	log.Debug("First T ", v)
+	mappingField.Fields = []string{"pet name", "photoUrls[1]"}
+
+	v, err = SetFieldValue("url2", v, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
 	vv, _ := json.Marshal(v)
-	logger.Info("FInaly value:", string(vv))
+	log.Info("FInaly value:", string(vv))
 }
 
 func TestNameNest2(t *testing.T) {
 	jsond := "{}"
-	v, err := SetFieldValue("id", jsond, "input.Account.records[0].ID")
-	logger.Debug("First T ", v)
-	v, err = SetFieldValue("namesssss", v, "input.Account.records[0].Name")
+	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
+	mappingField.Fields = []string{"input", "Account", "records[0]", "ID"}
+	v, err := SetFieldValue("id", jsond, mappingField)
+	log.Debug("First T ", v)
+	mappingField.Fields = []string{"input", "Account", "records[0]", "Name"}
+
+	v, err = SetFieldValue("namesssss", v, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
 	vv, _ := json.Marshal(v)
-	logger.Info("FInaly value:", string(vv))
+	log.Info("FInaly value:", string(vv))
 }
 
 func TestNameSameLevel(t *testing.T) {
 	jsond := "{}"
-	v, err := SetFieldValue("id", jsond, "input.Account.ID")
-	logger.Debug("First T ", v)
-	v, err = SetFieldValue("namesssss", v, "input.Account.Name")
+	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
+	mappingField.Fields = []string{"input", "Account", "ID"}
+	v, err := SetFieldValue("id", jsond, mappingField)
+	log.Debug("First T ", v)
+	mappingField.Fields = []string{"input", "Account", "Name"}
+
+	v, err = SetFieldValue("namesssss", v, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
 	vv, _ := json.Marshal(v)
-	logger.Info("FInaly value:", string(vv))
+	log.Info("FInaly value:", string(vv))
 }
 
 func TestNameWithTag(t *testing.T) {
 	jsond := "{}"
-	v, err := SetFieldValue("url", jsond, "pet name.photo	Urls[0]")
-	logger.Debug("First T ", v)
-	v, err = SetFieldValue("url2", v, "pet name.photo	Urls[1]")
+	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
+	mappingField.Fields = []string{"pet", "pet name", "photo	Urls[0]"}
+	v, err := SetFieldValue("url", jsond, mappingField)
+	log.Debug("First T ", v)
+	mappingField.Fields = []string{"pet", "pet name", "photo	Urls[1]"}
+
+	v, err = SetFieldValue("url2", v, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
-	logger.Info("FInaly value:", v)
+	log.Info("FInaly value:", v)
 }
 
 func TestSetEmptyNestField(t *testing.T) {
 	jsond := "{}"
-	v, err := SetFieldValueFromString("tagID", jsond, "Response.Pet.Tags[0].Name")
-	logger.Debug("First T ", v)
-	v, err = SetFieldValue("tagID2", v, "Response.Pet.Tags[1].Name")
+	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
+	mappingField.Fields = []string{"Response", "Pet", "Tags[0]", "Name"}
+	v, err := SetFieldValueFromString("tagID", jsond, mappingField)
+	log.Debug("First T ", v)
+	mappingField.Fields = []string{"Response", "Pet", "Tags[1]", "Name"}
+
+	v, err = SetFieldValue("tagID2", v, mappingField)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
-	logger.Debug("FInaly value:", v)
+	log.Debug("FInaly value:", v)
 }
 
 func TestMap(t *testing.T) {
@@ -159,10 +211,10 @@ func TestMap(t *testing.T) {
 	//map[Response:map[Pet:map[Tags:[{"Name":"tagID"}]]]]
 	//map[Response:map[Pet:map[Tags:[map[Name:tagID]]]]]
 	//map[Response:map[Pet:map[Tags:[map[]]]]]
-	logger.Debug(maps)
+	log.Debug(maps)
 
 	v, _ := json.Marshal(maps)
-	logger.Debug(string(v))
+	log.Debug(string(v))
 
 }
 
@@ -175,8 +227,8 @@ func setArray(value interface{}, index int, path string) {
 		panic(err)
 	}
 
-	logger.Debug("Set Value :", c)
-	logger.Debug("Final Data:", jsonParsed.String())
+	log.Debug("Set Value :", c)
+	log.Debug("Final Data:", jsonParsed.String())
 
 }
 
@@ -188,9 +240,9 @@ func getArray(index int, path string) {
 	if err != nil {
 		panic(err)
 	}
-	logger.Debug("Type :", reflect.TypeOf(c))
+	log.Debug("Type :", reflect.TypeOf(c))
 
-	logger.Debug("Get Value :", c.String())
+	log.Debug("Get Value :", c.String())
 
 }
 
@@ -209,9 +261,13 @@ func TestConcurrentSet(t *testing.T) {
 				}
 			}()
 			jsond := "{}"
-			v, err := SetFieldValue("url", jsond, "pet name.photoUrls[0]")
-			logger.Debug("First T ", v)
-			v, err = SetFieldValue("url2", v, "pet name.photoUrls[1]")
+			mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
+			mappingField.Fields = []string{"pet name", "photoUrls[0]"}
+			v, err := SetFieldValue("url", jsond, mappingField)
+			log.Debug("First T ", v)
+			mappingField.Fields = []string{"pet name", "photoUrls[1]"}
+
+			v, err = SetFieldValue("url2", v, mappingField)
 			assert.Nil(t, err)
 			assert.NotNil(t, v)
 		}(r)

@@ -11,7 +11,7 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/wijson"
+	"github.com/TIBCOSoftware/flogo-lib/json"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
@@ -144,7 +144,7 @@ func settValueToComplexObject(toMappingRef *ref.MappingRef, fieldName string, ou
 	}
 
 	log.Debugf("Set value %+v to fields %s", value, fields)
-	complexValue, err2 := wijson.SetFieldValue(value, complexVlaueIn, fields)
+	complexValue, err2 := json.SetFieldValue(value, complexVlaueIn, fields)
 	if err2 != nil {
 		return err2
 	}

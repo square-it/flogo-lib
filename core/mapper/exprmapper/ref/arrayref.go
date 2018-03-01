@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/wijson"
+	"github.com/TIBCOSoftware/flogo-lib/json"
 )
 
 type ArrayRef struct {
@@ -41,7 +41,7 @@ func (m *ArrayRef) Eval(inputScope, outputScope data.Scope) (interface{}, error)
 
 func (m *ArrayRef) getValueFromRef(object interface{}, ref string) (interface{}, error) {
 	reference := GetFieldNameFromArrayRef(ref)
-	return wijson.GetFieldValueFromInP(object, reference)
+	return json.GetFieldValueFromInP(object, reference)
 }
 
 func GetFieldNameFromArrayRef(arrayRef string) string {

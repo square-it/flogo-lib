@@ -4,7 +4,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref/field"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -51,61 +52,77 @@ var jsonData = `{
     "tag  world":"CHINA"
 }`
 
-func TestRootArray(t *testing.T) {
-	value, err := GetFieldValue(jsonData, "City[0]")
+func TestRootChildArray(t *testing.T) {
+	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
+	mappingField.Fields = []string{"City[0]"}
+	value, err := GetFieldValueFromIn(jsonData, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, value)
-	logger.Debug("Value is:", value)
+	log.Debug("Value is:", value)
 }
 
 func TestRoot(t *testing.T) {
-	value, err := GetFieldValue(jsonData, "City")
+	mappingField := &field.MappingField{HasArray: false, HasSpecialField: false}
+	mappingField.Fields = []string{"City"}
+	value, err := GetFieldValueFromIn(jsonData, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, value)
-	logger.Debug("Value is:", value)
+	log.Debug("Value is:", value)
 }
 
 func TestGetFieldWithSpaces(t *testing.T) {
-	value, err := GetFieldValue(jsonData, "hello world")
+	mappingField := &field.MappingField{HasArray: false, HasSpecialField: false}
+	mappingField.Fields = []string{"hello world"}
+	value, err := GetFieldValueFromIn(jsonData, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, value)
-	logger.Debug("Value is:", value)
+	log.Debug("Value is:", value)
 }
 
 func TestGetFieldWithTag(t *testing.T) {
-	value, err := GetFieldValue(jsonData, "tag  world")
+	mappingField := &field.MappingField{HasArray: false, HasSpecialField: false}
+	mappingField.Fields = []string{"tag  world"}
+	value, err := GetFieldValueFromIn(jsonData, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, value)
-	logger.Info("Value is:", value)
+	log.Info("Value is:", value)
 }
 
 func TestGetArray(t *testing.T) {
-	value, err := GetFieldValue(jsonData, "Emails[0]")
+	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
+	mappingField.Fields = []string{"Emails[0]"}
+	value, err := GetFieldValueFromIn(jsonData, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, value)
-	logger.Debug("Value is:", value)
+	log.Debug("Value is:", value)
 
 }
 
 func TestMultipleLevelArray(t *testing.T) {
-	value, err := GetFieldValue(jsonData, "City[0].Array[1].id")
+	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
+	mappingField.Fields = []string{"City[0]", "Array[1]", "id"}
+	value, err := GetFieldValueFromIn(jsonData, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, value)
-	logger.Debug("Value:", value)
+	log.Debug("Value:", value)
 }
 
 func TestMultipleLevelObject(t *testing.T) {
-	value, err := GetFieldValue(jsonData, "City[0].Park.Maps.bb")
+	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
+	mappingField.Fields = []string{"City[0]", "Park", "Maps", "bb"}
+	value, err := GetFieldValueFromIn(jsonData, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, value)
-	logger.Debug("Value:", value)
+	log.Debug("Value:", value)
 }
 
 func TestID(t *testing.T) {
-	value, err := GetFieldValue(jsonData, "Id")
+	mappingField := &field.MappingField{HasArray: false, HasSpecialField: false}
+	mappingField.Fields = []string{"Id"}
+	value, err := GetFieldValueFromIn(jsonData, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, value)
-	logger.Debug("Value:", value)
+	log.Debug("Value:", value)
 }
 
 func TestGetFieldValue(t *testing.T) {
@@ -163,9 +180,10 @@ func TestGetFieldValue(t *testing.T) {
     }
 }
 `
-
-	value, err := GetFieldValue(account, "Account.records[0].Name")
-	logger.Infof("Value:%s", value)
+	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
+	mappingField.Fields = []string{"Account", "records[0]", "Name"}
+	value, err := GetFieldValueFromIn(account, mappingField)
+	log.Infof("Value:%s", value)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, value)
@@ -185,7 +203,9 @@ func TestConcurrentGetk(t *testing.T) {
 					recovered = r
 				}
 			}()
-			value, err := GetFieldValue(jsonData, "City[0].Park.Maps.bb")
+			mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
+			mappingField.Fields = []string{"City[0]", "Park", "Maps", "bb"}
+			value, err := GetFieldValueFromIn(jsonData, mappingField)
 			assert.Nil(t, err)
 			assert.NotNil(t, value)
 		}(r)
@@ -193,4 +213,56 @@ func TestConcurrentGetk(t *testing.T) {
 	}
 	w.Wait()
 	assert.Nil(t, recovered)
+}
+
+func TestRootArray(t *testing.T) {
+	jsonArray := `[
+    {
+        "Body": "test from WI",
+        "MD5OfBody": "ec7d5c27e25bcd3d6a65362b71bd0525",
+        "MD5OfMessageAttributes": "50df80e5fea57210bb8167abfd053899",
+        "MessageAttributes": {
+            "MA1": "test"
+        },
+        "MessageId": "1c0483d9-8166-4df0-be9f-cd03177a38c6",
+        "ReceiptHandle": "AQEBE6elNqdJKrTz5A2X/gQJETxPdtJgAktTAuT4pvBTjQgnJpSEPhfMI08fHCMrEX6ILD0fTY2FVPCCJ8LfMvAxp+LO2/Bsi1uZhUyesFoj11Y/4jvdYSCQhqWEuAI1q1pxpSj2d2QbL5SUlX979ZG+Abv/IYeDvPO8nyuZ0IWgVhZWaGcoOwADvj3mNJZ9XJh8mS3vL8EQlUO6dhIRn9PxVet2fGRmm3iY1YI4N7bZsw9nxIqIYgl5kfuBNegSRcrrTOb6u9vTnHK2uiiCwJi+Io6WNGuJGF4fyFi3skk/AvCS7fjl+4MFqoHKsm1nR06Rel7017m0/Dg5KaOJCRAJ92gV4iuUMynG1WfmELMMg/sS19hrNvcgdKW5Vd3Snn/oNcoP2Ebb7CQA08XzVcoO0maVt2KqUWgvqf0DDxVArEE="
+    }
+]`
+
+	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
+	mappingField.Fields = []string{"[0]", "MessageId"}
+	value, err := GetFieldValueFromIn(jsonArray, mappingField)
+	assert.Nil(t, err)
+	assert.NotNil(t, value)
+}
+
+func TestRootArrayInvalid(t *testing.T) {
+	jsonArray := `[
+    {
+        "Body": "test from WI",
+        "MD5OfBody": "ec7d5c27e25bcd3d6a65362b71bd0525",
+        "MD5OfMessageAttributes": "50df80e5fea57210bb8167abfd053899",
+        "MessageAttributes": {
+            "MA1": "test"
+        },
+        "MessageId": "1c0483d9-8166-4df0-be9f-cd03177a38c6",
+        "ReceiptHandle": "AQEBE6elNqdJKrTz5A2X/gQJETxPdtJgAktTAuT4pvBTjQgnJpSEPhfMI08fHCMrEX6ILD0fTY2FVPCCJ8LfMvAxp+LO2/Bsi1uZhUyesFoj11Y/4jvdYSCQhqWEuAI1q1pxpSj2d2QbL5SUlX979ZG+Abv/IYeDvPO8nyuZ0IWgVhZWaGcoOwADvj3mNJZ9XJh8mS3vL8EQlUO6dhIRn9PxVet2fGRmm3iY1YI4N7bZsw9nxIqIYgl5kfuBNegSRcrrTOb6u9vTnHK2uiiCwJi+Io6WNGuJGF4fyFi3skk/AvCS7fjl+4MFqoHKsm1nR06Rel7017m0/Dg5KaOJCRAJ92gV4iuUMynG1WfmELMMg/sS19hrNvcgdKW5Vd3Snn/oNcoP2Ebb7CQA08XzVcoO0maVt2KqUWgvqf0DDxVArEE="
+    },
+	    {
+        "Body": "test from WI2",
+        "MD5OfBody": "ec7d5c27e25bcd33d6a65362b71bd0525",
+        "MD5OfMessageAttributes": "50df80e5fea57210bb8167abfd053899",
+        "MessageAttributes": {
+            "MA1": "test"
+        },
+        "MessageId": "==1c04833d9-8166-4df0-be9f-cd03177a38c6",
+        "ReceiptHandle": "AQE3BE6elNqdJKrTz5A2X/gQJETxPdtJgAktTAuT4pvBTjQgnJpSEPhfMI08fHCMrEX6ILD0fTY2FVPCCJ8LfMvAxp+LO2/Bsi1uZhUyesFoj11Y/4jvdYSCQhqWEuAI1q1pxpSj2d2QbL5SUlX979ZG+Abv/IYeDvPO8nyuZ0IWgVhZWaGcoOwADvj3mNJZ9XJh8mS3vL8EQlUO6dhIRn9PxVet2fGRmm3iY1YI4N7bZsw9nxIqIYgl5kfuBNegSRcrrTOb6u9vTnHK2uiiCwJi+Io6WNGuJGF4fyFi3skk/AvCS7fjl+4MFqoHKsm1nR06Rel7017m0/Dg5KaOJCRAJ92gV4iuUMynG1WfmELMMg/sS19hrNvcgdKW5Vd3Snn/oNcoP2Ebb7CQA08XzVcoO0maVt2KqUWgvqf0DDxVArEE="
+    }
+]`
+
+	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
+	mappingField.Fields = []string{"[0]", "MessageId[0]"}
+	value, err := GetFieldValueFromIn(jsonArray, mappingField)
+	assert.NotNil(t, err)
+	assert.Nil(t, value)
 }

@@ -8,7 +8,7 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/wijson"
+	flogojson "github.com/TIBCOSoftware/flogo-lib/json"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/util"
@@ -160,13 +160,13 @@ func (a *ArrayMapping) DoArrayMapping(inputScope, outputScope data.Scope, resolv
 			return fmt.Errorf("Get fields from mapping string error, due to [%s]", err.Error())
 		}
 		if toValue == nil {
-			vv, err := wijson.SetFieldValue(objArray, toValue, mappingField)
+			vv, err := flogojson.SetFieldValue(objArray, toValue, mappingField)
 			if err != nil {
 				return err
 			}
 			log.Debugf("Set Value return as %+v", vv)
 		} else {
-			vv, err := wijson.SetFieldValue(objArray, toValue, mappingField)
+			vv, err := flogojson.SetFieldValue(objArray, toValue, mappingField)
 			if err != nil {
 				return err
 			}
@@ -243,7 +243,7 @@ func (a *ArrayMapping) runArrayMap(fromValue, value interface{}, fields []*Array
 				objArray[i] = make(map[string]interface{})
 			}
 
-			_, err := wijson.SetFieldValueP(objArray, toValue, ref.GetFieldNameFromArrayRef(field.To))
+			_, err := flogojson.SetFieldValueP(objArray, toValue, ref.GetFieldNameFromArrayRef(field.To))
 			if err != nil {
 				return err
 			}
@@ -272,7 +272,7 @@ func (a *ArrayMapping) runArrayMap(fromValue, value interface{}, fields []*Array
 func (a *ArrayMapping) DoMap(fromValue, value interface{}, to string, inputScope, outputScope data.Scope, resolver data.Resolver) error {
 	switch a.Type {
 	case PRIMITIVE:
-		_, err := wijson.SetFieldValueP(fromValue, value, to)
+		_, err := flogojson.SetFieldValueP(fromValue, value, to)
 		if err != nil {
 			return err
 		}
@@ -425,7 +425,7 @@ func GetValueFromArrayRef(object interface{}, expressionRef interface{}, inputSc
 	} else {
 		if ref.IsArrayMapping(stringVal) {
 			reference := ref.GetFieldNameFromArrayRef(stringVal)
-			fromValue, err = wijson.GetFieldValueFromInP(object, reference)
+			fromValue, err = flogojson.GetFieldValueFromInP(object, reference)
 			if err != nil {
 				return nil, err
 			}
