@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref/field"
+	"github.com/TIBCOSoftware/flogo-lib/json/field"
 
 	"github.com/stretchr/testify/assert"
 )

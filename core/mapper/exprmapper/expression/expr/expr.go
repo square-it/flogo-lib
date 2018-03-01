@@ -11,7 +11,6 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/function"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/util"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/witype"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
@@ -102,7 +101,7 @@ type Expression struct {
 	Right    *Expression `json:"right"`
 
 	Value interface{} `json:"value"`
-	Type  witype.TYPE `json:"type"`
+	Type  data.Type `json:"type"`
 
 	//done
 }
@@ -195,16 +194,16 @@ func DeSerialization(base64str string) (*Expression, error) {
 	return ex, nil
 }
 
-func (e *Expression) UnmarshalJSON(data []byte) error {
+func (e *Expression) UnmarshalJSON(exprData []byte) error {
 	ser := &struct {
 		Left     *Expression `json:"left"`
 		Operator OPERATIOR   `json:"operator"`
 		Right    *Expression `json:"right"`
 		Value    interface{} `json:"value"`
-		Type     witype.TYPE `json:"type"`
+		Type     data.Type `json:"type"`
 	}{}
 
-	if err := json.Unmarshal(data, ser); err != nil {
+	if err := json.Unmarshal(exprData, ser); err != nil {
 		return err
 	}
 
@@ -227,7 +226,7 @@ func NewWIExpression() *Expression {
 }
 
 func (e *Expression) IsFunction() bool {
-	if witype.FUNCTION == e.Type {
+	if data.FUNCTION == e.Type {
 		return true
 	}
 	return false
@@ -282,7 +281,7 @@ func (f *Expression) evaluate(data interface{}, inputScope data.Scope, resolver 
 	return f.run(leftValue, operator, rightValue)
 }
 
-func (f *Expression) do(data interface{}, inputScope data.Scope, resolver data.Resolver, resultChan chan interface{}) {
+func (f *Expression) do(edata interface{}, inputScope data.Scope, resolver data.Resolver, resultChan chan interface{}) {
 	if f == nil {
 		resultChan <- nil
 	}
@@ -301,13 +300,13 @@ func (f *Expression) do(data interface{}, inputScope data.Scope, resolver data.R
 		if len(funcReturn) == 1 {
 			leftValue = funcReturn[0]
 		}
-	} else if f.Type == witype.EXPRESSION {
+	} else if f.Type == data.EXPRESSION {
 		var err error
-		leftValue, err = f.evaluate(data, inputScope, resolver)
+		leftValue, err = f.evaluate(edata, inputScope, resolver)
 		if err != nil {
 			resultChan <- errors.New("Eval left expression error: " + err.Error())
 		}
-	} else if f.Type == witype.REF {
+	} else if f.Type == data.REF {
 		refMaping := ref.NewMappingRef(f.Value.(string))
 		v, err := refMaping.Eval(inputScope, resolver)
 		if err != nil {
@@ -315,9 +314,9 @@ func (f *Expression) do(data interface{}, inputScope data.Scope, resolver data.R
 			resultChan <- fmt.Errorf("Mapping ref eva error [%s]", err.Error())
 		}
 		leftValue = v
-	} else if f.Type == witype.ARRAYREF {
+	} else if f.Type == data.ARRAYREF {
 		arrayRef := ref.NewArrayRef(f.Value.(string))
-		v, err := arrayRef.EvalFromData(data)
+		v, err := arrayRef.EvalFromData(edata)
 		if err != nil {
 			log.Errorf("Mapping ref eva error [%s]", err.Error())
 			resultChan <- fmt.Errorf("Mapping ref eva error [%s]", err.Error())

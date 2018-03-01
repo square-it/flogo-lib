@@ -6,14 +6,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref/field"
+	"github.com/TIBCOSoftware/flogo-lib/json/field"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/expr"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/function"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/gocc/token"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/witype"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
 var log = logger.GetLogger("expression-direction")
@@ -82,21 +82,21 @@ func NewMappingRef(lit interface{}) (interface{}, error) {
 func NewFunction(name Attribute, parameters Attribute) (interface{}, error) {
 	log.Debugf("New function name type [%s] and parameter type [%s]:", reflect.TypeOf(name), reflect.TypeOf(parameters))
 
-	wi_func := &function.FunctionExp{}
+	f_func := &function.FunctionExp{}
 	to := name.(*token.Token)
-	wi_func.Name = string(to.Lit)
+	f_func.Name = string(to.Lit)
 
 	switch parameters.(type) {
 	case *function.Parameter:
-		wi_func.Params = append(wi_func.Params, parameters.(*function.Parameter))
+		f_func.Params = append(f_func.Params, parameters.(*function.Parameter))
 	case []*function.Parameter:
 		for _, p := range parameters.([]*function.Parameter) {
 			if !p.IsEmtpy() {
-				wi_func.Params = append(wi_func.Params, p)
+				f_func.Params = append(f_func.Params, p)
 			}
 		}
 	}
-	return wi_func, nil
+	return f_func, nil
 }
 
 func NewArgument(a Attribute) (interface{}, error) {
@@ -105,19 +105,19 @@ func NewArgument(a Attribute) (interface{}, error) {
 	parameters := []*function.Parameter{}
 	switch a.(type) {
 	case *token.Token:
-		param.Type = witype.STRING
+		param.Type = data.STRING
 		param.Value = string(a.(*token.Token).Lit)
 	case int64:
-		param.Type = witype.INT64
+		param.Type = data.INTEGER
 		param.Value = a
 	case string:
-		param.Type = witype.STRING
+		param.Type = data.STRING
 		param.Value = a.(string)
 	case bool:
-		param.Type = witype.BOOL
+		param.Type = data.BOOLEAN
 		param.Value = a.(bool)
 	case *function.FunctionExp:
-		param.Type = witype.FUNCTION
+		param.Type = data.FUNCTION
 		param.Function = a.(*function.FunctionExp)
 	case []*function.Parameter:
 		for _, p := range a.([]*function.Parameter) {
@@ -126,10 +126,10 @@ func NewArgument(a Attribute) (interface{}, error) {
 			}
 		}
 	case *ref.MappingRef:
-		param.Type = witype.REF
+		param.Type = data.REF
 		param.Value = a
 	case *ref.ArrayRef:
-		param.Type = witype.ARRAYREF
+		param.Type = data.ARRAYREF
 		param.Value = a
 	case []interface{}:
 		//TODO
@@ -149,22 +149,22 @@ func NewArguments(as ...Attribute) (interface{}, error) {
 		param := &function.Parameter{}
 		switch a.(type) {
 		case *token.Token:
-			param.Type = witype.STRING
+			param.Type = data.STRING
 			param.Value = string(a.(*token.Token).Lit)
 		case int64:
-			param.Type = witype.INT64
+			param.Type = data.INTEGER
 			param.Value = a
 		case string:
-			param.Type = witype.STRING
+			param.Type = data.STRING
 			param.Value = a.(string)
 		case *function.FunctionExp:
-			param.Type = witype.FUNCTION
+			param.Type = data.FUNCTION
 			param.Function = a.(*function.FunctionExp)
 		case *ref.MappingRef:
-			param.Type = witype.REF
+			param.Type = data.REF
 			param.Value = a
 		case *ref.ArrayRef:
-			param.Type = witype.ARRAYREF
+			param.Type = data.ARRAYREF
 			param.Value = a
 		case []*function.Parameter:
 			for _, p := range a.([]*function.Parameter) {
@@ -201,7 +201,7 @@ func NewExpression(left Attribute, op Attribute, right Attribute) (interface{}, 
 
 	expression.Left = getExpression(left)
 	expression.Right = getExpression(right)
-	expression.Type = witype.EXPRESSION
+	expression.Type = data.EXPRESSION
 	return expression, nil
 }
 
@@ -209,26 +209,26 @@ func getExpression(ex Attribute) *expr.Expression {
 	expression := expr.NewWIExpression()
 	switch ex.(type) {
 	case int64:
-		expression.Type = witype.INT64
+		expression.Type = data.INTEGER
 		expression.Value = ex.(int64)
 	case string:
-		expression.Type = witype.STRING
+		expression.Type = data.STRING
 		expression.Value = ex.(string)
 	case bool:
-		expression.Type = witype.BOOL
+		expression.Type = data.BOOLEAN
 		expression.Value = ex.(bool)
 	case ref.MappingRef:
-		expression.Type = witype.REF
+		expression.Type = data.REF
 		ref := ex.(ref.MappingRef)
 		expression.Value = ref
 	case *ref.MappingRef:
-		expression.Type = witype.REF
+		expression.Type = data.REF
 		expression.Value = ex.(*ref.MappingRef).GetRef()
 	case *ref.ArrayRef:
-		expression.Type = witype.ARRAYREF
+		expression.Type = data.ARRAYREF
 		expression.Value = ex.(*ref.ArrayRef).GetRef()
 	case *function.FunctionExp:
-		expression.Type = witype.FUNCTION
+		expression.Type = data.FUNCTION
 		expression.Value = ex.(*function.FunctionExp)
 	case *expr.Expression:
 		expression = ex.(*expr.Expression)

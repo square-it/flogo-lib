@@ -12,7 +12,7 @@ import (
 
 func TestFunctionConcatWithSpace(t *testing.T) {
 
-	v, err := NewFunctionExpression(`wi.concat("This", "is",string.concat("my","first"),"gocc",string.concat("lexer","and","parser"),string.concat("go","program","!!!"))`).Eval()
+	v, err := NewFunctionExpression(`flogo.concat("This", "is",string.concat("my","first"),"gocc",string.concat("lexer","and","parser"),string.concat("go","program","!!!"))`).Eval()
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -24,7 +24,7 @@ func TestFunctionConcatWithSpace(t *testing.T) {
 
 func TestFunctionConcatWithMultiSpace(t *testing.T) {
 
-	v, err := NewFunctionExpression(`wi.concat("This",   " is" , " WI")`).Eval()
+	v, err := NewFunctionExpression(`flogo.concat("This",   " is" , " WI")`).Eval()
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -35,7 +35,7 @@ func TestFunctionConcatWithMultiSpace(t *testing.T) {
 }
 func TestFunctionConcat(t *testing.T) {
 
-	v, err := NewFunctionExpression(`wi.concat("This","is",string.concat("my","first"),"gocc",string.concat("lexer","and","parser"),string.concat("go","program","!!!"))`).Eval()
+	v, err := NewFunctionExpression(`flogo.concat("This","is",string.concat("my","first"),"gocc",string.concat("lexer","and","parser"),string.concat("go","program","!!!"))`).Eval()
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -111,7 +111,7 @@ func TestFunctionWithRefMapping2(t *testing.T) {
 }
 
 func TestFunctionWithTag(t *testing.T) {
-	v, err := NewFunctionExpression(`wi.concat($A2.message,"lixingwang")`).Eval()
+	v, err := NewFunctionExpression(`flogo.concat($A2.message,"lixingwang")`).Eval()
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -155,17 +155,17 @@ func (s *Concat) GetName() string {
 }
 
 func (s *Concat) GetCategory() string {
-	return "wi"
+	return "flogo"
 }
 
 func (s *Concat) Eval(strs ...string) string {
-	log.Debugf("Start wi:concat function with parameters %s", strs)
+	log.Debugf("Start flogo:concat function with parameters %s", strs)
 	var buffer bytes.Buffer
 
 	for _, v := range strs {
 		buffer.WriteString(v)
 	}
-	log.Debugf("Done wi:concat function with result %s", buffer.String())
+	log.Debugf("Done flogo:concat function with result %s", buffer.String())
 	return buffer.String()
 }
 
@@ -185,13 +185,13 @@ func (s *PConcat) GetCategory() string {
 }
 
 func (s *PConcat) Eval(strs ...string) string {
-	log.Debugf("Start wi:concat function with parameters %s", strs)
+	log.Debugf("Start string:concat function with parameters %s", strs)
 	var buffer bytes.Buffer
 
 	for _, v := range strs {
 		buffer.WriteString(v)
 	}
-	log.Debugf("Done wi:concat function with result %s", buffer.String())
+	log.Debugf("Done string:concat function with result %s", buffer.String())
 	return buffer.String()
 }
 

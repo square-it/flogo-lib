@@ -42,7 +42,7 @@ singlequote_string : '\'' {_quotedpair |.} '\'' ;
 wi_argument : '$' _wistring ;
 
 
-<< import "github.com/TIBCOSoftware/flogo-lib/core/mapper/expression/expression/direction" >>
+<< import "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/direction" >>
 
 
 /*

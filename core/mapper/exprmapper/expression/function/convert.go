@@ -7,27 +7,27 @@ import (
 	"reflect"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/util"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/witype"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
-func ConvertToValue(value interface{}, dataType witype.TYPE) (interface{}, error) {
+func ConvertToValue(value interface{}, dataType data.Type) (interface{}, error) {
 
 	var coerced interface{}
 	var err error
 
 	switch dataType {
-	case witype.STRING:
+	case data.STRING:
 		coerced, err = util.ConvertToString(value)
-	case witype.INT64:
+	case data.INTEGER:
 		coerced, err = util.ConvertToInt64(value)
-	case witype.FLOAT:
+	case data.NUMBER:
 		coerced, err = util.ConvertToFloat(value)
-	case witype.FUNCTION:
+	case data.FUNCTION:
 		coerced, err = ConvertToFunction(value)
-	case witype.REF:
+	case data.REF:
 		coerced, err = ConvertToRef(value)
-	case witype.EXPRESSION:
+	case data.EXPRESSION:
 		return value, nil
 	}
 

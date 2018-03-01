@@ -5,7 +5,6 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/function"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/gocc/lexer"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/gocc/parser"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/witype"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
@@ -129,7 +128,7 @@ func GetExpressionType(mapValue string) int {
 	case *expr.TernaryExpressio:
 		return TERNARY_EXPRESSION
 	case *expr.Expression:
-		if t.Type == witype.FUNCTION || t.Type == witype.EXPRESSION {
+		if t.Type == data.FUNCTION || t.Type == data.EXPRESSION {
 			return EXPRESSION
 		} else {
 			return STRING

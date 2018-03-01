@@ -23,13 +23,13 @@ func (s *ConcatRegistryTest) GetCategory() string {
 }
 
 func (s *ConcatRegistryTest) Eval(strs ...string) string {
-	logrus.Debugf("Start wi:concat function with parameters %s", strs)
+	logrus.Debugf("Start test:concat function with parameters %s", strs)
 	var buffer bytes.Buffer
 
 	for _, v := range strs {
 		buffer.WriteString(v)
 	}
-	logrus.Debugf("Done wi:concat function with result %s", buffer.String())
+	logrus.Debugf("Done test:concat function with result %s", buffer.String())
 	return buffer.String()
 }
 

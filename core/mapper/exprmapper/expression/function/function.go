@@ -10,9 +10,8 @@ import (
 
 	"fmt"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/witype"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
@@ -30,18 +29,18 @@ type FunctionExp struct {
 
 type Parameter struct {
 	Function *FunctionExp `json:"function"`
-	Type     witype.TYPE  `json:"type"`
+	Type     data.Type    `json:"type"`
 	Value    interface{}  `json:"value"`
 }
 
-func (p *Parameter) UnmarshalJSON(data []byte) error {
+func (p *Parameter) UnmarshalJSON(paramData []byte) error {
 	ser := &struct {
 		Function *FunctionExp `json:"function"`
-		Type     witype.TYPE  `json:"type"`
+		Type     data.Type    `json:"type"`
 		Value    interface{}  `json:"value"`
 	}{}
 
-	if err := json.Unmarshal(data, ser); err != nil {
+	if err := json.Unmarshal(paramData, ser); err != nil {
 		return err
 	}
 
@@ -73,7 +72,7 @@ func (p *Parameter) IsEmtpy() bool {
 }
 
 func (p *Parameter) IsFunction() bool {
-	if witype.FUNCTION == p.Type {
+	if data.FUNCTION == p.Type {
 		return true
 	}
 	return false
@@ -167,7 +166,7 @@ func convertToFunctionName(name string) string {
 	return name
 }
 
-func (f *FunctionExp) callFunction(data interface{}, inputScope data.Scope, resolver data.Resolver) (results []reflect.Value, err error) {
+func (f *FunctionExp) callFunction(fdata interface{}, inputScope data.Scope, resolver data.Resolver) (results []reflect.Value, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("%+v", r)
@@ -183,7 +182,7 @@ func (f *FunctionExp) callFunction(data interface{}, inputScope data.Scope, reso
 	inputs := []reflect.Value{}
 	for i, p := range f.Params {
 		if p.IsFunction() {
-			result, err := p.Function.callFunction(data, inputScope, resolver)
+			result, err := p.Function.callFunction(fdata, inputScope, resolver)
 			if err != nil {
 				return nil, err
 			}
@@ -193,7 +192,7 @@ func (f *FunctionExp) callFunction(data interface{}, inputScope data.Scope, reso
 			}
 		} else {
 			if !p.IsEmtpy() {
-				if p.Type == witype.REF {
+				if p.Type == data.REF {
 					logrus.Debug("Mapping ref field should done before eval function.")
 					var field *ref.MappingRef
 					switch p.Value.(type) {
@@ -215,7 +214,7 @@ func (f *FunctionExp) callFunction(data interface{}, inputScope data.Scope, reso
 
 					}
 
-				} else if p.Type == witype.ARRAYREF {
+				} else if p.Type == data.ARRAYREF {
 					logrus.Debug("Mapping ref field should done before eval function.")
 					var field *ref.ArrayRef
 					switch p.Value.(type) {
@@ -228,7 +227,7 @@ func (f *FunctionExp) callFunction(data interface{}, inputScope data.Scope, reso
 					if inputScope == nil {
 						p.Value = field.GetRef()
 					} else {
-						v, err := field.EvalFromData(data)
+						v, err := field.EvalFromData(fdata)
 						if err != nil {
 							return nil, err
 						}

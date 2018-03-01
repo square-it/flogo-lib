@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref/field"
+	"github.com/TIBCOSoftware/flogo-lib/json/field"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/json"
