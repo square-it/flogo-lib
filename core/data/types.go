@@ -3,6 +3,7 @@ package data
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 // Type denotes a data type
@@ -51,7 +52,8 @@ func (t Type) String() string {
 
 // ToTypeEnum get the data type that corresponds to the specified name
 func ToTypeEnum(typeStr string) (Type, bool) {
-	dataType, found := typeMap[typeStr]
+
+	dataType, found := typeMap[strings.ToLower(typeStr)]
 
 	return dataType, found
 }
@@ -77,7 +79,7 @@ func GetType(val interface{}) (Type, error) {
 	case ComplexObject:
 		return COMPLEX_OBJECT, nil
 	default:
-		return ANY, fmt.Errorf("Unable to determine type of %#v", t)
+		return ANY, fmt.Errorf("unable to determine type of %#v", t)
 	}
 }
 
