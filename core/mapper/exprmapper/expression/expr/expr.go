@@ -1,7 +1,6 @@
 package expr
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"reflect"
@@ -9,12 +8,12 @@ import (
 
 	"fmt"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/function"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/util"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/function"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/funcexprtype"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/util"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 var log = logger.GetLogger("expr")
@@ -166,11 +165,6 @@ func (t *TernaryExpressio) HandleParameter(param interface{}, inputScope data.Sc
 	}
 }
 
-func (e *Expression) Serialization() (string, error) {
-	v, err := json.Marshal(e)
-	return base64.StdEncoding.EncodeToString(v), err
-}
-
 func (e *Expression) String() string {
 	v, err := json.Marshal(e)
 	if err != nil {
@@ -178,20 +172,6 @@ func (e *Expression) String() string {
 		return ""
 	}
 	return string(v)
-}
-
-func DeSerialization(base64str string) (*Expression, error) {
-	ex := &Expression{}
-
-	v, err := base64.StdEncoding.DecodeString(base64str)
-	if err != nil {
-		return nil, errors.New("Do serialization function err: " + err.Error())
-	}
-	err = json.Unmarshal(v, ex)
-	if err != nil {
-		return nil, errors.New("Do Unmarshal function err: " + err.Error())
-	}
-	return ex, nil
 }
 
 func (e *Expression) UnmarshalJSON(exprData []byte) error {
