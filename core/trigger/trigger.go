@@ -40,9 +40,9 @@ type InitContext interface {
 type Status string
 
 const (
-	Started Status = "Started"
-	Stopped        = "Stopped"
-	Failed         = "Failed"
+	StatusStarted Status = "Started"
+	StatusStopped        = "Stopped"
+	StatusFailed         = "Failed"
 )
 
 //TriggerInstance contains all the information for a Trigger Instance, configuration and interface
