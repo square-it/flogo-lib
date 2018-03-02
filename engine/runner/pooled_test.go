@@ -52,8 +52,8 @@ func (m *MockResultAction) IOMetadata() *data.IOMetadata {
 func (m *MockResultAction) Run(context context.Context, inputs map[string]*data.Attribute, handler action.ResultHandler) error {
 	args := m.Called(context, inputs, handler)
 	go func() {
-		dataAttr, _ := data.NewAttribute("data", data.STRING, "mock")
-		codeAttr, _ := data.NewAttribute("code", data.INTEGER, 200)
+		dataAttr, _ := data.NewAttribute("data", data.TypeString, "mock")
+		codeAttr, _ := data.NewAttribute("code", data.TypeInteger, 200)
 		resultData := map[string]*data.Attribute{
 			"data": dataAttr,
 			"code": codeAttr,

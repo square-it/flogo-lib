@@ -3,21 +3,22 @@ package data
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 // Type denotes a data type
 type Type int
 
 const (
-	ANY            Type = iota
-	STRING
-	INTEGER
-	NUMBER
-	BOOLEAN
-	OBJECT
-	ARRAY
-	PARAMS
-	COMPLEX_OBJECT
+	TypeAny           Type = iota
+	TypeString
+	TypeInteger
+	TypeNumber
+	TypeBoolean
+	TypeObject
+	TypeArray
+	TypeParams
+	TypeComplexObject
 )
 
 var types = [...]string{
@@ -34,15 +35,15 @@ var types = [...]string{
 }
 
 var typeMap = map[string]Type{
-	"any":            ANY,
-	"string":         STRING,
-	"integer":        INTEGER,
-	"number":         NUMBER,
-	"boolean":        BOOLEAN,
-	"object":         OBJECT,
-	"array":          ARRAY,
-	"params":         PARAMS,
-	"complex_object": COMPLEX_OBJECT,
+	"any":            TypeAny,
+	"string":         TypeString,
+	"integer":        TypeInteger,
+	"number":         TypeNumber,
+	"boolean":        TypeBoolean,
+	"object":         TypeObject,
+	"array":          TypeArray,
+	"params":         TypeParams,
+	"complex_object": TypeComplexObject,
 }
 
 func (t Type) String() string {
@@ -51,7 +52,8 @@ func (t Type) String() string {
 
 // ToTypeEnum get the data type that corresponds to the specified name
 func ToTypeEnum(typeStr string) (Type, bool) {
-	dataType, found := typeMap[typeStr]
+
+	dataType, found := typeMap[strings.ToLower(typeStr)]
 
 	return dataType, found
 }
@@ -61,23 +63,23 @@ func GetType(val interface{}) (Type, error) {
 
 	switch t := val.(type) {
 	case string:
-		return STRING, nil
+		return TypeString, nil
 	case int:
-		return INTEGER, nil
+		return TypeInteger, nil
 	case float64:
-		return NUMBER, nil
+		return TypeNumber, nil
 	case json.Number:
-		return NUMBER, nil
+		return TypeNumber, nil
 	case bool:
-		return BOOLEAN, nil
+		return TypeBoolean, nil
 	case map[string]interface{}:
-		return OBJECT, nil
+		return TypeObject, nil
 	case []interface{}:
-		return ARRAY, nil
+		return TypeArray, nil
 	case ComplexObject:
-		return COMPLEX_OBJECT, nil
+		return TypeComplexObject, nil
 	default:
-		return ANY, fmt.Errorf("Unable to determine type of %#v", t)
+		return TypeAny, fmt.Errorf("unable to determine type of %#v", t)
 	}
 }
 

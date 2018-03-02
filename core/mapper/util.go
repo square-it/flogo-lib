@@ -37,9 +37,9 @@ func (e *assignExpr) Eval(scope data.Scope) (interface{}, error) {
 	//temporary hack
 	if attr.Value() == nil {
 		switch attr.Type() {
-		case data.OBJECT:
+		case data.TypeObject:
 			attr.SetValue(make(map[string]interface{}))
-		case data.PARAMS:
+		case data.TypeParams:
 			attr.SetValue(make(map[string]string))
 		}
 	}

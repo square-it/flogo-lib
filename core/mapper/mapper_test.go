@@ -20,10 +20,10 @@ func TestLiteralMapper(t *testing.T) {
 
 	mapper := factory.NewMapper(&data.MapperDef{Mappings: mappings}, nil)
 
-	attr1, _ := data.NewAttribute("Simple", data.INTEGER, nil)
-	attr2, _ := data.NewAttribute("Obj", data.OBJECT, nil)
-	attr3, _ := data.NewAttribute("Array", data.ARRAY, nil)
-	attr4, _ := data.NewAttribute("Params", data.PARAMS, nil)
+	attr1, _ := data.NewAttribute("Simple", data.TypeInteger, nil)
+	attr2, _ := data.NewAttribute("Obj", data.TypeObject, nil)
+	attr3, _ := data.NewAttribute("Array", data.TypeArray, nil)
+	attr4, _ := data.NewAttribute("Params", data.TypeParams, nil)
 
 	md := map[string]*data.Attribute{attr1.Name(): attr1, attr2.Name(): attr2, attr3.Name(): attr3, attr4.Name(): attr4}
 	outScope := data.NewFixedScope(md)
@@ -77,18 +77,18 @@ func TestAssignMapper(t *testing.T) {
 
 	mapper := factory.NewMapper(&data.MapperDef{Mappings: mappings}, nil)
 
-	attrI1, _ := data.NewAttribute("SimpleI", data.INTEGER, nil)
-	attrI2, _ := data.NewAttribute("ObjI", data.OBJECT, nil)
-	attrI3, _ := data.NewAttribute("ArrayI", data.ARRAY, nil)
-	attrI4, _ := data.NewAttribute("ParamsI", data.PARAMS, nil)
+	attrI1, _ := data.NewAttribute("SimpleI", data.TypeInteger, nil)
+	attrI2, _ := data.NewAttribute("ObjI", data.TypeObject, nil)
+	attrI3, _ := data.NewAttribute("ArrayI", data.TypeArray, nil)
+	attrI4, _ := data.NewAttribute("ParamsI", data.TypeParams, nil)
 
 	mdI := map[string]*data.Attribute{attrI1.Name(): attrI1, attrI2.Name(): attrI2, attrI3.Name(): attrI3, attrI4.Name(): attrI4}
 	inScope := data.NewFixedScope(mdI)
 
-	attrO1, _ := data.NewAttribute("SimpleO", data.INTEGER, nil)
-	attrO2, _ := data.NewAttribute("ObjO", data.OBJECT, nil)
-	attrO3, _ := data.NewAttribute("ArrayO", data.ARRAY, nil)
-	attrO4, _ := data.NewAttribute("ParamsO", data.PARAMS, nil)
+	attrO1, _ := data.NewAttribute("SimpleO", data.TypeInteger, nil)
+	attrO2, _ := data.NewAttribute("ObjO", data.TypeObject, nil)
+	attrO3, _ := data.NewAttribute("ArrayO", data.TypeArray, nil)
+	attrO4, _ := data.NewAttribute("ParamsO", data.TypeParams, nil)
 
 	mdO := map[string]*data.Attribute{attrO1.Name(): attrO1, attrO2.Name(): attrO2, attrO3.Name(): attrO3, attrO4.Name(): attrO4}
 	outScope := data.NewFixedScope(mdO)

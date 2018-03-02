@@ -33,13 +33,23 @@ func TestGetResolutionDetails(t *testing.T) {
 	assert.Equal(t, "", details.Path)
 
 	// Resolution of second level Activity expression map
-	a = "activity[myactivityId].myMapAttributeName.mapkey"
+	a = "activity[myactivityId].myObjectAttributeName.objectKey"
 	details, err = GetResolutionDetails(a)
 	assert.Nil(t, err)
 	assert.Equal(t, "activity", details.ResolverName)
-	assert.Equal(t, "myMapAttributeName", details.Property)
+	assert.Equal(t, "myObjectAttributeName", details.Property)
 	assert.Equal(t, "myactivityId", details.Item)
-	assert.Equal(t, ".mapkey", details.Path)
+	assert.Equal(t, ".objectKey", details.Path)
+
+	// Resolution of second level Activity expression map
+	a = `activity[myactivityId].myMapAttributeName["a.b"]`
+	details, err = GetResolutionDetails(a)
+	assert.Nil(t, err)
+	assert.Equal(t, "activity", details.ResolverName)
+	assert.Equal(t, "myactivityId", details.Item)
+	assert.Equal(t, "myMapAttributeName", details.Property)
+	assert.Equal(t, `["a.b"]`, details.Path)
+
 
 	// Resolution of second level Activity expression array
 	a = "activity.myactivityId.myArrayAttributeName[0]"
@@ -60,13 +70,22 @@ func TestGetResolutionDetails(t *testing.T) {
 	assert.Equal(t, "", details.Path)
 
 	// Resolution of second level Activity expression map
-	a = "activity.myactivityId.myMapAttributeName.mapkey"
+	a = "activity.myactivityId.myObjectAttributeName.objectKey"
 	details, err = GetResolutionDetails(a)
 	assert.Nil(t, err)
 	assert.Equal(t, "activity", details.ResolverName)
-	assert.Equal(t, "myMapAttributeName", details.Property)
+	assert.Equal(t, "myObjectAttributeName", details.Property)
 	assert.Equal(t, "myactivityId", details.Item)
-	assert.Equal(t, ".mapkey", details.Path)
+	assert.Equal(t, ".objectKey", details.Path)
+
+	// Resolution of second level Activity expression map
+	a = `activity.myactivityId.myMapAttributeName["a.b"]`
+	details, err = GetResolutionDetails(a)
+	assert.Nil(t, err)
+	assert.Equal(t, "activity", details.ResolverName)
+	assert.Equal(t, "myactivityId", details.Item)
+	assert.Equal(t, "myMapAttributeName", details.Property)
+	assert.Equal(t, `["a.b"]`, details.Path)
 
 	// Resolution of second level Activity expression array
 	a = "activity.myactivityId.myArrayAttributeName[0]"
