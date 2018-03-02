@@ -125,7 +125,13 @@ func GetResolutionDetails(toResolve string) (*ResolutionDetails, error) {
 		itemIdx := strings.Index(resolverName, "[")
 
 		if itemIdx != -1 {
-			details.Item = resolverName[itemIdx+1:]
+			item := resolverName[itemIdx+1:]
+			itemCloseInx := strings.Index(resolverName, "]")
+			if itemCloseInx != -1 {
+				details.Item = resolverName[itemIdx+1:itemCloseInx]
+			}else {
+				details.Item = item
+			}
 			details.ResolverName = resolverName[:itemIdx]
 		} else {
 			details.ResolverName = resolverName
