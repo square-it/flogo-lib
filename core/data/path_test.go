@@ -28,6 +28,18 @@ func TestPathGetValue(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, 1.0, newVal)
 
+	mapVal, _ = CoerceToObject("{\"myParam\":{\"nestedMap\":1}}")
+	path = `["myParam"].nestedMap`
+	newVal, err = PathGetValue(mapVal, path)
+	assert.Nil(t, err)
+	assert.Equal(t, 1.0, newVal)
+
+	mapVal, _ = CoerceToObject("{\"myParam\":{\"nestedMap\":1}}")
+	path = `.myParam["nestedMap"]`
+	newVal, err = PathGetValue(mapVal, path)
+	assert.Nil(t, err)
+	assert.Equal(t, 1.0, newVal)
+
 	arrVal, _ = CoerceToArray("[{\"nestedMap1\":1},{\"nestedMap2\":2}]")
 	path = "[1].nestedMap2"
 	newVal, err = PathGetValue(arrVal, path)
@@ -87,6 +99,23 @@ func TestPathSetValue(t *testing.T) {
 	newVal, err = PathGetValue(mapVal, path)
 	assert.Nil(t, err)
 	assert.Equal(t, 7, newVal)
+
+	mapVal, _ = CoerceToObject("{\"myParam\":{\"nestedMap\":1}}")
+	path = `["myParam"].nestedMap`
+	assert.Nil(t, err)
+	err = PathSetValue(mapVal, path, 7)
+	newVal, err = PathGetValue(mapVal, path)
+	assert.Nil(t, err)
+	assert.Equal(t, 7, newVal)
+
+	mapVal, _ = CoerceToObject("{\"myParam\":{\"nestedMap\":1}}")
+	path = `.myParam["nestedMap"]`
+	assert.Nil(t, err)
+	err = PathSetValue(mapVal, path, 7)
+	newVal, err = PathGetValue(mapVal, path)
+	assert.Nil(t, err)
+	assert.Equal(t, 7, newVal)
+
 
 	arrVal, _ = CoerceToArray("[{\"nestedMap1\":1},{\"nestedMap2\":2}]")
 	path = "[1].nestedMap2"
