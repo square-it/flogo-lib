@@ -3,11 +3,12 @@ package mapper
 import (
 	"fmt"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/data"
-	"strings"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"encoding/json"
+	"strings"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 var mapplerLog = logger.GetLogger("basic-mapper")
@@ -134,7 +135,7 @@ func (m *BasicMapper) Apply(inputScope data.Scope, outputScope data.Scope) error
 			if err != nil {
 				return fmt.Errorf("Expression mapping failed, due to %s", err.Error())
 			}
-		case data.MTARRAY:
+		case data.MtArray:
 			//ArrayMapping
 			mapplerLog.Debugf("Array mapping value %s", mapping.Value)
 			//Array mapping value must be string
@@ -170,7 +171,7 @@ func (m *BasicMapper) UpdateMapping() error {
 
 		switch mappingDef.Type {
 		//Array mapping
-		case data.MTARRAY:
+		case data.MtArray:
 			//Update Array Mapping
 			arrayMapping, err := exprmapper.ParseArrayMapping(mapping.Value)
 			if err != nil {
