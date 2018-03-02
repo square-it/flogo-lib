@@ -164,7 +164,7 @@ func SetAttribute(fieldName string, value interface{}, outputScope data.Scope) e
 	attribute, exist := outputScope.GetAttr(fieldName)
 	if exist {
 		switch attribute.Type() {
-		case data.COMPLEX_OBJECT:
+		case data.TypeComplexObject:
 			complexObject := attribute.Value().(*data.ComplexObject)
 			newComplexObject := &data.ComplexObject{Metadata: complexObject.Metadata, Value: value}
 			outputScope.SetAttrValue(fieldName, newComplexObject)
