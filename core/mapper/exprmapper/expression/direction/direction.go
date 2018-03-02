@@ -6,14 +6,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/TIBCOSoftware/flogo-lib/json/field"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json/field"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/expr"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/function"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/gocc/token"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/funcexprtype"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
 var log = logger.GetLogger("expression-direction")
@@ -105,19 +105,19 @@ func NewArgument(a Attribute) (interface{}, error) {
 	parameters := []*function.Parameter{}
 	switch a.(type) {
 	case *token.Token:
-		param.Type = data.STRING
+		param.Type = funcexprtype.STRING
 		param.Value = string(a.(*token.Token).Lit)
 	case int64:
-		param.Type = data.INTEGER
+		param.Type = funcexprtype.INTEGER
 		param.Value = a
 	case string:
-		param.Type = data.STRING
+		param.Type = funcexprtype.STRING
 		param.Value = a.(string)
 	case bool:
-		param.Type = data.BOOLEAN
+		param.Type = funcexprtype.BOOLEAN
 		param.Value = a.(bool)
 	case *function.FunctionExp:
-		param.Type = data.FUNCTION
+		param.Type = funcexprtype.FUNCTION
 		param.Function = a.(*function.FunctionExp)
 	case []*function.Parameter:
 		for _, p := range a.([]*function.Parameter) {
@@ -126,10 +126,10 @@ func NewArgument(a Attribute) (interface{}, error) {
 			}
 		}
 	case *ref.MappingRef:
-		param.Type = data.REF
+		param.Type = funcexprtype.REF
 		param.Value = a
 	case *ref.ArrayRef:
-		param.Type = data.ARRAYREF
+		param.Type = funcexprtype.ARRAYREF
 		param.Value = a
 	case []interface{}:
 		//TODO
@@ -149,22 +149,22 @@ func NewArguments(as ...Attribute) (interface{}, error) {
 		param := &function.Parameter{}
 		switch a.(type) {
 		case *token.Token:
-			param.Type = data.STRING
+			param.Type = funcexprtype.STRING
 			param.Value = string(a.(*token.Token).Lit)
 		case int64:
-			param.Type = data.INTEGER
+			param.Type = funcexprtype.INTEGER
 			param.Value = a
 		case string:
-			param.Type = data.STRING
+			param.Type = funcexprtype.STRING
 			param.Value = a.(string)
 		case *function.FunctionExp:
-			param.Type = data.FUNCTION
+			param.Type = funcexprtype.FUNCTION
 			param.Function = a.(*function.FunctionExp)
 		case *ref.MappingRef:
-			param.Type = data.REF
+			param.Type = funcexprtype.REF
 			param.Value = a
 		case *ref.ArrayRef:
-			param.Type = data.ARRAYREF
+			param.Type = funcexprtype.ARRAYREF
 			param.Value = a
 		case []*function.Parameter:
 			for _, p := range a.([]*function.Parameter) {
@@ -201,7 +201,7 @@ func NewExpression(left Attribute, op Attribute, right Attribute) (interface{}, 
 
 	expression.Left = getExpression(left)
 	expression.Right = getExpression(right)
-	expression.Type = data.EXPRESSION
+	expression.Type = funcexprtype.EXPRESSION
 	return expression, nil
 }
 
@@ -209,26 +209,26 @@ func getExpression(ex Attribute) *expr.Expression {
 	expression := expr.NewWIExpression()
 	switch ex.(type) {
 	case int64:
-		expression.Type = data.INTEGER
+		expression.Type = funcexprtype.INTEGER
 		expression.Value = ex.(int64)
 	case string:
-		expression.Type = data.STRING
+		expression.Type = funcexprtype.STRING
 		expression.Value = ex.(string)
 	case bool:
-		expression.Type = data.BOOLEAN
+		expression.Type = funcexprtype.BOOLEAN
 		expression.Value = ex.(bool)
 	case ref.MappingRef:
-		expression.Type = data.REF
+		expression.Type = funcexprtype.REF
 		ref := ex.(ref.MappingRef)
 		expression.Value = ref
 	case *ref.MappingRef:
-		expression.Type = data.REF
+		expression.Type = funcexprtype.REF
 		expression.Value = ex.(*ref.MappingRef).GetRef()
 	case *ref.ArrayRef:
-		expression.Type = data.ARRAYREF
+		expression.Type = funcexprtype.ARRAYREF
 		expression.Value = ex.(*ref.ArrayRef).GetRef()
 	case *function.FunctionExp:
-		expression.Type = data.FUNCTION
+		expression.Type = funcexprtype.FUNCTION
 		expression.Value = ex.(*function.FunctionExp)
 	case *expr.Expression:
 		expression = ex.(*expr.Expression)

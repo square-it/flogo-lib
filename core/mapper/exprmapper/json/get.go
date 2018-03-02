@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/TIBCOSoftware/flogo-lib/json/field"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json/field"
 
 	"encoding/json"
 	"sync"
@@ -14,7 +14,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
-var log = logger.GetLogger("wi_json")
+var log = logger.GetLogger("json")
 
 func GetFieldValueP(jsonData string, path string) (interface{}, error) {
 	jsonParsed, err := ParseJSON([]byte(jsonData))

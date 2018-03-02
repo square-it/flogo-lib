@@ -14,6 +14,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/funcexprtype"
 )
 
 var log = logger.GetLogger("expr")
@@ -101,8 +102,7 @@ type Expression struct {
 	Right    *Expression `json:"right"`
 
 	Value interface{} `json:"value"`
-	Type  data.Type `json:"type"`
-
+	Type  funcexprtype.Type `json:"type"`
 	//done
 }
 
@@ -200,7 +200,7 @@ func (e *Expression) UnmarshalJSON(exprData []byte) error {
 		Operator OPERATIOR   `json:"operator"`
 		Right    *Expression `json:"right"`
 		Value    interface{} `json:"value"`
-		Type     data.Type `json:"type"`
+		Type     funcexprtype.Type `json:"type"`
 	}{}
 
 	if err := json.Unmarshal(exprData, ser); err != nil {
@@ -226,7 +226,7 @@ func NewWIExpression() *Expression {
 }
 
 func (e *Expression) IsFunction() bool {
-	if data.FUNCTION == e.Type {
+	if funcexprtype.FUNCTION == e.Type {
 		return true
 	}
 	return false
@@ -300,13 +300,13 @@ func (f *Expression) do(edata interface{}, inputScope data.Scope, resolver data.
 		if len(funcReturn) == 1 {
 			leftValue = funcReturn[0]
 		}
-	} else if f.Type == data.EXPRESSION {
+	} else if f.Type == funcexprtype.EXPRESSION {
 		var err error
 		leftValue, err = f.evaluate(edata, inputScope, resolver)
 		if err != nil {
 			resultChan <- errors.New("Eval left expression error: " + err.Error())
 		}
-	} else if f.Type == data.REF {
+	} else if f.Type == funcexprtype.REF {
 		refMaping := ref.NewMappingRef(f.Value.(string))
 		v, err := refMaping.Eval(inputScope, resolver)
 		if err != nil {
@@ -314,7 +314,7 @@ func (f *Expression) do(edata interface{}, inputScope data.Scope, resolver data.
 			resultChan <- fmt.Errorf("Mapping ref eva error [%s]", err.Error())
 		}
 		leftValue = v
-	} else if f.Type == data.ARRAYREF {
+	} else if f.Type == funcexprtype.ARRAYREF {
 		arrayRef := ref.NewArrayRef(f.Value.(string))
 		v, err := arrayRef.EvalFromData(edata)
 		if err != nil {

@@ -6,7 +6,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/TIBCOSoftware/flogo-lib/json/field"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json/field"
 
 	"fmt"
 	"github.com/stretchr/testify/assert"

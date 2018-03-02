@@ -7,6 +7,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/gocc/parser"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/funcexprtype"
 )
 
 var log = logger.GetLogger("expression")
@@ -128,7 +129,7 @@ func GetExpressionType(mapValue string) int {
 	case *expr.TernaryExpressio:
 		return TERNARY_EXPRESSION
 	case *expr.Expression:
-		if t.Type == data.FUNCTION || t.Type == data.EXPRESSION {
+		if t.Type == funcexprtype.FUNCTION || t.Type == funcexprtype.EXPRESSION {
 			return EXPRESSION
 		} else {
 			return STRING

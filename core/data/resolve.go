@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/TIBCOSoftware/flogo-lib/json/field"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json/field"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 

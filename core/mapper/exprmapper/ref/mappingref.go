@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/TIBCOSoftware/flogo-lib/json/field"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json/field"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
-	"github.com/TIBCOSoftware/flogo-lib/json"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/util"
 )

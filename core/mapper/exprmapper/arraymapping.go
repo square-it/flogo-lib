@@ -8,7 +8,7 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
-	flogojson "github.com/TIBCOSoftware/flogo-lib/json"
+	flogojson "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/util"

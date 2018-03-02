@@ -18,12 +18,6 @@ const (
 	ARRAY
 	PARAMS
 	COMPLEX_OBJECT
-
-	//For expression type
-	REF
-	ARRAYREF
-	FUNCTION
-	EXPRESSION
 )
 
 var types = [...]string{
@@ -37,10 +31,6 @@ var types = [...]string{
 	"params",
 	"any",
 	"complex_object",
-	"ref",
-	"arrayRef",
-	"function",
-	"expression",
 }
 
 var typeMap = map[string]Type{
@@ -53,10 +43,6 @@ var typeMap = map[string]Type{
 	"array":          ARRAY,
 	"params":         PARAMS,
 	"complex_object": COMPLEX_OBJECT,
-	"ref":            REF,
-	"arrayRef":       ARRAYREF,
-	"function":       FUNCTION,
-	"expression":     EXPRESSION,
 }
 
 func (t Type) String() string {

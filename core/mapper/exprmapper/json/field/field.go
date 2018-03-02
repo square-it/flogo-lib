@@ -8,7 +8,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
-var log = logger.GetLogger("mapper-field")
+var log = logger.GetLogger("expr-mapper-field")
 type MappingField struct {
 	HasSpecialField bool
 	HasArray        bool

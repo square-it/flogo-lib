@@ -1,7 +1,6 @@
 package function
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"reflect"
@@ -13,6 +12,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/funcexprtype"
 )
 
 var logrus = logger.GetLogger("function")
@@ -29,14 +29,14 @@ type FunctionExp struct {
 
 type Parameter struct {
 	Function *FunctionExp `json:"function"`
-	Type     data.Type    `json:"type"`
+	Type     funcexprtype.Type    `json:"type"`
 	Value    interface{}  `json:"value"`
 }
 
 func (p *Parameter) UnmarshalJSON(paramData []byte) error {
 	ser := &struct {
 		Function *FunctionExp `json:"function"`
-		Type     data.Type    `json:"type"`
+		Type     funcexprtype.Type    `json:"type"`
 		Value    interface{}  `json:"value"`
 	}{}
 
@@ -72,7 +72,7 @@ func (p *Parameter) IsEmtpy() bool {
 }
 
 func (p *Parameter) IsFunction() bool {
-	if data.FUNCTION == p.Type {
+	if funcexprtype.FUNCTION == p.Type {
 		return true
 	}
 	return false
@@ -192,7 +192,7 @@ func (f *FunctionExp) callFunction(fdata interface{}, inputScope data.Scope, res
 			}
 		} else {
 			if !p.IsEmtpy() {
-				if p.Type == data.REF {
+				if p.Type == funcexprtype.REF {
 					logrus.Debug("Mapping ref field should done before eval function.")
 					var field *ref.MappingRef
 					switch p.Value.(type) {
@@ -214,7 +214,7 @@ func (f *FunctionExp) callFunction(fdata interface{}, inputScope data.Scope, res
 
 					}
 
-				} else if p.Type == data.ARRAYREF {
+				} else if p.Type == funcexprtype.ARRAYREF {
 					logrus.Debug("Mapping ref field should done before eval function.")
 					var field *ref.ArrayRef
 					switch p.Value.(type) {
@@ -282,22 +282,4 @@ func (f *FunctionExp) extractErrorFromValues(values []reflect.Value) ([]reflect.
 	}
 
 	return tempValues, err
-}
-
-func (f *FunctionExp) Serialization() (string, error) {
-	v, err := json.Marshal(f)
-	return base64.StdEncoding.EncodeToString(v), err
-}
-
-func DeSerialization(base64str string) (*FunctionExp, error) {
-	f := &FunctionExp{}
-	v, err := base64.StdEncoding.DecodeString(base64str)
-	if err != nil {
-		return nil, errors.New("Do serialization function err: " + err.Error())
-	}
-	err = json.Unmarshal(v, f)
-	if err != nil {
-		return nil, errors.New("Do Unmarshal function err: " + err.Error())
-	}
-	return f, nil
 }

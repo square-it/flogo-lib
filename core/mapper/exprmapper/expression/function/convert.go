@@ -8,26 +8,26 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/util"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
-	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/funcexprtype"
 )
 
-func ConvertToValue(value interface{}, dataType data.Type) (interface{}, error) {
+func ConvertToValue(value interface{}, dataType funcexprtype.Type) (interface{}, error) {
 
 	var coerced interface{}
 	var err error
 
 	switch dataType {
-	case data.STRING:
+	case funcexprtype.STRING:
 		coerced, err = util.ConvertToString(value)
-	case data.INTEGER:
+	case funcexprtype.INTEGER:
 		coerced, err = util.ConvertToInt64(value)
-	case data.NUMBER:
+	case funcexprtype.FLOAT:
 		coerced, err = util.ConvertToFloat(value)
-	case data.FUNCTION:
+	case funcexprtype.FUNCTION:
 		coerced, err = ConvertToFunction(value)
-	case data.REF:
+	case funcexprtype.REF:
 		coerced, err = ConvertToRef(value)
-	case data.EXPRESSION:
+	case funcexprtype.EXPRESSION:
 		return value, nil
 	}
 

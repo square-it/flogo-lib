@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
-	"github.com/TIBCOSoftware/flogo-lib/json"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json"
 )
 
 type ArrayRef struct {

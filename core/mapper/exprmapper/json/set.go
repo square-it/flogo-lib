@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/TIBCOSoftware/flogo-lib/json/field"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json/field"
 )
 
 type JSONData struct {

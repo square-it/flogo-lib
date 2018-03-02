@@ -5,28 +5,8 @@ import (
 	"testing"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/expr"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/function"
 )
 
-func TestFuncNestConcat(t *testing.T) {
-	newFunction, err := NewFunctionExpression(`string.concat("This","is",string.concat("my","first"),"gocc",string.concat("lexer","and","parser"),string.concat("go","program","!!!"))`).GetFunction()
-	if err != nil {
-		fail(t, err)
-	}
-
-	str, err := newFunction.Serialization()
-	if err != nil {
-		fail(t, err)
-	}
-	funcUnseri := &function.FunctionExp{}
-	funcUnseri, err = function.DeSerialization(str)
-	v, err := funcUnseri.Eval()
-	if err != nil {
-		fail(t, err)
-	}
-
-	fmt.Println("Result:", v)
-}
 
 func TestFuncExpression(t *testing.T) {
 	ex, err := NewExpression(`string.concat("123","456")="123456"`).GetExpression()
