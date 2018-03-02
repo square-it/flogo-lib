@@ -25,6 +25,8 @@ func PathGetValue(value interface{}, path string) (interface{}, error) {
 		} else {
 			return nil, fmt.Errorf("Unable to evaluate path: %s", path)
 		}
+	} else if strings.HasPrefix(path, `["`) {
+		//todo handle map lookup
 	} else if strings.HasPrefix(path, "[") {
 		newVal, newPath, err = pathGetSetArrayValue(value, path, nil, false)
 	} else {
