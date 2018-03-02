@@ -5,7 +5,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json/field"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
@@ -111,65 +110,38 @@ type ResolutionDetails struct {
 func GetResolutionDetails(toResolve string) (*ResolutionDetails, error) {
 
 	//todo optimize, maybe tokenize first
+
+	dotIdx := strings.Index(toResolve, ".")
+
+	if dotIdx == -1 {
+		return nil, fmt.Errorf("invalid resolution expression [%s]", toResolve)
+	}
+
 	details := &ResolutionDetails{}
+	itemIdx := strings.Index(toResolve[:dotIdx], "[")
 
-	if field.HasSpecialFields(toResolve) {
-		fields, err := field.GetAllspecialFields(toResolve)
-		if err != nil {
-			return details, err
-		}
-
-		resolverName := fields[0]
-		fieldname := fields[1]
-
-		itemIdx := strings.Index(resolverName, "[")
-
-		if itemIdx != -1 {
-			item := resolverName[itemIdx+1:]
-			itemCloseInx := strings.Index(resolverName, "]")
-			if itemCloseInx != -1 {
-				details.Item = resolverName[itemIdx+1:itemCloseInx]
-			}else {
-				details.Item = item
-			}
-			details.ResolverName = resolverName[:itemIdx]
-		} else {
-			details.ResolverName = resolverName
-		}
-		details.Property = fieldname
-
-		details.Path = strings.Join(fields[2:], ".")
+	if itemIdx != -1 {
+		details.Item = toResolve[itemIdx+1 : dotIdx-1]
+		details.ResolverName = toResolve[:itemIdx]
 	} else {
-		dotIdx := strings.Index(toResolve, ".")
+		details.ResolverName = toResolve[:dotIdx]
 
-		if dotIdx == -1 {
-			return nil, fmt.Errorf("invalid resolution expression [%s]", toResolve)
+		//special case for activity without brackets
+		if strings.HasPrefix(toResolve, "activity") {
+			nextDot := strings.Index(toResolve[dotIdx+1:], ".") + dotIdx + 1
+			details.Item = toResolve[dotIdx+1 : nextDot]
+			dotIdx = nextDot
 		}
+	}
 
-		itemIdx := strings.Index(toResolve[:dotIdx], "[")
-		if itemIdx != -1 {
-			details.Item = toResolve[itemIdx+1 : dotIdx-1]
-			details.ResolverName = toResolve[:itemIdx]
-		} else {
-			details.ResolverName = toResolve[:dotIdx]
+	pathIdx := strings.IndexFunc(toResolve[dotIdx+1:], isSep)
 
-			//special case for activity without brackets
-			if strings.HasPrefix(toResolve, "activity") {
-				nextDot := strings.Index(toResolve[dotIdx+1:], ".") + dotIdx + 1
-				details.Item = toResolve[dotIdx+1 : nextDot]
-				dotIdx = nextDot
-			}
-		}
-
-		pathIdx := strings.IndexFunc(toResolve[dotIdx+1:], isSep)
-
-		if pathIdx != -1 {
-			pathStart := pathIdx + dotIdx + 1
-			details.Path = toResolve[pathStart:]
-			details.Property = toResolve[dotIdx+1 : pathStart]
-		} else {
-			details.Property = toResolve[dotIdx+1:]
-		}
+	if pathIdx != -1 {
+		pathStart := pathIdx + dotIdx + 1
+		details.Path = toResolve[pathStart:]
+		details.Property = toResolve[dotIdx+1 : pathStart]
+	} else {
+		details.Property = toResolve[dotIdx+1:]
 	}
 
 	return details, nil
