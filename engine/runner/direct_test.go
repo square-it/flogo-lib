@@ -30,8 +30,8 @@ func (m *MockAsyncAction) Metadata() *action.Metadata {
 func (m *MockAsyncAction) Run(context context.Context, inputs map[string]*data.Attribute, handler action.ResultHandler) error {
 	args := m.Called(context, inputs, handler)
 	if handler != nil {
-		dataAttr, _ := data.NewAttribute("data", data.STRING, "mock")
-		codeAttr, _ := data.NewAttribute("code", data.INTEGER, 200)
+		dataAttr, _ := data.NewAttribute("data", data.TypeString, "mock")
+		codeAttr, _ := data.NewAttribute("code", data.TypeInteger, 200)
 		resultData := map[string]*data.Attribute{
 			"data": dataAttr,
 			"code": codeAttr,
@@ -46,8 +46,8 @@ func (m *MockAsyncAction) Run(context context.Context, inputs map[string]*data.A
 func TestResultOk(t *testing.T) {
 
 	//mockData,_ :=data.CoerceToObject("{\"data\":\"mock data \"}")
-	dataAttr, _ := data.NewAttribute("data", data.STRING, "mock data")
-	codeAttr, _ := data.NewAttribute("code", data.INTEGER, 1)
+	dataAttr, _ := data.NewAttribute("data", data.TypeString, "mock data")
+	codeAttr, _ := data.NewAttribute("code", data.TypeInteger, 1)
 	resultData := map[string]*data.Attribute{
 		"data": dataAttr,
 		"code": codeAttr,

@@ -14,23 +14,23 @@ func CoerceToValue(value interface{}, dataType Type) (interface{}, error) {
 	var err error
 
 	switch dataType {
-	case STRING:
+	case TypeString:
 		coerced, err = CoerceToString(value)
-	case INTEGER:
+	case TypeInteger:
 		coerced, err = CoerceToInteger(value)
-	case NUMBER:
+	case TypeNumber:
 		coerced, err = CoerceToNumber(value)
-	case BOOLEAN:
+	case TypeBoolean:
 		coerced, err = CoerceToBoolean(value)
-	case OBJECT:
+	case TypeObject:
 		coerced, err = CoerceToObject(value)
-	case ARRAY:
+	case TypeArray:
 		coerced, err = CoerceToArray(value)
-	case PARAMS:
+	case TypeParams:
 		coerced, err = CoerceToParams(value)
-	case COMPLEX_OBJECT:
+	case TypeComplexObject:
 		coerced, err = CoerceToComplexObject(value)
-	case ANY:
+	case TypeAny:
 		coerced, err = CoerceToAny(value)
 	}
 
@@ -394,7 +394,7 @@ func (h *MapHelper) ToAttributes(data map[string]interface{}, metadata []*Attrib
 		if !exists {
 			if !ignoreExtras {
 				//todo handle error
-				attr, _ := NewAttribute(key, ANY, value)
+				attr, _ := NewAttribute(key, TypeAny, value)
 				attrs = append(attrs, attr)
 			}
 		} else {
