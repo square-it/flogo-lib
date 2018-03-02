@@ -9,8 +9,8 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/util"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 var log = logger.GetLogger("MappingRef")
@@ -21,9 +21,9 @@ type MappingRef struct {
 
 func NewMappingRef(ref string) *MappingRef {
 	//Compatible TriggerData, the $TriggerData might in function or expression
-	if strings.Index(ref, "$TriggerData") >=0  {
+	if strings.Index(ref, "$TriggerData") >= 0 {
 		return &MappingRef{ref: strings.Replace(ref, "$TriggerData", "$flow", -1)}
-	}else {
+	} else {
 		return &MappingRef{ref: ref}
 	}
 }
@@ -82,12 +82,8 @@ func (m *MappingRef) getValueFromAttribute(inputscope data.Scope, resolver data.
 	}
 	//Only need activity and field name
 	resolutionDetails.Path = ""
-	var newRef string
-	if strings.Index(resolutionDetails.Property, ".") >= 0 {
-		newRef = resolutionDetails.ResolverName + "['" + resolutionDetails.Property + "']"
-	}else {
-		newRef = resolutionDetails.ResolverName + "." + resolutionDetails.Property
-	}
+	//var newRef string
+	newRef := resolutionDetails.ResolverName + "[" + resolutionDetails.Item + "]" + "." + resolutionDetails.Property
 
 	log.Debugf("Activity and root field name is: %s", newRef)
 	value, err := resolver.Resolve(newRef, inputscope)
@@ -307,7 +303,7 @@ func getActivityName(fieldname string) string {
 	endIndex := strings.Index(fieldname, "]")
 	if startIndex >= 0 {
 		return fieldname[startIndex+1 : endIndex]
-	}else {
+	} else {
 		return fieldname
 	}
 }
