@@ -58,6 +58,31 @@ func ConvertToInt64(val interface{}) (int64, error) {
 	}
 }
 
+func ConvertToInt(val interface{}) (int, error) {
+	switch t := val.(type) {
+	case int:
+		return t, nil
+	case int64:
+		return int(t), nil
+	case float64:
+		return int(t), nil
+	case json.Number:
+		i, err := t.Int64()
+		return int(i), err
+	case string:
+		return strconv.Atoi(t)
+	case bool:
+		if t {
+			return 1, nil
+		}
+		return 0, nil
+	case nil:
+		return 0, nil
+	default:
+		return 0, fmt.Errorf("Unable to coerce %#v to int64", val)
+	}
+}
+
 func ConvertToFloat(val interface{}) (float64, error) {
 	switch t := val.(type) {
 	case int:
@@ -117,3 +142,20 @@ func ConvertToBytes(value interface{}) ([]byte, error) {
 	return nil, fmt.Errorf("Cannot convert nil to []byte")
 }
 
+func ConvertToBool(value interface{}) (bool, error) {
+	if value != nil {
+		switch t := value.(type) {
+		case bool:
+			return t, nil
+		case string:
+			return strconv.ParseBool(t)
+		default:
+			str, err := ConvertToString(value)
+			if err != nil {
+				return false, err
+			}
+			return strconv.ParseBool(str)
+		}
+	}
+	return false, nil
+}

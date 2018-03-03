@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"reflect"
-	"strings"
 
 	"fmt"
 
@@ -100,7 +99,7 @@ type Expression struct {
 	Operator OPERATIOR   `json:"operator"`
 	Right    *Expression `json:"right"`
 
-	Value interface{} `json:"value"`
+	Value interface{}       `json:"value"`
 	Type  funcexprtype.Type `json:"type"`
 	//done
 }
@@ -176,10 +175,10 @@ func (e *Expression) String() string {
 
 func (e *Expression) UnmarshalJSON(exprData []byte) error {
 	ser := &struct {
-		Left     *Expression `json:"left"`
-		Operator OPERATIOR   `json:"operator"`
-		Right    *Expression `json:"right"`
-		Value    interface{} `json:"value"`
+		Left     *Expression       `json:"left"`
+		Operator OPERATIOR         `json:"operator"`
+		Right    *Expression       `json:"right"`
+		Value    interface{}       `json:"value"`
 		Type     funcexprtype.Type `json:"type"`
 	}{}
 
@@ -365,37 +364,54 @@ func equals(left interface{}, right interface{}) (bool, error) {
 		return false, nil
 	}
 
-	rightType := getType(right)
-	log.Debugf("Right expression type [%s]", rightType)
-	switch left.(type) {
-	case int:
-		if rightType.Kind() == reflect.Int {
-			return left.(int) == right.(int), nil
-		}
-	case int64:
-
-		if rightType.Kind() == reflect.Int64 {
-			return left.(int64) == right.(int64), nil
-		}
-	case float64:
-		if rightType.Kind() == reflect.Float64 {
-			return left.(float64) == right.(float64), nil
-		}
-	case string:
-		s, err := util.ConvertToString(right)
-		if err != nil {
-			return false, err
-		}
-		return strings.EqualFold(left.(string), s), nil
-	case bool:
-		if rightType.Kind() == reflect.Bool {
-			return left.(bool) == right.(bool), nil
-		}
-	default:
-		return false, errors.New("Unknow type to equals" + getType(left).String())
+	rightValue, err := convertRightValueToLeftType(left, right)
+	if err != nil {
+		return false, err
 	}
 
-	return false, nil
+	log.Debugf("Right expression value [%s]", rightValue)
+
+	return left == rightValue, nil
+}
+
+func convertRightValueToLeftType(left interface{}, right interface{}) (interface{}, error) {
+	if left == nil || right == nil {
+		return right, nil
+	}
+	var rightValue interface{}
+	var err error
+	switch left.(type) {
+	case int:
+		rightValue, err = util.ConvertToInt(right)
+		if err != nil {
+			err = fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+		}
+		return rightValue, nil
+	case int64:
+		rightValue, err = util.ConvertToInt64(right)
+		if err != nil {
+			err = fmt.Errorf("Convert right expression to type int64 failed, due to %s", err.Error())
+		}
+	case float64:
+		rightValue, err = util.ConvertToFloat(right)
+		if err != nil {
+			err = fmt.Errorf("Convert right expression to type float64 failed, due to %s", err.Error())
+		}
+	case string:
+		rightValue, err = util.ConvertToString(right)
+		if err != nil {
+			err = fmt.Errorf("Convert right expression to type string failed, due to %s", err.Error())
+		}
+	case bool:
+		rightValue, err = util.ConvertToBool(right)
+		if err != nil {
+			err = fmt.Errorf("Convert right expression to type boolean failed, due to %s", err.Error())
+		}
+	default:
+		err = fmt.Errorf("Unsupport type to compare now")
+	}
+	return rightValue, err
+
 }
 
 func notEquals(left interface{}, right interface{}) (bool, error) {
@@ -409,44 +425,15 @@ func notEquals(left interface{}, right interface{}) (bool, error) {
 		return true, nil
 	}
 
-	rightType := getType(right)
-	switch left.(type) {
-	case int:
-		if rightType.Kind() == reflect.Int {
-			return left.(int) != right.(int), nil
-		} else {
-			return false, errors.New("Right expression must be int")
-		}
-	case int64:
-
-		if rightType.Kind() != reflect.Int64 {
-			return left.(int64) == right.(int64), nil
-		} else {
-			return false, errors.New("Right expression must be int64")
-		}
-	case float64:
-		if rightType.Kind() == reflect.Float64 {
-			return left.(float64) != right.(float64), nil
-		} else {
-			return false, errors.New("Right expression must be float64")
-		}
-	case string:
-		if rightType.Kind() == reflect.String {
-			return !strings.EqualFold(left.(string), right.(string)), nil
-		} else {
-			return false, errors.New("Right expression must be string")
-		}
-	case bool:
-		if rightType.Kind() == reflect.Bool {
-			return left.(bool) != right.(bool), nil
-		} else {
-			return false, errors.New("Right expression must be int")
-		}
-	default:
-		return false, errors.New("Unknow type to equals" + getType(left).String())
+	rightValue, err := convertRightValueToLeftType(left, right)
+	if err != nil {
+		return false, err
 	}
 
-	return false, nil
+	log.Debugf("Right expression value [%s]", rightValue)
+
+	return left != rightValue, nil
+
 }
 
 func gt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
@@ -461,39 +448,42 @@ func gt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 	}
 
 	rightType := getType(right)
-	switch left.(type) {
+	log.Infof("Right type: %s", rightType.String())
+	switch le := left.(type) {
 	case int:
-		if rightType.Kind() == reflect.Int {
-			if includeEquals {
-				return left.(int) >= right.(int), nil
-
-			} else {
-				return left.(int) > right.(int), nil
-			}
-		} else {
-			return false, errors.New("Right expression must be int")
+		//We should conver to int first
+		rightValue, err := util.ConvertToInt(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
-	case int64:
-		if rightType.Kind() == reflect.Int64 {
-			if includeEquals {
-				return left.(int64) >= right.(int64), nil
+		if includeEquals {
+			return le >= rightValue, nil
 
-			} else {
-				return left.(int64) > right.(int64), nil
-			}
 		} else {
-			return false, errors.New("Right expression must be int64")
+			return le > rightValue, nil
+		}
+
+	case int64:
+		rightValue, err := util.ConvertToInt64(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+		}
+		if includeEquals {
+			return le >= rightValue, nil
+
+		} else {
+			return le > rightValue, nil
 		}
 	case float64:
-		if rightType.Kind() == reflect.Float64 {
-			if includeEquals {
-				return left.(float64) >= right.(float64), nil
+		rightValue, err := util.ConvertToFloat(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+		}
+		if includeEquals {
+			return le >= rightValue, nil
 
-			} else {
-				return left.(float64) > right.(float64), nil
-			}
 		} else {
-			return false, errors.New("Right expression must be float64")
+			return le > rightValue, nil
 		}
 	default:
 		return false, errors.New("Unknow type to equals" + getType(left).String())
@@ -513,40 +503,39 @@ func lt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 		return false, nil
 	}
 
-	rightType := getType(right)
-	switch left.(type) {
+	switch le := left.(type) {
 	case int:
-		if rightType.Kind() == reflect.Int {
-			if includeEquals {
-				return left.(int) <= right.(int), nil
+		rightValue, err := util.ConvertToInt(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+		}
+		if includeEquals {
+			return le <= rightValue, nil
 
-			} else {
-				return left.(int) < right.(int), nil
-			}
 		} else {
-			return false, errors.New("Right expression must be int")
+			return le < rightValue, nil
 		}
 	case int64:
-		if rightType.Kind() == reflect.Int64 {
-			if includeEquals {
-				return left.(int64) <= right.(int64), nil
+		rightValue, err := util.ConvertToInt64(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+		}
+		if includeEquals {
+			return le <= rightValue, nil
 
-			} else {
-				return left.(int64) < right.(int64), nil
-			}
 		} else {
-			return false, errors.New("Right expression must be int64")
+			return le < rightValue, nil
 		}
 	case float64:
-		if rightType.Kind() == reflect.Float64 {
-			if includeEquals {
-				return left.(float64) <= right.(float64), nil
+		rightValue, err := util.ConvertToFloat(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+		}
+		if includeEquals {
+			return le <= rightValue, nil
 
-			} else {
-				return left.(float64) < right.(float64), nil
-			}
 		} else {
-			return false, errors.New("Right expression must be float64")
+			return le < rightValue, nil
 		}
 	default:
 		return false, errors.New("Unknow type to equals" + getType(left).String())
@@ -559,12 +548,13 @@ func add(left interface{}, right interface{}) (bool, error) {
 
 	log.Infof("Add operator, Left expression value %+v, right expression value %+v", left, right)
 
-	rightType := getType(right)
-	switch left.(type) {
+	switch le := left.(type) {
 	case bool:
-		if rightType.Kind() == reflect.Bool {
-			return left.(bool) && right.(bool), nil
+		rightValue, err := util.ConvertToBool(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
+		return le && rightValue, nil
 	default:
 		return false, errors.New("Unknow type to add expression " + getType(left).String())
 	}
@@ -575,15 +565,13 @@ func add(left interface{}, right interface{}) (bool, error) {
 func or(left interface{}, right interface{}) (bool, error) {
 
 	log.Infof("Add operator, Left expression value %+v, right expression value %+v", left, right)
-
-	rightType := getType(right)
-	switch left.(type) {
+	switch le := left.(type) {
 	case bool:
-		if rightType.Kind() == reflect.Bool {
-			return left.(bool) || right.(bool), nil
-		} else {
-			return false, errors.New("Unknow type to or expression " + getType(rightType).String())
+		rightValue, err := util.ConvertToBool(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
+		return le || rightValue, nil
 	default:
 		return false, errors.New("Unknow type to add expression " + getType(left).String())
 	}
@@ -602,27 +590,28 @@ func additon(left interface{}, right interface{}) (interface{}, error) {
 		return false, nil
 	}
 
-	rightType := getType(right)
-	switch left.(type) {
+	switch le := left.(type) {
 	case int:
-		if rightType.Kind() == reflect.Int {
-			return left.(int) + right.(int), nil
+		rightValue, err := util.ConvertToInt(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+		}
 
-		} else {
-			return false, errors.New("Right expression must be int")
-		}
+		return le + rightValue, nil
+
 	case int64:
-		if rightType.Kind() == reflect.Int64 {
-			return left.(int64) + right.(int64), nil
-		} else {
-			return false, errors.New("Right expression must be int64")
+		rightValue, err := util.ConvertToInt64(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
+
+		return le + rightValue, nil
 	case float64:
-		if rightType.Kind() == reflect.Float64 {
-			return left.(float64) + right.(float64), nil
-		} else {
-			return false, errors.New("Right expression must be float64")
+		rightValue, err := util.ConvertToFloat(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
+		return le + rightValue, nil
 	default:
 		return false, errors.New("Unknow type to equals" + getType(left).String())
 	}
@@ -641,27 +630,28 @@ func sub(left interface{}, right interface{}) (interface{}, error) {
 		return false, nil
 	}
 
-	rightType := getType(right)
-	switch left.(type) {
+	switch le := left.(type) {
 	case int:
-		if rightType.Kind() == reflect.Int {
-			return left.(int) - right.(int), nil
+		rightValue, err := util.ConvertToInt(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+		}
 
-		} else {
-			return false, errors.New("Right expression must be int")
-		}
+		return le - rightValue, nil
 	case int64:
-		if rightType.Kind() == reflect.Int64 {
-			return left.(int64) - right.(int64), nil
-		} else {
-			return false, errors.New("Right expression must be int64")
+		rightValue, err := util.ConvertToInt64(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
+
+		return le - rightValue, nil
 	case float64:
-		if rightType.Kind() == reflect.Float64 {
-			return left.(float64) - right.(float64), nil
-		} else {
-			return false, errors.New("Right expression must be float64")
+		rightValue, err := util.ConvertToFloat(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
+
+		return le - rightValue, nil
 	default:
 		return false, errors.New("Unknow type to equals" + getType(left).String())
 	}
@@ -680,27 +670,28 @@ func multiplication(left interface{}, right interface{}) (interface{}, error) {
 		return false, nil
 	}
 
-	rightType := getType(right)
-	switch left.(type) {
+	switch le := left.(type) {
 	case int:
-		if rightType.Kind() == reflect.Int {
-			return left.(int) * right.(int), nil
+		rightValue, err := util.ConvertToInt(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+		}
 
-		} else {
-			return false, errors.New("Right expression must be int")
-		}
+		return le * rightValue, nil
 	case int64:
-		if rightType.Kind() == reflect.Int64 {
-			return left.(int64) * right.(int64), nil
-		} else {
-			return false, errors.New("Right expression must be int64")
+		rightValue, err := util.ConvertToInt64(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
+
+		return le * rightValue, nil
 	case float64:
-		if rightType.Kind() == reflect.Float64 {
-			return left.(float64) * right.(float64), nil
-		} else {
-			return false, errors.New("Right expression must be float64")
+		rightValue, err := util.ConvertToFloat(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
+
+		return le * rightValue, nil
 	default:
 		return false, errors.New("Unknow type to equals" + getType(left).String())
 	}
@@ -719,27 +710,25 @@ func div(left interface{}, right interface{}) (interface{}, error) {
 		return false, nil
 	}
 
-	rightType := getType(right)
-	switch left.(type) {
+	switch le := left.(type) {
 	case int:
-		if rightType.Kind() == reflect.Int {
-			return left.(int) + right.(int), nil
-
-		} else {
-			return false, errors.New("Right expression must be int")
+		rightValue, err := util.ConvertToInt(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
+		return le + rightValue, nil
 	case int64:
-		if rightType.Kind() == reflect.Int64 {
-			return left.(int64) + right.(int64), nil
-		} else {
-			return false, errors.New("Right expression must be int64")
+		rightValue, err := util.ConvertToInt64(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
+		return le + rightValue, nil
 	case float64:
-		if rightType.Kind() == reflect.Float64 {
-			return left.(float64) + right.(float64), nil
-		} else {
-			return false, errors.New("Right expression must be float64")
+		rightValue, err := util.ConvertToFloat(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
+		return le + rightValue, nil
 	default:
 		return false, errors.New("Unknow type to equals" + getType(left).String())
 	}
