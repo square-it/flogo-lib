@@ -129,7 +129,7 @@ var ActTab = ActionTable{
 		Ignore: "",
 	},
 	ActionRow{ // S27
-		Accept: 0,
+		Accept: 10,
 		Ignore: "",
 	},
 	ActionRow{ // S28
@@ -141,11 +141,11 @@ var ActTab = ActionTable{
 		Ignore: "",
 	},
 	ActionRow{ // S30
-		Accept: 10,
+		Accept: 2,
 		Ignore: "",
 	},
 	ActionRow{ // S31
-		Accept: 0,
+		Accept: 2,
 		Ignore: "",
 	},
 	ActionRow{ // S32
@@ -153,34 +153,10 @@ var ActTab = ActionTable{
 		Ignore: "",
 	},
 	ActionRow{ // S33
-		Accept: 2,
-		Ignore: "",
-	},
-	ActionRow{ // S34
-		Accept: 0,
-		Ignore: "",
-	},
-	ActionRow{ // S35
-		Accept: 0,
-		Ignore: "",
-	},
-	ActionRow{ // S36
-		Accept: 2,
-		Ignore: "",
-	},
-	ActionRow{ // S37
 		Accept: 11,
 		Ignore: "",
 	},
-	ActionRow{ // S38
-		Accept: 10,
-		Ignore: "",
-	},
-	ActionRow{ // S39
-		Accept: 10,
-		Ignore: "",
-	},
-	ActionRow{ // S40
+	ActionRow{ // S34
 		Accept: 12,
 		Ignore: "",
 	},

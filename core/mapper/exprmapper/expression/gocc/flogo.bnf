@@ -22,8 +22,9 @@ operator_charactor : {_operator_charactor} ;
 _wirefbracketArray : '[' {_digit} ']';
 _wirefbracketDouble : '[' '"' {.} '"' ']';
 _wirefbracketSingle : '[' '\'' {.} '\'' ']';
-_wirefbracket : _wirefbracketDouble | _wirefbracketSingle | _wirefbracketArray;
-_wiref : 'a'-'z' | 'A'-'Z' | '.' | '0'-'9' | '-' | '[' | ']' | '_' | ' ' | '$' | _wirefbracket;
+_wirefbracketNone : '[' {_character_digit} ']';
+_wirefbracket : '[' {.} ']';
+_wiref : 'a'-'z' | 'A'-'Z' | '.' | '0'-'9' | '-' | '[' | ']' | '_' | ' ' | '$' | '{' | '}' | _wirefbracket;
 _wistring : {_wiref};
 
 //Static function name, such as concat, substring, len etc...
