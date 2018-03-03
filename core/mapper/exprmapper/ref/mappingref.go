@@ -76,6 +76,11 @@ func (m *MappingRef) GetValue(inputScope data.Scope, resovler data.Resolver) (in
 func (m *MappingRef) getValueFromAttribute(inputscope data.Scope, resolver data.Resolver) (interface{}, error) {
 
 	log.Debugf("Get value from attribute ref [%s]", m.ref)
+	if strings.HasPrefix(m.ref, "${") {
+		//backward compatible for old version OSS
+		return resolver.Resolve(m.ref, inputscope)
+	}
+
 	resolutionDetails, err := data.GetResolutionDetails(m.ref)
 	if err != nil {
 		return nil, fmt.Errorf("Get activity name and root field error, %s", err.Error())
