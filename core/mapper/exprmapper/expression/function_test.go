@@ -1,13 +1,14 @@
 package expression
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/function"
-	"testing"
-	"github.com/stretchr/testify/assert"
 	"bytes"
 	"fmt"
 	"strconv"
+	"testing"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/function"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/util"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFunctionConcatWithSpace(t *testing.T) {
@@ -141,6 +142,18 @@ func TestFunctionWithPackage(t *testing.T) {
 	assert.Equal(t, "$A2.messagelixingwang", v[0].(string))
 
 	fmt.Println("Result:", v[0])
+}
+
+func TestFunctionWithSpecialFiled(t *testing.T) {
+	v, err := NewExpression(`$activity[lixingwang].myattri["name.name"][0]>2`).GetExpression()
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	v.Eval()
+	//assert.Equal(t, "$A2.messagelixingwang", v[0].(string))
+
+	//fmt.Println("Result:", v[0])
 }
 
 type Concat struct {
