@@ -1,6 +1,7 @@
 package ref
 
 import (
+	ejson "encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -9,7 +10,6 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/util"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
@@ -60,7 +60,7 @@ func (m *MappingRef) GetValue(inputScope data.Scope, resovler data.Resolver) (in
 	}
 
 	if mappingFiled == nil || len(mappingFiled.Fields) <= 0 {
-		value, err := util.ConvertToInterface(inStruct)
+		value, err := toInfterface(inStruct)
 		if err != nil {
 			value = inStruct
 		}
@@ -71,6 +71,27 @@ func (m *MappingRef) GetValue(inputScope data.Scope, resovler data.Resolver) (in
 		return nil, err
 	}
 	return mappingValue, nil
+}
+
+func toInfterface(value interface{}) (interface{}, error) {
+
+	var paramMap interface{}
+
+	if value == nil {
+		return paramMap, nil
+	}
+
+	switch t := value.(type) {
+	case string:
+		err := ejson.Unmarshal([]byte(t), &paramMap)
+		if err != nil {
+			return nil, err
+		}
+		return paramMap, nil
+	default:
+		return value, nil
+	}
+	return paramMap, nil
 }
 
 func (m *MappingRef) getValueFromAttribute(inputscope data.Scope, resolver data.Resolver) (interface{}, error) {

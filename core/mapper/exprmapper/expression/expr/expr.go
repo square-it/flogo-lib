@@ -11,7 +11,6 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/function"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/funcexprtype"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/util"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
@@ -382,28 +381,28 @@ func convertRightValueToLeftType(left interface{}, right interface{}) (interface
 	var err error
 	switch left.(type) {
 	case int:
-		rightValue, err = util.ConvertToInt(right)
+		rightValue, err = data.CoerceToInteger(right)
 		if err != nil {
 			err = fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
 		return rightValue, nil
 	case int64:
-		rightValue, err = util.ConvertToInt64(right)
+		rightValue, err = data.CoerceToInt64(right)
 		if err != nil {
 			err = fmt.Errorf("Convert right expression to type int64 failed, due to %s", err.Error())
 		}
 	case float64:
-		rightValue, err = util.ConvertToFloat(right)
+		rightValue, err = data.CoerceToNumber(right)
 		if err != nil {
 			err = fmt.Errorf("Convert right expression to type float64 failed, due to %s", err.Error())
 		}
 	case string:
-		rightValue, err = util.ConvertToString(right)
+		rightValue, err = data.CoerceToString(right)
 		if err != nil {
 			err = fmt.Errorf("Convert right expression to type string failed, due to %s", err.Error())
 		}
 	case bool:
-		rightValue, err = util.ConvertToBool(right)
+		rightValue, err = data.CoerceToBoolean(right)
 		if err != nil {
 			err = fmt.Errorf("Convert right expression to type boolean failed, due to %s", err.Error())
 		}
@@ -452,7 +451,7 @@ func gt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 	switch le := left.(type) {
 	case int:
 		//We should conver to int first
-		rightValue, err := util.ConvertToInt(right)
+		rightValue, err := data.CoerceToInteger(right)
 		if err != nil {
 			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
@@ -464,7 +463,7 @@ func gt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 		}
 
 	case int64:
-		rightValue, err := util.ConvertToInt64(right)
+		rightValue, err := data.CoerceToInt64(right)
 		if err != nil {
 			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
@@ -475,7 +474,7 @@ func gt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 			return le > rightValue, nil
 		}
 	case float64:
-		rightValue, err := util.ConvertToFloat(right)
+		rightValue, err := data.CoerceToNumber(right)
 		if err != nil {
 			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
@@ -505,7 +504,7 @@ func lt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 
 	switch le := left.(type) {
 	case int:
-		rightValue, err := util.ConvertToInt(right)
+		rightValue, err := data.CoerceToInteger(right)
 		if err != nil {
 			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
@@ -516,7 +515,7 @@ func lt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 			return le < rightValue, nil
 		}
 	case int64:
-		rightValue, err := util.ConvertToInt64(right)
+		rightValue, err := data.CoerceToInt64(right)
 		if err != nil {
 			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
@@ -527,7 +526,7 @@ func lt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 			return le < rightValue, nil
 		}
 	case float64:
-		rightValue, err := util.ConvertToFloat(right)
+		rightValue, err := data.CoerceToNumber(right)
 		if err != nil {
 			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
@@ -550,7 +549,7 @@ func add(left interface{}, right interface{}) (bool, error) {
 
 	switch le := left.(type) {
 	case bool:
-		rightValue, err := util.ConvertToBool(right)
+		rightValue, err := data.CoerceToBoolean(right)
 		if err != nil {
 			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
@@ -567,7 +566,7 @@ func or(left interface{}, right interface{}) (bool, error) {
 	log.Infof("Add operator, Left expression value %+v, right expression value %+v", left, right)
 	switch le := left.(type) {
 	case bool:
-		rightValue, err := util.ConvertToBool(right)
+		rightValue, err := data.CoerceToBoolean(right)
 		if err != nil {
 			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
@@ -592,7 +591,7 @@ func additon(left interface{}, right interface{}) (interface{}, error) {
 
 	switch le := left.(type) {
 	case int:
-		rightValue, err := util.ConvertToInt(right)
+		rightValue, err := data.CoerceToInteger(right)
 		if err != nil {
 			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
@@ -600,14 +599,14 @@ func additon(left interface{}, right interface{}) (interface{}, error) {
 		return le + rightValue, nil
 
 	case int64:
-		rightValue, err := util.ConvertToInt64(right)
+		rightValue, err := data.CoerceToInt64(right)
 		if err != nil {
 			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
 
 		return le + rightValue, nil
 	case float64:
-		rightValue, err := util.ConvertToFloat(right)
+		rightValue, err := data.CoerceToNumber(right)
 		if err != nil {
 			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
@@ -632,21 +631,21 @@ func sub(left interface{}, right interface{}) (interface{}, error) {
 
 	switch le := left.(type) {
 	case int:
-		rightValue, err := util.ConvertToInt(right)
+		rightValue, err := data.CoerceToInteger(right)
 		if err != nil {
 			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
 
 		return le - rightValue, nil
 	case int64:
-		rightValue, err := util.ConvertToInt64(right)
+		rightValue, err := data.CoerceToInt64(right)
 		if err != nil {
 			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
 
 		return le - rightValue, nil
 	case float64:
-		rightValue, err := util.ConvertToFloat(right)
+		rightValue, err := data.CoerceToNumber(right)
 		if err != nil {
 			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
@@ -672,21 +671,21 @@ func multiplication(left interface{}, right interface{}) (interface{}, error) {
 
 	switch le := left.(type) {
 	case int:
-		rightValue, err := util.ConvertToInt(right)
+		rightValue, err := data.CoerceToInteger(right)
 		if err != nil {
 			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
 
 		return le * rightValue, nil
 	case int64:
-		rightValue, err := util.ConvertToInt64(right)
+		rightValue, err := data.CoerceToInt64(right)
 		if err != nil {
 			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
 
 		return le * rightValue, nil
 	case float64:
-		rightValue, err := util.ConvertToFloat(right)
+		rightValue, err := data.CoerceToNumber(right)
 		if err != nil {
 			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
@@ -712,19 +711,19 @@ func div(left interface{}, right interface{}) (interface{}, error) {
 
 	switch le := left.(type) {
 	case int:
-		rightValue, err := util.ConvertToInt(right)
+		rightValue, err := data.CoerceToInteger(right)
 		if err != nil {
 			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
 		return le + rightValue, nil
 	case int64:
-		rightValue, err := util.ConvertToInt64(right)
+		rightValue, err := data.CoerceToInt64(right)
 		if err != nil {
 			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
 		return le + rightValue, nil
 	case float64:
-		rightValue, err := util.ConvertToFloat(right)
+		rightValue, err := data.CoerceToNumber(right)
 		if err != nil {
 			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}

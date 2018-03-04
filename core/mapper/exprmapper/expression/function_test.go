@@ -6,8 +6,9 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
+
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/function"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -300,7 +301,7 @@ func (s *String) Eval(in interface{}) string {
 		//v := int64(in)
 		return strconv.FormatInt(in.(int64), 10)
 	default:
-		str, err := util.ConvertToString(in)
+		str, err := data.CoerceToString(in)
 		if err != nil {
 			log.Errorf("Convert to string error %s", err.Error())
 		}
