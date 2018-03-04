@@ -2,8 +2,16 @@ package mapper
 
 import (
 	"fmt"
+
+	"encoding/json"
+	"strings"
+
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
+
+var mapplerLog = logger.GetLogger("basic-mapper")
 
 type Factory interface {
 	// NewMapper creates a new data.Mapper from the specified data.MapperDef
@@ -72,6 +80,10 @@ func (m *BasicMapper) Mappings() []*data.MappingDef {
 // return error
 func (m *BasicMapper) Apply(inputScope data.Scope, outputScope data.Scope) error {
 
+	if err := m.UpdateMapping(); err != nil {
+		return fmt.Errorf("Update mapping ref error %s", err.Error())
+	}
+
 	//todo validate types
 	for _, mapping := range m.mappings {
 
@@ -119,9 +131,63 @@ func (m *BasicMapper) Apply(inputScope data.Scope, outputScope data.Scope) error
 				return err
 			}
 		case data.MtExpression:
-			//todo implement script mapping
+			err := exprmapper.Map(mapping, inputScope, outputScope, m.resolver)
+			if err != nil {
+				return fmt.Errorf("Expression mapping failed, due to %s", err.Error())
+			}
+		case data.MtArray:
+			//ArrayMapping
+			mapplerLog.Debugf("Array mapping value %s", mapping.Value)
+			//Array mapping value must be string
+			arrayMapping, err := exprmapper.ParseArrayMapping(mapping.Value)
+			if err != nil {
+				return fmt.Errorf("Array mapping structure error -  %s", err.Error())
+			}
+
+			if err := arrayMapping.Validate(); err != nil {
+				return err
+			}
+			if err = arrayMapping.DoArrayMapping(inputScope, outputScope, m.resolver); err != nil {
+				return fmt.Errorf("Do array mapping error - %s", err.Error())
+			}
+
 		}
+
 	}
 
+	return nil
+}
+
+func (m *BasicMapper) UpdateMapping() error {
+	var newMappingDefs []*data.MappingDef
+	for _, mapping := range m.mappings {
+		var mappingDef *data.MappingDef
+		//Remove all $INPUT for mapTo include array mapping
+		if mapping.MapTo != "" && strings.HasPrefix(mapping.MapTo, exprmapper.MAP_TO_INPUT) {
+			mappingDef = &data.MappingDef{Type: mapping.Type, Value: mapping.Value, MapTo: exprmapper.RemovePrefixInput(mapping.MapTo)}
+		} else {
+			mappingDef = mapping
+		}
+
+		switch mappingDef.Type {
+		//Array mapping
+		case data.MtArray:
+			//Update Array Mapping
+			arrayMapping, err := exprmapper.ParseArrayMapping(mapping.Value)
+			if err != nil {
+				return fmt.Errorf("Array mapping structure error -  %s", err.Error())
+			}
+
+			arrayMapping.RemovePrefixForMapTo()
+			v, err := json.Marshal(arrayMapping)
+			if err != nil {
+				return err
+			}
+			mappingDef.Value = string(v)
+		}
+		mapplerLog.Debugf("Updated mapping def %+v", mappingDef)
+		newMappingDefs = append(newMappingDefs, mappingDef)
+	}
+	m.mappings = newMappingDefs
 	return nil
 }

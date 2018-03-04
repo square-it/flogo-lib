@@ -2,9 +2,11 @@ package json
 
 import (
 	"encoding/json"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"fmt"
 	"strings"
 	"sync"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json/field"
 )
 
 type JSONData struct {
@@ -12,30 +14,99 @@ type JSONData struct {
 	rw        sync.RWMutex
 }
 
-func SetFieldValueFromString(data interface{}, jsonData string, path string) (interface{}, error) {
+func SetFieldValueFromStringP(data interface{}, jsonData string, path string) (interface{}, error) {
 	jsonParsed, err := ParseJSON([]byte(jsonData))
 	if err != nil {
 		return nil, err
 
 	}
-	return setValue(data, &JSONData{container: jsonParsed, rw: sync.RWMutex{}}, path)
+	return setValueP(data, &JSONData{container: jsonParsed, rw: sync.RWMutex{}}, path)
 }
 
-func SetFieldValue(data interface{}, jsonData interface{}, path string) (interface{}, error) {
+func SetFieldValueFromString(data interface{}, jsonData string, mappingField *field.MappingField) (interface{}, error) {
+	jsonParsed, err := ParseJSON([]byte(jsonData))
+	if err != nil {
+		return nil, err
+
+	}
+	return setValue(data, &JSONData{container: jsonParsed, rw: sync.RWMutex{}}, mappingField)
+}
+
+func SetFieldValueP(data interface{}, jsonData interface{}, path string) (interface{}, error) {
 	switch t := jsonData.(type) {
 	case string:
-		return SetFieldValueFromString(data, t, path)
+		return SetFieldValueFromStringP(data, t, path)
 	default:
 		jsonParsed, err := Consume(jsonData)
 		if err != nil {
 			return nil, err
 
 		}
-		return setValue(data, &JSONData{container: jsonParsed, rw: sync.RWMutex{}}, path)
+		return setValueP(data, &JSONData{container: jsonParsed, rw: sync.RWMutex{}}, path)
 	}
 }
 
-func setValue(value interface{}, jsonData *JSONData, path string) (interface{}, error) {
+func SetFieldValue(data interface{}, jsonData interface{}, mappingField *field.MappingField) (interface{}, error) {
+	switch t := jsonData.(type) {
+	case string:
+		return SetFieldValueFromString(data, t, mappingField)
+	default:
+		jsonParsed, err := Consume(jsonData)
+		if err != nil {
+			return nil, err
+
+		}
+		return setValue(data, &JSONData{container: jsonParsed, rw: sync.RWMutex{}}, mappingField)
+	}
+}
+
+func setValueP(value interface{}, jsonData *JSONData, path string) (interface{}, error) {
+	if field.HasArray(path) && field.HasSpecialFields(path) {
+		fields, err := field.GetAllspecialFields(path)
+		if err != nil {
+			return nil, fmt.Errorf("Get All special fields error, due to [%s]", err.Error())
+		}
+		return handleArrayWithSpecialFields(value, jsonData, fields)
+	} else if field.HasArray(path) {
+		return setArrayValue(value, jsonData, path)
+	} else if field.HasSpecialFields(path) {
+		fields, err := field.GetAllspecialFields(path)
+		if err != nil {
+			return nil, err
+		}
+		_, err = jsonData.container.Set(value, fields...)
+		if err != nil {
+			return nil, err
+		}
+		return jsonData.container.object, nil
+	}
+	_, err := jsonData.container.Set(value, strings.Split(path, ".")...)
+	if err != nil {
+		return nil, err
+	}
+	return jsonData.container.object, nil
+}
+
+func setValue(value interface{}, jsonData *JSONData, mappingField *field.MappingField) (interface{}, error) {
+	if mappingField.HasArray && mappingField.HasSpecialField {
+		return handleArrayWithSpecialFields(value, jsonData, mappingField.Fields)
+	} else if mappingField.HasArray {
+		return setArrayValue(value, jsonData, strings.Join(mappingField.Fields, "."))
+	} else if mappingField.HasSpecialField {
+		_, err := jsonData.container.Set(value, mappingField.Fields...)
+		if err != nil {
+			return nil, err
+		}
+		return jsonData.container.object, nil
+	}
+	_, err := jsonData.container.Set(value, mappingField.Fields...)
+	if err != nil {
+		return nil, err
+	}
+	return jsonData.container.object, nil
+}
+
+func setArrayValue(value interface{}, jsonData *JSONData, path string) (interface{}, error) {
 
 	jsonData.rw.Lock()
 
@@ -46,7 +117,7 @@ func setValue(value interface{}, jsonData *JSONData, path string) (interface{}, 
 		//Array
 		arrayFieldName := getFieldName(path)
 		index, _ := getFieldSliceIndex(path)
-		logger.Debug("Field Name:", arrayFieldName, " and index: ", index)
+		log.Debug("Field Name:", arrayFieldName, " and index: ", index)
 		restPath := getRestArrayFieldName(path)
 		if restPath == "" {
 			if strings.Index(path, "]") == len(path)-1 {
@@ -120,7 +191,7 @@ func setValue(value interface{}, jsonData *JSONData, path string) (interface{}, 
 
 					newObject, err := ParseJSON([]byte("{}"))
 					_, err = newObject.SetP(value, restPath)
-					logger.Debugf("new object %s", newObject.String())
+					log.Debugf("new object %s", newObject.String())
 					if err != nil {
 						return nil, err
 					}
@@ -142,7 +213,7 @@ func setValue(value interface{}, jsonData *JSONData, path string) (interface{}, 
 						if err != nil {
 							return nil, err
 						}
-						return setValue(value, &JSONData{container: c, rw: sync.RWMutex{}}, restPath)
+						return setArrayValue(value, &JSONData{container: c, rw: sync.RWMutex{}}, restPath)
 					} else {
 						//_, err := jsonField.Set(value, restPath)
 						//if err != nil {
@@ -157,7 +228,7 @@ func setValue(value interface{}, jsonData *JSONData, path string) (interface{}, 
 						return nil, err
 					}
 					if strings.Index(restPath, "[") > 0 {
-						return setValue(value, &JSONData{container: jsonField, rw: sync.RWMutex{}}, restPath)
+						return setArrayValue(value, &JSONData{container: jsonField, rw: sync.RWMutex{}}, restPath)
 					} else {
 						switch t := jsonField.object.(type) {
 						case map[string]interface{}:
@@ -181,11 +252,11 @@ func setValue(value interface{}, jsonData *JSONData, path string) (interface{}, 
 				}
 
 				if strings.Index(restPath, "[") > 0 {
-					return setValue(value, &JSONData{container: array, rw: sync.RWMutex{}}, restPath)
+					return setArrayValue(value, &JSONData{container: array, rw: sync.RWMutex{}}, restPath)
 				} else {
 					newObject, err := ParseJSON([]byte("{}"))
 					_, err = newObject.SetP(value, restPath)
-					logger.Debugf("new object %s", newObject.String())
+					log.Debugf("new object %s", newObject.String())
 					if err != nil {
 						return nil, err
 					}
@@ -200,6 +271,7 @@ func setValue(value interface{}, jsonData *JSONData, path string) (interface{}, 
 			}
 
 		}
+		// }
 	} else {
 		_, err := container.Set(value, strings.Split(path, ".")...)
 		if err != nil {

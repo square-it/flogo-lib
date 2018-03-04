@@ -20,6 +20,8 @@ const (
 
 	// MtObject denotes a object construction mapping
 	MtObject MappingType = 4
+
+	MtArray MappingType = 5
 )
 
 // MappingDef is a simple structure that defines a mapping
@@ -76,6 +78,8 @@ func (md *MappingDef) UnmarshalJSON(b []byte) error {
 		md.Type = MtExpression
 	case "object", "4":
 		md.Type = MtObject
+	case "array", "5":
+		md.Type = MtArray
 	default:
 		return errors.New("unsupported mapping type: " + strType)
 	}
