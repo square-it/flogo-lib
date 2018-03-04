@@ -200,7 +200,7 @@ func (e *Expression) UnmarshalJSON(exprData []byte) error {
 	return nil
 }
 
-func NewWIExpression() *Expression {
+func NewExpression() *Expression {
 	return &Expression{}
 }
 
