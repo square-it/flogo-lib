@@ -50,6 +50,8 @@ func CoerceToString(val interface{}) (string, error) {
 		return t, nil
 	case int:
 		return strconv.Itoa(t), nil
+	case int64:
+		return strconv.FormatInt(t, 10), nil
 	case float64:
 		return strconv.FormatFloat(t, 'f', -1, 64), nil
 	case json.Number:
@@ -101,6 +103,31 @@ func CoerceToInteger(val interface{}) (int, error) {
 	}
 }
 
+func CoerceToInt64(val interface{}) (int64, error) {
+	switch t := val.(type) {
+	case int:
+		return int64(t), nil
+	case int64:
+		return t, nil
+	case float64:
+		return int64(t), nil
+	case json.Number:
+		i, err := t.Int64()
+		return int64(i), err
+	case string:
+		return strconv.ParseInt(t, 10, 64)
+	case bool:
+		if t {
+			return 1, nil
+		}
+		return 0, nil
+	case nil:
+		return 0, nil
+	default:
+		return 0, fmt.Errorf("Unable to coerce %#v to int64", val)
+	}
+}
+
 // CoerceToNumber coerce a value to a number
 func CoerceToNumber(val interface{}) (float64, error) {
 	switch t := val.(type) {
@@ -145,7 +172,11 @@ func CoerceToBoolean(val interface{}) (bool, error) {
 	case nil:
 		return false, nil
 	default:
-		return false, fmt.Errorf("Unable to coerce %#v to bool", val)
+		str, err := CoerceToString(val)
+		if err != nil {
+			return false, fmt.Errorf("Unable to coerce %#v to bool", val)
+		}
+		return strconv.ParseBool(str)
 	}
 }
 
