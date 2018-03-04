@@ -100,7 +100,7 @@ type Expression struct {
 	Operator OPERATIOR   `json:"operator"`
 	Right    *Expression `json:"right"`
 
-	Value interface{} `json:"value"`
+	Value interface{}       `json:"value"`
 	Type  funcexprtype.Type `json:"type"`
 	//done
 }
@@ -176,10 +176,10 @@ func (e *Expression) String() string {
 
 func (e *Expression) UnmarshalJSON(exprData []byte) error {
 	ser := &struct {
-		Left     *Expression `json:"left"`
-		Operator OPERATIOR   `json:"operator"`
-		Right    *Expression `json:"right"`
-		Value    interface{} `json:"value"`
+		Left     *Expression       `json:"left"`
+		Operator OPERATIOR         `json:"operator"`
+		Right    *Expression       `json:"right"`
+		Value    interface{}       `json:"value"`
 		Type     funcexprtype.Type `json:"type"`
 	}{}
 
@@ -201,7 +201,7 @@ func (e *Expression) UnmarshalJSON(exprData []byte) error {
 	return nil
 }
 
-func NewWIExpression() *Expression {
+func NewExpression() *Expression {
 	return &Expression{}
 }
 

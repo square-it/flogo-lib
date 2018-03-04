@@ -1,5 +1,5 @@
 /*
-    This file use to describe all function and expression that support in Web Integrator.
+    This file use to describe all function and expression that support in Flogo.
     The are BNF standard expression
 
     Author: Tracy Li
@@ -18,7 +18,6 @@ _operator_charactor : '>' | '<' | '|' | '&' | '!' | '=' | '+' | '-' | '*' | '/' 
 //operator_str : {_operator_str} ;
 operator_charactor : {_operator_charactor} ;
 
-//Web Integrator string which contain .
 _wirefbracketArray : '[' {_digit} ']';
 _wirefbracketDouble : '[' '"' {.} '"' ']';
 _wirefbracketSingle : '[' '\'' {.} '\'' ']';
@@ -38,7 +37,7 @@ _quotedpair : '\\' . ;
 //Double quotes strings
 doublequotes_string : '"' {_quotedpair | .} '"';
 singlequote_string : '\'' {_quotedpair |.} '\'' ;
-//Web Integrator Ref string, such as" $A3.Input.Query.Result
+//Flogo Ref string, such as" $A3.Input.Query.Result
 wi_argument : '$' _wistring ;
 
 
@@ -47,7 +46,7 @@ wi_argument : '$' _wistring ;
 
 /*
 
-    Describe Web Integrator function rules.
+    Describe Flogo function rules.
     Example:
         1. concat("This","is",concat("my","first"),"gocc",concat("lexer","and","parser"),concat("go","program","!!!"))
            Result:Thisismyfirstgocclexerandparsergoprogram!!!

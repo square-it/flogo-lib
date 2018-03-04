@@ -191,7 +191,7 @@ func NewExpressionField(a Attribute) (interface{}, error) {
 func NewExpression(left Attribute, op Attribute, right Attribute) (interface{}, error) {
 	log.Debugf("New Expression and operator [%s]", string(op.(*token.Token).Lit))
 
-	expression := expr.NewWIExpression()
+	expression := expr.NewExpression()
 	operator, found := expr.ToOperator(strings.TrimSpace(string(op.(*token.Token).Lit)))
 	if found {
 		expression.Operator = operator
@@ -206,7 +206,7 @@ func NewExpression(left Attribute, op Attribute, right Attribute) (interface{}, 
 }
 
 func getExpression(ex Attribute) *expr.Expression {
-	expression := expr.NewWIExpression()
+	expression := expr.NewExpression()
 	switch ex.(type) {
 	case int64:
 		expression.Type = funcexprtype.INTEGER
