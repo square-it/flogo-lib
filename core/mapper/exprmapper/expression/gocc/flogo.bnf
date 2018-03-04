@@ -18,13 +18,12 @@ _operator_charactor : '>' | '<' | '|' | '&' | '!' | '=' | '+' | '-' | '*' | '/' 
 //operator_str : {_operator_str} ;
 operator_charactor : {_operator_charactor} ;
 
-_wirefbracketArray : '[' {_digit} ']';
-_wirefbracketDouble : '[' '"' {.} '"' ']';
-_wirefbracketSingle : '[' '\'' {.} '\'' ']';
-_wirefbracketNone : '[' {_character_digit} ']';
-_wirefbracket : '[' {.} ']';
-_wiref : 'a'-'z' | 'A'-'Z' | '.' | '0'-'9' | '-' | '[' | ']' | '_' | ' ' | '$' | '{' | '}' | _wirefbracket;
-_wistring : {_wiref};
+_refbracketArray : '[' {_digit} ']';
+_refbracketDouble : '[' '"' {.} '"' ']';
+_refbracketSingle : '[' '\'' {.} '\'' ']';
+_refbracket : '[' {.} ']';
+_ref : 'a'-'z' | 'A'-'Z' | '.' | '0'-'9' | '-' | '[' | ']' | '_' | ' ' | '$' | '{' | '}' | _refbracket;
+_flogostring : {_ref};
 
 //Static function name, such as concat, substring, len etc...
 function_name : {_character_digit} ;
@@ -39,7 +38,7 @@ _quotedpair : '\\' . ;
 doublequotes_string : '"' {_quotedpair | .} '"';
 singlequote_string : '\'' {_quotedpair |.} '\'' ;
 //Flogo Ref string, such as" $A3.Input.Query.Result
-wi_argument : '$' _wistring ;
+argument : '$' _flogostring ;
 
 
 << import "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/direction" >>
@@ -84,7 +83,7 @@ Int
     : int64           <<direction.NewIntLit($0)>>
     ;
 MappingRef
-    : wi_argument     <<direction.NewMappingRef($0)>>
+    : argument     <<direction.NewMappingRef($0)>>
     ;
 Bool
     : "true"           <<direction.NewBool($0)>>

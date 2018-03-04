@@ -44,12 +44,8 @@ func TestExpressionString(t *testing.T) {
 		t.Fatal(err)
 		t.Failed()
 	}
-	result, err := v.EvalWithScope(nil, nil)
-	if err != nil {
-		t.Fatal(err)
-		t.Failed()
-	}
-	fmt.Println("Result:", result)
+	_, err = v.EvalWithScope(nil, nil)
+	assert.NotNil(t, err)
 }
 
 func TestExpressionWithOldWay(t *testing.T) {
@@ -58,12 +54,8 @@ func TestExpressionWithOldWay(t *testing.T) {
 		t.Fatal(err)
 		t.Failed()
 	}
-	result, err := v.EvalWithScope(nil, nil)
-	if err != nil {
-		t.Fatal(err)
-		t.Failed()
-	}
-	fmt.Println("Result:", result)
+	_, err = v.EvalWithScope(nil, nil)
+	assert.NotNil(t, err)
 
 }
 

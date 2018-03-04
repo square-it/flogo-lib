@@ -24,7 +24,7 @@ var actionTab = actionTable{
 			shift(10), /* doublequotes_string */
 			shift(11), /* singlequote_string */
 			shift(12), /* int64 */
-			shift(13), /* wi_argument */
+			shift(13), /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -45,7 +45,7 @@ var actionTab = actionTable{
 			nil,          /* doublequotes_string */
 			nil,          /* singlequote_string */
 			nil,          /* int64 */
-			nil,          /* wi_argument */
+			nil,          /* argument */
 			nil,          /* true */
 			nil,          /* flase */
 			nil,          /* operator_charactor */
@@ -66,7 +66,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(22), /* operator_charactor, reduce: Expr */
@@ -87,7 +87,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			shift(16),  /* operator_charactor */
@@ -108,7 +108,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -129,7 +129,7 @@ var actionTab = actionTable{
 			shift(27), /* doublequotes_string */
 			shift(28), /* singlequote_string */
 			shift(29), /* int64 */
-			shift(30), /* wi_argument */
+			shift(30), /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -150,7 +150,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(19), /* operator_charactor, reduce: Expr */
@@ -171,7 +171,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(20), /* operator_charactor, reduce: Expr */
@@ -192,7 +192,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(18), /* operator_charactor, reduce: Expr */
@@ -213,7 +213,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(21), /* operator_charactor, reduce: Expr */
@@ -234,7 +234,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(12), /* operator_charactor, reduce: DoubleQString */
@@ -255,7 +255,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(13), /* operator_charactor, reduce: SingleQString */
@@ -276,7 +276,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(14), /* operator_charactor, reduce: Int */
@@ -297,7 +297,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(15), /* operator_charactor, reduce: MappingRef */
@@ -318,7 +318,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(24), /* operator_charactor, reduce: Expr */
@@ -339,7 +339,7 @@ var actionTab = actionTable{
 			shift(10), /* doublequotes_string */
 			shift(11), /* singlequote_string */
 			shift(12), /* int64 */
-			shift(13), /* wi_argument */
+			shift(13), /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -360,7 +360,7 @@ var actionTab = actionTable{
 			reduce(26), /* doublequotes_string, reduce: Operator */
 			reduce(26), /* singlequote_string, reduce: Operator */
 			reduce(26), /* int64, reduce: Operator */
-			reduce(26), /* wi_argument, reduce: Operator */
+			reduce(26), /* argument, reduce: Operator */
 			nil,        /* true */
 			nil,        /* flase */
 			nil,        /* operator_charactor */
@@ -381,7 +381,7 @@ var actionTab = actionTable{
 			shift(43), /* doublequotes_string */
 			shift(44), /* singlequote_string */
 			shift(45), /* int64 */
-			shift(46), /* wi_argument */
+			shift(46), /* argument */
 			shift(47), /* true */
 			shift(48), /* flase */
 			nil,       /* operator_charactor */
@@ -402,7 +402,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			reduce(4), /* operator_charactor, reduce: Func1 */
@@ -423,7 +423,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(22), /* operator_charactor, reduce: Expr */
@@ -444,7 +444,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			shift(16),  /* operator_charactor */
@@ -465,7 +465,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -486,7 +486,7 @@ var actionTab = actionTable{
 			shift(27), /* doublequotes_string */
 			shift(28), /* singlequote_string */
 			shift(29), /* int64 */
-			shift(30), /* wi_argument */
+			shift(30), /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -507,7 +507,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(19), /* operator_charactor, reduce: Expr */
@@ -528,7 +528,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(20), /* operator_charactor, reduce: Expr */
@@ -549,7 +549,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(18), /* operator_charactor, reduce: Expr */
@@ -570,7 +570,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(21), /* operator_charactor, reduce: Expr */
@@ -591,7 +591,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(12), /* operator_charactor, reduce: DoubleQString */
@@ -612,7 +612,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(13), /* operator_charactor, reduce: SingleQString */
@@ -633,7 +633,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(14), /* operator_charactor, reduce: Int */
@@ -654,7 +654,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(15), /* operator_charactor, reduce: MappingRef */
@@ -675,7 +675,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(24), /* operator_charactor, reduce: Expr */
@@ -696,7 +696,7 @@ var actionTab = actionTable{
 			shift(64), /* doublequotes_string */
 			shift(65), /* singlequote_string */
 			shift(66), /* int64 */
-			shift(67), /* wi_argument */
+			shift(67), /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -717,7 +717,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(22), /* operator_charactor, reduce: Expr */
@@ -738,7 +738,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			shift(16),  /* operator_charactor */
@@ -759,7 +759,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			nil,        /* operator_charactor */
@@ -780,7 +780,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -801,7 +801,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -822,7 +822,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -843,7 +843,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -864,7 +864,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -885,7 +885,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -906,7 +906,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -927,7 +927,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			nil,        /* operator_charactor */
@@ -948,7 +948,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			nil,        /* operator_charactor */
@@ -969,7 +969,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			nil,        /* operator_charactor */
@@ -990,7 +990,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			nil,        /* operator_charactor */
@@ -1011,7 +1011,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			nil,        /* operator_charactor */
@@ -1032,7 +1032,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			nil,        /* operator_charactor */
@@ -1053,7 +1053,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(25), /* operator_charactor, reduce: Expr */
@@ -1074,7 +1074,7 @@ var actionTab = actionTable{
 			shift(27), /* doublequotes_string */
 			shift(28), /* singlequote_string */
 			shift(29), /* int64 */
-			shift(30), /* wi_argument */
+			shift(30), /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -1095,7 +1095,7 @@ var actionTab = actionTable{
 			shift(43), /* doublequotes_string */
 			shift(44), /* singlequote_string */
 			shift(45), /* int64 */
-			shift(46), /* wi_argument */
+			shift(46), /* argument */
 			shift(47), /* true */
 			shift(48), /* flase */
 			nil,       /* operator_charactor */
@@ -1116,7 +1116,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			reduce(4), /* operator_charactor, reduce: Func1 */
@@ -1137,7 +1137,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			shift(16),  /* operator_charactor */
@@ -1158,7 +1158,7 @@ var actionTab = actionTable{
 			shift(64), /* doublequotes_string */
 			shift(65), /* singlequote_string */
 			shift(66), /* int64 */
-			shift(67), /* wi_argument */
+			shift(67), /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -1179,7 +1179,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			nil,        /* operator_charactor */
@@ -1200,7 +1200,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(22), /* operator_charactor, reduce: Expr */
@@ -1221,7 +1221,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			shift(16),  /* operator_charactor */
@@ -1242,7 +1242,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -1263,7 +1263,7 @@ var actionTab = actionTable{
 			shift(27), /* doublequotes_string */
 			shift(28), /* singlequote_string */
 			shift(29), /* int64 */
-			shift(30), /* wi_argument */
+			shift(30), /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -1284,7 +1284,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(19), /* operator_charactor, reduce: Expr */
@@ -1305,7 +1305,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(20), /* operator_charactor, reduce: Expr */
@@ -1326,7 +1326,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(18), /* operator_charactor, reduce: Expr */
@@ -1347,7 +1347,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(21), /* operator_charactor, reduce: Expr */
@@ -1368,7 +1368,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(12), /* operator_charactor, reduce: DoubleQString */
@@ -1389,7 +1389,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(13), /* operator_charactor, reduce: SingleQString */
@@ -1410,7 +1410,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(14), /* operator_charactor, reduce: Int */
@@ -1431,7 +1431,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(15), /* operator_charactor, reduce: MappingRef */
@@ -1452,7 +1452,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(24), /* operator_charactor, reduce: Expr */
@@ -1473,7 +1473,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -1494,7 +1494,7 @@ var actionTab = actionTable{
 			shift(43), /* doublequotes_string */
 			shift(44), /* singlequote_string */
 			shift(45), /* int64 */
-			shift(46), /* wi_argument */
+			shift(46), /* argument */
 			shift(47), /* true */
 			shift(48), /* flase */
 			nil,       /* operator_charactor */
@@ -1515,7 +1515,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -1536,7 +1536,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			reduce(3), /* operator_charactor, reduce: Func1 */
@@ -1557,7 +1557,7 @@ var actionTab = actionTable{
 			shift(43), /* doublequotes_string */
 			shift(44), /* singlequote_string */
 			shift(45), /* int64 */
-			shift(46), /* wi_argument */
+			shift(46), /* argument */
 			shift(47), /* true */
 			shift(48), /* flase */
 			nil,       /* operator_charactor */
@@ -1578,7 +1578,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			shift(16),  /* operator_charactor */
@@ -1599,7 +1599,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -1620,7 +1620,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(25), /* operator_charactor, reduce: Expr */
@@ -1641,7 +1641,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -1662,7 +1662,7 @@ var actionTab = actionTable{
 			shift(64), /* doublequotes_string */
 			shift(65), /* singlequote_string */
 			shift(66), /* int64 */
-			shift(67), /* wi_argument */
+			shift(67), /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -1683,7 +1683,7 @@ var actionTab = actionTable{
 			shift(43), /* doublequotes_string */
 			shift(44), /* singlequote_string */
 			shift(45), /* int64 */
-			shift(46), /* wi_argument */
+			shift(46), /* argument */
 			shift(47), /* true */
 			shift(48), /* flase */
 			nil,       /* operator_charactor */
@@ -1704,7 +1704,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			reduce(4), /* operator_charactor, reduce: Func1 */
@@ -1725,7 +1725,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			shift(16),  /* operator_charactor */
@@ -1746,7 +1746,7 @@ var actionTab = actionTable{
 			shift(64), /* doublequotes_string */
 			shift(65), /* singlequote_string */
 			shift(66), /* int64 */
-			shift(67), /* wi_argument */
+			shift(67), /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -1767,7 +1767,7 @@ var actionTab = actionTable{
 			shift(10), /* doublequotes_string */
 			shift(11), /* singlequote_string */
 			shift(12), /* int64 */
-			shift(13), /* wi_argument */
+			shift(13), /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -1788,7 +1788,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			nil,        /* operator_charactor */
@@ -1809,7 +1809,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			nil,        /* operator_charactor */
@@ -1830,7 +1830,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			reduce(3), /* operator_charactor, reduce: Func1 */
@@ -1851,7 +1851,7 @@ var actionTab = actionTable{
 			shift(27), /* doublequotes_string */
 			shift(28), /* singlequote_string */
 			shift(29), /* int64 */
-			shift(30), /* wi_argument */
+			shift(30), /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -1872,7 +1872,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(22), /* operator_charactor, reduce: Expr */
@@ -1893,7 +1893,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			shift(16),  /* operator_charactor */
@@ -1914,7 +1914,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(19), /* operator_charactor, reduce: Expr */
@@ -1935,7 +1935,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(20), /* operator_charactor, reduce: Expr */
@@ -1956,7 +1956,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(18), /* operator_charactor, reduce: Expr */
@@ -1977,7 +1977,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(21), /* operator_charactor, reduce: Expr */
@@ -1998,7 +1998,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			nil,        /* operator_charactor */
@@ -2019,7 +2019,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(25), /* operator_charactor, reduce: Expr */
@@ -2040,7 +2040,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			nil,        /* operator_charactor */
@@ -2061,7 +2061,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(33), /* operator_charactor, reduce: TernaryParam */
@@ -2082,7 +2082,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			reduce(1), /* operator_charactor, reduce: Func */
@@ -2103,7 +2103,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			shift(16), /* operator_charactor */
@@ -2124,7 +2124,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(19), /* operator_charactor, reduce: Expr */
@@ -2145,7 +2145,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(20), /* operator_charactor, reduce: Expr */
@@ -2166,7 +2166,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(18), /* operator_charactor, reduce: Expr */
@@ -2187,7 +2187,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(21), /* operator_charactor, reduce: Expr */
@@ -2208,7 +2208,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(28), /* operator_charactor, reduce: TernaryExp */
@@ -2229,7 +2229,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -2250,7 +2250,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(33), /* operator_charactor, reduce: TernaryParam */
@@ -2271,7 +2271,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			reduce(1), /* operator_charactor, reduce: Func */
@@ -2292,7 +2292,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			shift(16), /* operator_charactor */
@@ -2313,7 +2313,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(19), /* operator_charactor, reduce: Expr */
@@ -2334,7 +2334,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(20), /* operator_charactor, reduce: Expr */
@@ -2355,7 +2355,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(18), /* operator_charactor, reduce: Expr */
@@ -2376,7 +2376,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(21), /* operator_charactor, reduce: Expr */
@@ -2397,7 +2397,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(28), /* operator_charactor, reduce: TernaryExp */
@@ -2418,7 +2418,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			reduce(3), /* operator_charactor, reduce: Func1 */
@@ -2439,7 +2439,7 @@ var actionTab = actionTable{
 			shift(64), /* doublequotes_string */
 			shift(65), /* singlequote_string */
 			shift(66), /* int64 */
-			shift(67), /* wi_argument */
+			shift(67), /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			nil,       /* operator_charactor */
@@ -2460,7 +2460,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(33), /* operator_charactor, reduce: TernaryParam */
@@ -2481,7 +2481,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			reduce(1), /* operator_charactor, reduce: Func */
@@ -2502,7 +2502,7 @@ var actionTab = actionTable{
 			nil,       /* doublequotes_string */
 			nil,       /* singlequote_string */
 			nil,       /* int64 */
-			nil,       /* wi_argument */
+			nil,       /* argument */
 			nil,       /* true */
 			nil,       /* flase */
 			shift(16), /* operator_charactor */
@@ -2523,7 +2523,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(19), /* operator_charactor, reduce: Expr */
@@ -2544,7 +2544,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(20), /* operator_charactor, reduce: Expr */
@@ -2565,7 +2565,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(18), /* operator_charactor, reduce: Expr */
@@ -2586,7 +2586,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(21), /* operator_charactor, reduce: Expr */
@@ -2607,7 +2607,7 @@ var actionTab = actionTable{
 			nil,        /* doublequotes_string */
 			nil,        /* singlequote_string */
 			nil,        /* int64 */
-			nil,        /* wi_argument */
+			nil,        /* argument */
 			nil,        /* true */
 			nil,        /* flase */
 			reduce(28), /* operator_charactor, reduce: TernaryExp */

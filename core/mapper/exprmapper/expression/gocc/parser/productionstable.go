@@ -171,7 +171,7 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `MappingRef : wi_argument	<< direction.NewMappingRef(X[0]) >>`,
+		String: `MappingRef : argument	<< direction.NewMappingRef(X[0]) >>`,
 		Id:         "MappingRef",
 		NTType:     7,
 		Index:      15,
