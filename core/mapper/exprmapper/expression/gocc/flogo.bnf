@@ -10,12 +10,12 @@
 _digit : '0'-'9' ;
 
 _number : _digit {_digit} ;
-_exponent  : ( 'e' | 'E' ) [ '+' | '-' ] _number ;
+_float_exp  : ( 'e' | 'E' ) [ '+' | '-' ] _number ;
 
-_float_lit : ( _number '.' _number _exponent )
-	| ( _number '.' ( _number | _exponent ) )
-	| ( '.' ( _number | _exponent ) )
-	| ( _number _exponent )
+_float_lit : ( _number '.' _number _float_exp )
+	| ( _number '.' ( _number | _float_exp ) )
+	| ( '.' ( _number | _float_exp ) )
+	| ( _number _float_exp )
 	;
 
 float : (_float_lit);
@@ -28,9 +28,6 @@ _operator_charactor : '>' | '<' | '|' | '&' | '!' | '=' | '+' | '-' | '*' | '/' 
 //operator_str : {_operator_str} ;
 operator_charactor : {_operator_charactor} ;
 
-_refbracketArray : '[' {_digit} ']';
-_refbracketDouble : '[' '"' {.} '"' ']';
-_refbracketSingle : '[' '\'' {.} '\'' ']';
 _refbracket : '[' {.} ']';
 _ref : 'a'-'z' | 'A'-'Z' | '.' | '0'-'9' | '-' | '[' | ']' | '_' | ' ' | '$' | '{' | '}' | _refbracket;
 _flogostring : {_ref};
