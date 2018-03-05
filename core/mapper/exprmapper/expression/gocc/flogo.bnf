@@ -9,7 +9,17 @@
 
 _digit : '0'-'9' ;
 
-int64 : _digit {_digit} ;
+_number : _digit {_digit} ;
+_exponent  : ( 'e' | 'E' ) [ '+' | '-' ] _number ;
+
+_float_lit : ( _number '.' _number _exponent )
+	| ( _number '.' ( _number | _exponent ) )
+	| ( '.' ( _number | _exponent ) )
+	| ( _number _exponent )
+	;
+
+float : (_float_lit);
+number : (_number);
 _character_digit:  'a'-'z' | 'A'-'Z' | '0'-'9' | ':' | '.' | '_' | '-';
 
 /*Expression Operator*/
@@ -50,7 +60,7 @@ argument : '$' _flogostring ;
     Example:
         1. concat("This","is",concat("my","first"),"gocc",concat("lexer","and","parser"),concat("go","program","!!!"))
            Result:Thisismyfirstgocclexerandparsergoprogram!!!
-        2. concat("Beijing",String(int64(Len("lixingwang"))))
+        2. concat("Beijing",String(number(Len("lixingwang"))))
            Result: Beijing10
  */
 Func :
@@ -67,7 +77,8 @@ Args
 	: DoubleQString          <<direction.NewArgument($0)>>
     | SingleQString          <<direction.NewArgument($0)>>
 	| Int             <<direction.NewArgument($0)>>
-    | Bool            <<direction.NewArgument($0)>> 
+    | Float           <<direction.NewArgument($0)>>
+    | Bool            <<direction.NewArgument($0)>>
 	| MappingRef      <<direction.NewArgument($0)>>
 	| Func1           <<direction.NewArgument($0)>>
 	| Args delimitor_param Args   <<direction.NewArguments($0, $2)>>
@@ -78,17 +89,20 @@ DoubleQString
 SingleQString
     : singlequote_string      <<direction.NewSingleQuoteStringLit($0)>>
     ;
-
 Int
-    : int64           <<direction.NewIntLit($0)>>
+    : number           <<direction.NewIntLit($0)>>
     ;
 MappingRef
-    : argument     <<direction.NewMappingRef($0)>>
+    : argument      <<direction.NewMappingRef($0)>>
     ;
 Bool
     : "true"           <<direction.NewBool($0)>>
-    | "flase"          <<direction.NewBool($0)>>
+    | "false"          <<direction.NewBool($0)>>
     ;
+Float
+    : float           <<direction.NewFloatLit($0)>>
+    ;
+
 /*
     Expression which support operators so far
         eq          -> =
@@ -111,6 +125,7 @@ Bool
 
 Expr
     : Int                     <<direction.NewExpressionField($0)>>
+    | Float                   <<direction.NewExpressionField($0)>>
     | DoubleQString           <<direction.NewExpressionField($0)>>
     | SingleQString           <<direction.NewExpressionField($0)>>
     | MappingRef              <<direction.NewExpressionField($0)>>
@@ -130,6 +145,7 @@ TernaryExp
 
 TernaryParam
     :Int                     <<direction.NewExpressionField($0)>>
+    | Float                  <<direction.NewExpressionField($0)>>
     | DoubleQString          <<direction.NewExpressionField($0)>>
     | SingleQString          <<direction.NewExpressionField($0)>>
     | MappingRef             <<direction.NewExpressionField($0)>>
