@@ -21,7 +21,7 @@ func ConvertToValue(value interface{}, dataType funcexprtype.Type) (interface{},
 	case funcexprtype.STRING:
 		coerced, err = data.CoerceToString(value)
 	case funcexprtype.INTEGER:
-		coerced, err = data.CoerceToInt64(value)
+		coerced, err = data.CoerceToInteger(value)
 	case funcexprtype.FLOAT:
 		coerced, err = data.CoerceToNumber(value)
 	case funcexprtype.FUNCTION:

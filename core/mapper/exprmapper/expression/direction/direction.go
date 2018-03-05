@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
+
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json/field"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/expr"
@@ -55,9 +57,15 @@ func NewSingleQuoteStringLit(lit interface{}) (string, error) {
 	return str, nil
 }
 
-func NewIntLit(lit interface{}) (int64, error) {
+func NewIntLit(lit interface{}) (int, error) {
 	str := strings.TrimSpace(string(lit.(*token.Token).Lit))
-	s, err := strconv.ParseInt(str, 10, 64)
+	s, err := data.CoerceToInteger(str)
+	return s, err
+}
+
+func NewFloatLit(lit interface{}) (float64, error) {
+	str := strings.TrimSpace(string(lit.(*token.Token).Lit))
+	s, err := data.CoerceToNumber(str)
 	return s, err
 }
 
@@ -107,8 +115,11 @@ func NewArgument(a Attribute) (interface{}, error) {
 	case *token.Token:
 		param.Type = funcexprtype.STRING
 		param.Value = string(a.(*token.Token).Lit)
-	case int64:
+	case int:
 		param.Type = funcexprtype.INTEGER
+		param.Value = a
+	case float64:
+		param.Type = funcexprtype.FLOAT
 		param.Value = a
 	case string:
 		param.Type = funcexprtype.STRING
@@ -151,8 +162,11 @@ func NewArguments(as ...Attribute) (interface{}, error) {
 		case *token.Token:
 			param.Type = funcexprtype.STRING
 			param.Value = string(a.(*token.Token).Lit)
-		case int64:
+		case int:
 			param.Type = funcexprtype.INTEGER
+			param.Value = a
+		case float64:
+			param.Type = funcexprtype.FLOAT
 			param.Value = a
 		case string:
 			param.Type = funcexprtype.STRING
@@ -208,9 +222,12 @@ func NewExpression(left Attribute, op Attribute, right Attribute) (interface{}, 
 func getExpression(ex Attribute) *expr.Expression {
 	expression := expr.NewExpression()
 	switch ex.(type) {
-	case int64:
+	case int:
 		expression.Type = funcexprtype.INTEGER
-		expression.Value = ex.(int64)
+		expression.Value = ex.(int)
+	case float64:
+		expression.Type = funcexprtype.FLOAT
+		expression.Value = ex.(float64)
 	case string:
 		expression.Type = funcexprtype.STRING
 		expression.Value = ex.(string)

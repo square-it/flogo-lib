@@ -53,7 +53,7 @@ func TestFunctionLength(t *testing.T) {
 		t.Fatal(err)
 		t.Failed()
 	}
-	assert.Equal(t, int64(10), v[0].(int64))
+	assert.Equal(t, int(10), v[0].(int))
 
 	fmt.Println("Result:", v[0])
 }
@@ -224,13 +224,13 @@ func (s *Length) GetCategory() string {
 	return "string"
 }
 
-func (s *Length) Eval(str string) int64 {
+func (s *Length) Eval(str string) int {
 	log.Debugf("Return the length of a string \"%s\"", str)
 	var l int
 	//l = len([]rune(str))
 	l = len(str)
 	log.Debugf("Done calculating the length %d", l)
-	return int64(l)
+	return l
 }
 
 type PanicFunc struct {
