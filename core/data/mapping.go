@@ -66,23 +66,27 @@ func (md *MappingDef) UnmarshalJSON(b []byte) error {
 
 	md.MapTo = ser.MapTo
 	md.Value = ser.Value
+	intType, err := ConvertMappingType(ser.Type)
+	if err == nil {
+		md.Type = intType
+	}
+	return err
+}
 
-	strType, _ := CoerceToString(ser.Type)
-
+func ConvertMappingType(mapType interface{}) (MappingType, error) {
+	strType, _ := CoerceToString(mapType)
 	switch strType {
 	case "assign", "1":
-		md.Type = MtAssign
+		return MtAssign, nil
 	case "literal", "2":
-		md.Type = MtLiteral
+		return MtLiteral, nil
 	case "expression", "3":
-		md.Type = MtExpression
+		return MtExpression, nil
 	case "object", "4":
-		md.Type = MtObject
+		return MtObject, nil
 	case "array", "5":
-		md.Type = MtArray
+		return MtArray, nil
 	default:
-		return errors.New("unsupported mapping type: " + strType)
+		return 0, errors.New("unsupported mapping type: " + strType)
 	}
-
-	return nil
 }
