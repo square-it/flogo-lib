@@ -1,13 +1,15 @@
 package expression
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/function"
-	"testing"
-	"github.com/stretchr/testify/assert"
 	"bytes"
 	"fmt"
 	"strconv"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/util"
+	"testing"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/function"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFunctionConcatWithSpace(t *testing.T) {
@@ -51,7 +53,7 @@ func TestFunctionLength(t *testing.T) {
 		t.Fatal(err)
 		t.Failed()
 	}
-	assert.Equal(t, int64(10), v[0].(int64))
+	assert.Equal(t, int(10), v[0].(int))
 
 	fmt.Println("Result:", v[0])
 }
@@ -143,6 +145,18 @@ func TestFunctionWithPackage(t *testing.T) {
 	fmt.Println("Result:", v[0])
 }
 
+func TestFunctionWithSpecialFiled(t *testing.T) {
+	v, err := NewExpression(`$activity[lixingwang].myattri["name.name"][0]>2`).GetExpression()
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	v.Eval()
+	//assert.Equal(t, "$A2.messagelixingwang", v[0].(string))
+
+	//fmt.Println("Result:", v[0])
+}
+
 type Concat struct {
 }
 
@@ -210,13 +224,13 @@ func (s *Length) GetCategory() string {
 	return "string"
 }
 
-func (s *Length) Eval(str string) int64 {
+func (s *Length) Eval(str string) int {
 	log.Debugf("Return the length of a string \"%s\"", str)
 	var l int
 	//l = len([]rune(str))
 	l = len(str)
 	log.Debugf("Done calculating the length %d", l)
-	return int64(l)
+	return l
 }
 
 type PanicFunc struct {
@@ -287,7 +301,7 @@ func (s *String) Eval(in interface{}) string {
 		//v := int64(in)
 		return strconv.FormatInt(in.(int64), 10)
 	default:
-		str, err := util.ConvertToString(in)
+		str, err := data.CoerceToString(in)
 		if err != nil {
 			log.Errorf("Convert to string error %s", err.Error())
 		}

@@ -38,6 +38,27 @@ func TestExpressionTernaryString(t *testing.T) {
 	fmt.Println("Result:", result)
 }
 
+func TestExpressionString(t *testing.T) {
+	v, err := NewExpression(`$activity[C].result=3`).GetExpression()
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	_, err = v.EvalWithScope(nil, nil)
+	assert.NotNil(t, err)
+}
+
+func TestExpressionWithOldWay(t *testing.T) {
+	v, err := NewExpression(`${flow.petMax} > 2`).GetExpression()
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	_, err = v.EvalWithScope(nil, nil)
+	assert.NotNil(t, err)
+
+}
+
 func TestExpressionTernaryFunction(t *testing.T) {
 	v, err := NewExpression(`string.length("lixingwang")>11?"lixingwang":"fff"`).GetTernaryExpression()
 	if err != nil {

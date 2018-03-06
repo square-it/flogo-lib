@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/util"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
+
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/funcexprtype"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
 )
 
 func ConvertToValue(value interface{}, dataType funcexprtype.Type) (interface{}, error) {
@@ -18,11 +19,11 @@ func ConvertToValue(value interface{}, dataType funcexprtype.Type) (interface{},
 
 	switch dataType {
 	case funcexprtype.STRING:
-		coerced, err = util.ConvertToString(value)
+		coerced, err = data.CoerceToString(value)
 	case funcexprtype.INTEGER:
-		coerced, err = util.ConvertToInt64(value)
+		coerced, err = data.CoerceToInteger(value)
 	case funcexprtype.FLOAT:
-		coerced, err = util.ConvertToFloat(value)
+		coerced, err = data.CoerceToNumber(value)
 	case funcexprtype.FUNCTION:
 		coerced, err = ConvertToFunction(value)
 	case funcexprtype.REF:

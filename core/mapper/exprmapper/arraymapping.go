@@ -6,12 +6,11 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
-	flogojson "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression"
+	flogojson "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/util"
 )
 
 var arraylog = logger.GetLogger("array-mapping")
@@ -76,13 +75,13 @@ func (a *ArrayMapping) DoArrayMapping(inputScope, outputScope data.Scope, resolv
 	switch a.Type {
 	case PRIMITIVE:
 		mappingDef := a.mappingDef()
-		err := Map(mappingDef, inputScope, outputScope,resolver)
+		err := Map(mappingDef, inputScope, outputScope, resolver)
 		if err != nil {
 			return err
 		}
 	case FOREACH:
 		//First Level
-		toRef := ref.NewMappingRef( a.To)
+		toRef := ref.NewMappingRef(a.To)
 		var fromValue interface{}
 		var err error
 
@@ -325,16 +324,16 @@ func (a *ArrayMapping) RemovePrefixForMapTo() {
 	}
 }
 
-func ParseArrayMapping(data interface{}) (*ArrayMapping, error) {
+func ParseArrayMapping(arrayDatadata interface{}) (*ArrayMapping, error) {
 	amapping := &ArrayMapping{}
-	switch t := data.(type) {
+	switch t := arrayDatadata.(type) {
 	case string:
 		err := json.Unmarshal([]byte(t), amapping)
 		if err != nil {
 			return nil, err
 		}
 	case interface{}:
-		s, err := util.ConvertToString(t)
+		s, err := data.CoerceToString(t)
 		if err != nil {
 			return nil, fmt.Errorf("Convert array mapping value to string error, due to [%s]", err.Error())
 		}
@@ -369,7 +368,7 @@ func getFieldValue(value interface{}, fieldName string) interface{} {
 	return value
 }
 
-func GetValueFromArrayRef(object interface{}, expressionRef interface{}, inputScope data.Scope,resolver data.Resolver) (interface{}, error) {
+func GetValueFromArrayRef(object interface{}, expressionRef interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
 
 	var fromValue interface{}
 	var err error

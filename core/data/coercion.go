@@ -145,7 +145,11 @@ func CoerceToBoolean(val interface{}) (bool, error) {
 	case nil:
 		return false, nil
 	default:
-		return false, fmt.Errorf("Unable to coerce %#v to bool", val)
+		str, err := CoerceToString(val)
+		if err != nil {
+			return false, fmt.Errorf("Unable to coerce %#v to bool", val)
+		}
+		return strconv.ParseBool(str)
 	}
 }
 
