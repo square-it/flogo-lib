@@ -56,7 +56,12 @@ func NewMapperDefFromAnyArray(mappings []interface{}) (*data.MapperDef, error) {
 
 		mappingObject := mapping.(map[string]interface{})
 
-		mappingType := int(mappingObject["type"].(float64))
+		mappingType, err := data.ConvertMappingType(mappingObject["type"])
+
+		if err != nil {
+			return nil, err
+		}
+
 		value := mappingObject["value"]
 		mapTo := mappingObject["mapTo"].(string)
 
