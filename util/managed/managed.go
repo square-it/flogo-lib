@@ -1,4 +1,4 @@
-package util
+package managed
 
 import (
 	"fmt"
@@ -17,8 +17,8 @@ type Managed interface {
 	Stop() error
 }
 
-// startManaged starts a "Managed" object
-func startManaged(managed Managed) error {
+// start starts a "Managed" object
+func start(managed Managed) error {
 
 	defer func() error {
 		if r := recover(); r != nil {
@@ -36,8 +36,8 @@ func startManaged(managed Managed) error {
 	return managed.Start()
 }
 
-// stopManaged stops a "Managed" object
-func stopManaged(managed Managed) error {
+// stop stops a "Managed" object
+func stop(managed Managed) error {
 
 	defer func() error {
 		if r := recover(); r != nil {
@@ -55,11 +55,11 @@ func stopManaged(managed Managed) error {
 	return managed.Stop()
 }
 
-// StartManaged starts a Managed object, handles panics and logs details
-func StartManaged(name string, managed Managed) error {
+// Start starts a Managed object, handles panics and logs details
+func Start(name string, managed Managed) error {
 
 	logger.Debugf("%s: Starting...", name)
-	err := managed.Start()
+	err := start(managed)
 
 	if err != nil {
 		logger.Errorf("%s: Error Starting", name)
@@ -70,12 +70,12 @@ func StartManaged(name string, managed Managed) error {
 	return nil
 }
 
-// StopManaged stops a Managed object, handles panics and logs details
-func StopManaged(name string, managed Managed) error {
+// Stop stops a Managed object, handles panics and logs details
+func Stop(name string, managed Managed) error {
 
 	logger.Debugf("%s: Stopping...", name)
 
-	err := stopManaged(managed)
+	err := stop(managed)
 
 	if err != nil {
 		logger.Errorf("Error stopping '%s': %s", name, err.Error())
