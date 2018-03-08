@@ -87,7 +87,10 @@ func (e *EngineConfig) Init(directRunner bool) error {
 			}
 		}
 
-		app.RegisterResources(e.App.Resources)
+		err := app.RegisterResources(e.App.Resources)
+		if err != nil {
+			return err
+		}
 
 		triggers, err := app.CreateTriggers(e.App.Triggers, e.actionRunner)
 
@@ -109,7 +112,10 @@ func (e *EngineConfig) Start() error {
 
 	// Todo document RunnerType for engine configuration
 	runnerType := config.GetRunnerType()
-	e.Init(runnerType == "DIRECT")
+	err := e.Init(runnerType == "DIRECT")
+	if err != nil {
+		return err
+	}
 
 	actionRunner := e.actionRunner.(interface{})
 
@@ -119,7 +125,7 @@ func (e *EngineConfig) Start() error {
 
 	logger.Info("Engine: Starting Services...")
 
-	err := e.serviceManager.Start()
+	err = e.serviceManager.Start()
 
 	if err != nil {
 		logger.Error("Engine: Error Starting Services - " + err.Error())
@@ -160,6 +166,7 @@ func (e *EngineConfig) Start() error {
 	logger.Info("Engine: Triggers Started")
 
 	logger.Info("Engine: Started")
+
 	return nil
 }
 
