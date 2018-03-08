@@ -1,11 +1,11 @@
 package engine
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/config"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"strconv"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 //TestNewPooledConfigOk
