@@ -140,14 +140,20 @@ func (m *MappingRef) GetValueFromOutputScope(outputtscope data.Scope) (interface
 	log.Debugf("GetValueFromOutputScope field name %s and exist %t ", fieldName, exist)
 
 	if exist {
-		complexObject := attribute.Value().(*data.ComplexObject)
-		object := complexObject.Value
-		//Convert the object to exist struct.
-		//TODO return interface rather than string
-		if object == nil {
-			return "{}", nil
+		switch attribute.Type() {
+		case data.TypeComplexObject:
+			complexObject := attribute.Value().(*data.ComplexObject)
+			object := complexObject.Value
+			//Convert the object to exist struct.
+			//TODO return interface rather than string
+			if object == nil {
+				return "{}", nil
+			}
+			return object, nil
+		default:
+			return attribute.Value(), nil
 		}
-		return object, nil
+
 	}
 	return nil, fmt.Errorf("Cannot found attribute %s", fieldName)
 }
@@ -229,7 +235,8 @@ func (m *MappingRef) GetFields() (*field.MappingField, error) {
 	} else if strings.Index(m.ref, ".") >= 0 {
 		return &field.MappingField{HasArray: hasArray, HasSpecialField: false, Fields: strings.Split(m.ref, ".")[1:]}, nil
 	} else {
-		return &field.MappingField{HasArray: hasArray, HasSpecialField: false, Fields: []string{m.ref}}, nil
+		//Only attribute name no field name
+		return &field.MappingField{HasArray: hasArray, HasSpecialField: false, Fields: []string{}}, nil
 	}
 }
 

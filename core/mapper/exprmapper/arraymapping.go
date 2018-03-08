@@ -158,19 +158,14 @@ func (a *ArrayMapping) DoArrayMapping(inputScope, outputScope data.Scope, resolv
 		if err != nil {
 			return fmt.Errorf("Get fields from mapping string error, due to [%s]", err.Error())
 		}
-		if toValue == nil {
+		if mappingField != nil && len(mappingField.Fields) > 0 {
 			vv, err := flogojson.SetFieldValue(objArray, toValue, mappingField)
 			if err != nil {
 				return err
 			}
 			log.Debugf("Set Value return as %+v", vv)
 		} else {
-			vv, err := flogojson.SetFieldValue(objArray, toValue, mappingField)
-			if err != nil {
-				return err
-			}
-			log.Debugf("Set Value return as %+v", vv)
-
+			toValue = objArray
 		}
 
 		if err != nil {
@@ -353,7 +348,10 @@ func toInterface(data interface{}) interface{} {
 			return make(map[string]interface{})
 		}
 	default:
-		return data
+		if t == nil {
+			//TODO maybe consider other types as well
+			return make(map[string]interface{})
+		}
 	}
 	return data
 }
