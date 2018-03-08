@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var s = &StringLength{}
+var s = &Length{}
 
 func TestStaticFunc_String_length(t *testing.T) {
 	final11 := s.Eval("TIBCO FLOGO")
