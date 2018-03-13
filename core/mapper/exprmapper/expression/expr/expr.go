@@ -58,9 +58,8 @@ var operatorMap = map[string]OPERATIOR{
 
 var operatorCharactorMap = map[string]OPERATIOR{
 	"==":  EQ,
-	"=":   EQ,
 	"||":  OR,
-	"&":   AND,
+	"&&":  AND,
 	"!=":  NOT_EQ,
 	">":   GT,
 	"<":   LT,

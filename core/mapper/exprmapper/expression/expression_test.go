@@ -21,6 +21,8 @@ func TestExpressionTernary(t *testing.T) {
 		t.Fatal(err)
 		t.Failed()
 	}
+	assert.Equal(t, "fff", result)
+
 	fmt.Println("Result:", result)
 }
 
@@ -35,11 +37,12 @@ func TestExpressionTernaryString(t *testing.T) {
 		t.Fatal(err)
 		t.Failed()
 	}
+	assert.Equal(t, "lixingwang", result)
 	fmt.Println("Result:", result)
 }
 
 func TestExpressionString(t *testing.T) {
-	v, err := NewExpression(`$activity[C].result=3`).GetExpression()
+	v, err := NewExpression(`$activity[C].result==3`).GetExpression()
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -70,6 +73,7 @@ func TestExpressionTernaryFunction(t *testing.T) {
 		t.Fatal(err)
 		t.Failed()
 	}
+	assert.Equal(t, "fff", result)
 	fmt.Println("Result:", result)
 }
 
@@ -84,6 +88,9 @@ func TestExpressionTernaryRef(t *testing.T) {
 		t.Fatal(err)
 		t.Failed()
 	}
+
+	assert.Equal(t, "$A3.Account.Address", result)
+
 	fmt.Println("Result:", result)
 }
 
@@ -100,11 +107,13 @@ func TestExpressionTernaryRef2(t *testing.T) {
 		t.Fatal(err)
 		t.Failed()
 	}
+	assert.Equal(t, "fff", result)
+
 	fmt.Println("Result:", result)
 }
 
 func TestWeExpr_LinkMapping(t *testing.T) {
-	expr, err := NewExpression(`$T.parameters.path_params[0].value=2`).GetExpression()
+	expr, err := NewExpression(`$T.parameters.path_params[0].value==2`).GetExpression()
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -113,7 +122,7 @@ func TestWeExpr_LinkMapping(t *testing.T) {
 }
 
 func TestWeExpr_LinkMapping2(t *testing.T) {
-	v, err := NewExpression(`$T.parameters=2`).GetExpression()
+	v, err := NewExpression(`$T.parameters==2`).GetExpression()
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -122,70 +131,80 @@ func TestWeExpr_LinkMapping2(t *testing.T) {
 }
 
 func TestExpressionInt(t *testing.T) {
-	v, err := NewExpression(`123=456`).Eval()
+	v, err := NewExpression(`123==456`).Eval()
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
 	}
+	assert.Equal(t, false, v)
+
 	fmt.Println("Result:", v)
 }
 
 func TestExpressionEQ(t *testing.T) {
-	v, err := NewExpression(`123=123`).Eval()
+	v, err := NewExpression(`123==123`).Eval()
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
 	}
+	assert.Equal(t, true, v)
+
 	fmt.Println("Result:", v)
 }
 
 func TestExpressionEQFunction(t *testing.T) {
-	v, err := NewExpression(`string.concat("123","456")="123456"`).Eval()
+	v, err := NewExpression(`string.concat("123","456")=="123456"`).Eval()
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
 	}
+	assert.Equal(t, true, v)
 	fmt.Println("Result:", v)
 }
 
 func TestExpressionEQFunction2Side(t *testing.T) {
-	v, err := NewExpression(`string.concat("123","456") = string.concat("12","3456")`).Eval()
+	v, err := NewExpression(`string.concat("123","456") == string.concat("12","3456")`).Eval()
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
 	}
+	assert.Equal(t, true, v)
 	fmt.Println("Result:", v)
 }
 
 func TestExpressionRef(t *testing.T) {
-	_, err := NewExpression(`$A4.query.name="name"`).Eval()
+	_, err := NewExpression(`$A4.query.name=="name"`).Eval()
 	assert.NotNil(t, err)
 }
 
 func TestExpressionFunction(t *testing.T) {
-	v, err := NewExpression(`string.concat("tibco","software")="tibcosoftware"`).Eval()
+	v, err := NewExpression(`string.concat("tibco","software")=="tibcosoftware"`).Eval()
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
 	}
+	assert.Equal(t, true, v)
+
 	fmt.Println("Result:", v)
 }
 
 func TestExpressionAnd(t *testing.T) {
-	v, err := NewExpression(`("dddddd" = "dddddd") & ("123" = "123")`).Eval()
+	v, err := NewExpression(`("dddddd" == "dddd3dd") && ("133" == "123")`).Eval()
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
 	}
+	assert.Equal(t, false, v)
 	fmt.Println("Result:", v)
 }
 
 func TestExpressionOr(t *testing.T) {
-	v, err := NewExpression(`("dddddd" = "dddddd") & ("123" = "123")`).Eval()
+	v, err := NewExpression(`("dddddd" == "dddddd") && ("123" == "123")`).Eval()
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
 	}
+	assert.Equal(t, true, v)
 	fmt.Println("Result:", v)
 }
 
@@ -197,7 +216,7 @@ func TestFunc(t *testing.T) {
 	}
 	fmt.Println("Result:", v)
 	assert.Equal(t, v, true)
-	v, err = NewExpression(`string.length("lixingwang") = 10`).Eval()
+	v, err = NewExpression(`string.length("lixingwang") == 10`).Eval()
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
