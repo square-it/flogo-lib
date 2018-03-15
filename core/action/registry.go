@@ -7,7 +7,7 @@ import (
 var (
 	actionFactories = make(map[string]Factory)
 
-	//Deprecated
+	// Deprecated: No longer used
 	actions = make(map[string]Action)
 )
 
@@ -39,13 +39,13 @@ func Factories() map[string]Factory {
 	return actionFactories
 }
 
-//DEPRECATED
+// Deprecated: No longer used
 func Get(id string) Action {
 
 	return actions[id]
 }
 
-//DEPRECATED
+// Deprecated: No longer used
 func Register(id string, act Action) error {
 
 	if len(id) == 0 {
@@ -65,7 +65,7 @@ func Register(id string, act Action) error {
 	return nil
 }
 
-//DEPRECATED
+// Deprecated: No longer used
 func Actions() map[string]Action {
 
 	actionsCopy := make(map[string]Action, len(actions))

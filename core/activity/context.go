@@ -1,7 +1,6 @@
 package activity
 
 import (
-	//"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
@@ -9,7 +8,7 @@ import (
 // It provides access to attributes, task and Flow information.
 type Context interface {
 
-	// FlowDetails gets the action.Context under with the activity is executing
+	// ActivityHost gets the "host" under with the activity is executing
 	ActivityHost() Host
 
 	//Name the name of the activity that is currently executing
@@ -30,12 +29,10 @@ type Context interface {
 	// SetOutput sets the value of the specified output attribute
 	SetOutput(name string, value interface{})
 
-	// TaskName returns the name of the Task the Activity is currently executing
-	//Deprecated
+	// Deprecated: Use ActivityHost().Name() instead.
 	TaskName() string
 
-	//Deprecated
-	// FlowDetails returns the details fo the Flow Instance
+	// Deprecated: Use ActivityHost() instead.
 	FlowDetails() FlowDetails
 }
 
@@ -46,9 +43,6 @@ type Host interface {
 
 	// Name the name of the Activity Host
 	Name() string
-
-	// The action reference
-	//Ref() string
 
 	// IOMetadata get the input/output metadata of the activity host
 	IOMetadata() *data.IOMetadata
@@ -81,8 +75,7 @@ type Host interface {
 //	SetInitValue(key string, value interface{})
 //}
 
-// Deprecated
-// FlowDetails details of the flow that is being executed
+// Deprecated: Use ActivityHost() instead.
 type FlowDetails interface {
 
 	// ID returns the ID of the Flow Instance

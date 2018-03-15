@@ -12,10 +12,9 @@ type Config struct {
 	Ref      string                 `json:"ref"`
 	Settings map[string]interface{} `json:"settings"`
 	Output   map[string]interface{} `json:"output"`
+	Handlers []*HandlerConfig       `json:"handlers"`
 
-	Handlers []*HandlerConfig `json:"handlers"`
-
-	//for backwards compatibility
+	// Deprecated: Use Output
 	Outputs map[string]interface{} `json:"outputs"`
 }
 
@@ -93,12 +92,16 @@ type HandlerConfig struct {
 	Output   map[string]interface{} `json:"output"`
 	Action   *action.Config
 
-	//for backwards compatibility
-	ActionId             string                 `json:"actionId"`
-	ActionMappings       *data.IOMappings       `json:"actionMappings,omitempty"`
-	Outputs              map[string]interface{} `json:"outputs"`
-	ActionOutputMappings []*data.MappingDef     `json:"actionOutputMappings,omitempty"`
-	ActionInputMappings  []*data.MappingDef     `json:"actionInputMappings,omitempty"`
+	// Deprecated: Use Action (*action.Config)
+	ActionId string `json:"actionId"`
+	// Deprecated: Use Action (*action.Config)
+	ActionMappings *data.IOMappings `json:"actionMappings,omitempty"`
+	// Deprecated: Use Action (*action.Config)
+	ActionOutputMappings []*data.MappingDef `json:"actionOutputMappings,omitempty"`
+	// Deprecated: Use Action (*action.Config)
+	ActionInputMappings []*data.MappingDef `json:"actionInputMappings,omitempty"`
+	// Deprecated: Use Output
+	Outputs map[string]interface{} `json:"outputs"`
 }
 
 func (hc *HandlerConfig) GetSetting(setting string) string {

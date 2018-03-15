@@ -9,7 +9,7 @@ type Activity interface {
 	// that the task is done.
 	Eval(ctx Context) (done bool, err error)
 
-	// ActivityMetadata returns the metadata of the activity
+	// Metadata returns the metadata of the activity
 	Metadata() *Metadata
 }
 

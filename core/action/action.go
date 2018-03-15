@@ -9,10 +9,10 @@ import (
 
 // Action is an action to perform as a result of a trigger
 type Action interface {
-	//Metadata get the Action's metadata
+	// Metadata get the Action's metadata
 	Metadata() *Metadata
 
-	//IOMetadata get the Action's IO metadata
+	// IOMetadata get the Action's IO metadata
 	IOMetadata() *data.IOMetadata
 }
 
@@ -36,7 +36,7 @@ type AsyncAction interface {
 // Factory is used to create new instances for an action
 type Factory interface {
 
-	//New create a new Action
+	// New create a new Action
 	New(config *Config) (Action, error)
 }
 
@@ -52,21 +52,20 @@ func GetMetadata(act Action) *Metadata {
 
 // Runner runs actions
 type Runner interface {
-	//DEPRECATED
+	// Deprecated: Use Execute() instead
 	Run(context context.Context, act Action, uri string, options interface{}) (code int, data interface{}, err error)
 
-	//Run the specified Action
-	//DEPRECATED
+	// Deprecated: Use Execute() instead
 	RunAction(ctx context.Context, act Action, options map[string]interface{}) (results map[string]*data.Attribute, err error)
 
-	//Execute the specified Action
+	// Execute the specified Action
 	Execute(ctx context.Context, act Action, inputs map[string]*data.Attribute) (results map[string]*data.Attribute, err error)
 }
 
 // ResultHandler used to handle results from the Action
 type ResultHandler interface {
 
-	// HandleResult invoked when there are results available
+	// HandleResult is invoked when there are results available
 	HandleResult(results map[string]*data.Attribute, err error)
 
 	// Done indicates that the action has completed

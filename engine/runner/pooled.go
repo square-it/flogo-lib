@@ -95,18 +95,19 @@ func (runner *PooledRunner) Stop() error {
 	return nil
 }
 
-//Deprecated
+// Deprecated: Use Execute() instead
 func (runner *PooledRunner) Run(ctx context.Context, act action.Action, uri string, options interface{}) (code int, data interface{}, err error) {
 
 	return 0, nil, errors.New("unsupported")
 }
 
-// Run implements action.Runner.Run
+// Deprecated: Use Execute() instead
 func (runner *PooledRunner) RunAction(ctx context.Context, act action.Action, options map[string]interface{}) (results map[string]*data.Attribute, err error) {
 
 	return nil, errors.New("unsupported")
 }
 
+// Execute implements action.Runner.Execute
 func (runner *PooledRunner) Execute(ctx context.Context, act action.Action, inputs map[string]*data.Attribute) (results map[string]*data.Attribute, err error) {
 
 	if act == nil {
