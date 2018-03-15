@@ -3,6 +3,8 @@ package trigger
 import (
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"strconv"
+	"time"
 )
 
 // Config is the configuration for a Trigger
@@ -26,6 +28,7 @@ func (c *Config) FixUp(metadata *Metadata) {
 		c.Output = c.Outputs
 	}
 
+
 	// fix up top-level outputs
 	for name, value := range c.Output {
 
@@ -46,6 +49,11 @@ func (c *Config) FixUp(metadata *Metadata) {
 	for _, hc := range c.Handlers {
 
 		hc.parent = c
+
+		//for backwards compatibility
+		if hc.ActionId == "" {
+			hc.ActionId = strconv.Itoa(time.Now().Nanosecond())
+		}
 
 		//for backwards compatibility
 		if len(hc.Output) == 0 {
