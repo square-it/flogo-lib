@@ -2,6 +2,7 @@ package trigger
 
 import (
 	"context"
+
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper"
@@ -127,7 +128,12 @@ func (h *Handler) generateInputs(triggerData map[string]interface{}) (map[string
 		return nil, nil
 	}
 
-	triggerAttrs, _ := h.dataToAttrs(triggerData)
+	triggerAttrs, err := h.dataToAttrs(triggerData)
+
+	if err != nil {
+		logger.Errorf("Failed parsing attrs: %s, Error: %s", triggerData, err)
+		return nil, err
+	}
 
 	if len(triggerAttrs) == 0 {
 		return nil, nil
