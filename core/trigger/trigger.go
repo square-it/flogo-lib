@@ -18,8 +18,7 @@ type Trigger interface {
 	// Metadata returns the metadata of the trigger
 	Metadata() *Metadata
 
-	// Init sets up the trigger, it is called before Start()
-	//DEPRECATED
+	// Deprecated: Triggers should implement trigger.Init interface
 	Init(actionRunner action.Runner)
 }
 
@@ -31,6 +30,7 @@ type Init interface {
 	Initialize(ctx InitContext) error
 }
 
+// InitContext is the initialization context for the trigger instance
 type InitContext interface {
 
 	// GetHandlers gets the handlers associated with the trigger

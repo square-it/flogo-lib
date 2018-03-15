@@ -29,20 +29,19 @@ func (runner *DirectRunner) Stop() error {
 	return nil
 }
 
-//Run
-//Deprecated
+// Deprecated: Use Execute() instead
 func (runner *DirectRunner) Run(ctx context.Context, act action.Action, uri string, options interface{}) (code int, data interface{}, err error) {
 
 	return 0, nil, errors.New("unsupported")
 }
 
-// Run the specified action
+// Deprecated: Use Execute() instead
 func (runner *DirectRunner) RunAction(ctx context.Context, act action.Action, options map[string]interface{}) (results map[string]*data.Attribute, err error) {
 
 	return nil, errors.New("unsupported")
 }
 
-// Run the specified action
+// Execute implements action.Runner.Execute
 func (runner *DirectRunner) Execute(ctx context.Context, act action.Action, inputs map[string]*data.Attribute) (results map[string]*data.Attribute, err error) {
 
 	if act == nil {

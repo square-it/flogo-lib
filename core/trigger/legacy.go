@@ -9,7 +9,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
-//DEPRECATED
+// Deprecated: Temporarily generated for backwards compatibility support
 type LegacyRunner struct {
 	currentRunner   action.Runner
 	triggerMetadata *Metadata

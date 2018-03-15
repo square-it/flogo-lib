@@ -12,32 +12,8 @@ type Config struct {
 	Data     json.RawMessage  `json:"data"`
 	Mappings *data.IOMappings `json:"mappings"`
 
-	//Deprecated
+	// Deprecated: No longer used
 	Id string `json:"id"`
-	//Deprecated
+	// Deprecated: No longer used
 	Metadata *data.IOMetadata `json:"metadata"`
-	//Deprecated
-	//OldData json.RawMessage
 }
-
-//func GetConfigInputMetadata(act Action) []*data.Attribute {
-//
-//	if act.Config() != nil {
-//		if act.Config().Metadata != nil {
-//			return act.Config().Metadata.Input
-//		}
-//	}
-//
-//	return nil
-//}
-//
-//func GetConfigOutputMetadata(act Action) []*data.Attribute {
-//
-//	if act.Config() != nil {
-//		if act.Config().Metadata != nil {
-//			return act.Config().Metadata.Output
-//		}
-//	}
-//
-//	return nil
-//}

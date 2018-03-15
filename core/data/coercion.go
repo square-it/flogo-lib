@@ -125,7 +125,7 @@ func CoerceToLong(val interface{}) (int64, error) {
 	}
 }
 
-// DEPRECATED
+// Deprecated: Use CoerceToDouble()
 func CoerceToNumber(val interface{}) (float64, error) {
 	return CoerceToDouble(val)
 }
