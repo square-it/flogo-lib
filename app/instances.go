@@ -36,7 +36,7 @@ func CreateTriggers(tConfigs []*trigger.Config, runner action.Runner) (map[strin
 
 		var legacyRunner *trigger.LegacyRunner
 
-		newTrg, isNew := trg.(trigger.Init)
+		newTrg, isNew := trg.(trigger.Initializable)
 
 		if !isNew {
 			legacyRunner = trigger.NewLegacyRunner(runner, trg.Metadata())
@@ -71,7 +71,10 @@ func CreateTriggers(tConfigs []*trigger.Config, runner action.Runner) (map[strin
 				return nil, err
 			}
 		} else {
-			trg.Init(legacyRunner)
+			oldTrg, isOld := trg.(trigger.InitOld)
+			if isOld {
+				oldTrg.Init(legacyRunner)
+			}
 		}
 
 		triggers[tConfig.Id] = trg
