@@ -9,10 +9,10 @@ import (
 
 	"reflect"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
@@ -27,7 +27,7 @@ func Map(mapping *data.MappingDef, inputScope, outputScope data.Scope, resolver 
 	if err != nil {
 		return err
 	}
-	err = setValueToOutputScopde(mapping.MapTo, outputScope, mappingValue, resolver)
+	err = SetValueToOutputScopde(mapping.MapTo, outputScope, mappingValue)
 	if err != nil {
 		err = fmt.Errorf("Set value %+v to output [%s] error - %s", mappingValue, mapping.MapTo, err.Error())
 		log.Error(err)
@@ -106,7 +106,7 @@ func GetMappingValue(mappingV interface{}, inputScope data.Scope, resolver data.
 	return nil, nil
 }
 
-func setValueToOutputScopde(mapTo string, outputScope data.Scope, value interface{}, resolver data.Resolver) error {
+func SetValueToOutputScopde(mapTo string, outputScope data.Scope, value interface{}) error {
 	toMappingRef := ref.NewMappingRef(mapTo)
 	actRootField, err := toMappingRef.GetActivtyRootField()
 	if err != nil {
@@ -178,7 +178,6 @@ func SetAttribute(fieldName string, value interface{}, outputScope data.Scope) e
 	return nil
 }
 
-
 func RemovePrefixInput(str string) string {
 	if str != "" && strings.HasPrefix(str, MAP_TO_INPUT) {
 		//Remove $INPUT for mapTo
@@ -190,4 +189,3 @@ func RemovePrefixInput(str string) string {
 	}
 	return str
 }
-
