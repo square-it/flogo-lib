@@ -203,7 +203,18 @@ func NewFixedScopeFromMap(metadata map[string]*Attribute) *FixedScope {
 func (s *FixedScope) GetAttr(name string) (attr *Attribute, exists bool) {
 
 	attr, found := s.attrs[name]
-	return attr, found
+
+	if found {
+		return attr, true
+	} else {
+		metaAttr, found := s.metadata[name]
+		if found {
+			attr, _ := NewAttribute(name, metaAttr.Type(), metaAttr.value)
+			s.attrs[name] = attr
+			return attr, true
+		}
+	}
+	return nil, false
 }
 
 // GetAttrs gets the attributes set in the scope
