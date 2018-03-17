@@ -24,6 +24,8 @@ func PathGetValue(value interface{}, path string) (interface{}, error) {
 			newVal, newPath, err = pathGetSetObjValue(objVal, path, nil, false)
 		} else if paramsVal, ok := value.(map[string]string); ok {
 			newVal, newPath, err = pathGetSetParamsValue(paramsVal, path, nil, false)
+		} else if objVal, ok := value.(*ComplexObject); ok {
+			return PathGetValue(objVal.Value, path)
 		} else {
 			return nil, fmt.Errorf("unable to evaluate path: %s", path)
 		}
@@ -32,6 +34,8 @@ func PathGetValue(value interface{}, path string) (interface{}, error) {
 			newVal, newPath, err = pathGetSetMapValue(objVal, path, nil, false)
 		} else if paramsVal, ok := value.(map[string]string); ok {
 			newVal, newPath, err = pathGetSetMapParamsValue(paramsVal, path, nil, false)
+		} else if objVal, ok := value.(*ComplexObject); ok {
+			return PathGetValue(objVal.Value, path)
 		} else {
 			return nil, fmt.Errorf("unable to evaluate path: %s", path)
 		}
@@ -62,6 +66,8 @@ func PathSetValue(attrValue interface{}, path string, value interface{}) error {
 			newVal, newPath, err = pathGetSetObjValue(objVal, path, value, true)
 		} else if paramsVal, ok := attrValue.(map[string]string); ok {
 			newVal, newPath, err = pathGetSetParamsValue(paramsVal, path, value, true)
+		} else if objVal, ok := value.(*ComplexObject); ok {
+			return PathSetValue(objVal.Value, path, value)
 		} else {
 			return fmt.Errorf("Unable to evaluate path: %s", path)
 		}
@@ -70,6 +76,8 @@ func PathSetValue(attrValue interface{}, path string, value interface{}) error {
 			newVal, newPath, err = pathGetSetMapValue(objVal, path, value, true)
 		} else if paramsVal, ok := attrValue.(map[string]string); ok {
 			newVal, newPath, err = pathGetSetMapParamsValue(paramsVal, path, value, true)
+		} else if objVal, ok := value.(*ComplexObject); ok {
+			return PathSetValue(objVal.Value, path, value)
 		} else {
 			return fmt.Errorf("unable to evaluate path: %s", path)
 		}
