@@ -67,8 +67,23 @@ func (r *BasicResolver) Resolve(toResolve string, scope Scope) (value interface{
 			logger.Error(err.Error())
 			return "", err
 		}
+	case ".":
+		//Current scope resolution
+		attr, exists := scope.GetAttr(details.Property)
+		if !exists {
+			return nil, fmt.Errorf("failed to resolve current scope: '%s', not found in scope", details.Property)
+		}
+		value = attr.Value()
 	default:
 		return nil, fmt.Errorf("unsupported resolver: %s", details.ResolverName)
+	}
+
+	if details.Path != "" {
+		value, err = PathGetValue(value, details.Path)
+		if err != nil {
+			logger.Error(err.Error())
+			return nil, err
+		}
 	}
 
 	return value, nil
@@ -124,8 +139,12 @@ func GetResolutionDetails(toResolve string) (*ResolutionDetails, error) {
 		details.Item = toResolve[itemIdx+1 : dotIdx-1]
 		details.ResolverName = toResolve[:itemIdx]
 	} else {
-		details.ResolverName = toResolve[:dotIdx]
-
+		//For the case to get current scope atribute data
+		if strings.HasPrefix(toResolve, "$.") || strings.HasPrefix(toResolve, ".") {
+			details.ResolverName = toResolve[:dotIdx+1]
+		} else {
+			details.ResolverName = toResolve[:dotIdx]
+		}
 		//special case for activity without brackets
 		if strings.HasPrefix(toResolve, "activity") {
 			nextDot := strings.Index(toResolve[dotIdx+1:], ".") + dotIdx + 1
