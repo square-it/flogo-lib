@@ -123,15 +123,16 @@ type ResolutionDetails struct {
 }
 
 func GetResolutionDetails(toResolve string) (*ResolutionDetails, error) {
+
 	//todo optimize, maybe tokenize first
 
 	dotIdx := strings.Index(toResolve, ".")
+
 	if dotIdx == -1 {
 		return nil, fmt.Errorf("invalid resolution expression [%s]", toResolve)
 	}
 
 	details := &ResolutionDetails{}
-
 	itemIdx := strings.Index(toResolve[:dotIdx], "[")
 
 	if itemIdx != -1 {
@@ -163,7 +164,6 @@ func GetResolutionDetails(toResolve string) (*ResolutionDetails, error) {
 	}
 
 	return details, nil
-
 }
 
 func GetResolutionDetailsOld(toResolve string) (*ResolutionDetails, error) {

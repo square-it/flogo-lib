@@ -150,7 +150,7 @@ func TestGetResolutionDetailsOld(t *testing.T) {
 
 	// Resolution of second level Activity expression map
 	a = "${activity.myactivityId.myMapAttributeName}.mapkey"
-	details, err = GetResolutionDetails(a)
+	details, err = GetResolutionDetailsOld(a)
 	assert.Nil(t, err)
 	assert.Equal(t, "activity", details.ResolverName)
 	assert.Equal(t, "myMapAttributeName", details.Property)

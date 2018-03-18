@@ -118,7 +118,6 @@ func (m *MappingRef) getValueFromAttribute(inputscope data.Scope, resolver data.
 		}
 	} else {
 		newRef = resolutionDetails.ResolverName + resolutionDetails.Property
-
 	}
 
 	log.Debugf("Activity and root field name is: %s", newRef)
