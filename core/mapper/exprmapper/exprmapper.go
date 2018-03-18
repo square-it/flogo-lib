@@ -27,7 +27,7 @@ func Map(mapping *data.MappingDef, inputScope, outputScope data.Scope, resolver 
 	if err != nil {
 		return err
 	}
-	err = SetValueToOutputScopde(mapping.MapTo, outputScope, mappingValue)
+	err = SetValueToOutputScope(mapping.MapTo, outputScope, mappingValue)
 	if err != nil {
 		err = fmt.Errorf("Set value %+v to output [%s] error - %s", mappingValue, mapping.MapTo, err.Error())
 		log.Error(err)
@@ -106,7 +106,7 @@ func GetMappingValue(mappingV interface{}, inputScope data.Scope, resolver data.
 	return nil, nil
 }
 
-func SetValueToOutputScopde(mapTo string, outputScope data.Scope, value interface{}) error {
+func SetValueToOutputScope(mapTo string, outputScope data.Scope, value interface{}) error {
 	toMappingRef := ref.NewMappingRef(mapTo)
 	actRootField, err := toMappingRef.GetActivtyRootField()
 	if err != nil {
