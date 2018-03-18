@@ -167,13 +167,13 @@ func TestGetResolutionDetailsOld(t *testing.T) {
 	assert.Equal(t, "[0]", details.Path)
 }
 
-func TestSimpleScopeResolve(t *testing.T) {
+func TestToGetCurrentScope(t *testing.T) {
 	a := "$.header.Accept"
 	details, err := GetResolutionDetails(a)
 	assert.Nil(t, err)
 	assert.Equal(t, "$.", details.ResolverName)
 	assert.Equal(t, "header", details.Property)
-	assert.Equal(t, "Accept", details.Path)
+	assert.Equal(t, ".Accept", details.Path)
 
 	a = "$.array[0]"
 	details, err = GetResolutionDetails(a)
