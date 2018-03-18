@@ -110,10 +110,15 @@ func (m *MappingRef) getValueFromAttribute(inputscope data.Scope, resolver data.
 	resolutionDetails.Path = ""
 	//var newRef string
 	var newRef string
-	if resolutionDetails.Item != "" {
-		newRef = resolutionDetails.ResolverName + "[" + resolutionDetails.Item + "]" + "." + resolutionDetails.Property
+	if resolutionDetails.ResolverName != "$." {
+		if resolutionDetails.Item != "" {
+			newRef = resolutionDetails.ResolverName + "[" + resolutionDetails.Item + "]" + "." + resolutionDetails.Property
+		} else {
+			newRef = resolutionDetails.ResolverName + "." + resolutionDetails.Property
+		}
 	} else {
-		newRef = resolutionDetails.ResolverName + "." + resolutionDetails.Property
+		newRef = resolutionDetails.ResolverName + resolutionDetails.Property
+
 	}
 
 	log.Debugf("Activity and root field name is: %s", newRef)

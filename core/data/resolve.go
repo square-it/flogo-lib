@@ -67,8 +67,23 @@ func (r *BasicResolver) Resolve(toResolve string, scope Scope) (value interface{
 			logger.Error(err.Error())
 			return "", err
 		}
+	case ".":
+		//Current scope resolution
+		attr, exists := scope.GetAttr(details.Property)
+		if !exists {
+			return nil, fmt.Errorf("failed to resolve current scope: '%s', not found in scope", details.Property)
+		}
+		value = attr.Value()
 	default:
 		return nil, fmt.Errorf("unsupported resolver: %s", details.ResolverName)
+	}
+
+	if details.Path != "" {
+		value, err = PathGetValue(value, details.Path)
+		if err != nil {
+			logger.Error(err.Error())
+			return nil, err
+		}
 	}
 
 	return value, nil
@@ -110,41 +125,70 @@ type ResolutionDetails struct {
 func GetResolutionDetails(toResolve string) (*ResolutionDetails, error) {
 
 	//todo optimize, maybe tokenize first
-
-	dotIdx := strings.Index(toResolve, ".")
-
-	if dotIdx == -1 {
-		return nil, fmt.Errorf("invalid resolution expression [%s]", toResolve)
-	}
-
 	details := &ResolutionDetails{}
-	itemIdx := strings.Index(toResolve[:dotIdx], "[")
+	if strings.HasPrefix(toResolve, "$.") || strings.HasPrefix(toResolve, ".") {
+		//Get current scope resolution
 
-	if itemIdx != -1 {
-		details.Item = toResolve[itemIdx+1 : dotIdx-1]
-		details.ResolverName = toResolve[:itemIdx]
-	} else {
-		details.ResolverName = toResolve[:dotIdx]
+		dotIdx := strings.Index(toResolve, ".")
+		details.ResolverName = toResolve[:dotIdx+1]
+		path := toResolve[dotIdx+1:]
 
-		//special case for activity without brackets
-		if strings.HasPrefix(toResolve, "activity") {
-			nextDot := strings.Index(toResolve[dotIdx+1:], ".") + dotIdx + 1
-			details.Item = toResolve[dotIdx+1 : nextDot]
-			dotIdx = nextDot
+		pathIdx := strings.Index(path, ".")
+		var propertyName string
+		if pathIdx == -1 {
+			propertyName = path
+			details.Path = ""
+		} else {
+			propertyName = path[:pathIdx]
+			details.Path = path[pathIdx:]
+
 		}
-	}
 
-	pathIdx := strings.IndexFunc(toResolve[dotIdx+1:], isSep)
-
-	if pathIdx != -1 {
-		pathStart := pathIdx + dotIdx + 1
-		details.Path = toResolve[pathStart:]
-		details.Property = toResolve[dotIdx+1 : pathStart]
+		arrayIndex := strings.Index(propertyName, "[")
+		if arrayIndex == -1 {
+			details.Property = propertyName
+		} else {
+			details.Property = propertyName[:arrayIndex]
+			details.Path = path[arrayIndex:]
+		}
+		return details, nil
 	} else {
-		details.Property = toResolve[dotIdx+1:]
+
+		dotIdx := strings.Index(toResolve, ".")
+
+		if dotIdx == -1 {
+			return nil, fmt.Errorf("invalid resolution expression [%s]", toResolve)
+		}
+
+		itemIdx := strings.Index(toResolve[:dotIdx], "[")
+
+		if itemIdx != -1 {
+			details.Item = toResolve[itemIdx+1 : dotIdx-1]
+			details.ResolverName = toResolve[:itemIdx]
+		} else {
+			details.ResolverName = toResolve[:dotIdx]
+
+			//special case for activity without brackets
+			if strings.HasPrefix(toResolve, "activity") {
+				nextDot := strings.Index(toResolve[dotIdx+1:], ".") + dotIdx + 1
+				details.Item = toResolve[dotIdx+1 : nextDot]
+				dotIdx = nextDot
+			}
+		}
+
+		pathIdx := strings.IndexFunc(toResolve[dotIdx+1:], isSep)
+
+		if pathIdx != -1 {
+			pathStart := pathIdx + dotIdx + 1
+			details.Path = toResolve[pathStart:]
+			details.Property = toResolve[dotIdx+1 : pathStart]
+		} else {
+			details.Property = toResolve[dotIdx+1:]
+		}
+
+		return details, nil
 	}
 
-	return details, nil
 }
 
 func GetResolutionDetailsOld(toResolve string) (*ResolutionDetails, error) {
