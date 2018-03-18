@@ -27,7 +27,6 @@ func (c *Config) FixUp(metadata *Metadata) {
 		c.Output = c.Outputs
 	}
 
-
 	// fix up top-level outputs
 	for name, value := range c.Output {
 

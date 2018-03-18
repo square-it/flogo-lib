@@ -9,6 +9,7 @@ import (
 )
 
 var log = logger.GetLogger("expr-mapper-field")
+
 type MappingField struct {
 	HasSpecialField bool
 	HasArray        bool
@@ -22,8 +23,8 @@ func GetAllspecialFields(path string) ([]string, error) {
 	var lastIndex = 0
 	matches := re.FindAllStringIndex(path, -1)
 	for i, match := range matches {
-		log.Debugf("Mathing index %d", match)
-		log.Debugf("Mathing string %s", path[match[0]:match[1]])
+		//log.Debugf("Mathing index %d", match)
+		//log.Debugf("Mathing string %s", path[match[0]:match[1]])
 
 		if i == 0 && lastIndex == 0 {
 			startPart := trimDot(path[:match[0]])

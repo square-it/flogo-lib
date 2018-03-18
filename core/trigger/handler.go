@@ -7,6 +7,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"fmt"
 )
 
 type Handler struct {
@@ -222,4 +223,8 @@ func (h *Handler) generateOutputs(actionResults map[string]*data.Attribute) (map
 	}
 
 	return actionResults, nil
+}
+
+func (h *Handler) String() string {
+	return fmt.Sprintf("Handler[action:%s]", h.config.Action.Ref)
 }

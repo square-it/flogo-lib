@@ -13,11 +13,11 @@ type Activity interface {
 	Metadata() *Metadata
 }
 
-// Init is an optional interface that can be implemented by an activity.  If implemented,
+// Initializable is an optional interface that can be implemented by an activity.  If implemented,
 // it will be invoked for each corresponding activity configuration that has settings.
-//type Init interface {
+//type Initializable interface {
 //
-//	// Init initialize the Activity for a particular configuration
+//	// Initialize is called to initialize the Activity for a particular configuration
 //	Initialize(ctx InitContext) error
 //}
 

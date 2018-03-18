@@ -17,16 +17,13 @@ type Trigger interface {
 
 	// Metadata returns the metadata of the trigger
 	Metadata() *Metadata
-
-	// Deprecated: Triggers should implement trigger.Init interface
-	Init(actionRunner action.Runner)
 }
 
-// Init interface should be implemented by all Triggers, the Initialize method
-// will eventually move up to Trigger to replace the deprecated "Init" method
-type Init interface {
+// Initializable interface should be implemented by all Triggers, the Initialize method
+// will eventually move up to Trigger to replace the the old "Init" method
+type Initializable interface {
 
-	// Init initialize the Activity for a particular configuration
+	// Initialize is called to initialize the Trigger
 	Initialize(ctx InitContext) error
 }
 
@@ -35,4 +32,11 @@ type InitContext interface {
 
 	// GetHandlers gets the handlers associated with the trigger
 	GetHandlers() []*Handler
+}
+
+// Deprecated: No longer used
+type InitOld interface {
+
+	// Deprecated: Triggers should implement trigger.Initializable interface
+	Init(actionRunner action.Runner)
 }
