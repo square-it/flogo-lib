@@ -125,19 +125,11 @@ func (h *Handler) dataToAttrs(triggerData map[string]interface{}) ([]*data.Attri
 
 func (h *Handler) generateInputs(triggerData map[string]interface{}) (map[string]*data.Attribute, error) {
 
-	if len(triggerData) == 0 {
-		return nil, nil
-	}
-
 	triggerAttrs, err := h.dataToAttrs(triggerData)
 
 	if err != nil {
 		logger.Errorf("Failed parsing attrs: %s, Error: %s", triggerData, err)
 		return nil, err
-	}
-
-	if len(triggerAttrs) == 0 {
-		return nil, nil
 	}
 
 	var inputs map[string]*data.Attribute
