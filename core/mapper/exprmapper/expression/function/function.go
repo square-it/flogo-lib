@@ -10,9 +10,9 @@ import (
 	"fmt"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/funcexprtype"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/funcexprtype"
 )
 
 var logrus = logger.GetLogger("function")
@@ -28,16 +28,16 @@ type FunctionExp struct {
 }
 
 type Parameter struct {
-	Function *FunctionExp `json:"function"`
-	Type     funcexprtype.Type    `json:"type"`
-	Value    interface{}  `json:"value"`
+	Function *FunctionExp      `json:"function"`
+	Type     funcexprtype.Type `json:"type"`
+	Value    interface{}       `json:"value"`
 }
 
 func (p *Parameter) UnmarshalJSON(paramData []byte) error {
 	ser := &struct {
-		Function *FunctionExp `json:"function"`
-		Type     funcexprtype.Type    `json:"type"`
-		Value    interface{}  `json:"value"`
+		Function *FunctionExp      `json:"function"`
+		Type     funcexprtype.Type `json:"type"`
+		Value    interface{}       `json:"value"`
 	}{}
 
 	if err := json.Unmarshal(paramData, ser); err != nil {
@@ -223,15 +223,25 @@ func (f *FunctionExp) callFunction(fdata interface{}, inputScope data.Scope, res
 					case *ref.ArrayRef:
 						field = p.Value.(*ref.ArrayRef)
 					}
-					//TODO
 					if inputScope == nil {
 						p.Value = field.GetRef()
 					} else {
-						v, err := field.EvalFromData(fdata)
-						if err != nil {
-							return nil, err
+						if fdata == nil {
+							//Array mapping should not go here for today, take is as get current scope.
+							//TODO how to know it is array mapping or get current scope
+							ref := ref.NewMappingRef(field.GetRef())
+							v, _ := ref.Eval(inputScope, resolver)
+							p.Value = v
+
+						} else {
+							v, err := field.EvalFromData(fdata)
+							if err != nil {
+								return nil, err
+							}
+							p.Value = v
+
 						}
-						p.Value = v
+
 					}
 				}
 				if p.Value != nil {
