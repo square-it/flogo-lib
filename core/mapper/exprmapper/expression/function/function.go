@@ -230,7 +230,10 @@ func (f *FunctionExp) callFunction(fdata interface{}, inputScope data.Scope, res
 							//Array mapping should not go here for today, take is as get current scope.
 							//TODO how to know it is array mapping or get current scope
 							ref := ref.NewMappingRef(field.GetRef())
-							v, _ := ref.Eval(inputScope, resolver)
+							v, err := ref.Eval(inputScope, resolver)
+							if err != nil {
+								return nil, err
+							}
 							p.Value = v
 
 						} else {
