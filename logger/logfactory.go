@@ -145,7 +145,7 @@ func (logfactory *DefaultLoggerFactory) GetLogger(name string) Logger {
 		// Get log level for name
 		level, err := GetLevelForName(logLevelName)
 		if err != nil {
-			return nil
+			panic(fmt.Sprintf("Unsupported Log Level - [%s]. Supported Value - [INFO DEBUG WARN ERROR]", logLevelName))
 		}
 		l.SetLogLevel(level)
 		mutex.Lock()
