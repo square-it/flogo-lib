@@ -9,11 +9,18 @@ import (
 
 	"reflect"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+
+	//Pre registry all function for now
+	_ "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/function/number/random"
+	_ "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/function/string/concat"
+	_ "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/function/string/equals"
+	_ "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/function/string/equalsignorecase"
+	_ "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/function/string/length"
 )
 
 var log = logger.GetLogger("mapper")
@@ -178,7 +185,6 @@ func SetAttribute(fieldName string, value interface{}, outputScope data.Scope) e
 	return nil
 }
 
-
 func RemovePrefixInput(str string) string {
 	if str != "" && strings.HasPrefix(str, MAP_TO_INPUT) {
 		//Remove $INPUT for mapTo
@@ -190,4 +196,3 @@ func RemovePrefixInput(str string) string {
 	}
 	return str
 }
-
