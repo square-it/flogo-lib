@@ -19,6 +19,7 @@ import (
 	_ "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/function/number/random"
 	_ "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/function/string/concat"
 	_ "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/function/string/equals"
+	_ "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/function/string/equalsignorecase"
 	_ "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/function/string/length"
 )
 

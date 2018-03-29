@@ -1,4 +1,4 @@
-package equals
+package equalsignorecase
 
 import (
 	"strings"
