@@ -10,12 +10,22 @@ import (
 
 var loggerMap = make(map[string]Logger)
 var mutex = &sync.RWMutex{}
-
+var logLevel = InfoLevel
 type DefaultLoggerFactory struct {
 }
 
 func init() {
+
 	RegisterLoggerFactory(&DefaultLoggerFactory{})
+
+	logLevelName := config.GetLogLevel()
+	// Get log level for name
+	getLogLevel, err := GetLevelForName(logLevelName)
+	if err != nil {
+		println("Unsupported Log Level - ["+logLevelName+"]. Set to Log Level - ["+defaultLogLevel+"]")
+	} else {
+		logLevel = getLogLevel
+	}
 }
 
 type DefaultLogger struct {
@@ -140,14 +150,9 @@ func (logfactory *DefaultLoggerFactory) GetLogger(name string) Logger {
 			loggerName: name,
 			loggerImpl: logImpl,
 		}
-		// Get log level from config
-		logLevelName := config.GetLogLevel()
-		// Get log level for name
-		level, err := GetLevelForName(logLevelName)
-		if err != nil {
-			return nil
-		}
-		l.SetLogLevel(level)
+
+		l.SetLogLevel(logLevel)
+
 		mutex.Lock()
 		loggerMap[name] = l
 		mutex.Unlock()
