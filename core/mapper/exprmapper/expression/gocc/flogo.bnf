@@ -75,6 +75,7 @@ Flogo
 BaseExpr
     : Func
     | Expr
+    | Param
     ;
 Func
 	: function_name "(" Args ")"                 << direction.NewFunction($0, $2) >>
@@ -87,11 +88,12 @@ Args
     ;
 
 Expr
+    : ExprArg Operator ExprArg                   <<direction.NewExpression($0, $1, $2) >>
+    ;
+ExprArg
     : ExprParam                                  <<direction.NewExpressionField($0)>>
-    | Expr Operator Expr                         <<direction.NewExpression($0, $1, $2) >>
     | "(" Expr ")"                               <<direction.NewExpressionField($1) >>
     ;
-
 Operator
     : operator_charactor
     ;
@@ -104,12 +106,12 @@ ExprParam
     | Func                                       <<direction.NewExpressionField($0)>>
     ;
 Param
-     : Int                                        <<direction.NewExpressionField($0)>>
-     | Float                                      <<direction.NewExpressionField($0)>>
-     | Bool                                       <<direction.NewExpressionField($0)>>
-     | DoubleQString                              <<direction.NewExpressionField($0)>>
-     | SingleQString                              <<direction.NewExpressionField($0)>>
-     | MappingRef                                 <<direction.NewExpressionField($0)>>
+     : Int
+     | Float
+     | Bool
+     | DoubleQString
+     | SingleQString
+     | MappingRef
      ;
 
 DoubleQString
