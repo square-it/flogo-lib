@@ -151,7 +151,6 @@ func (t *TernaryExpressio) EvalWithData(value interface{}, inputScope data.Scope
 
 func (t *TernaryExpressio) HandleParameter(param interface{}, value interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
 	var firstValue interface{}
-	fmt.Println(reflect.TypeOf(param))
 	switch t := param.(type) {
 	case *function.FunctionExp:
 		vss, err := t.EvalWithData(value, inputScope, resolver)
