@@ -318,3 +318,13 @@ func TestIsFunction(t *testing.T) {
 	b = IsFunction(`$A3.name.fields`)
 	assert.False(t, b)
 }
+
+func TestNewExpressionBoolean(t *testing.T) {
+	v, err := NewExpression(`(string.length("sea") == 3) == true`).Eval()
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, true, v)
+	fmt.Println("Result:", v)
+}

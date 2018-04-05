@@ -74,9 +74,13 @@ argument : '$' _flogostring ;
            Result: Beijing10
  */
 Flogo
+    : BaseExpr
+    | TernaryExp
+    ;
+
+BaseExpr
     : Func
     | Expr
-    | TernaryExp
     ;
 Func
 	: function_name "(" Args ")"                 << direction.NewFunction($0, $2) >>
@@ -98,8 +102,7 @@ Operator
     : operator_charactor
     ;
 TernaryExp
-    : Expr                                       <<direction.NewExpressionField($0) >>
-    | TernaryExp "?" ExprParam ":" ExprParam     <<direction.NewTernaryExpression($0, $2, $4)>>
+    : BaseExpr "?" BaseExpr ":" BaseExpr     <<direction.NewTernaryExpression($0, $2, $4)>>
     ;
 
 ExprParam
