@@ -155,7 +155,11 @@ func (t *TernaryExpressio) HandleParameter(param interface{}, inputScope data.Sc
 		}
 		firstValue = vss
 		return firstValue, nil
-
+	case *ref.ArrayRef:
+		//t.EvalFromData()
+		return nil, fmt.Errorf("ternary expression does not support array mapping")
+	case *ref.MappingRef:
+		return t.Eval(inputScope, resolver)
 	default:
 		firstValue = t
 		return firstValue, nil

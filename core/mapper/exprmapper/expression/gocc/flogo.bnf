@@ -23,6 +23,24 @@ number : (_number);
 _character_digit:  'a'-'z' | 'A'-'Z' | '0'-'9' | ':' | '.' | '_' | '-';
 
 /*Expression Operator*/
+/*
+    Expression which support operators so far
+        eq          -> =
+       	or          -> ||
+       	and         -> &
+       	ne          -> !=
+       	gt          -> >
+       	lt          -> <
+       	ge          -> >=
+       	le          -> <=
+       	+           -> +
+       	-           -> -
+       	*           -> *
+       	div         -> /
+       	idiv        -> /
+       	mod         -> mod
+       	|           -> |
+*/
 _operator_charactor : '>' | '<' | '|' | '&' | '!' | '=' | '+' | '-' | '*' | '/' | ' ';
 //_operator_str : 'a'-'z' | 'A'-'Z' ;
 //operator_str : {_operator_str} ;
@@ -34,11 +52,6 @@ _flogostring : {_ref};
 
 //Static function name, such as concat, substring, len etc...
 function_name : {_character_digit} ;
-
-//space : {_whitespace} ;
-//Static function parameter delimitor
-delimitor_param : ',' ;
-
 _quotedpair : '\\' . ;
 
 //Double quotes strings
@@ -60,92 +73,64 @@ argument : '$' _flogostring ;
         2. concat("Beijing",String(number(Len("lixingwang"))))
            Result: Beijing10
  */
-Func :
-    Func1
+Flogo
+    : Func
     | Expr
+    | TernaryExp
     ;
-Func1
-	: function_name "(" Args ")"   << direction.NewFunction($0, $2) >>
-	| function_name "()"   << direction.NewFunction($0, "") >>
-//	| function_name "(" space Args space ")"   << direction.NewFunction($0, $3) >>
+Func
+	: function_name "(" Args ")"                 << direction.NewFunction($0, $2) >>
+	| function_name "()"                         << direction.NewFunction($0, "") >>
 
 	;
 Args
-	: DoubleQString          <<direction.NewArgument($0)>>
-    | SingleQString          <<direction.NewArgument($0)>>
-	| Int             <<direction.NewArgument($0)>>
-    | Float           <<direction.NewArgument($0)>>
-    | Bool            <<direction.NewArgument($0)>>
-	| MappingRef      <<direction.NewArgument($0)>>
-	| Func1           <<direction.NewArgument($0)>>
-	| Args delimitor_param Args   <<direction.NewArguments($0, $2)>>
+	: ExprParam                                  <<direction.NewArgument($0)>>
+	| Args "," Args                              <<direction.NewArguments($0, $2)>>
     ;
-DoubleQString
-    : doublequotes_string      <<direction.NewDoubleQuoteStringLit($0)>>
-    ;
-SingleQString
-    : singlequote_string      <<direction.NewSingleQuoteStringLit($0)>>
-    ;
-Int
-    : number           <<direction.NewIntLit($0)>>
-    ;
-MappingRef
-    : argument      <<direction.NewMappingRef($0)>>
-    ;
-Bool
-    : "true"           <<direction.NewBool($0)>>
-    | "false"          <<direction.NewBool($0)>>
-    ;
-Float
-    : float           <<direction.NewFloatLit($0)>>
-    ;
-
-/*
-    Expression which support operators so far
-        eq          -> =
-       	or          -> ||
-       	and         -> &
-       	ne          -> !=
-       	gt          -> >
-       	lt          -> <
-       	ge          -> >=
-       	le          -> <=
-       	+           -> +
-       	-           -> -
-       	*           -> *
-       	div         -> /
-       	idiv        -> /
-       	mod         -> mod
-       	|           -> |
-*/
-
 
 Expr
-    : Int                     <<direction.NewExpressionField($0)>>
-    | Float                   <<direction.NewExpressionField($0)>>
-    | DoubleQString           <<direction.NewExpressionField($0)>>
-    | SingleQString           <<direction.NewExpressionField($0)>>
-    | MappingRef              <<direction.NewExpressionField($0)>>
-    | Func1                   <<direction.NewExpressionField($0)>>
-    | Expr Operator Expr      <<direction.NewExpression($0, $1, $2) >>
-    | TernaryExp
-    | "(" Expr ")"            <<direction.NewExpressionField($1) >>
+    : ExprParam                                  <<direction.NewExpressionField($0)>>
+    | Expr Operator Expr                         <<direction.NewExpression($0, $1, $2) >>
+    | "(" Expr ")"                               <<direction.NewExpressionField($1) >>
     ;
 
 Operator
     : operator_charactor
     ;
 TernaryExp
-    : Expr                          <<direction.NewExpressionField($0) >>
-    | TernaryExp "?" TernaryParam ":" TernaryParam  <<direction.NewTernaryExpression($0, $2, $4)>>
+    : Expr                                       <<direction.NewExpressionField($0) >>
+    | TernaryExp "?" ExprParam ":" ExprParam     <<direction.NewTernaryExpression($0, $2, $4)>>
     ;
 
-TernaryParam
-    :Int                     <<direction.NewExpressionField($0)>>
-    | Float                  <<direction.NewExpressionField($0)>>
-    | DoubleQString          <<direction.NewExpressionField($0)>>
-    | SingleQString          <<direction.NewExpressionField($0)>>
-    | MappingRef             <<direction.NewExpressionField($0)>>
-    | Func
+ExprParam
+    : Param                                      <<direction.NewExpressionField($0)>>
+    | Func                                       <<direction.NewExpressionField($0)>>
     ;
+Param
+     : Int                                        <<direction.NewExpressionField($0)>>
+     | Float                                      <<direction.NewExpressionField($0)>>
+     | Bool                                       <<direction.NewExpressionField($0)>>
+     | DoubleQString                              <<direction.NewExpressionField($0)>>
+     | SingleQString                              <<direction.NewExpressionField($0)>>
+     | MappingRef                                 <<direction.NewExpressionField($0)>>
+     ;
 
+DoubleQString
+    : doublequotes_string                        <<direction.NewDoubleQuoteStringLit($0)>>
+    ;
+SingleQString
+    : singlequote_string                         <<direction.NewSingleQuoteStringLit($0)>>
+    ;
+Int
+    : number                                     <<direction.NewIntLit($0)>>
+    ;
+MappingRef
+    : argument                                   <<direction.NewMappingRef($0)>>
+    ;
+Bool
+    : "true"                                     <<direction.NewBool($0)>>
+    | "false"                                    <<direction.NewBool($0)>>
+    ;
+Float
+    : float                                      <<direction.NewFloatLit($0)>>
+    ;
