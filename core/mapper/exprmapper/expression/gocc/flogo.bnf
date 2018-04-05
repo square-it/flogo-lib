@@ -1,6 +1,6 @@
 /*
     This file use to describe all function and expression that support in Flogo.
-    The are BNF standard expression
+    BNF standard expression
 
     Author: Tracy Li
  */
@@ -25,9 +25,9 @@ _character_digit:  'a'-'z' | 'A'-'Z' | '0'-'9' | ':' | '.' | '_' | '-';
 /*Expression Operator*/
 /*
     Expression which support operators so far
-        eq          -> =
+        eq          -> ==
        	or          -> ||
-       	and         -> &
+       	and         -> &&
        	ne          -> !=
        	gt          -> >
        	lt          -> <
@@ -36,14 +36,8 @@ _character_digit:  'a'-'z' | 'A'-'Z' | '0'-'9' | ':' | '.' | '_' | '-';
        	+           -> +
        	-           -> -
        	*           -> *
-       	div         -> /
-       	idiv        -> /
-       	mod         -> mod
-       	|           -> |
 */
 _operator_charactor : '>' | '<' | '|' | '&' | '!' | '=' | '+' | '-' | '*' | '/' | ' ';
-//_operator_str : 'a'-'z' | 'A'-'Z' ;
-//operator_str : {_operator_str} ;
 operator_charactor : {_operator_charactor} ;
 
 _refbracket : '[' {.} ']';
@@ -75,7 +69,7 @@ argument : '$' _flogostring ;
  */
 Flogo
     : BaseExpr
-    | TernaryExp
+    | TernaryExpr
     ;
 
 BaseExpr
@@ -101,7 +95,7 @@ Expr
 Operator
     : operator_charactor
     ;
-TernaryExp
+TernaryExpr
     : BaseExpr "?" BaseExpr ":" BaseExpr     <<direction.NewTernaryExpression($0, $2, $4)>>
     ;
 

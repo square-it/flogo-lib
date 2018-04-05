@@ -18,7 +18,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		5,  // Expr
 		-1, // Operator
-		3,  // TernaryExp
+		3,  // TernaryExpr
 		8,  // ExprParam
 		9,  // Param
 		13, // DoubleQString
@@ -36,7 +36,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -54,7 +54,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -72,7 +72,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -90,7 +90,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -108,7 +108,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		24, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -126,7 +126,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -144,7 +144,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		29, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		32, // ExprParam
 		33, // Param
 		37, // DoubleQString
@@ -162,7 +162,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -180,7 +180,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -198,7 +198,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -216,7 +216,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -234,7 +234,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -252,7 +252,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -270,7 +270,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -288,7 +288,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -306,7 +306,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -324,7 +324,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -342,7 +342,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -360,7 +360,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -378,7 +378,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -396,7 +396,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -414,7 +414,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -432,7 +432,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		49, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		52, // ExprParam
 		53, // Param
 		57, // DoubleQString
@@ -450,7 +450,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		68, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		8,  // ExprParam
 		9,  // Param
 		13, // DoubleQString
@@ -468,7 +468,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -486,7 +486,7 @@ var gotoTab = gotoTable{
 		71, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		72, // ExprParam
 		73, // Param
 		77, // DoubleQString
@@ -504,7 +504,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -522,7 +522,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -540,7 +540,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		88, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -558,7 +558,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -576,7 +576,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		91, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		32, // ExprParam
 		33, // Param
 		37, // DoubleQString
@@ -594,7 +594,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -612,7 +612,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -630,7 +630,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -648,7 +648,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -666,7 +666,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -684,7 +684,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -702,7 +702,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -720,7 +720,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -738,7 +738,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -756,7 +756,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -774,7 +774,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -792,7 +792,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -810,7 +810,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -828,7 +828,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -846,7 +846,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -864,7 +864,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -882,7 +882,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -900,7 +900,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		93, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -918,7 +918,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -936,7 +936,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		96, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		32, // ExprParam
 		33, // Param
 		37, // DoubleQString
@@ -954,7 +954,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -972,7 +972,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -990,7 +990,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1008,7 +1008,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1026,7 +1026,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1044,7 +1044,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1062,7 +1062,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1080,7 +1080,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1098,7 +1098,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1116,7 +1116,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1134,7 +1134,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1152,7 +1152,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1170,7 +1170,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1188,7 +1188,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1206,7 +1206,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1224,7 +1224,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1242,7 +1242,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		24, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1260,7 +1260,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1278,7 +1278,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1296,7 +1296,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1314,7 +1314,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1332,7 +1332,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1350,7 +1350,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1368,7 +1368,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1386,7 +1386,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1404,7 +1404,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1422,7 +1422,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1440,7 +1440,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1458,7 +1458,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1476,7 +1476,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1494,7 +1494,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1512,7 +1512,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1530,7 +1530,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1548,7 +1548,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1566,7 +1566,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1584,7 +1584,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1602,7 +1602,7 @@ var gotoTab = gotoTable{
 		-1,  // Args
 		101, // Expr
 		-1,  // Operator
-		-1,  // TernaryExp
+		-1,  // TernaryExpr
 		32,  // ExprParam
 		33,  // Param
 		37,  // DoubleQString
@@ -1620,7 +1620,7 @@ var gotoTab = gotoTable{
 		102, // Args
 		-1,  // Expr
 		-1,  // Operator
-		-1,  // TernaryExp
+		-1,  // TernaryExpr
 		72,  // ExprParam
 		73,  // Param
 		77,  // DoubleQString
@@ -1638,7 +1638,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1656,7 +1656,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		88, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1674,7 +1674,7 @@ var gotoTab = gotoTable{
 		-1,  // Args
 		106, // Expr
 		-1,  // Operator
-		-1,  // TernaryExp
+		-1,  // TernaryExpr
 		109, // ExprParam
 		110, // Param
 		114, // DoubleQString
@@ -1692,7 +1692,7 @@ var gotoTab = gotoTable{
 		-1,  // Args
 		125, // Expr
 		-1,  // Operator
-		-1,  // TernaryExp
+		-1,  // TernaryExpr
 		52,  // ExprParam
 		53,  // Param
 		57,  // DoubleQString
@@ -1710,7 +1710,7 @@ var gotoTab = gotoTable{
 		126, // Args
 		-1,  // Expr
 		-1,  // Operator
-		-1,  // TernaryExp
+		-1,  // TernaryExpr
 		72,  // ExprParam
 		73,  // Param
 		77,  // DoubleQString
@@ -1728,7 +1728,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1746,7 +1746,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		88, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1764,7 +1764,7 @@ var gotoTab = gotoTable{
 		128, // Args
 		-1,  // Expr
 		-1,  // Operator
-		-1,  // TernaryExp
+		-1,  // TernaryExpr
 		72,  // ExprParam
 		73,  // Param
 		77,  // DoubleQString
@@ -1782,7 +1782,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1800,7 +1800,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1818,7 +1818,7 @@ var gotoTab = gotoTable{
 		129, // Args
 		-1,  // Expr
 		-1,  // Operator
-		-1,  // TernaryExp
+		-1,  // TernaryExpr
 		72,  // ExprParam
 		73,  // Param
 		77,  // DoubleQString
@@ -1836,7 +1836,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		88, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1854,7 +1854,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1872,7 +1872,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1890,7 +1890,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1908,7 +1908,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1926,7 +1926,7 @@ var gotoTab = gotoTable{
 		-1,  // Args
 		-1,  // Expr
 		131, // Operator
-		-1,  // TernaryExp
+		-1,  // TernaryExpr
 		-1,  // ExprParam
 		-1,  // Param
 		-1,  // DoubleQString
@@ -1944,7 +1944,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1962,7 +1962,7 @@ var gotoTab = gotoTable{
 		-1,  // Args
 		134, // Expr
 		-1,  // Operator
-		-1,  // TernaryExp
+		-1,  // TernaryExpr
 		32,  // ExprParam
 		33,  // Param
 		37,  // DoubleQString
@@ -1980,7 +1980,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -1998,7 +1998,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2016,7 +2016,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2034,7 +2034,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2052,7 +2052,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2070,7 +2070,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2088,7 +2088,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2106,7 +2106,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2124,7 +2124,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2142,7 +2142,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2160,7 +2160,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2178,7 +2178,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2196,7 +2196,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2214,7 +2214,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2232,7 +2232,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2250,7 +2250,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2268,7 +2268,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		93, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2286,7 +2286,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2304,7 +2304,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2322,7 +2322,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2340,7 +2340,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2358,7 +2358,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2376,7 +2376,7 @@ var gotoTab = gotoTable{
 		-1,  // Args
 		138, // Expr
 		-1,  // Operator
-		-1,  // TernaryExp
+		-1,  // TernaryExpr
 		109, // ExprParam
 		110, // Param
 		114, // DoubleQString
@@ -2394,7 +2394,7 @@ var gotoTab = gotoTable{
 		139, // Args
 		-1,  // Expr
 		-1,  // Operator
-		-1,  // TernaryExp
+		-1,  // TernaryExpr
 		72,  // ExprParam
 		73,  // Param
 		77,  // DoubleQString
@@ -2412,7 +2412,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2430,7 +2430,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		88, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2448,7 +2448,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2466,7 +2466,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2484,7 +2484,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2502,7 +2502,7 @@ var gotoTab = gotoTable{
 		-1,  // Args
 		-1,  // Expr
 		131, // Operator
-		-1,  // TernaryExp
+		-1,  // TernaryExpr
 		-1,  // ExprParam
 		-1,  // Param
 		-1,  // DoubleQString
@@ -2520,7 +2520,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2538,7 +2538,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString
@@ -2556,7 +2556,7 @@ var gotoTab = gotoTable{
 		-1, // Args
 		-1, // Expr
 		-1, // Operator
-		-1, // TernaryExp
+		-1, // TernaryExpr
 		-1, // ExprParam
 		-1, // Param
 		-1, // DoubleQString

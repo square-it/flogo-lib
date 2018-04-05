@@ -2303,7 +2303,7 @@ var actionTab = actionTable{
 		canRecover: false,
 		actions: [numSymbols]action{
 			nil,        /* INVALID */
-			reduce(13), /* $, reduce: TernaryExp */
+			reduce(13), /* $, reduce: TernaryExpr */
 			nil,        /* function_name */
 			nil,        /* ( */
 			nil,        /* ) */

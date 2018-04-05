@@ -41,7 +41,7 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Flogo : TernaryExp	<<  >>`,
+		String: `Flogo : TernaryExpr	<<  >>`,
 		Id:         "Flogo",
 		NTType:     1,
 		Index:      2,
@@ -151,8 +151,8 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `TernaryExp : BaseExpr "?" BaseExpr ":" BaseExpr	<< direction.NewTernaryExpression(X[0], X[2], X[4]) >>`,
-		Id:         "TernaryExp",
+		String: `TernaryExpr : BaseExpr "?" BaseExpr ":" BaseExpr	<< direction.NewTernaryExpression(X[0], X[2], X[4]) >>`,
+		Id:         "TernaryExpr",
 		NTType:     7,
 		Index:      13,
 		NumSymbols: 5,
