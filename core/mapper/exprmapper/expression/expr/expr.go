@@ -75,6 +75,12 @@ var operatorCharactorMap = map[string]OPERATIOR{
 	//TODO negtive
 }
 
+type Expr interface {
+	EvalWithScope(inputScope data.Scope, resolver data.Resolver) (interface{}, error)
+	Eval() (interface{}, error)
+	EvalWithData(value interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error)
+}
+
 func ToOperator(operator string) (OPERATIOR, bool) {
 	op, found := operatorMap[operator]
 	if !found {
@@ -116,18 +122,26 @@ type TernaryExpressio struct {
 }
 
 func (t *TernaryExpressio) EvalWithScope(inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
-	v, err := t.HandleParameter(t.First, inputScope, resolver)
+	return t.EvalWithData(nil, inputScope, resolver)
+}
+
+func (t *TernaryExpressio) Eval() (interface{}, error) {
+	return t.EvalWithScope(nil, data.GetBasicResolver())
+}
+
+func (t *TernaryExpressio) EvalWithData(value interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
+	v, err := t.HandleParameter(t.First, value, inputScope, resolver)
 	if err != nil {
 		return nil, err
 	}
 	if v.(bool) {
-		v2, err2 := t.HandleParameter(t.Second, inputScope, resolver)
+		v2, err2 := t.HandleParameter(t.Second, value, inputScope, resolver)
 		if err2 != nil {
 			return nil, err2
 		}
 		return v2, nil
 	} else {
-		v3, err3 := t.HandleParameter(t.Third, inputScope, resolver)
+		v3, err3 := t.HandleParameter(t.Third, value, inputScope, resolver)
 		if err3 != nil {
 			return nil, err3
 		}
@@ -135,29 +149,25 @@ func (t *TernaryExpressio) EvalWithScope(inputScope data.Scope, resolver data.Re
 	}
 }
 
-func (t *TernaryExpressio) HandleParameter(param interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
+func (t *TernaryExpressio) HandleParameter(param interface{}, value interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
 	var firstValue interface{}
 	fmt.Println(reflect.TypeOf(param))
 	switch t := param.(type) {
 	case *function.FunctionExp:
-		vss, err := t.EvalWithScope(inputScope, resolver)
+		vss, err := t.EvalWithData(value, inputScope, resolver)
 		if err != nil {
 			return nil, err
 		}
-		if len(vss) > 0 {
-			firstValue = vss[0]
-		}
-		return firstValue, nil
+		return function.HandleToSingleOutput(vss), nil
 	case *Expression:
-		vss, err := t.EvalWithScope(inputScope, resolver)
+		vss, err := t.EvalWithData(value, inputScope, resolver)
 		if err != nil {
 			return nil, err
 		}
 		firstValue = vss
 		return firstValue, nil
 	case *ref.ArrayRef:
-		//t.EvalFromData()
-		return nil, fmt.Errorf("ternary expression does not support array mapping")
+		return t.EvalFromData(value)
 	case *ref.MappingRef:
 		return t.Eval(inputScope, resolver)
 	default:
@@ -269,18 +279,12 @@ func (f *Expression) do(edata interface{}, inputScope data.Scope, resolver data.
 	log.Debug("Do left and expression ", f)
 	var leftValue interface{}
 	if f.IsFunction() {
-		function := f.Value.(*function.FunctionExp)
-		funcReturn, err := function.EvalWithScope(inputScope, resolver)
+		funct := f.Value.(*function.FunctionExp)
+		funcReturn, err := funct.EvalWithScope(inputScope, resolver)
 		if err != nil {
 			resultChan <- errors.New("Eval left expression error: " + err.Error())
 		}
-
-		if len(funcReturn) > 1 {
-			resultChan <- errors.New("Function " + function.Name + " cannot return more than one using in expression")
-		}
-		if len(funcReturn) == 1 {
-			leftValue = funcReturn[0]
-		}
+		leftValue = function.HandleToSingleOutput(funcReturn)
 	} else if f.Type == funcexprtype.EXPRESSION {
 		var err error
 		leftValue, err = f.evaluate(edata, inputScope, resolver)

@@ -21,11 +21,11 @@ func TestStaticFunc_String_length(t *testing.T) {
 }
 
 func TestExpression(t *testing.T) {
-	fun, err := expression.NewFunctionExpression(`string.length("seafood,name")`).GetFunction()
+	fun, err := expression.ParserExpression(`string.length("seafood,name")`)
 	assert.Nil(t, err)
 	assert.NotNil(t, fun)
 	v, err := fun.Eval()
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
-	assert.Equal(t, 12, v[0])
+	assert.Equal(t, 12, v)
 }

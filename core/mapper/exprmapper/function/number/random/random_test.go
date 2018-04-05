@@ -16,11 +16,11 @@ func TestSample(t *testing.T) {
 }
 
 func TestExpression(t *testing.T) {
-	fun, err := expression.NewFunctionExpression(`number.random(100000)`).GetFunction()
+	fun, err := expression.ParserExpression(`number.random(100000)`)
 	assert.Nil(t, err)
 	assert.NotNil(t, fun)
 	v, err := fun.Eval()
 	assert.Nil(t, err)
-	assert.NotNil(t, v[0])
+	assert.NotNil(t, v)
 	fmt.Println(v)
 }
