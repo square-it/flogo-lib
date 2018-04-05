@@ -210,7 +210,6 @@ func (f *FunctionExp) callFunction(fdata interface{}, inputScope data.Scope, res
 						if err != nil {
 							return nil, err
 						}
-						log.Info("============%s", v)
 						p.Value = v
 
 					}
