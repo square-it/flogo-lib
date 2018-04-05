@@ -328,3 +328,17 @@ func TestNewExpressionBoolean(t *testing.T) {
 	assert.Equal(t, true, v)
 	fmt.Println("Result:", v)
 }
+
+func TestExpressionWithNest(t *testing.T) {
+	//Invalid
+	_, err := NewExpression(`(1&&1)==(1&&1)`).Eval()
+	assert.NotNil(t, err)
+
+	//valid case
+	v, err := NewExpression(`(true && true) == false`).Eval()
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, false, v)
+}

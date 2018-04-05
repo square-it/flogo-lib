@@ -558,7 +558,7 @@ func add(left interface{}, right interface{}) (bool, error) {
 		}
 		return le && rightValue, nil
 	default:
-		return false, errors.New("Unknow type to add expression " + getType(left).String())
+		return false, errors.New("Unknow type use in add operator " + getType(left).String())
 	}
 
 	return false, nil
