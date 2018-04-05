@@ -125,6 +125,7 @@ Expr
     | Float                   <<direction.NewExpressionField($0)>>
     | DoubleQString           <<direction.NewExpressionField($0)>>
     | SingleQString           <<direction.NewExpressionField($0)>>
+    | Bool                    <<direction.NewExpressionField($0)>>
     | MappingRef              <<direction.NewExpressionField($0)>>
     | Func1                   <<direction.NewExpressionField($0)>>
     | Expr Operator Expr      <<direction.NewExpression($0, $1, $2) >>

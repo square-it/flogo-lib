@@ -261,7 +261,7 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Expr : MappingRef	<< direction.NewExpressionField(X[0]) >>`,
+		String: `Expr : Bool	<< direction.NewExpressionField(X[0]) >>`,
 		Id:         "Expr",
 		NTType:     10,
 		Index:      24,
@@ -271,7 +271,7 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Expr : Func1	<< direction.NewExpressionField(X[0]) >>`,
+		String: `Expr : MappingRef	<< direction.NewExpressionField(X[0]) >>`,
 		Id:         "Expr",
 		NTType:     10,
 		Index:      25,
@@ -281,10 +281,20 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Expr : Expr Operator Expr	<< direction.NewExpression(X[0], X[1], X[2]) >>`,
+		String: `Expr : Func1	<< direction.NewExpressionField(X[0]) >>`,
 		Id:         "Expr",
 		NTType:     10,
 		Index:      26,
+		NumSymbols: 1,
+		ReduceFunc: func(X []Attrib) (Attrib, error) {
+			return direction.NewExpressionField(X[0])
+		},
+	},
+	ProdTabEntry{
+		String: `Expr : Expr Operator Expr	<< direction.NewExpression(X[0], X[1], X[2]) >>`,
+		Id:         "Expr",
+		NTType:     10,
+		Index:      27,
 		NumSymbols: 3,
 		ReduceFunc: func(X []Attrib) (Attrib, error) {
 			return direction.NewExpression(X[0], X[1], X[2])
@@ -294,7 +304,7 @@ var productionsTable = ProdTab{
 		String: `Expr : TernaryExp	<<  >>`,
 		Id:         "Expr",
 		NTType:     10,
-		Index:      27,
+		Index:      28,
 		NumSymbols: 1,
 		ReduceFunc: func(X []Attrib) (Attrib, error) {
 			return X[0], nil
@@ -304,7 +314,7 @@ var productionsTable = ProdTab{
 		String: `Expr : "(" Expr ")"	<< direction.NewExpressionField(X[1]) >>`,
 		Id:         "Expr",
 		NTType:     10,
-		Index:      28,
+		Index:      29,
 		NumSymbols: 3,
 		ReduceFunc: func(X []Attrib) (Attrib, error) {
 			return direction.NewExpressionField(X[1])
@@ -314,7 +324,7 @@ var productionsTable = ProdTab{
 		String: `Operator : operator_charactor	<<  >>`,
 		Id:         "Operator",
 		NTType:     11,
-		Index:      29,
+		Index:      30,
 		NumSymbols: 1,
 		ReduceFunc: func(X []Attrib) (Attrib, error) {
 			return X[0], nil
@@ -324,7 +334,7 @@ var productionsTable = ProdTab{
 		String: `TernaryExp : Expr	<< direction.NewExpressionField(X[0]) >>`,
 		Id:         "TernaryExp",
 		NTType:     12,
-		Index:      30,
+		Index:      31,
 		NumSymbols: 1,
 		ReduceFunc: func(X []Attrib) (Attrib, error) {
 			return direction.NewExpressionField(X[0])
@@ -334,7 +344,7 @@ var productionsTable = ProdTab{
 		String: `TernaryExp : TernaryExp "?" TernaryParam ":" TernaryParam	<< direction.NewTernaryExpression(X[0], X[2], X[4]) >>`,
 		Id:         "TernaryExp",
 		NTType:     12,
-		Index:      31,
+		Index:      32,
 		NumSymbols: 5,
 		ReduceFunc: func(X []Attrib) (Attrib, error) {
 			return direction.NewTernaryExpression(X[0], X[2], X[4])
@@ -344,7 +354,7 @@ var productionsTable = ProdTab{
 		String: `TernaryParam : Int	<< direction.NewExpressionField(X[0]) >>`,
 		Id:         "TernaryParam",
 		NTType:     13,
-		Index:      32,
+		Index:      33,
 		NumSymbols: 1,
 		ReduceFunc: func(X []Attrib) (Attrib, error) {
 			return direction.NewExpressionField(X[0])
@@ -354,7 +364,7 @@ var productionsTable = ProdTab{
 		String: `TernaryParam : Float	<< direction.NewExpressionField(X[0]) >>`,
 		Id:         "TernaryParam",
 		NTType:     13,
-		Index:      33,
+		Index:      34,
 		NumSymbols: 1,
 		ReduceFunc: func(X []Attrib) (Attrib, error) {
 			return direction.NewExpressionField(X[0])
@@ -364,7 +374,7 @@ var productionsTable = ProdTab{
 		String: `TernaryParam : DoubleQString	<< direction.NewExpressionField(X[0]) >>`,
 		Id:         "TernaryParam",
 		NTType:     13,
-		Index:      34,
+		Index:      35,
 		NumSymbols: 1,
 		ReduceFunc: func(X []Attrib) (Attrib, error) {
 			return direction.NewExpressionField(X[0])
@@ -374,7 +384,7 @@ var productionsTable = ProdTab{
 		String: `TernaryParam : SingleQString	<< direction.NewExpressionField(X[0]) >>`,
 		Id:         "TernaryParam",
 		NTType:     13,
-		Index:      35,
+		Index:      36,
 		NumSymbols: 1,
 		ReduceFunc: func(X []Attrib) (Attrib, error) {
 			return direction.NewExpressionField(X[0])
@@ -384,7 +394,7 @@ var productionsTable = ProdTab{
 		String: `TernaryParam : MappingRef	<< direction.NewExpressionField(X[0]) >>`,
 		Id:         "TernaryParam",
 		NTType:     13,
-		Index:      36,
+		Index:      37,
 		NumSymbols: 1,
 		ReduceFunc: func(X []Attrib) (Attrib, error) {
 			return direction.NewExpressionField(X[0])
@@ -394,7 +404,7 @@ var productionsTable = ProdTab{
 		String: `TernaryParam : Func	<<  >>`,
 		Id:         "TernaryParam",
 		NTType:     13,
-		Index:      37,
+		Index:      38,
 		NumSymbols: 1,
 		ReduceFunc: func(X []Attrib) (Attrib, error) {
 			return X[0], nil
