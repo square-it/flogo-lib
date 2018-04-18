@@ -429,3 +429,175 @@ func TestExpressionWithNest(t *testing.T) {
 	}
 	assert.Equal(t, false, v)
 }
+
+func TestExpressionWithNILLiteral(t *testing.T) {
+	//valid case
+	e, err := ParserExpression(`(true && true) != nil`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	v, err := e.Eval()
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, true, v)
+
+	e, err = ParserExpression(`123 != nil`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	v, err = e.Eval()
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, true, v)
+
+	e, err = ParserExpression(`nil == nil`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	v, err = e.Eval()
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, true, v)
+}
+func TestExpressionWithNIL(t *testing.T) {
+	os.Setenv("name", "test")
+	defer func() {
+		os.Unsetenv("name")
+	}()
+	scope := data.NewFixedScope(nil)
+	e, err := ParserExpression(`$env.name != nil`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	v, err := e.EvalWithScope(scope, data.GetBasicResolver())
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, true, v)
+
+	e, err = ParserExpression(`$env.name == "test"`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	v, err = e.EvalWithScope(scope, data.GetBasicResolver())
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, true, v)
+
+	e, err = ParserExpression(`$.name.test == nil`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+
+	v, err = e.EvalWithScope(GetSimpleScope("name", "{}"), data.GetBasicResolver())
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, true, v)
+
+	e, err = ParserExpression(`$.name.test != nil`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+
+	v, err = e.EvalWithScope(GetSimpleScope("name", `{"test":"123"}`), data.GetBasicResolver())
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, true, v)
+
+	e, err = ParserExpression(`$.name.test == "123"`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+
+	v, err = e.EvalWithScope(GetSimpleScope("name", `{"test":"123"}`), data.GetBasicResolver())
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, true, v)
+
+	d := `{"test":"test", "obj":{"id":123, "value":null}}`
+	testScope := GetSimpleScope("name", d)
+
+	e, err = ParserExpression(`$.name.test == "test"`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+
+	v, err = e.EvalWithScope(testScope, data.GetBasicResolver())
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, true, v)
+
+	e, err = ParserExpression(`$.name.obj.value == nil`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+
+	v, err = e.EvalWithScope(testScope, data.GetBasicResolver())
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, true, v)
+
+	e, err = ParserExpression(`$.name.obj.id == 123`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+
+	v, err = e.EvalWithScope(testScope, data.GetBasicResolver())
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, true, v)
+
+	e, err = ParserExpression(`$.name.obj.notexist == nil`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+
+	v, err = e.EvalWithScope(testScope, data.GetBasicResolver())
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, true, v)
+}
+
+func GetSimpleScope(name, value string) data.Scope {
+	a, _ := data.NewAttribute(name, data.TypeObject, value)
+	maps := make(map[string]*data.Attribute)
+	maps[name] = a
+	scope := data.NewFixedScope(maps)
+	scope.SetAttrValue(name, value)
+	return scope
+}
