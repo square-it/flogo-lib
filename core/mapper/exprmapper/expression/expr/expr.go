@@ -166,12 +166,31 @@ func (t *TernaryExpressio) HandleParameter(param interface{}, value interface{},
 		firstValue = vss
 		return firstValue, nil
 	case *ref.ArrayRef:
-		return t.EvalFromData(value)
+		return handleArrayRef(value, t.GetRef(), inputScope, resolver)
 	case *ref.MappingRef:
 		return t.Eval(inputScope, resolver)
 	default:
 		firstValue = t
 		return firstValue, nil
+	}
+}
+
+func handleArrayRef(edata interface{}, mapref string, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
+	if edata == nil {
+		v, err := ref.NewMappingRef(mapref).Eval(inputScope, resolver)
+		if err != nil {
+			log.Errorf("Mapping ref eva error [%s]", err.Error())
+			return nil, fmt.Errorf("Mapping ref eva error [%s]", err.Error())
+		}
+		return v, nil
+	} else {
+		arrayRef := ref.NewArrayRef(mapref)
+		v, err := arrayRef.EvalFromData(edata)
+		if err != nil {
+			log.Errorf("Mapping ref eva error [%s]", err.Error())
+			return nil, fmt.Errorf("Mapping ref eva error [%s]", err.Error())
+		}
+		return v, nil
 	}
 }
 
@@ -299,11 +318,9 @@ func (f *Expression) do(edata interface{}, inputScope data.Scope, resolver data.
 		}
 		leftValue = v
 	} else if f.Type == funcexprtype.ARRAYREF {
-		arrayRef := ref.NewArrayRef(f.Value.(string))
-		v, err := arrayRef.EvalFromData(edata)
+		v, err := handleArrayRef(edata, f.Value.(string), inputScope, resolver)
 		if err != nil {
-			log.Errorf("Mapping ref eva error [%s]", err.Error())
-			resultChan <- fmt.Errorf("Mapping ref eva error [%s]", err.Error())
+			resultChan <- err
 		}
 		leftValue = v
 	} else {

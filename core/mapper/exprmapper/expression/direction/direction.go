@@ -75,6 +75,13 @@ func NewBool(lit interface{}) (bool, error) {
 	return b, err
 }
 
+type NIL struct {
+}
+
+func NewNilLit(lit interface{}) (*NIL, error) {
+	return &NIL{}, nil
+}
+
 func NewMappingRef(lit interface{}) (interface{}, error) {
 	s := strings.TrimSpace(string(lit.(*token.Token).Lit))
 	log.Debugf("New mapping ref and value [%s]", s)
@@ -127,6 +134,9 @@ func NewArgument(a Attribute) (interface{}, error) {
 	case bool:
 		param.Type = funcexprtype.BOOLEAN
 		param.Value = a.(bool)
+	case *NIL:
+		param.Type = funcexprtype.NIL
+		param.Value = nil
 	case *function.FunctionExp:
 		param.Type = funcexprtype.FUNCTION
 		param.Function = a.(*function.FunctionExp)
@@ -249,6 +259,9 @@ func getExpression(ex Attribute) *expr.Expression {
 	case bool:
 		expression.Type = funcexprtype.BOOLEAN
 		expression.Value = ex.(bool)
+	case *NIL:
+		expression.Type = funcexprtype.NIL
+		expression.Value = nil
 	case ref.MappingRef:
 		expression.Type = funcexprtype.REF
 		ref := ex.(ref.MappingRef)

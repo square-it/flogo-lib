@@ -251,10 +251,20 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
+		String: `Param : Nil	<<  >>`,
+		Id:         "Param",
+		NTType:     10,
+		Index:      23,
+		NumSymbols: 1,
+		ReduceFunc: func(X []Attrib) (Attrib, error) {
+			return X[0], nil
+		},
+	},
+	ProdTabEntry{
 		String: `DoubleQString : doublequotes_string	<< direction.NewDoubleQuoteStringLit(X[0]) >>`,
 		Id:         "DoubleQString",
 		NTType:     11,
-		Index:      23,
+		Index:      24,
 		NumSymbols: 1,
 		ReduceFunc: func(X []Attrib) (Attrib, error) {
 			return direction.NewDoubleQuoteStringLit(X[0])
@@ -264,7 +274,7 @@ var productionsTable = ProdTab{
 		String: `SingleQString : singlequote_string	<< direction.NewSingleQuoteStringLit(X[0]) >>`,
 		Id:         "SingleQString",
 		NTType:     12,
-		Index:      24,
+		Index:      25,
 		NumSymbols: 1,
 		ReduceFunc: func(X []Attrib) (Attrib, error) {
 			return direction.NewSingleQuoteStringLit(X[0])
@@ -274,7 +284,7 @@ var productionsTable = ProdTab{
 		String: `Int : number	<< direction.NewIntLit(X[0]) >>`,
 		Id:         "Int",
 		NTType:     13,
-		Index:      25,
+		Index:      26,
 		NumSymbols: 1,
 		ReduceFunc: func(X []Attrib) (Attrib, error) {
 			return direction.NewIntLit(X[0])
@@ -284,7 +294,7 @@ var productionsTable = ProdTab{
 		String: `MappingRef : argument	<< direction.NewMappingRef(X[0]) >>`,
 		Id:         "MappingRef",
 		NTType:     14,
-		Index:      26,
+		Index:      27,
 		NumSymbols: 1,
 		ReduceFunc: func(X []Attrib) (Attrib, error) {
 			return direction.NewMappingRef(X[0])
@@ -294,7 +304,7 @@ var productionsTable = ProdTab{
 		String: `Bool : "true"	<< direction.NewBool(X[0]) >>`,
 		Id:         "Bool",
 		NTType:     15,
-		Index:      27,
+		Index:      28,
 		NumSymbols: 1,
 		ReduceFunc: func(X []Attrib) (Attrib, error) {
 			return direction.NewBool(X[0])
@@ -304,7 +314,7 @@ var productionsTable = ProdTab{
 		String: `Bool : "false"	<< direction.NewBool(X[0]) >>`,
 		Id:         "Bool",
 		NTType:     15,
-		Index:      28,
+		Index:      29,
 		NumSymbols: 1,
 		ReduceFunc: func(X []Attrib) (Attrib, error) {
 			return direction.NewBool(X[0])
@@ -314,10 +324,20 @@ var productionsTable = ProdTab{
 		String: `Float : float	<< direction.NewFloatLit(X[0]) >>`,
 		Id:         "Float",
 		NTType:     16,
-		Index:      29,
+		Index:      30,
 		NumSymbols: 1,
 		ReduceFunc: func(X []Attrib) (Attrib, error) {
 			return direction.NewFloatLit(X[0])
+		},
+	},
+	ProdTabEntry{
+		String: `Nil : "nil"	<< direction.NewNilLit(X[0]) >>`,
+		Id:         "Nil",
+		NTType:     17,
+		Index:      31,
+		NumSymbols: 1,
+		ReduceFunc: func(X []Attrib) (Attrib, error) {
+			return direction.NewNilLit(X[0])
 		},
 	},
 }
