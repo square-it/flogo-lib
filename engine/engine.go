@@ -80,12 +80,12 @@ func (e *engineImpl) Init(directRunner bool) error {
 		}
 
 		propProvider := app.GetPropertyProvider()
-
 		// Initialize the properties
-		for id, value := range e.app.Properties {
-			propProvider.SetProperty(id, value)
+		props, err := app.GetProperties(e.app.Properties)
+		if err != nil {
+			return err
 		}
-
+		propProvider.SetProperties(props)
 		data.SetPropertyProvider(propProvider)
 
 		actionFactories := action.Factories()
@@ -98,7 +98,7 @@ func (e *engineImpl) Init(directRunner bool) error {
 			}
 		}
 
-		err := app.RegisterResources(e.app.Resources)
+		err = app.RegisterResources(e.app.Resources)
 		if err != nil {
 			return err
 		}

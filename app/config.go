@@ -9,17 +9,18 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
+	"github.com/pkg/errors"
 )
 
 // App is the configuration for the App
 type Config struct {
-	Name        string                 `json:"name"`
-	Type        string                 `json:"type"`
-	Version     string                 `json:"version"`
-	Description string                 `json:"description"`
-	Properties  map[string]interface{} `json:"properties"`
-	Triggers    []*trigger.Config      `json:"triggers"`
-	Resources   []*resource.Config     `json:"resources"`
+	Name        string             `json:"name"`
+	Type        string             `json:"type"`
+	Version     string             `json:"version"`
+	Description string             `json:"description"`
+	Properties  interface{}        `json:"properties"`
+	Triggers    []*trigger.Config  `json:"triggers"`
+	Resources   []*resource.Config `json:"resources"`
 
 	//for backwards compatibility
 	Actions []*action.Config `json:"actions"`
@@ -57,6 +58,68 @@ func (d *defaultConfigProvider) GetApp() (*Config, error) {
 	}
 
 	return app, nil
+}
+
+func GetProperties(properties interface{}) (map[string]interface{}, error) {
+
+	props := make(map[string]interface{})
+
+	if properties != nil {
+		oldPropsModel, ok := properties.(map[string]interface{})
+		if ok {
+			// Old model
+			for name, value := range oldPropsModel {
+				strValue, ok := value.(string)
+				if ok {
+					if strValue != "" && strValue[0] == '$' {
+						// Needs resolution
+						pValue, err := data.GetBasicResolver().Resolve(strValue, nil)
+						if err != nil {
+							return props, err
+						}
+						value = pValue
+					}
+				}
+				props[name] = value
+			}
+			return props, nil
+		}
+
+		newPropModel, ok := properties.([]interface{})
+		if ok {
+			// New model
+			for _, value := range newPropModel {
+				propObj, ok := value.(map[string]interface{})
+				if ok {
+					pName := propObj["name"].(string)
+					pType := propObj["type"].(string)
+					pValue := propObj["value"]
+
+					dataType, _ := data.ToTypeEnum(pType)
+					strValue, ok := pValue.(string)
+					if ok {
+						if strValue != "" && strValue[0] == '$' {
+							// Needs resolution
+							resolvedValue, err := data.GetBasicResolver().Resolve(strValue, nil)
+							if err != nil {
+								return props, err
+							}
+							pValue = resolvedValue
+						}
+					}
+					value, err := data.CoerceToValue(pValue, dataType)
+					if err != nil {
+						return props, err
+					}
+					props[pName] = value
+				}
+			}
+			return props, nil
+		}
+		return nil, errors.New("Invalid application properties configuration")
+	}
+
+	return props, nil
 }
 
 func FixUpApp(cfg *Config) {

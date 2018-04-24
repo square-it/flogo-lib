@@ -16,7 +16,31 @@ func TestGetResolutionDetails(t *testing.T) {
 	assert.Equal(t, "", details.Item)
 	assert.Equal(t, "", details.Path)
 
+	a = "property[Prop1]"
+	details, err = GetResolutionDetails(a)
+	assert.Nil(t, err)
+	assert.Equal(t, "property", details.ResolverName)
+	assert.Equal(t, "Prop1", details.Property)
+	assert.Equal(t, "", details.Item)
+	assert.Equal(t, "", details.Path)
+
+	a = "property[foo.bar.Prop1]"
+	details, err = GetResolutionDetails(a)
+	assert.Nil(t, err)
+	assert.Equal(t, "property", details.ResolverName)
+	assert.Equal(t, "foo.bar.Prop1", details.Property)
+	assert.Equal(t, "", details.Item)
+	assert.Equal(t, "", details.Path)
+
 	a = "env.VAR1"
+	details, err = GetResolutionDetails(a)
+	assert.Nil(t, err)
+	assert.Equal(t, "env", details.ResolverName)
+	assert.Equal(t, "VAR1", details.Property)
+	assert.Equal(t, "", details.Item)
+	assert.Equal(t, "", details.Path)
+
+	a = "env[VAR1]"
 	details, err = GetResolutionDetails(a)
 	assert.Nil(t, err)
 	assert.Equal(t, "env", details.ResolverName)
