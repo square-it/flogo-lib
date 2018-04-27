@@ -11,7 +11,7 @@ import (
 
 var log = logger.GetLogger("expression")
 
-func ParserExpression(exprString string) (expr.Expr, error) {
+func ParseExpression(exprString string) (expr.Expr, error) {
 	st, err := getParser(exprString)
 	if err != nil {
 		log.Warnf("Error to parser expression, %+v ", err.Error())
@@ -33,6 +33,6 @@ func getParser(exampleStr string) (interface{}, error) {
 }
 
 func IsExpression(mapValue string) bool {
-	_, err := ParserExpression(mapValue)
+	_, err := ParseExpression(mapValue)
 	return err == nil
 }

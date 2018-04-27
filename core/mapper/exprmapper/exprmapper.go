@@ -49,7 +49,7 @@ func GetMappingValue(mappingV interface{}, inputScope data.Scope, resolver data.
 		return mappingV, nil
 	}
 	mappingValue := mappingV.(string)
-	exp, err := expression.ParserExpression(mappingValue)
+	exp, err := expression.ParseExpression(mappingValue)
 	if err == nil {
 		//flogo expression
 		expValue, err := exp.EvalWithScope(inputScope, resolver)

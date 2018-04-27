@@ -87,7 +87,7 @@ func (a *ArrayMapping) DoArrayMapping(inputScope, outputScope data.Scope, resolv
 
 		//TODO this might never be call.. try to delete
 		stringVal, _ := a.From.(string)
-		exp, err := expression.ParserExpression(stringVal)
+		exp, err := expression.ParseExpression(stringVal)
 		if err == nil {
 			//flogo expression
 			expValue, err := exp.EvalWithScope(inputScope, resolver)
@@ -353,7 +353,7 @@ func GetValueFromArrayRef(object interface{}, expressionRef interface{}, inputSc
 		//Non string value
 		return expressionRef, nil
 	}
-	exp, err := expression.ParserExpression(stringVal)
+	exp, err := expression.ParseExpression(stringVal)
 	if err == nil {
 		//flogo expression
 		expValue, err := exp.EvalWithScope(inputScope, resolver)
