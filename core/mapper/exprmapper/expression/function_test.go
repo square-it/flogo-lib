@@ -14,74 +14,105 @@ import (
 
 func TestFunctionConcatWithSpace(t *testing.T) {
 
-	v, err := NewFunctionExpression(`flogo.concat("This", "is",string.concat("my","first"),"gocc",string.concat("lexer","and","parser"),string.concat("go","program","!!!"))`).Eval()
+	e, err := ParseExpression(`flogo.concat("This", "is",string.concat("my","first"),"gocc",string.concat("lexer","and","parser"),string.concat("go","program","!!!"))`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
 	}
-
-	assert.Equal(t, "Thisismyfirstgocclexerandparsergoprogram!!!", v[0].(string))
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	v, err := e.Eval()
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, "Thisismyfirstgocclexerandparsergoprogram!!!", function.HandleToSingleOutput(v).(string))
 	fmt.Println("Result:", v)
 }
 
 func TestFunctionConcatWithMultiSpace(t *testing.T) {
 
-	v, err := NewFunctionExpression(`flogo.concat("This",   " is" , " WI")`).Eval()
+	e, err := ParseExpression(`flogo.concat("This",   " is" , " WI")`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
 	}
-
-	assert.Equal(t, "This is WI", v[0].(string))
+	v, err := e.Eval()
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, "This is WI", function.HandleToSingleOutput(v).(string))
 	fmt.Println("Result:", v)
 }
 func TestFunctionConcat(t *testing.T) {
 
-	v, err := NewFunctionExpression(`flogo.concat("This","is",string.concat("my","first"),"gocc",string.concat("lexer","and","parser"),string.concat("go","program","!!!"))`).Eval()
+	e, err := ParseExpression(`flogo.concat("This","is",string.concat("my","first"),"gocc",string.concat("lexer","and","parser"),string.concat("go","program","!!!"))`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
 	}
-
-	assert.Equal(t, "Thisismyfirstgocclexerandparsergoprogram!!!", v[0].(string))
+	v, err := e.Eval()
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, "Thisismyfirstgocclexerandparsergoprogram!!!", function.HandleToSingleOutput(v).(string))
 	fmt.Println("Result:", v)
 }
 
 func TestFunctionLength(t *testing.T) {
-	v, err := NewFunctionExpression(`string.length("lixingwang")`).Eval()
+	e, err := ParseExpression(`string.length("lixingwang")`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
 	}
-	assert.Equal(t, int(10), v[0].(int))
+	v, err := e.Eval()
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, int(10), function.HandleToSingleOutput(v).(int))
 
-	fmt.Println("Result:", v[0])
+	fmt.Println("Result:", function.HandleToSingleOutput(v))
 }
 
 func TestFunctionCombine(t *testing.T) {
-	v, err := NewFunctionExpression(`string.concat("Beijing",string.tostring(string.length("lixingwang")))`).Eval()
+	e, err := ParseExpression(`string.concat("Beijing",string.tostring(string.length("lixingwang")))`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
 	}
-	assert.Equal(t, "Beijing10", v[0].(string))
+	v, err := e.Eval()
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, "Beijing10", function.HandleToSingleOutput(v).(string))
 
-	fmt.Println("Result:", v[0])
+	fmt.Println("Result:", function.HandleToSingleOutput(v))
 }
 
 func TestFunctionCombine2(t *testing.T) {
-	v, err := NewFunctionExpression(`string.concat("Beijing",string.tostring(string.length("lixingwang")))`).Eval()
+	e, err := ParseExpression(`string.concat("Beijing",string.tostring(string.length("lixingwang")))`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
 	}
-	assert.Equal(t, "Beijing10", v[0].(string))
+	v, err := e.Eval()
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, "Beijing10", function.HandleToSingleOutput(v).(string))
 
-	fmt.Println("Result:", v[0])
+	fmt.Println("Result:", function.HandleToSingleOutput(v))
 }
 
 func TestFunctionError(t *testing.T) {
-	v, err := NewFunctionExpression(`string.concat("Beijing",string.tostring(2017))`).Eval()
+	v, err := ParseExpression(`string.concat("Beijing",string.tostring(2017))`)
 	if err != nil {
 		assert.NotNil(t, err)
 		fmt.Println("Result", v)
@@ -91,70 +122,93 @@ func TestFunctionError(t *testing.T) {
 }
 
 func TestFunctionWithRefMapping(t *testing.T) {
-	v, err := NewFunctionExpression(`string.concat($A3.query.result,"data")`).Eval()
+	e, err := ParseExpression(`string.concat($A3.query.result,"data")`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
 	}
-	assert.Equal(t, "$A3.query.resultdata", v[0].(string))
+	v, err := e.Eval()
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, "$A3.query.resultdata", function.HandleToSingleOutput(v).(string))
 
-	fmt.Println("Result:", v[0])
+	fmt.Println("Result:", function.HandleToSingleOutput(v))
 }
 
 func TestFunctionWithRefMapping2(t *testing.T) {
-	v, err := NewFunctionExpression(`string.concat($A2.message,"lixingwang")`).Eval()
+	e, err := ParseExpression(`string.concat($A2.message,"lixingwang")`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
 	}
-	assert.Equal(t, "$A2.messagelixingwang", v[0].(string))
+	v, err := e.Eval()
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, "$A2.messagelixingwang", function.HandleToSingleOutput(v).(string))
 
-	fmt.Println("Result:", v[0])
+	fmt.Println("Result:", function.HandleToSingleOutput(v))
 }
 
 func TestFunctionWithTag(t *testing.T) {
-	v, err := NewFunctionExpression(`flogo.concat($A2.message,"lixingwang")`).Eval()
+	e, err := ParseExpression(`flogo.concat($A2.message,"lixingwang")`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
 	}
-	assert.Equal(t, "$A2.messagelixingwang", v[0].(string))
+	v, err := e.Eval()
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, "$A2.messagelixingwang", function.HandleToSingleOutput(v).(string))
 
-	fmt.Println("Result:", v[0])
+	fmt.Println("Result:", function.HandleToSingleOutput(v))
 }
 
 func TestFunctionWithSpaceInRef(t *testing.T) {
-	v, err := NewFunctionExpression(`string.concat($Marketo Get Lead by Id.output.result[0].firstName,$Marketo Get Lead by Id.output.result[0].lastName)`).Eval()
+	e, err := ParseExpression(`string.concat($Marketo Get Lead by Id.output.result[0].firstName,$Marketo Get Lead by Id.output.result[0].lastName)`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
 	}
-	assert.Equal(t, "$Marketo Get Lead by Id.output.result[0].firstName$Marketo Get Lead by Id.output.result[0].lastName", v[0].(string))
+	v, err := e.Eval()
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, "$Marketo Get Lead by Id.output.result[0].firstName$Marketo Get Lead by Id.output.result[0].lastName", function.HandleToSingleOutput(v).(string))
 
-	fmt.Println("Result:", v[0])
+	fmt.Println("Result:", function.HandleToSingleOutput(v))
 }
 
 func TestFunctionWithPackage(t *testing.T) {
-	v, err := NewFunctionExpression(`string.concat($A2.message,"lixingwang")`).Eval()
+	e, err := ParseExpression(`string.concat($A2.message,"lixingwang")`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
 	}
-	assert.Equal(t, "$A2.messagelixingwang", v[0].(string))
+	v, err := e.Eval()
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, "$A2.messagelixingwang", function.HandleToSingleOutput(v).(string))
 
-	fmt.Println("Result:", v[0])
+	fmt.Println("Result:", function.HandleToSingleOutput(v))
 }
 
 func TestFunctionWithSpecialFiled(t *testing.T) {
-	v, err := NewExpression(`$activity[lixingwang].myattri["name.name"][0]>2`).GetExpression()
+	e, err := ParseExpression(`$activity[lixingwang].myattri["name.name"][0]>2`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
 	}
-	v.Eval()
-	//assert.Equal(t, "$A2.messagelixingwang", v[0].(string))
-
-	//fmt.Println("Result:", v[0])
+	_, err = e.Eval()
+	assert.NotNil(t, err)
 }
 
 type Concat struct {
@@ -254,13 +308,15 @@ func (s *PanicFunc) Eval() string {
 }
 
 func TestPanictFunction(t *testing.T) {
-	v, err := NewFunctionExpression(`panic.panic()`).Eval()
+	e, err := ParseExpression(`panic.panic()`)
+	assert.Nil(t, err)
+	v, err := e.Eval()
 	assert.NotNil(t, err)
 	assert.Nil(t, v)
 }
 
 func TestNumberLenFunction(t *testing.T) {
-	v, err := NewFunctionExpression(`string.length("hello,world")`).Eval()
+	v, err := ParseExpression(`string.length("hello,world")`)
 	log.Info(v)
 	assert.NotNil(t, v)
 	assert.Nil(t, err)

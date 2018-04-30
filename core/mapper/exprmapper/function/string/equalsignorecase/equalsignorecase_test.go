@@ -22,21 +22,21 @@ func TestStaticFunc_Starts_with(t *testing.T) {
 }
 
 func TestExpression(t *testing.T) {
-	fun, err := expression.NewFunctionExpression(`string.equalsIgnoreCase("TIBCO FLOGO", "TIBCO FLOGO")`).GetFunction()
+	fun, err := expression.ParseExpression(`string.equalsIgnoreCase("TIBCO FLOGO", "TIBCO FLOGO")`)
 	assert.Nil(t, err)
 	assert.NotNil(t, fun)
 	v, err := fun.Eval()
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
-	assert.Equal(t, true, v[0])
+	assert.Equal(t, true, v)
 }
 
 func TestExpressionIgnoreCase(t *testing.T) {
-	fun, err := expression.NewFunctionExpression(`string.equalsIgnoreCase("TIBCO flogo", "TIBCO FLOGO")`).GetFunction()
+	fun, err := expression.ParseExpression(`string.equalsIgnoreCase("TIBCO flogo", "TIBCO FLOGO")`)
 	assert.Nil(t, err)
 	assert.NotNil(t, fun)
 	v, err := fun.Eval()
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
-	assert.Equal(t, true, v[0])
+	assert.Equal(t, true, v)
 }

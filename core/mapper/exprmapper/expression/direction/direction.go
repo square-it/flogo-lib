@@ -111,7 +111,7 @@ func NewArgument(a Attribute) (interface{}, error) {
 	log.Debugf("New Argument and type [%s]", reflect.TypeOf(a))
 	param := &function.Parameter{}
 	parameters := []*function.Parameter{}
-	switch a.(type) {
+	switch t := a.(type) {
 	case *token.Token:
 		param.Type = funcexprtype.STRING
 		param.Value = string(a.(*token.Token).Lit)
@@ -136,6 +136,8 @@ func NewArgument(a Attribute) (interface{}, error) {
 				parameters = append(parameters, p)
 			}
 		}
+	case *expr.Expression:
+		exprFieldToArgument(t, param)
 	case *ref.MappingRef:
 		param.Type = funcexprtype.REF
 		param.Value = a
@@ -151,6 +153,19 @@ func NewArgument(a Attribute) (interface{}, error) {
 	}
 	parameters = append(parameters, param)
 	return parameters, nil
+}
+
+func exprFieldToArgument(ex *expr.Expression, param *function.Parameter) {
+	if ex != nil {
+		switch ex.Type {
+		case funcexprtype.INTEGER, funcexprtype.ARRAYREF, funcexprtype.BOOLEAN, funcexprtype.FLOAT, funcexprtype.REF, funcexprtype.STRING:
+			param.Type = ex.Type
+			param.Value = ex.Value
+		case funcexprtype.FUNCTION:
+			param.Type = ex.Type
+			param.Function = ex.Value.(*function.FunctionExp)
+		}
+	}
 }
 
 func NewArguments(as ...Attribute) (interface{}, error) {

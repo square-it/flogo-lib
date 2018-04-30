@@ -78,44 +78,42 @@ func (p *Parameter) IsFunction() bool {
 	return false
 }
 
-func (f *FunctionExp) Eval() ([]interface{}, error) {
-
-	values, err := f.callFunction(nil, nil, nil)
+func (f *FunctionExp) Eval() (interface{}, error) {
+	value, err := f.callFunction(nil, nil, nil)
 	if err != nil {
 		return nil, err
 	}
-	returns := []interface{}{}
-	for _, v := range values {
-		returns = append(returns, convertType(v))
-	}
-	return returns, err
+	return convertType(value), err
 }
 
-func (f *FunctionExp) EvalWithScope(inputScope data.Scope, resolver data.Resolver) ([]interface{}, error) {
+func (f *FunctionExp) EvalWithScope(inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
 
-	values, err := f.callFunction(nil, inputScope, resolver)
+	value, err := f.callFunction(nil, inputScope, resolver)
 	if err != nil {
 		logrus.Errorf("Execution failed for function [%s] error - %+v", f.Name, err.Error())
 		return nil, err
 	}
-	returns := []interface{}{}
-	for _, v := range values {
-		returns = append(returns, convertType(v))
-	}
-	return returns, err
+	return convertType(value), err
 }
 
-func (f *FunctionExp) EvalWithData(data interface{}, inputScope data.Scope, resolver data.Resolver) ([]interface{}, error) {
-
-	values, err := f.callFunction(data, inputScope, resolver)
+func (f *FunctionExp) EvalWithData(data interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
+	value, err := f.callFunction(data, inputScope, resolver)
 	if err != nil {
 		return nil, err
 	}
-	returns := []interface{}{}
-	for _, v := range values {
-		returns = append(returns, convertType(v))
+	return convertType(value), err
+}
+
+func HandleToSingleOutput(values interface{}) interface{} {
+	if values != nil {
+		switch t := values.(type) {
+		case []interface{}:
+			return t[0]
+		default:
+			return t
+		}
 	}
-	return returns, err
+	return nil
 }
 
 func convertType(value reflect.Value) interface{} {
@@ -166,7 +164,7 @@ func convertToFunctionName(name string) string {
 	return name
 }
 
-func (f *FunctionExp) callFunction(fdata interface{}, inputScope data.Scope, resolver data.Resolver) (results []reflect.Value, err error) {
+func (f *FunctionExp) callFunction(fdata interface{}, inputScope data.Scope, resolver data.Resolver) (results reflect.Value, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("%+v", r)
@@ -176,7 +174,7 @@ func (f *FunctionExp) callFunction(fdata interface{}, inputScope data.Scope, res
 
 	method, err := f.getMethod()
 	if err != nil {
-		return nil, err
+		return reflect.Value{}, err
 	}
 
 	inputs := []reflect.Value{}
@@ -184,12 +182,9 @@ func (f *FunctionExp) callFunction(fdata interface{}, inputScope data.Scope, res
 		if p.IsFunction() {
 			result, err := p.Function.callFunction(fdata, inputScope, resolver)
 			if err != nil {
-				return nil, err
+				return reflect.Value{}, err
 			}
-
-			for _, v := range result {
-				inputs = append(inputs, v)
-			}
+			inputs = append(inputs, result)
 		} else {
 			if !p.IsEmtpy() {
 				if p.Type == funcexprtype.REF {
@@ -208,10 +203,9 @@ func (f *FunctionExp) callFunction(fdata interface{}, inputScope data.Scope, res
 
 						v, err := field.Eval(inputScope, resolver)
 						if err != nil {
-							return nil, err
+							return reflect.Value{}, err
 						}
 						p.Value = v
-
 					}
 
 				} else if p.Type == funcexprtype.ARRAYREF {
@@ -232,14 +226,14 @@ func (f *FunctionExp) callFunction(fdata interface{}, inputScope data.Scope, res
 							ref := ref.NewMappingRef(field.GetRef())
 							v, err := ref.Eval(inputScope, resolver)
 							if err != nil {
-								return nil, err
+								return reflect.Value{}, err
 							}
 							p.Value = v
 
 						} else {
 							v, err := field.EvalFromData(fdata)
 							if err != nil {
-								return nil, err
+								return reflect.Value{}, err
 							}
 							p.Value = v
 
@@ -280,7 +274,7 @@ func (f *FunctionExp) callFunction(fdata interface{}, inputScope data.Scope, res
 	return f.extractErrorFromValues(values)
 }
 
-func (f *FunctionExp) extractErrorFromValues(values []reflect.Value) ([]reflect.Value, error) {
+func (f *FunctionExp) extractErrorFromValues(values []reflect.Value) (reflect.Value, error) {
 	tempValues := []reflect.Value{}
 
 	var err error
@@ -294,5 +288,8 @@ func (f *FunctionExp) extractErrorFromValues(values []reflect.Value) ([]reflect.
 		}
 	}
 
-	return tempValues, err
+	if len(tempValues) > 1 {
+		return tempValues[0], fmt.Errorf("Not support function multiple returns")
+	}
+	return tempValues[0], err
 }
