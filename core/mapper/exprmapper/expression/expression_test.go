@@ -432,7 +432,7 @@ func TestExpressionWithNest(t *testing.T) {
 
 func TestExpressionWithNILLiteral(t *testing.T) {
 	//valid case
-	e, err := ParserExpression(`(true && true) != nil`)
+	e, err := ParseExpression(`(true && true) != nil`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -444,7 +444,7 @@ func TestExpressionWithNILLiteral(t *testing.T) {
 	}
 	assert.Equal(t, true, v)
 
-	e, err = ParserExpression(`123 != nil`)
+	e, err = ParseExpression(`123 != nil`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -456,7 +456,7 @@ func TestExpressionWithNILLiteral(t *testing.T) {
 	}
 	assert.Equal(t, true, v)
 
-	e, err = ParserExpression(`nil == nil`)
+	e, err = ParseExpression(`nil == nil`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -474,7 +474,7 @@ func TestExpressionWithNIL(t *testing.T) {
 		os.Unsetenv("name")
 	}()
 	scope := data.NewFixedScope(nil)
-	e, err := ParserExpression(`$env.name != nil`)
+	e, err := ParseExpression(`$env.name != nil`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -486,7 +486,7 @@ func TestExpressionWithNIL(t *testing.T) {
 	}
 	assert.Equal(t, true, v)
 
-	e, err = ParserExpression(`$env.name == "test"`)
+	e, err = ParseExpression(`$env.name == "test"`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -498,7 +498,7 @@ func TestExpressionWithNIL(t *testing.T) {
 	}
 	assert.Equal(t, true, v)
 
-	e, err = ParserExpression(`$.name.test == nil`)
+	e, err = ParseExpression(`$.name.test == nil`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -511,7 +511,7 @@ func TestExpressionWithNIL(t *testing.T) {
 	}
 	assert.Equal(t, true, v)
 
-	e, err = ParserExpression(`$.name.test != nil`)
+	e, err = ParseExpression(`$.name.test != nil`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -524,7 +524,7 @@ func TestExpressionWithNIL(t *testing.T) {
 	}
 	assert.Equal(t, true, v)
 
-	e, err = ParserExpression(`$.name.test == "123"`)
+	e, err = ParseExpression(`$.name.test == "123"`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -540,7 +540,7 @@ func TestExpressionWithNIL(t *testing.T) {
 	d := `{"test":"test", "obj":{"id":123, "value":null}}`
 	testScope := GetSimpleScope("name", d)
 
-	e, err = ParserExpression(`$.name.test == "test"`)
+	e, err = ParseExpression(`$.name.test == "test"`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -553,7 +553,7 @@ func TestExpressionWithNIL(t *testing.T) {
 	}
 	assert.Equal(t, true, v)
 
-	e, err = ParserExpression(`$.name.obj.value == nil`)
+	e, err = ParseExpression(`$.name.obj.value == nil`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -566,7 +566,7 @@ func TestExpressionWithNIL(t *testing.T) {
 	}
 	assert.Equal(t, true, v)
 
-	e, err = ParserExpression(`$.name.obj.id == 123`)
+	e, err = ParseExpression(`$.name.obj.id == 123`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -579,7 +579,7 @@ func TestExpressionWithNIL(t *testing.T) {
 	}
 	assert.Equal(t, true, v)
 
-	e, err = ParserExpression(`$.name.obj.notexist == nil`)
+	e, err = ParseExpression(`$.name.obj.notexist == nil`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()

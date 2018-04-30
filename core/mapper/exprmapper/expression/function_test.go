@@ -202,7 +202,7 @@ func TestFunctionWithPackage(t *testing.T) {
 }
 
 func TestFunctionWithNil(t *testing.T) {
-	e, err := ParserExpression(`string.concat("test","nil")`)
+	e, err := ParseExpression(`string.concat("test","nil")`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -214,7 +214,7 @@ func TestFunctionWithNil(t *testing.T) {
 	}
 	assert.Equal(t, "testnil", function.HandleToSingleOutput(v).(string))
 
-	e, err = ParserExpression(`string.concat("test",nil)`)
+	e, err = ParseExpression(`string.concat("test",nil)`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
