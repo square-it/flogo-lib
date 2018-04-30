@@ -14,7 +14,7 @@ import (
 
 func TestFunctionConcatWithSpace(t *testing.T) {
 
-	e, err := ParserExpression(`flogo.concat("This", "is",string.concat("my","first"),"gocc",string.concat("lexer","and","parser"),string.concat("go","program","!!!"))`)
+	e, err := ParseExpression(`flogo.concat("This", "is",string.concat("my","first"),"gocc",string.concat("lexer","and","parser"),string.concat("go","program","!!!"))`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -34,7 +34,7 @@ func TestFunctionConcatWithSpace(t *testing.T) {
 
 func TestFunctionConcatWithMultiSpace(t *testing.T) {
 
-	e, err := ParserExpression(`flogo.concat("This",   " is" , " WI")`)
+	e, err := ParseExpression(`flogo.concat("This",   " is" , " WI")`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -49,7 +49,7 @@ func TestFunctionConcatWithMultiSpace(t *testing.T) {
 }
 func TestFunctionConcat(t *testing.T) {
 
-	e, err := ParserExpression(`flogo.concat("This","is",string.concat("my","first"),"gocc",string.concat("lexer","and","parser"),string.concat("go","program","!!!"))`)
+	e, err := ParseExpression(`flogo.concat("This","is",string.concat("my","first"),"gocc",string.concat("lexer","and","parser"),string.concat("go","program","!!!"))`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -64,7 +64,7 @@ func TestFunctionConcat(t *testing.T) {
 }
 
 func TestFunctionLength(t *testing.T) {
-	e, err := ParserExpression(`string.length("lixingwang")`)
+	e, err := ParseExpression(`string.length("lixingwang")`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -80,7 +80,7 @@ func TestFunctionLength(t *testing.T) {
 }
 
 func TestFunctionCombine(t *testing.T) {
-	e, err := ParserExpression(`string.concat("Beijing",string.tostring(string.length("lixingwang")))`)
+	e, err := ParseExpression(`string.concat("Beijing",string.tostring(string.length("lixingwang")))`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -96,7 +96,7 @@ func TestFunctionCombine(t *testing.T) {
 }
 
 func TestFunctionCombine2(t *testing.T) {
-	e, err := ParserExpression(`string.concat("Beijing",string.tostring(string.length("lixingwang")))`)
+	e, err := ParseExpression(`string.concat("Beijing",string.tostring(string.length("lixingwang")))`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -112,7 +112,7 @@ func TestFunctionCombine2(t *testing.T) {
 }
 
 func TestFunctionError(t *testing.T) {
-	v, err := ParserExpression(`string.concat("Beijing",string.tostring(2017))`)
+	v, err := ParseExpression(`string.concat("Beijing",string.tostring(2017))`)
 	if err != nil {
 		assert.NotNil(t, err)
 		fmt.Println("Result", v)
@@ -122,7 +122,7 @@ func TestFunctionError(t *testing.T) {
 }
 
 func TestFunctionWithRefMapping(t *testing.T) {
-	e, err := ParserExpression(`string.concat($A3.query.result,"data")`)
+	e, err := ParseExpression(`string.concat($A3.query.result,"data")`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -138,7 +138,7 @@ func TestFunctionWithRefMapping(t *testing.T) {
 }
 
 func TestFunctionWithRefMapping2(t *testing.T) {
-	e, err := ParserExpression(`string.concat($A2.message,"lixingwang")`)
+	e, err := ParseExpression(`string.concat($A2.message,"lixingwang")`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -154,7 +154,7 @@ func TestFunctionWithRefMapping2(t *testing.T) {
 }
 
 func TestFunctionWithTag(t *testing.T) {
-	e, err := ParserExpression(`flogo.concat($A2.message,"lixingwang")`)
+	e, err := ParseExpression(`flogo.concat($A2.message,"lixingwang")`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -170,7 +170,7 @@ func TestFunctionWithTag(t *testing.T) {
 }
 
 func TestFunctionWithSpaceInRef(t *testing.T) {
-	e, err := ParserExpression(`string.concat($Marketo Get Lead by Id.output.result[0].firstName,$Marketo Get Lead by Id.output.result[0].lastName)`)
+	e, err := ParseExpression(`string.concat($Marketo Get Lead by Id.output.result[0].firstName,$Marketo Get Lead by Id.output.result[0].lastName)`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -186,7 +186,7 @@ func TestFunctionWithSpaceInRef(t *testing.T) {
 }
 
 func TestFunctionWithPackage(t *testing.T) {
-	e, err := ParserExpression(`string.concat($A2.message,"lixingwang")`)
+	e, err := ParseExpression(`string.concat($A2.message,"lixingwang")`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -229,7 +229,7 @@ func TestFunctionWithNil(t *testing.T) {
 }
 
 func TestFunctionWithSpecialFiled(t *testing.T) {
-	e, err := ParserExpression(`$activity[lixingwang].myattri["name.name"][0]>2`)
+	e, err := ParseExpression(`$activity[lixingwang].myattri["name.name"][0]>2`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -335,7 +335,7 @@ func (s *PanicFunc) Eval() string {
 }
 
 func TestPanictFunction(t *testing.T) {
-	e, err := ParserExpression(`panic.panic()`)
+	e, err := ParseExpression(`panic.panic()`)
 	assert.Nil(t, err)
 	v, err := e.Eval()
 	assert.NotNil(t, err)
@@ -343,7 +343,7 @@ func TestPanictFunction(t *testing.T) {
 }
 
 func TestNumberLenFunction(t *testing.T) {
-	v, err := ParserExpression(`string.length("hello,world")`)
+	v, err := ParseExpression(`string.length("hello,world")`)
 	log.Info(v)
 	assert.NotNil(t, v)
 	assert.Nil(t, err)

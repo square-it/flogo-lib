@@ -16,7 +16,7 @@ func TestSample(t *testing.T) {
 }
 
 func TestExpression(t *testing.T) {
-	fun, err := expression.ParserExpression(`number.random(100000)`)
+	fun, err := expression.ParseExpression(`number.random(100000)`)
 	assert.Nil(t, err)
 	assert.NotNil(t, fun)
 	v, err := fun.Eval()

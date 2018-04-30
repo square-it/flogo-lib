@@ -12,7 +12,7 @@ import (
 )
 
 func TestExpressionTernary(t *testing.T) {
-	v, err := ParserExpression(`1>2?string.concat("sss","ddddd"):"fff"`)
+	v, err := ParseExpression(`1>2?string.concat("sss","ddddd"):"fff"`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -30,7 +30,7 @@ func TestExpressionTernary(t *testing.T) {
 }
 
 func TestExpressionTernaryString(t *testing.T) {
-	v, err := ParserExpression(`1<2?"lixingwang":"fff"`)
+	v, err := ParseExpression(`1<2?"lixingwang":"fff"`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -45,7 +45,7 @@ func TestExpressionTernaryString(t *testing.T) {
 }
 
 func TestExpressionString(t *testing.T) {
-	v, err := ParserExpression(`$activity[C].result==3`)
+	v, err := ParseExpression(`$activity[C].result==3`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -55,7 +55,7 @@ func TestExpressionString(t *testing.T) {
 }
 
 func TestExpressionWithOldWay(t *testing.T) {
-	v, err := ParserExpression(`${flow.petMax} > 2`)
+	v, err := ParseExpression(`${flow.petMax} > 2`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -66,7 +66,7 @@ func TestExpressionWithOldWay(t *testing.T) {
 }
 
 func TestExpressionTernaryFunction(t *testing.T) {
-	v, err := ParserExpression(`string.length($TriggerData.queryParams.id) == 0 ? "Query Id cannot be null" : string.length($TriggerData.queryParams.id)`)
+	v, err := ParseExpression(`string.length($TriggerData.queryParams.id) == 0 ? "Query Id cannot be null" : string.length($TriggerData.queryParams.id)`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -90,7 +90,7 @@ func TestExpressionTernaryRef(t *testing.T) {
 	os.Setenv("name", "flogo")
 	os.Setenv("address", "tibco")
 
-	v, err := ParserExpression(`string.length("lixingwang")>11?$env.name:$env.address`)
+	v, err := ParseExpression(`string.length("lixingwang")>11?$env.name:$env.address`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -108,7 +108,7 @@ func TestExpressionTernaryRef(t *testing.T) {
 }
 
 func TestExpressionTernaryRef2(t *testing.T) {
-	v, err := ParserExpression(`string.length("lixingwang")>11?"lixingwang":"fff"`)
+	v, err := ParseExpression(`string.length("lixingwang")>11?"lixingwang":"fff"`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -126,7 +126,7 @@ func TestExpressionTernaryRef2(t *testing.T) {
 }
 
 func TestWeExpr_LinkMapping(t *testing.T) {
-	expr, err := ParserExpression(`$T.parameters.path_params[0].value==2`)
+	expr, err := ParseExpression(`$T.parameters.path_params[0].value==2`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -135,7 +135,7 @@ func TestWeExpr_LinkMapping(t *testing.T) {
 }
 
 func TestWeExpr_LinkMapping2(t *testing.T) {
-	v, err := ParserExpression(`$T.parameters==2`)
+	v, err := ParseExpression(`$T.parameters==2`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -144,7 +144,7 @@ func TestWeExpr_LinkMapping2(t *testing.T) {
 }
 
 func TestExpressionInt(t *testing.T) {
-	expr, err := ParserExpression(`123==456`)
+	expr, err := ParseExpression(`123==456`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -160,7 +160,7 @@ func TestExpressionInt(t *testing.T) {
 }
 
 func TestExpressionEQ(t *testing.T) {
-	expr, err := ParserExpression(`123==123`)
+	expr, err := ParseExpression(`123==123`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -176,7 +176,7 @@ func TestExpressionEQ(t *testing.T) {
 }
 
 func TestExpressionEQFunction(t *testing.T) {
-	expr, err := ParserExpression(`string.concat("123","456")=="123456"`)
+	expr, err := ParseExpression(`string.concat("123","456")=="123456"`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -191,7 +191,7 @@ func TestExpressionEQFunction(t *testing.T) {
 }
 
 func TestExpressionEQFunction2Side(t *testing.T) {
-	e, err := ParserExpression(`string.concat("123","456") == string.concat("12","3456")`)
+	e, err := ParseExpression(`string.concat("123","456") == string.concat("12","3456")`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -206,12 +206,12 @@ func TestExpressionEQFunction2Side(t *testing.T) {
 }
 
 func TestExpressionRef(t *testing.T) {
-	_, err := ParserExpression(`$A4.query.name=="name"`)
+	_, err := ParseExpression(`$A4.query.name=="name"`)
 	assert.Nil(t, err)
 }
 
 func TestExpressionFunction(t *testing.T) {
-	e, err := ParserExpression(`string.concat("tibco","software")=="tibcosoftware"`)
+	e, err := ParseExpression(`string.concat("tibco","software")=="tibcosoftware"`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -227,7 +227,7 @@ func TestExpressionFunction(t *testing.T) {
 }
 
 func TestExpressionAnd(t *testing.T) {
-	e, err := ParserExpression(`("dddddd" == "dddd3dd") && ("133" == "123")`)
+	e, err := ParseExpression(`("dddddd" == "dddd3dd") && ("133" == "123")`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -242,7 +242,7 @@ func TestExpressionAnd(t *testing.T) {
 }
 
 func TestExpressionOr(t *testing.T) {
-	e, err := ParserExpression(`("dddddd" == "dddddd") && ("123" == "123")`)
+	e, err := ParseExpression(`("dddddd" == "dddddd") && ("123" == "123")`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -257,7 +257,7 @@ func TestExpressionOr(t *testing.T) {
 }
 
 func TestFunc(t *testing.T) {
-	e, err := ParserExpression(`string.length("lixingwang") == 10`)
+	e, err := ParseExpression(`string.length("lixingwang") == 10`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -269,7 +269,7 @@ func TestFunc(t *testing.T) {
 	}
 	fmt.Println("Result:", v)
 	assert.Equal(t, v, true)
-	e, err = ParserExpression(`string.length("lixingwang") == 10`)
+	e, err = ParseExpression(`string.length("lixingwang") == 10`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -284,7 +284,7 @@ func TestFunc(t *testing.T) {
 }
 
 func TestExpressionGT(t *testing.T) {
-	e, err := ParserExpression(`string.length("lixingwang") > 10`)
+	e, err := ParseExpression(`string.length("lixingwang") > 10`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -297,7 +297,7 @@ func TestExpressionGT(t *testing.T) {
 	fmt.Println("Result:", v)
 	assert.Equal(t, v, false)
 
-	e, err = ParserExpression(`string.length("lixingwang") >= 10`)
+	e, err = ParseExpression(`string.length("lixingwang") >= 10`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -310,7 +310,7 @@ func TestExpressionGT(t *testing.T) {
 	fmt.Println("Result:", v)
 	assert.Equal(t, v, true)
 
-	e, err = ParserExpression(`string.length("lixingwang") < 10`)
+	e, err = ParseExpression(`string.length("lixingwang") < 10`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -323,7 +323,7 @@ func TestExpressionGT(t *testing.T) {
 	fmt.Println("Result:", v)
 	assert.Equal(t, v, false)
 
-	e, err = ParserExpression(`string.length("lixingwang") <= 10`)
+	e, err = ParseExpression(`string.length("lixingwang") <= 10`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -392,7 +392,7 @@ func TestIsFunction(t *testing.T) {
 }
 
 func TestNewExpressionBoolean(t *testing.T) {
-	e, err := ParserExpression(`(string.length("sea") == 3) == true`)
+	e, err := ParseExpression(`(string.length("sea") == 3) == true`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -408,7 +408,7 @@ func TestNewExpressionBoolean(t *testing.T) {
 
 func TestExpressionWithNest(t *testing.T) {
 	//Invalid
-	e, err := ParserExpression(`(1&&1)==(1&&1)`)
+	e, err := ParseExpression(`(1&&1)==(1&&1)`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -417,7 +417,7 @@ func TestExpressionWithNest(t *testing.T) {
 	assert.NotNil(t, err)
 
 	//valid case
-	e, err = ParserExpression(`(true && true) == false`)
+	e, err = ParseExpression(`(true && true) == false`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()

@@ -18,7 +18,7 @@ func TestStaticFunc_Concat(t *testing.T) {
 }
 
 func TestExpressionDoubleQuotes(t *testing.T) {
-	fun, err := expression.ParserExpression(`string.concat('TIBCO',' Flo"go')`)
+	fun, err := expression.ParseExpression(`string.concat('TIBCO',' Flo"go')`)
 	assert.Nil(t, err)
 	assert.NotNil(t, fun)
 	v, err := fun.Eval()
@@ -27,7 +27,7 @@ func TestExpressionDoubleQuotes(t *testing.T) {
 }
 
 func TestExpressionSingleQuote(t *testing.T) {
-	fun, err := expression.ParserExpression(`string.concat("TIBCO"," Flo'o\o{go")`)
+	fun, err := expression.ParseExpression(`string.concat("TIBCO"," Flo'o\o{go")`)
 	assert.Nil(t, err)
 	assert.NotNil(t, fun)
 	v, err := fun.Eval()
@@ -36,7 +36,7 @@ func TestExpressionSingleQuote(t *testing.T) {
 }
 
 func TestExpressionCombine(t *testing.T) {
-	fun, err := expression.ParserExpression(`string.concat('Hello', " 'World'")`)
+	fun, err := expression.ParseExpression(`string.concat('Hello', " 'World'")`)
 	assert.Nil(t, err)
 	assert.NotNil(t, fun)
 	v, err := fun.Eval()
@@ -45,7 +45,7 @@ func TestExpressionCombine(t *testing.T) {
 }
 
 func TestExpressionCombine2(t *testing.T) {
-	fun, err := expression.ParserExpression(`string.concat('Hello', ' "World"')`)
+	fun, err := expression.ParseExpression(`string.concat('Hello', ' "World"')`)
 	assert.Nil(t, err)
 	assert.NotNil(t, fun)
 	v, err := fun.Eval()
@@ -53,7 +53,7 @@ func TestExpressionCombine2(t *testing.T) {
 	assert.Equal(t, `Hello "World"`, v)
 }
 func TestExpressionNewLine(t *testing.T) {
-	fun, err := expression.ParserExpression(`string.concat(
+	fun, err := expression.ParseExpression(`string.concat(
 	"TIBCO",
 	" FLOGO"
 	)`)
@@ -65,7 +65,7 @@ func TestExpressionNewLine(t *testing.T) {
 }
 
 func TestExpressionSpace(t *testing.T) {
-	fun, err := expression.ParserExpression(`string.concat(    "TIBCO"  ,  " FLOGO")   `)
+	fun, err := expression.ParseExpression(`string.concat(    "TIBCO"  ,  " FLOGO")   `)
 	assert.Nil(t, err)
 	assert.NotNil(t, fun)
 	v, err := fun.Eval()
@@ -74,7 +74,7 @@ func TestExpressionSpace(t *testing.T) {
 }
 
 func TestExpressionSpaceNewLineTab(t *testing.T) {
-	fun, err := expression.ParserExpression(`string.concat(    "TIBCO" 
+	fun, err := expression.ParseExpression(`string.concat(    "TIBCO" 
 		 ,	" FLOGO"	
 		 )`)
 	assert.Nil(t, err)
@@ -85,7 +85,7 @@ func TestExpressionSpaceNewLineTab(t *testing.T) {
 }
 
 func TestExpressionDoubleDoubleQuotes(t *testing.T) {
-	fun, err := expression.ParserExpression(`string.concat("\"abc\"", "dddd")`)
+	fun, err := expression.ParseExpression(`string.concat("\"abc\"", "dddd")`)
 	assert.Nil(t, err)
 	assert.NotNil(t, fun)
 	v, err := fun.Eval()
@@ -94,7 +94,7 @@ func TestExpressionDoubleDoubleQuotes(t *testing.T) {
 }
 
 func TestExpressionSingleSingleQuote(t *testing.T) {
-	fun, err := expression.ParserExpression(`string.concat('\'b\'ac\'', "dddd")`)
+	fun, err := expression.ParseExpression(`string.concat('\'b\'ac\'', "dddd")`)
 	assert.Nil(t, err)
 	assert.NotNil(t, fun)
 	v, err := fun.Eval()
