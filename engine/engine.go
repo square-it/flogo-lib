@@ -80,12 +80,12 @@ func (e *engineImpl) Init(directRunner bool) error {
 		}
 
 		propProvider := app.GetPropertyProvider()
-
 		// Initialize the properties
-		for id, value := range e.app.Properties {
-			propProvider.SetProperty(id, value)
+		props, err := app.GetProperties(e.app.Properties)
+		if err != nil {
+			return err
 		}
-
+		propProvider.SetProperties(props)
 		data.SetPropertyProvider(propProvider)
 
 		actionFactories := action.Factories()
@@ -98,7 +98,7 @@ func (e *engineImpl) Init(directRunner bool) error {
 			}
 		}
 
-		err := app.RegisterResources(e.app.Resources)
+		err = app.RegisterResources(e.app.Resources)
 		if err != nil {
 			return err
 		}
@@ -123,6 +123,7 @@ func (e *engineImpl) Start() error {
 
 	logger.SetDefaultLogger("engine")
 
+	logger.Debugf("Starting app [ %s ] with version [ %s ]", e.app.Name, e.app.Version)
 	logger.Info("Engine Starting...")
 
 	// Todo document RunnerType for engine configuration
@@ -154,7 +155,7 @@ func (e *engineImpl) Start() error {
 	var failed []string
 
 	for key, value := range e.triggers {
-		triggerInfo := &managed.Info{Name:key}
+		triggerInfo := &managed.Info{Name: key}
 		err := managed.Start(fmt.Sprintf("Trigger [ %s ]", key), value)
 		if err != nil {
 			logger.Infof("Trigger [%s] failed to start due to error [%s]", key, err.Error())
@@ -170,6 +171,7 @@ func (e *engineImpl) Start() error {
 		} else {
 			triggerInfo.Status = managed.StatusStarted
 			logger.Infof("Trigger [ %s ]: Started", key)
+			logger.Debugf("Trigger [ %s ] has ref [ %s ] and version [ %s ]", key, value.Metadata().ID, value.Metadata().Version)
 		}
 
 		e.triggerInfos[key] = triggerInfo

@@ -3,11 +3,12 @@ package trigger
 import (
 	"context"
 
+	"fmt"
+
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"fmt"
 )
 
 type Handler struct {
@@ -125,19 +126,11 @@ func (h *Handler) dataToAttrs(triggerData map[string]interface{}) ([]*data.Attri
 
 func (h *Handler) generateInputs(triggerData map[string]interface{}) (map[string]*data.Attribute, error) {
 
-	if len(triggerData) == 0 {
-		return nil, nil
-	}
-
 	triggerAttrs, err := h.dataToAttrs(triggerData)
 
 	if err != nil {
 		logger.Errorf("Failed parsing attrs: %s, Error: %s", triggerData, err)
 		return nil, err
-	}
-
-	if len(triggerAttrs) == 0 {
-		return nil, nil
 	}
 
 	var inputs map[string]*data.Attribute
@@ -190,6 +183,14 @@ func (h *Handler) generateInputs(triggerData map[string]interface{}) (map[string
 
 			attrName := "_T." + attr.Name()
 			inputs[attrName] = data.CloneAttribute(attrName, attr)
+		}
+
+		//Add action metadata into flow
+		if h.act.IOMetadata() != nil && h.act.IOMetadata().Input != nil {
+			//Adding action metadat into inputs
+			for _, attr := range h.act.IOMetadata().Input {
+				inputs[attr.Name()] = attr
+			}
 		}
 	}
 
