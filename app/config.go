@@ -17,18 +17,12 @@ type Config struct {
 	Type        string             `json:"type"`
 	Version     string             `json:"version"`
 	Description string             `json:"description"`
-	Properties  []AppProperty      `json:"properties"`
+	Properties  []*data.Attribute  `json:"properties"`
 	Triggers    []*trigger.Config  `json:"triggers"`
 	Resources   []*resource.Config `json:"resources"`
 
 	//for backwards compatibility
 	Actions []*action.Config `json:"actions"`
-}
-
-type AppProperty struct {
-	Name  string      `json:"name"`
-	Type  string      `json:"type"`
-	Value interface{} `json:"value"`
 }
 
 // defaultConfigProvider implementation of ConfigProvider
@@ -65,14 +59,12 @@ func (d *defaultConfigProvider) GetApp() (*Config, error) {
 	return app, nil
 }
 
-func GetProperties(properties []AppProperty) (map[string]interface{}, error) {
+func GetProperties(properties []*data.Attribute) (map[string]interface{}, error) {
 
 	props := make(map[string]interface{})
 	if properties != nil {
 		for _, property := range properties {
-
-			pValue := property.Value
-			dataType, _ := data.ToTypeEnum(property.Type)
+			pValue := property.Value()
 			strValue, ok := pValue.(string)
 			if ok {
 				if strValue != "" && strValue[0] == '$' {
@@ -84,11 +76,11 @@ func GetProperties(properties []AppProperty) (map[string]interface{}, error) {
 					pValue = resolvedValue
 				}
 			}
-			value, err := data.CoerceToValue(pValue, dataType)
+			value, err := data.CoerceToValue(pValue, property.Type())
 			if err != nil {
 				return props, err
 			}
-			props[property.Name] = value
+			props[property.Name()] = value
 		}
 		return props, nil
 	}
