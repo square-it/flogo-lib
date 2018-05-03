@@ -76,6 +76,7 @@ var TokMap = TokenMap{
 		"true",
 		"false",
 		"float",
+		"nil",
 	},
 
 	idMap: map[string]Type{
@@ -96,5 +97,6 @@ var TokMap = TokenMap{
 		"true":                14,
 		"false":               15,
 		"float":               16,
+		"nil":                 17,
 	},
 }
