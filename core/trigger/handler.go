@@ -64,6 +64,14 @@ func (h *Handler) GetSetting(setting string) (interface{}, bool) {
 	return val, exists
 }
 
+func (h *Handler) GetOutput() (map[string]interface{}) {
+
+	if h.config == nil {
+		return nil
+	}
+	return h.config.Output
+}
+
 func (h *Handler) GetStringSetting(setting string) string {
 	val, exists := h.GetSetting(setting)
 
