@@ -125,11 +125,15 @@ func (m *BasicMapper) Apply(inputScope data.Scope, outputScope data.Scope) error
 			if err != nil {
 				return err
 			}
-
-			err = outputScope.SetAttrValue(mapping.MapTo, val)
+			err = exprmapper.SetValueToOutputScope(mapping.MapTo, outputScope, val)
 			if err != nil {
+				err = fmt.Errorf("Set value %+v to output [%s] error - %s", val, mapping.MapTo, err.Error())
+				mapplerLog.Error(err)
 				return err
 			}
+			mapplerLog.Debugf("Set value %+v to %s Done", val, mapping.MapTo)
+			return nil
+
 		case data.MtExpression:
 			err := exprmapper.Map(mapping, inputScope, outputScope, m.resolver)
 			if err != nil {
