@@ -166,12 +166,31 @@ func (t *TernaryExpressio) HandleParameter(param interface{}, value interface{},
 		firstValue = vss
 		return firstValue, nil
 	case *ref.ArrayRef:
-		return t.EvalFromData(value)
+		return handleArrayRef(value, t.GetRef(), inputScope, resolver)
 	case *ref.MappingRef:
 		return t.Eval(inputScope, resolver)
 	default:
 		firstValue = t
 		return firstValue, nil
+	}
+}
+
+func handleArrayRef(edata interface{}, mapref string, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
+	if edata == nil {
+		v, err := ref.NewMappingRef(mapref).Eval(inputScope, resolver)
+		if err != nil {
+			log.Errorf("Mapping ref eva error [%s]", err.Error())
+			return nil, fmt.Errorf("Mapping ref eva error [%s]", err.Error())
+		}
+		return v, nil
+	} else {
+		arrayRef := ref.NewArrayRef(mapref)
+		v, err := arrayRef.EvalFromData(edata)
+		if err != nil {
+			log.Errorf("Mapping ref eva error [%s]", err.Error())
+			return nil, fmt.Errorf("Mapping ref eva error [%s]", err.Error())
+		}
+		return v, nil
 	}
 }
 
@@ -299,11 +318,9 @@ func (f *Expression) do(edata interface{}, inputScope data.Scope, resolver data.
 		}
 		leftValue = v
 	} else if f.Type == funcexprtype.ARRAYREF {
-		arrayRef := ref.NewArrayRef(f.Value.(string))
-		v, err := arrayRef.EvalFromData(edata)
+		v, err := handleArrayRef(edata, f.Value.(string), inputScope, resolver)
 		if err != nil {
-			log.Errorf("Mapping ref eva error [%s]", err.Error())
-			resultChan <- fmt.Errorf("Mapping ref eva error [%s]", err.Error())
+			resultChan <- err
 		}
 		leftValue = v
 	} else {
@@ -452,8 +469,8 @@ func gt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 		return false, nil
 	}
 
+	log.Debugf("Lefe value [%+v] and Right type: [%+v]", left, right)
 	rightType := getType(right)
-	log.Infof("Right type: %s", rightType.String())
 	switch le := left.(type) {
 	case int:
 		//We should conver to int first
@@ -490,8 +507,26 @@ func gt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 		} else {
 			return le > rightValue, nil
 		}
+	case string:
+		//In case of string, convert to number and compare
+		rightValue, err := data.CoerceToLong(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int64 failed, due to %s", err.Error())
+		}
+
+		leftValue, err := data.CoerceToLong(left)
+		if err != nil {
+			return false, fmt.Errorf("Convert left expression to type int64 failed, due to %s", err.Error())
+		}
+
+		if includeEquals {
+			return leftValue >= rightValue, nil
+
+		} else {
+			return leftValue > rightValue, nil
+		}
 	default:
-		return false, errors.New("Unknow type to equals" + getType(left).String())
+		return false, errors.New(fmt.Sprintf("Unknow type use to greater than, left [%s] and right [%s] ", getType(left).String(), rightType.String()))
 	}
 
 	return false, nil
@@ -542,8 +577,26 @@ func lt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 		} else {
 			return le < rightValue, nil
 		}
+	case string:
+		//In case of string, convert to number and compare
+		rightValue, err := data.CoerceToLong(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int64 failed, due to %s", err.Error())
+		}
+
+		leftValue, err := data.CoerceToLong(left)
+		if err != nil {
+			return false, fmt.Errorf("Convert left expression to type int64 failed, due to %s", err.Error())
+		}
+
+		if includeEquals {
+			return leftValue <= rightValue, nil
+
+		} else {
+			return leftValue < rightValue, nil
+		}
 	default:
-		return false, errors.New("Unknow type to equals" + getType(left).String())
+		return false, errors.New(fmt.Sprintf("Unknow type use to <, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
 
 	return false, nil
@@ -561,7 +614,7 @@ func add(left interface{}, right interface{}) (bool, error) {
 		}
 		return le && rightValue, nil
 	default:
-		return false, errors.New("Unknow type use in add operator " + getType(left).String())
+		return false, errors.New(fmt.Sprintf("Unknow type use to &&, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
 
 	return false, nil
@@ -578,7 +631,7 @@ func or(left interface{}, right interface{}) (bool, error) {
 		}
 		return le || rightValue, nil
 	default:
-		return false, errors.New("Unknow type to add expression " + getType(left).String())
+		return false, errors.New(fmt.Sprintf("Unknow type use to ||, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
 
 	return false, nil
@@ -618,7 +671,7 @@ func additon(left interface{}, right interface{}) (interface{}, error) {
 		}
 		return le + rightValue, nil
 	default:
-		return false, errors.New("Unknow type to equals" + getType(left).String())
+		return false, errors.New(fmt.Sprintf("Unknow type use to additon, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
 
 	return false, nil
@@ -658,7 +711,7 @@ func sub(left interface{}, right interface{}) (interface{}, error) {
 
 		return le - rightValue, nil
 	default:
-		return false, errors.New("Unknow type to equals" + getType(left).String())
+		return false, errors.New(fmt.Sprintf("Unknow type use to sub, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
 
 	return false, nil
@@ -698,7 +751,7 @@ func multiplication(left interface{}, right interface{}) (interface{}, error) {
 
 		return le * rightValue, nil
 	default:
-		return false, errors.New("Unknow type to equals" + getType(left).String())
+		return false, errors.New(fmt.Sprintf("Unknow type use to multiplication, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
 
 	return false, nil
@@ -735,7 +788,7 @@ func div(left interface{}, right interface{}) (interface{}, error) {
 		}
 		return le + rightValue, nil
 	default:
-		return false, errors.New("Unknow type to equals" + getType(left).String())
+		return false, errors.New(fmt.Sprintf("Unknow type use to div, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
 
 	return false, nil

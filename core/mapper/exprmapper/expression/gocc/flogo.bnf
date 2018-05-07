@@ -112,6 +112,7 @@ Param
      | DoubleQString
      | SingleQString
      | MappingRef
+     | Nil
      ;
 
 DoubleQString
@@ -132,4 +133,7 @@ Bool
     ;
 Float
     : float                                      <<direction.NewFloatLit($0)>>
+    ;
+Nil
+    : "nil"                                      <<direction.NewNilLit($0)>>
     ;

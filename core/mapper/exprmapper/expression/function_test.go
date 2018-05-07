@@ -201,6 +201,33 @@ func TestFunctionWithPackage(t *testing.T) {
 	fmt.Println("Result:", function.HandleToSingleOutput(v))
 }
 
+func TestFunctionWithNil(t *testing.T) {
+	e, err := ParseExpression(`string.concat("test","nil")`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	v, err := e.Eval()
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, "testnil", function.HandleToSingleOutput(v).(string))
+
+	e, err = ParseExpression(`string.concat("test",nil)`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	v, err = e.Eval()
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	assert.Equal(t, "test", function.HandleToSingleOutput(v).(string))
+
+}
+
 func TestFunctionWithSpecialFiled(t *testing.T) {
 	e, err := ParseExpression(`$activity[lixingwang].myattri["name.name"][0]>2`)
 	if err != nil {

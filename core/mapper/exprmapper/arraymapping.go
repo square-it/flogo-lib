@@ -112,7 +112,7 @@ func (a *ArrayMapping) DoArrayMapping(inputScope, outputScope data.Scope, resolv
 		//Check if fields is empty for primitive array mapping
 		if a.Fields == nil || len(a.Fields) <= 0 {
 			//Set value directlly to MapTo field
-			return setValueToOutputScopde(a.To, outputScope, fromValue, resolver)
+			return SetValueToOutputScope(a.To, outputScope, fromValue)
 		}
 
 		//Loop array
