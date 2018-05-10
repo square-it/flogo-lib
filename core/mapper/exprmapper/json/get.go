@@ -8,22 +8,12 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json/field"
 
-	"encoding/json"
 	"sync"
 
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 var log = logger.GetLogger("json")
-
-func GetFieldValueP(jsonData string, path string) (interface{}, error) {
-	jsonParsed, err := ParseJSON([]byte(jsonData))
-	if err != nil {
-		return nil, err
-
-	}
-	return getFieldValueP(&JSONData{container: jsonParsed, rw: sync.RWMutex{}}, path)
-}
 
 func GetFieldValueFromInP(data interface{}, path string) (interface{}, error) {
 	var jsonParsed *Container
@@ -32,11 +22,7 @@ func GetFieldValueFromInP(data interface{}, path string) (interface{}, error) {
 	if reflect.TypeOf(data).Kind() == reflect.String {
 		jsonParsed, err = ParseJSON([]byte(data.(string)))
 	} else {
-		b, err := json.Marshal(data)
-		if err != nil {
-			return nil, err
-		}
-		jsonParsed, err = ParseJSON(b)
+		jsonParsed = &Container{object: data}
 	}
 
 	if err != nil {
@@ -53,11 +39,7 @@ func GetFieldValueFromIn(data interface{}, mappingField *field.MappingField) (in
 	if reflect.TypeOf(data).Kind() == reflect.String {
 		jsonParsed, err = ParseJSON([]byte(data.(string)))
 	} else {
-		b, err := json.Marshal(data)
-		if err != nil {
-			return nil, err
-		}
-		jsonParsed, err = ParseJSON(b)
+		jsonParsed = &Container{object: data}
 	}
 
 	if err != nil {

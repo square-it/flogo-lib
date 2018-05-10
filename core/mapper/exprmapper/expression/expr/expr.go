@@ -469,8 +469,8 @@ func gt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 		return false, nil
 	}
 
+	log.Debugf("Left value [%+v] and Right value: [%+v]", left, right)
 	rightType := getType(right)
-	log.Infof("Right type: %s", rightType.String())
 	switch le := left.(type) {
 	case int:
 		//We should conver to int first
@@ -507,8 +507,26 @@ func gt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 		} else {
 			return le > rightValue, nil
 		}
+	case string:
+		//In case of string, convert to number and compare
+		rightValue, err := data.CoerceToLong(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int64 failed, due to %s", err.Error())
+		}
+
+		leftValue, err := data.CoerceToLong(left)
+		if err != nil {
+			return false, fmt.Errorf("Convert left expression to type int64 failed, due to %s", err.Error())
+		}
+
+		if includeEquals {
+			return leftValue >= rightValue, nil
+
+		} else {
+			return leftValue > rightValue, nil
+		}
 	default:
-		return false, errors.New("Unknow type to equals" + getType(left).String())
+		return false, errors.New(fmt.Sprintf("Unknow type use to greater than, left [%s] and right [%s] ", getType(left).String(), rightType.String()))
 	}
 
 	return false, nil
@@ -559,8 +577,26 @@ func lt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 		} else {
 			return le < rightValue, nil
 		}
+	case string:
+		//In case of string, convert to number and compare
+		rightValue, err := data.CoerceToLong(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int64 failed, due to %s", err.Error())
+		}
+
+		leftValue, err := data.CoerceToLong(left)
+		if err != nil {
+			return false, fmt.Errorf("Convert left expression to type int64 failed, due to %s", err.Error())
+		}
+
+		if includeEquals {
+			return leftValue <= rightValue, nil
+
+		} else {
+			return leftValue < rightValue, nil
+		}
 	default:
-		return false, errors.New("Unknow type to equals" + getType(left).String())
+		return false, errors.New(fmt.Sprintf("Unknow type use to <, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
 
 	return false, nil
@@ -578,7 +614,7 @@ func add(left interface{}, right interface{}) (bool, error) {
 		}
 		return le && rightValue, nil
 	default:
-		return false, errors.New("Unknow type use in add operator " + getType(left).String())
+		return false, errors.New(fmt.Sprintf("Unknow type use to &&, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
 
 	return false, nil
@@ -595,7 +631,7 @@ func or(left interface{}, right interface{}) (bool, error) {
 		}
 		return le || rightValue, nil
 	default:
-		return false, errors.New("Unknow type to add expression " + getType(left).String())
+		return false, errors.New(fmt.Sprintf("Unknow type use to ||, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
 
 	return false, nil
@@ -635,7 +671,7 @@ func additon(left interface{}, right interface{}) (interface{}, error) {
 		}
 		return le + rightValue, nil
 	default:
-		return false, errors.New("Unknow type to equals" + getType(left).String())
+		return false, errors.New(fmt.Sprintf("Unknow type use to additon, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
 
 	return false, nil
@@ -675,7 +711,7 @@ func sub(left interface{}, right interface{}) (interface{}, error) {
 
 		return le - rightValue, nil
 	default:
-		return false, errors.New("Unknow type to equals" + getType(left).String())
+		return false, errors.New(fmt.Sprintf("Unknow type use to sub, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
 
 	return false, nil
@@ -715,7 +751,7 @@ func multiplication(left interface{}, right interface{}) (interface{}, error) {
 
 		return le * rightValue, nil
 	default:
-		return false, errors.New("Unknow type to equals" + getType(left).String())
+		return false, errors.New(fmt.Sprintf("Unknow type use to multiplication, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
 
 	return false, nil
@@ -752,7 +788,7 @@ func div(left interface{}, right interface{}) (interface{}, error) {
 		}
 		return le + rightValue, nil
 	default:
-		return false, errors.New("Unknow type to equals" + getType(left).String())
+		return false, errors.New(fmt.Sprintf("Unknow type use to div, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
 
 	return false, nil
