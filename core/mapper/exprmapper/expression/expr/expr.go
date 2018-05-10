@@ -469,7 +469,7 @@ func gt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 		return false, nil
 	}
 
-	log.Debugf("Lefe value [%+v] and Right type: [%+v]", left, right)
+	log.Debugf("Left value [%+v] and Right value: [%+v]", left, right)
 	rightType := getType(right)
 	switch le := left.(type) {
 	case int:
