@@ -21,6 +21,7 @@ import (
 	_ "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/function/string/equals"
 	_ "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/function/string/equalsignorecase"
 	_ "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/function/string/length"
+	_ "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/function/string/substring"
 )
 
 var log = logger.GetLogger("mapper")
