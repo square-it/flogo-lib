@@ -26,6 +26,7 @@ package json
 import (
 	"encoding/json"
 	"errors"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"io"
 	"io/ioutil"
 	"strings"
@@ -355,7 +356,12 @@ func (g *Container) ArrayElement(index int, path ...string) (*Container, error) 
 	}
 	array, ok := g.Search(path...).Data().([]interface{})
 	if !ok {
-		return &Container{nil}, ErrNotArray
+		//Convert to array
+		var err error
+		array, err = data.CoerceToArray(g.Search(path...).Data())
+		if err != nil {
+			return &Container{nil}, ErrNotArray
+		}
 	}
 	if index < len(array) {
 		return &Container{array[index]}, nil
