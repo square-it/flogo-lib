@@ -127,17 +127,14 @@ func (m *BasicMapper) Apply(inputScope data.Scope, outputScope data.Scope) error
 			}
 			err = exprmapper.SetValueToOutputScope(mapping.MapTo, outputScope, val)
 			if err != nil {
-				err = fmt.Errorf("Set value %+v to output [%s] error - %s", val, mapping.MapTo, err.Error())
+				err = fmt.Errorf("set value %+v to output [%s] error - %s", val, mapping.MapTo, err.Error())
 				mapplerLog.Error(err)
 				return err
 			}
-			mapplerLog.Debugf("Set value %+v to %s Done", val, mapping.MapTo)
-			return nil
-
 		case data.MtExpression:
 			err := exprmapper.Map(mapping, inputScope, outputScope, m.resolver)
 			if err != nil {
-				return fmt.Errorf("Expression mapping failed, due to %s", err.Error())
+				return fmt.Errorf("expression mapping failed, due to %s", err.Error())
 			}
 		case data.MtArray:
 			//ArrayMapping
@@ -145,14 +142,14 @@ func (m *BasicMapper) Apply(inputScope data.Scope, outputScope data.Scope) error
 			//Array mapping value must be string
 			arrayMapping, err := exprmapper.ParseArrayMapping(mapping.Value)
 			if err != nil {
-				return fmt.Errorf("Array mapping structure error -  %s", err.Error())
+				return fmt.Errorf("array mapping structure error -  %s", err.Error())
 			}
 
 			if err := arrayMapping.Validate(); err != nil {
 				return err
 			}
 			if err = arrayMapping.DoArrayMapping(inputScope, outputScope, m.resolver); err != nil {
-				return fmt.Errorf("Do array mapping error - %s", err.Error())
+				return fmt.Errorf("array mapping error - %s", err.Error())
 			}
 
 		}
