@@ -340,4 +340,14 @@ var productionsTable = ProdTab{
 			return direction.NewNilLit(X[0])
 		},
 	},
+	ProdTabEntry{
+		String: `Nil : "null"	<< direction.NewNilLit(X[0]) >>`,
+		Id:         "Nil",
+		NTType:     17,
+		Index:      32,
+		NumSymbols: 1,
+		ReduceFunc: func(X []Attrib) (Attrib, error) {
+			return direction.NewNilLit(X[0])
+		},
+	},
 }

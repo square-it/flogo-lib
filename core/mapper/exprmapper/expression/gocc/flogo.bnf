@@ -136,4 +136,5 @@ Float
     ;
 Nil
     : "nil"                                      <<direction.NewNilLit($0)>>
+    | "null"                                     <<direction.NewNilLit($0)>>
     ;
