@@ -381,6 +381,6 @@ func GetValueFromArrayRef(object interface{}, expressionRef interface{}, inputSc
 		}
 
 	}
-	return fromValue, err
+	return fromValue, nil
 
 }
