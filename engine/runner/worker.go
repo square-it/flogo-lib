@@ -111,16 +111,20 @@ func (w ActionWorker) Start() {
 							actionData.arc <- &ActionResult{err: err}
 						} else {
 							done := false
+
+							replied := false
+
 							//wait for reply
 							for !done {
 								select {
 								case result := <-handler.result:
-									if handler.replyCnt == 1 {
+									if !replied {
+										replied = true
 										logger.Debugf("Action-Worker-%d: Received result: %#v", w.ID, result)
 										actionData.arc <- result
 									}
 								case <-handler.done:
-									if handler.replyCnt == 0 {
+									if !replied {
 										actionData.arc <- &ActionResult{}
 									}
 									done = true
@@ -152,14 +156,12 @@ func (w ActionWorker) Stop() {
 
 // AsyncResultHandler simple ResultHandler to use in the asynchronous case
 type AsyncResultHandler struct {
-	done    chan (bool)
-	result  chan (*ActionResult)
-	replyCnt int
+	done   chan bool
+	result chan *ActionResult
 }
 
 // HandleResult implements action.ResultHandler.HandleResult
 func (rh *AsyncResultHandler) HandleResult(results map[string]*data.Attribute, err error) {
-	rh.replyCnt++
 	rh.result <- &ActionResult{results: results, err: err}
 }
 
