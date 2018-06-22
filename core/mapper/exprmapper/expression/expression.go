@@ -14,7 +14,6 @@ var log = logger.GetLogger("expression")
 func ParseExpression(exprString string) (expr.Expr, error) {
 	st, err := getParser(exprString)
 	if err != nil {
-		log.Warnf("Error to parser expression, %+v ", err.Error())
 		return nil, err
 	}
 
