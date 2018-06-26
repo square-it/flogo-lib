@@ -386,7 +386,7 @@ func equals(left interface{}, right interface{}) (bool, error) {
 		return false, nil
 	}
 
-	leftValue, rightValue, err := ConvertToSamveType(left, right)
+	leftValue, rightValue, err := ConvertToSameType(left, right)
 	if err != nil {
 		return false, err
 	}
@@ -396,7 +396,7 @@ func equals(left interface{}, right interface{}) (bool, error) {
 	return leftValue == rightValue, nil
 }
 
-func ConvertToSamveType(left interface{}, right interface{}) (interface{}, interface{}, error) {
+func ConvertToSameType(left interface{}, right interface{}) (interface{}, interface{}, error) {
 	if left == nil || right == nil {
 		return left, right, nil
 	}
@@ -464,7 +464,7 @@ func notEquals(left interface{}, right interface{}) (bool, error) {
 		return true, nil
 	}
 
-	leftValue, rightValue, err := ConvertToSamveType(left, right)
+	leftValue, rightValue, err := ConvertToSameType(left, right)
 	if err != nil {
 		return false, err
 	}
