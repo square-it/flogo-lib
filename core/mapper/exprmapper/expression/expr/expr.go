@@ -386,53 +386,70 @@ func equals(left interface{}, right interface{}) (bool, error) {
 		return false, nil
 	}
 
-	rightValue, err := convertRightValueToLeftType(left, right)
+	leftValue, rightValue, err := ConvertToSameType(left, right)
 	if err != nil {
 		return false, err
 	}
 
 	log.Debugf("Right expression value [%s]", rightValue)
 
-	return left == rightValue, nil
+	return leftValue == rightValue, nil
 }
 
-func convertRightValueToLeftType(left interface{}, right interface{}) (interface{}, error) {
+func ConvertToSameType(left interface{}, right interface{}) (interface{}, interface{}, error) {
 	if left == nil || right == nil {
-		return right, nil
+		return left, right, nil
 	}
+	var leftValue interface{}
 	var rightValue interface{}
 	var err error
-	switch left.(type) {
+	switch t := left.(type) {
 	case int:
 		rightValue, err = data.CoerceToInteger(right)
 		if err != nil {
 			err = fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
-		return rightValue, nil
+		leftValue = t
 	case int64:
 		rightValue, err = data.CoerceToInteger(right)
 		if err != nil {
 			err = fmt.Errorf("Convert right expression to type int64 failed, due to %s", err.Error())
 		}
+		leftValue = t
 	case float64:
 		rightValue, err = data.CoerceToNumber(right)
 		if err != nil {
 			err = fmt.Errorf("Convert right expression to type float64 failed, due to %s", err.Error())
 		}
+		leftValue = t
 	case string:
 		rightValue, err = data.CoerceToString(right)
 		if err != nil {
 			err = fmt.Errorf("Convert right expression to type string failed, due to %s", err.Error())
 		}
+		leftValue = t
+
 	case bool:
 		rightValue, err = data.CoerceToBoolean(right)
 		if err != nil {
 			err = fmt.Errorf("Convert right expression to type boolean failed, due to %s", err.Error())
 		}
+		leftValue = t
+
+	case json.Number:
+		rightValue, err = data.CoerceToLong(right)
+		if err != nil {
+			err = fmt.Errorf("Convert right expression to type long failed, due to %s", err.Error())
+		}
+
+		leftValue, err = data.CoerceToLong(left)
+		if err != nil {
+			err = fmt.Errorf("Convert left expression to type long failed, due to %s", err.Error())
+		}
 	default:
 		err = fmt.Errorf("Unsupport type to compare now")
 	}
-	return rightValue, err
+	return leftValue, rightValue, err
 
 }
 
@@ -447,14 +464,14 @@ func notEquals(left interface{}, right interface{}) (bool, error) {
 		return true, nil
 	}
 
-	rightValue, err := convertRightValueToLeftType(left, right)
+	leftValue, rightValue, err := ConvertToSameType(left, right)
 	if err != nil {
 		return false, err
 	}
 
 	log.Debugf("Right expression value [%s]", rightValue)
 
-	return left != rightValue, nil
+	return leftValue != rightValue, nil
 
 }
 
@@ -507,7 +524,7 @@ func gt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 		} else {
 			return le > rightValue, nil
 		}
-	case string:
+	case string, json.Number:
 		//In case of string, convert to number and compare
 		rightValue, err := data.CoerceToLong(right)
 		if err != nil {
@@ -577,7 +594,7 @@ func lt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 		} else {
 			return le < rightValue, nil
 		}
-	case string:
+	case string, json.Number:
 		//In case of string, convert to number and compare
 		rightValue, err := data.CoerceToLong(right)
 		if err != nil {
@@ -670,6 +687,18 @@ func additon(left interface{}, right interface{}) (interface{}, error) {
 			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
 		return le + rightValue, nil
+	case json.Number:
+		rightValue, err := data.CoerceToLong(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type long failed, due to %s", err.Error())
+		}
+
+		leftValue, err := data.CoerceToLong(left)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type long failed, due to %s", err.Error())
+		}
+
+		return leftValue * rightValue, nil
 	default:
 		return false, errors.New(fmt.Sprintf("Unknow type use to additon, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
@@ -710,6 +739,18 @@ func sub(left interface{}, right interface{}) (interface{}, error) {
 		}
 
 		return le - rightValue, nil
+	case json.Number:
+		rightValue, err := data.CoerceToLong(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type long failed, due to %s", err.Error())
+		}
+
+		leftValue, err := data.CoerceToLong(left)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type long failed, due to %s", err.Error())
+		}
+
+		return leftValue - rightValue, nil
 	default:
 		return false, errors.New(fmt.Sprintf("Unknow type use to sub, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
@@ -750,6 +791,18 @@ func multiplication(left interface{}, right interface{}) (interface{}, error) {
 		}
 
 		return le * rightValue, nil
+	case json.Number:
+		rightValue, err := data.CoerceToLong(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type long failed, due to %s", err.Error())
+		}
+
+		leftValue, err := data.CoerceToLong(left)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type long failed, due to %s", err.Error())
+		}
+
+		return leftValue * rightValue, nil
 	default:
 		return false, errors.New(fmt.Sprintf("Unknow type use to multiplication, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
@@ -787,6 +840,18 @@ func div(left interface{}, right interface{}) (interface{}, error) {
 			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
 		return le + rightValue, nil
+	case json.Number:
+		rightValue, err := data.CoerceToLong(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type long failed, due to %s", err.Error())
+		}
+
+		leftValue, err := data.CoerceToLong(left)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type long failed, due to %s", err.Error())
+		}
+
+		return leftValue + rightValue, nil
 	default:
 		return false, errors.New(fmt.Sprintf("Unknow type use to div, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
