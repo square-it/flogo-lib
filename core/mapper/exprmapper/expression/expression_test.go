@@ -70,7 +70,19 @@ func TestExpressionString(t *testing.T) {
 }
 
 func TestExpressionWithOldWay(t *testing.T) {
-	v, err := ParseExpression(`${flow.petMax} > 2`)
+	v, err := ParseExpression(`"ddd" + "dddd"`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	_, err = v.EvalWithScope(nil, nil)
+	fmt.Println(err)
+	assert.NotNil(t, err)
+
+}
+
+func TestTernaryExpressionWithNagtive(t *testing.T) {
+	v, err := ParseExpression(`$.content.ParamNb3 != nil ? $.content.ParamNb3 : -1`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
