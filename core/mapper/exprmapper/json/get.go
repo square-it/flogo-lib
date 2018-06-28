@@ -48,7 +48,6 @@ func GetFieldValueFromIn(data interface{}, mappingField *field.MappingField) (in
 		if err != nil {
 			return nil, err
 		}
-		fmt.Println(string(b))
 		jsonParsed, err = ParseJSON(b)
 	}
 
