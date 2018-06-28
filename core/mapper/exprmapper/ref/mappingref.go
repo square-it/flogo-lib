@@ -60,11 +60,11 @@ func (m *MappingRef) GetValue(inputScope data.Scope, resovler data.Resolver) (in
 	}
 
 	if mappingFiled == nil || len(mappingFiled.Fields) <= 0 {
-		//value, err := toInfterface(inStruct)
-		//if err != nil {
-		//	value = inStruct
-		//}
-		return inStruct, nil
+		value, err := toInterface(inStruct)
+		if err != nil {
+			value = inStruct
+		}
+		return value, nil
 	}
 	mappingValue, err := json.GetFieldValueFromIn(inStruct, mappingFiled)
 	if err != nil {
@@ -73,7 +73,7 @@ func (m *MappingRef) GetValue(inputScope data.Scope, resovler data.Resolver) (in
 	return mappingValue, nil
 }
 
-func toInfterface(value interface{}) (interface{}, error) {
+func toInterface(value interface{}) (interface{}, error) {
 
 	var paramMap interface{}
 

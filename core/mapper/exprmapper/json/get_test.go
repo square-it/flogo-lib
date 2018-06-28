@@ -266,3 +266,63 @@ func TestRootArrayInvalid(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Nil(t, value)
 }
+
+func TestGetValue(t *testing.T) {
+	value := struct {
+		ID     string `json:"id"`
+		Name   string `json:"name"`
+		IntV   int    `json:"int_v"`
+		Int64V int64  `json:"int_64"`
+	}{
+		ID:     "12222",
+		Name:   "name",
+		Int64V: int64(123),
+		IntV:   int(12),
+	}
+
+	mappingField := &field.MappingField{HasArray: false, HasSpecialField: false}
+	mappingField.Fields = []string{"id"}
+
+	v, err := GetFieldValueFromIn(value, mappingField)
+	assert.Nil(t, err)
+	assert.Equal(t, "12222", v)
+
+	testMap := make(map[string]string)
+	testMap["id"] = "id"
+	testMap["id2"] = "id2"
+
+	testMap2 := make(map[string]interface{})
+	testMap2["id"] = value
+	testMap2["id2"] = int(2)
+
+	mappingField2 := &field.MappingField{HasArray: false, HasSpecialField: false}
+	mappingField2.Fields = []string{"id"}
+	v, err = GetFieldValueFromIn(testMap, mappingField2)
+	assert.Nil(t, err)
+	assert.Equal(t, "id", v)
+
+	mappingField3 := &field.MappingField{HasArray: false, HasSpecialField: false}
+	mappingField3.Fields = []string{"id2"}
+	v, err = GetFieldValueFromIn(testMap2, mappingField3)
+	assert.Nil(t, err)
+	assert.Equal(t, float64(2), v)
+
+	mappingField4 := &field.MappingField{HasArray: false, HasSpecialField: false}
+	mappingField4.Fields = []string{"id", "id"}
+	v, err = GetFieldValueFromIn(testMap2, mappingField4)
+	assert.Nil(t, err)
+	assert.Equal(t, "12222", v)
+
+	////Int64
+	mappingFieldInt64 := &field.MappingField{HasArray: false, HasSpecialField: false}
+	mappingFieldInt64.Fields = []string{"id", "int_64"}
+	v, err = GetFieldValueFromIn(testMap2, mappingFieldInt64)
+	assert.Nil(t, err)
+	assert.Equal(t, float64(123), v)
+	//Int
+	mappingFieldint := &field.MappingField{HasArray: false, HasSpecialField: false}
+	mappingFieldint.Fields = []string{"id", "int_v"}
+	v, err = GetFieldValueFromIn(testMap2, mappingFieldint)
+	assert.Nil(t, err)
+	assert.Equal(t, float64(12), v)
+}
