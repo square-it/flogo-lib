@@ -213,7 +213,7 @@ func (f *FunctionExp) callFunction(fdata interface{}, inputScope data.Scope, res
 					var field *ref.ArrayRef
 					switch p.Value.(type) {
 					case string:
-						//field = &arrayref.MappingRef{p.Value.(string)}
+						field = ref.NewArrayRef(p.Value.(string))
 					case *ref.ArrayRef:
 						field = p.Value.(*ref.ArrayRef)
 					}
