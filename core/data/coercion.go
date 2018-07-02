@@ -35,8 +35,8 @@ func CoerceToValue(value interface{}, dataType Type) (interface{}, error) {
 		coerced, err = CoerceToArrayIfNecessary(value)
 	case TypeParams:
 		coerced, err = CoerceToParams(value)
-	case TypePassword:
-		coerced, err = GetPasswordValueDecoder().DecodeValue(value)
+	case TypeSecret:
+		coerced, err = GetSecretValueDecoder().DecodeValue(value)
 	}
 
 	if err != nil {

@@ -20,7 +20,7 @@ const (
 	TypeComplexObject
 	TypeArray
 	TypeParams
-	TypePassword
+	TypeSecret
 
 )
 
@@ -35,7 +35,7 @@ var types = [...]string{
 	"complexObject",
 	"array",
 	"params",
-	"password",
+	"secret",
 }
 
 func (t Type) String() string {
@@ -66,8 +66,8 @@ func ToTypeEnum(typeStr string) (Type, bool) {
 		return TypeArray, true
 	case "params":
 		return TypeParams, true
-	case "password":
-		return TypePassword, true
+	case "secret":
+		return TypeSecret, true
 	default:
 		return TypeAny, false
 	}
