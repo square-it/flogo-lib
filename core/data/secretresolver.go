@@ -12,15 +12,18 @@ import (
 
 var secretDecoder SecretValueDecoder
 
+// SecretValueDecoder defines method for decoding value
 type SecretValueDecoder interface {
 	DecodeValue(value interface{}) (string, error)
 }
 
-
+// Set secret value decoder
 func SetSecretValueDecoder(pwdResolver SecretValueDecoder ) {
 	secretDecoder = pwdResolver
 }
 
+// Get secret value decoder. If not already set by SetSecretValueDecoder(), will return default KeyBasedSecretValueDecoder
+// where decoding key value is expected to be set through FLOGO_DATA_SECRET_KEY environment variable.
 func GetSecretValueDecoder() SecretValueDecoder {
 	if secretDecoder == nil {
 		secretDecoder = &KeyBasedSecretValueDecoder{Key: config.GetSecretKey()}
@@ -28,11 +31,13 @@ func GetSecretValueDecoder() SecretValueDecoder {
 	return secretDecoder
 }
 
-
+// A key based secret value decoder. Secret value encryption/decryption is based on SHA256
+// and refers https://gist.github.com/willshiao/f4b03650e5a82561a460b4a15789cfa1
 type KeyBasedSecretValueDecoder struct {
 	Key string
 }
 
+// Decode value based on a key
 func (defaultResolver *KeyBasedSecretValueDecoder) DecodeValue(value interface{}) (string, error) {
 	if value != nil   {
 		if defaultResolver.Key != "" {
