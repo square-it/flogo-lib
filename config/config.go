@@ -14,7 +14,8 @@ const (
 	ENV_APP_CONFIG_LOCATION_KEY  = "FLOGO_CONFIG_PATH"
 	APP_CONFIG_LOCATION_DEFAULT  = "flogo.json"
 	ENV_STOP_ENGINE_ON_ERROR_KEY = "FLOGO_ENGINE_STOP_ON_ERROR"
-	ENV_SECRET_KEY_KEY           = "FLOGO_DATA_SECRET_KEY"
+	ENV_DATA_SECRET_KEY_KEY      = "FLOGO_DATA_SECRET_KEY"
+	ENV_DATA_SECRET_KEY_DEFAULT      = "flogo"
 )
 
 var defaultLogLevel = LOG_LEVEL_DEFAULT
@@ -58,6 +59,10 @@ func StopEngineOnError() bool {
 	return b
 }
 
-func GetSecretKey() string {
-	return os.Getenv(ENV_SECRET_KEY_KEY)
+func GetDataSecretKey() string {
+	key := os.Getenv(ENV_DATA_SECRET_KEY_KEY)
+	if len(key) > 0 {
+		return key
+	}
+	return ENV_DATA_SECRET_KEY_DEFAULT
 }

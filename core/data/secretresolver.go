@@ -24,9 +24,10 @@ func SetSecretValueDecoder(pwdResolver SecretValueDecoder ) {
 
 // Get secret value decoder. If not already set by SetSecretValueDecoder(), will return default KeyBasedSecretValueDecoder
 // where decoding key value is expected to be set through FLOGO_DATA_SECRET_KEY environment variable.
+// If key is not set, a default key value(github.com/TIBCOSoftware/flogo-lib/config.ENV_DATA_SECRET_KEY_DEFAULT) will be used.
 func GetSecretValueDecoder() SecretValueDecoder {
 	if secretDecoder == nil {
-		secretDecoder = &KeyBasedSecretValueDecoder{Key: config.GetSecretKey()}
+		secretDecoder = &KeyBasedSecretValueDecoder{Key: config.GetDataSecretKey()}
 	}
 	return secretDecoder
 }
