@@ -36,8 +36,8 @@ type KeyBasedSecretValueDecoder struct {
 func (defaultResolver *KeyBasedSecretValueDecoder) DecodeValue(value interface{}) (string, error) {
 	if value != nil   {
 		if defaultResolver.Key != "" {
-			keyBytes := sha256.Sum256([]byte(defaultResolver.Key))
-			return decrypt(keyBytes[:], value.(string))
+			kBytes := sha256.Sum256([]byte(defaultResolver.Key))
+			return decryptValue(kBytes[:], value.(string))
 		}
 		return value.(string), nil
 	}
@@ -46,8 +46,8 @@ func (defaultResolver *KeyBasedSecretValueDecoder) DecodeValue(value interface{}
 
 
 // decrypt from base64 to decrypted string
-func decrypt(key []byte, cryptoText string) (string, error) {
-	ciphertext, err := base64.StdEncoding.DecodeString(cryptoText)
+func decryptValue(key []byte, encryptedData string) (string, error) {
+	ciphertext, err := base64.StdEncoding.DecodeString(encryptedData)
 	if err != nil {
 		return "", err
 	}
