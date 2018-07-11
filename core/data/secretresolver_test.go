@@ -8,21 +8,20 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/config"
 )
 
-func TestSecretKeyNotSet(t *testing.T) {
+func TestSecretKeyDefault(t *testing.T) {
 	defer func() {
 		SetSecretValueDecoder(nil)
 	}()
 	decoder := GetSecretValueDecoder()
-	decrypted, err := decoder.DecodeValue("mysecurepassword3")
+	decrypted, err := decoder.DecodeValue("QReglAoZB81p3jj9dCXA2oEbauCXu/N8G5wwqQjeARMG")
 	assert.Nil(t, err)
 	assert.Equal(t, "mysecurepassword3", decrypted)
-	SetSecretValueDecoder(nil)
 }
 
 func TestSecretKeyEnv(t *testing.T) {
-	os.Setenv(config.ENV_SECRET_KEY_KEY, "mysecretkey1")
+	os.Setenv(config.ENV_DATA_SECRET_KEY_KEY, "mysecretkey1")
 	defer func() {
-		os.Unsetenv(config.ENV_SECRET_KEY_KEY)
+		os.Unsetenv(config.ENV_DATA_SECRET_KEY_KEY)
 		SetSecretValueDecoder(nil)
 	}()
 	decrypted, err := GetSecretValueDecoder().DecodeValue("Dpn7oxbWZPHlLkPkzgm+qZFHfGHlAKoFXcu5RhbNlQZS")
