@@ -10,33 +10,66 @@ import (
 
 func TestSecretKeyDefault(t *testing.T) {
 	defer func() {
-		SetSecretValueDecoder(nil)
+		SetSecretValueHandler(nil)
 	}()
-	decoder := GetSecretValueDecoder()
-	decrypted, err := decoder.DecodeValue("QReglAoZB81p3jj9dCXA2oEbauCXu/N8G5wwqQjeARMG")
+	handler := GetSecretValueHandler()
+	encoded, err := handler.EncodeValue("mysecurepassword3")
 	assert.Nil(t, err)
-	assert.Equal(t, "mysecurepassword3", decrypted)
+	decoded, err := handler.DecodeValue(encoded)
+	assert.Nil(t, err)
+	assert.Equal(t, "mysecurepassword3", decoded)
 }
 
 func TestSecretKeyEnv(t *testing.T) {
 	os.Setenv(config.ENV_DATA_SECRET_KEY_KEY, "mysecretkey1")
 	defer func() {
 		os.Unsetenv(config.ENV_DATA_SECRET_KEY_KEY)
-		SetSecretValueDecoder(nil)
+		SetSecretValueHandler(nil)
 	}()
-	decrypted, err := GetSecretValueDecoder().DecodeValue("Dpn7oxbWZPHlLkPkzgm+qZFHfGHlAKoFXcu5RhbNlQZS")
+
+	handler := GetSecretValueHandler()
+	encoded, err := handler.EncodeValue("mysecurepassword1")
 	assert.Nil(t, err)
-	assert.Equal(t, "mysecurepassword1", decrypted)
+	decoded, err := handler.DecodeValue(encoded)
+	assert.Nil(t, err)
+	assert.Equal(t, "mysecurepassword1", decoded)
 }
 
 func TestSecretKey(t *testing.T) {
 	defer func() {
-		SetSecretValueDecoder(nil)
+		SetSecretValueHandler(nil)
 	}()
-	SetSecretValueDecoder(&KeyBasedSecretValueDecoder{Key: "mysecretkey2"})
-	decrypted, err := GetSecretValueDecoder().DecodeValue("4hmxSs2mjKfExP0lLLW9R9hK8631ce2r5RWDKYJjDZV2")
+	SetSecretValueHandler(&KeyBasedSecretValueHandler{Key: "mysecretkey2"})
+	handler := GetSecretValueHandler()
+	encoded, err := handler.EncodeValue("mysecurepassword1")
 	assert.Nil(t, err)
-	assert.Equal(t, "mysecurepassword2", decrypted)
+	decoded, err := GetSecretValueHandler().DecodeValue(encoded)
+	assert.Nil(t, err)
+	assert.Equal(t, "mysecurepassword1", decoded)
+}
+
+func TestSecretAttributeEncodedValue(t *testing.T) {
+	defer func() {
+		SetSecretValueHandler(nil)
+	}()
+	SetSecretValueHandler(&KeyBasedSecretValueHandler{Key: "mysecretkey2"})
+	handler := GetSecretValueHandler()
+	encoded, err := handler.EncodeValue("mysecurepassword1")
+	attr, err := NewAttribute("password", TypeString, encoded)
+	assert.Nil(t, err)
+	attr.secret = true
+	assert.Equal(t, "mysecurepassword1", attr.Value())
+}
+
+func TestSecretAttributeNonEncodedValue(t *testing.T) {
+	defer func() {
+		SetSecretValueHandler(nil)
+	}()
+	attr, err := NewAttribute("password", TypeString, "")
+	assert.Nil(t, err)
+	attr.secret = true
+	attr.SetValue("mysecurepassword1")
+	assert.Equal(t, "mysecurepassword1", attr.Value())
 }
 
 

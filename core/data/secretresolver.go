@@ -8,38 +8,41 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/pkg/errors"
+	"io"
+	"crypto/rand"
 )
 
-var secretDecoder SecretValueDecoder
+var secretDecoder SecretValueHandler
 
 // SecretValueDecoder defines method for decoding value
-type SecretValueDecoder interface {
+type SecretValueHandler interface {
+	EncodeValue(value interface{}) (string, error)
 	DecodeValue(value interface{}) (string, error)
 }
 
 // Set secret value decoder
-func SetSecretValueDecoder(pwdResolver SecretValueDecoder ) {
+func SetSecretValueHandler(pwdResolver SecretValueHandler ) {
 	secretDecoder = pwdResolver
 }
 
-// Get secret value decoder. If not already set by SetSecretValueDecoder(), will return default KeyBasedSecretValueDecoder
+// Get secret value handler. If not already set by SetSecretValueHandler(), will return default KeyBasedSecretValueDecoder
 // where decoding key value is expected to be set through FLOGO_DATA_SECRET_KEY environment variable.
 // If key is not set, a default key value(github.com/TIBCOSoftware/flogo-lib/config.DATA_SECRET_KEY_DEFAULT) will be used.
-func GetSecretValueDecoder() SecretValueDecoder {
+func GetSecretValueHandler() SecretValueHandler {
 	if secretDecoder == nil {
-		secretDecoder = &KeyBasedSecretValueDecoder{Key: config.GetDataSecretKey()}
+		secretDecoder = &KeyBasedSecretValueHandler{Key: config.GetDataSecretKey()}
 	}
 	return secretDecoder
 }
 
 // A key based secret value decoder. Secret value encryption/decryption is based on SHA256
 // and refers https://gist.github.com/willshiao/f4b03650e5a82561a460b4a15789cfa1
-type KeyBasedSecretValueDecoder struct {
+type KeyBasedSecretValueHandler struct {
 	Key string
 }
 
 // Decode value based on a key
-func (defaultResolver *KeyBasedSecretValueDecoder) DecodeValue(value interface{}) (string, error) {
+func (defaultResolver *KeyBasedSecretValueHandler) DecodeValue(value interface{}) (string, error) {
 	if value != nil   {
 		if defaultResolver.Key != "" {
 			kBytes := sha256.Sum256([]byte(defaultResolver.Key))
@@ -48,6 +51,40 @@ func (defaultResolver *KeyBasedSecretValueDecoder) DecodeValue(value interface{}
 		return value.(string), nil
 	}
 	return "", nil
+}
+
+func (defaultResolver *KeyBasedSecretValueHandler) EncodeValue(value interface{}) (string, error) {
+	if value != nil   {
+		if defaultResolver.Key != "" {
+			kBytes := sha256.Sum256([]byte(defaultResolver.Key))
+			return encryptValue(kBytes[:], value.(string))
+		}
+		return value.(string), nil
+	}
+	return "", nil
+}
+
+// encrypt string to base64 crypto using AES
+func encryptValue(key []byte, text string) (string, error) {
+	plaintext := []byte(text)
+
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return "", err
+	}
+
+	// The IV needs to be unique, but not secure. Therefore it's common to
+	// include it at the beginning of the ciphertext.
+	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
+	iv := ciphertext[:aes.BlockSize]
+	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+		return "", err
+	}
+
+	stream := cipher.NewCFBEncrypter(block, iv)
+	stream.XORKeyStream(ciphertext[aes.BlockSize:], plaintext)
+
+	return base64.StdEncoding.EncodeToString(ciphertext), nil
 }
 
 
