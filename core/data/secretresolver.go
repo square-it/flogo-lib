@@ -12,7 +12,7 @@ import (
 	"crypto/rand"
 )
 
-var secretDecoder SecretValueHandler
+var secretValueHandler SecretValueHandler
 
 // SecretValueDecoder defines method for decoding value
 type SecretValueHandler interface {
@@ -22,17 +22,17 @@ type SecretValueHandler interface {
 
 // Set secret value decoder
 func SetSecretValueHandler(pwdResolver SecretValueHandler ) {
-	secretDecoder = pwdResolver
+	secretValueHandler = pwdResolver
 }
 
 // Get secret value handler. If not already set by SetSecretValueHandler(), will return default KeyBasedSecretValueDecoder
 // where decoding key value is expected to be set through FLOGO_DATA_SECRET_KEY environment variable.
 // If key is not set, a default key value(github.com/TIBCOSoftware/flogo-lib/config.DATA_SECRET_KEY_DEFAULT) will be used.
 func GetSecretValueHandler() SecretValueHandler {
-	if secretDecoder == nil {
-		secretDecoder = &KeyBasedSecretValueHandler{Key: config.GetDataSecretKey()}
+	if secretValueHandler == nil {
+		secretValueHandler = &KeyBasedSecretValueHandler{Key: config.GetDataSecretKey()}
 	}
-	return secretDecoder
+	return secretValueHandler
 }
 
 // A key based secret value decoder. Secret value encryption/decryption is based on SHA256
