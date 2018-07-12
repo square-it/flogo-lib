@@ -10,7 +10,6 @@ type Attribute struct {
 	name     string
 	dataType Type
 	value    interface{}
-	secret   bool
 }
 
 // NewAttribute constructs a new attribute
@@ -57,22 +56,11 @@ func (a *Attribute) Type() Type {
 }
 
 func (a *Attribute) Value() interface{} {
-	if a.secret {
-		// Decrypt value
-		// TODO Handle Error
-		a.value, _ = GetSecretValueHandler().DecodeValue(a.value)
-	}
-
 	return a.value
 }
 
 func (a *Attribute) SetValue(value interface{}) (err error) {
 	a.value, err = CoerceToValue(value, a.dataType)
-
-	if a.secret {
-		// Encrypt value
-		a.value, err = GetSecretValueHandler().EncodeValue(a.value)
-	}
 	return err
 }
 
@@ -83,12 +71,10 @@ func (a *Attribute) MarshalJSON() ([]byte, error) {
 		Name   string      `json:"name"`
 		Type   string      `json:"type"`
 		Value  interface{} `json:"value"`
-		Secret bool        `json:"secret"`
 	}{
 		Name:   a.name,
 		Type:   a.dataType.String(),
 		Value:  a.value,
-		Secret: a.secret,
 	})
 }
 
@@ -107,7 +93,6 @@ func (a *Attribute) UnmarshalJSON(data []byte) error {
 	}
 
 	a.name = ser.Name
-	a.secret = ser.Secret
 	dt, exists := ToTypeEnum(ser.Type)
 
 	if !exists {
@@ -120,7 +105,14 @@ func (a *Attribute) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	} else {
-		a.value = val
+		if ser.Secret {
+			a.value, err = GetSecretValueHandler().DecodeValue(a.value)
+			if err != nil {
+				return err
+			}
+		} else {
+			a.value = val
+		}
 	}
 
 	return nil

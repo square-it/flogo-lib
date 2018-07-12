@@ -48,29 +48,6 @@ func TestSecretKey(t *testing.T) {
 	assert.Equal(t, "mysecurepassword1", decoded)
 }
 
-func TestSecretAttributeEncodedValue(t *testing.T) {
-	defer func() {
-		SetSecretValueHandler(nil)
-	}()
-	SetSecretValueHandler(&KeyBasedSecretValueHandler{Key: "mysecretkey2"})
-	handler := GetSecretValueHandler()
-	encoded, err := handler.EncodeValue("mysecurepassword1")
-	attr, err := NewAttribute("password", TypeString, encoded)
-	assert.Nil(t, err)
-	attr.secret = true
-	assert.Equal(t, "mysecurepassword1", attr.Value())
-}
-
-func TestSecretAttributeNonEncodedValue(t *testing.T) {
-	defer func() {
-		SetSecretValueHandler(nil)
-	}()
-	attr, err := NewAttribute("password", TypeString, "")
-	assert.Nil(t, err)
-	attr.secret = true
-	attr.SetValue("mysecurepassword1")
-	assert.Equal(t, "mysecurepassword1", attr.Value())
-}
 
 
 
