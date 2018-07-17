@@ -270,17 +270,17 @@ func (f *FunctionExp) callFunction(fdata interface{}, inputScope data.Scope, res
 	}
 
 	logrus.Debugf("Input Parameters: %+v", inputs)
-	ins, err := ensureArguments(method, inputs)
+	args, err := ensureArguments(method, inputs)
 	if err != nil {
 		return reflect.Value{}, fmt.Errorf("ensure function %s failed, due to %s", f.Name, err.Error())
 	}
-	values := method.Call(ins)
+	values := method.Call(args)
 	return f.extractErrorFromValues(values)
 }
 
 func ensureArguments(method reflect.Value, in []reflect.Value) ([]reflect.Value, error) {
 
-	var tmpInputs []reflect.Value
+	var retInputs []reflect.Value
 	methodType := method.Type()
 	n := method.Type().NumIn()
 	for i := 0; i < n; i++ {
@@ -289,9 +289,9 @@ func ensureArguments(method reflect.Value, in []reflect.Value) ([]reflect.Value,
 			if err != nil {
 				return nil, fmt.Errorf("use %s as type %s", xt.String(), targ.String())
 			}
-			tmpInputs = append(tmpInputs, reflect.ValueOf(v))
+			retInputs = append(retInputs, reflect.ValueOf(v))
 		} else {
-			tmpInputs = append(tmpInputs, in[i])
+			retInputs = append(retInputs, in[i])
 		}
 	}
 
@@ -305,13 +305,13 @@ func ensureArguments(method reflect.Value, in []reflect.Value) ([]reflect.Value,
 				if err != nil {
 					return nil, fmt.Errorf("use %s as type %s", xt.String(), elem.String())
 				}
-				tmpInputs = append(tmpInputs, reflect.ValueOf(v))
+				retInputs = append(retInputs, reflect.ValueOf(v))
 			} else {
-				tmpInputs = append(tmpInputs, x)
+				retInputs = append(retInputs, x)
 			}
 		}
 	}
-	return tmpInputs, nil
+	return retInputs, nil
 }
 
 func convertArgs(argType reflect.Type, in reflect.Value) (interface{}, error) {
