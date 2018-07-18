@@ -272,7 +272,7 @@ func (f *FunctionExp) callFunction(fdata interface{}, inputScope data.Scope, res
 	logrus.Debugf("Input Parameters: %+v", inputs)
 	args, err := ensureArguments(method, inputs)
 	if err != nil {
-		return reflect.Value{}, fmt.Errorf("Function  '%s' argument validation failed  due to error  %s", f.Name, err.Error())
+		return reflect.Value{}, fmt.Errorf("Function '%s' argument validation failed due to error %s", f.Name, err.Error())
 	}
 	values := method.Call(args)
 	return f.extractErrorFromValues(values)
