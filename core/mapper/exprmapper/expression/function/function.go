@@ -272,7 +272,7 @@ func (f *FunctionExp) callFunction(fdata interface{}, inputScope data.Scope, res
 	logrus.Debugf("Input Parameters: %+v", inputs)
 	args, err := ensureArguments(method, inputs)
 	if err != nil {
-		return reflect.Value{}, fmt.Errorf("ensure function %s failed, due to %s", f.Name, err.Error())
+		return reflect.Value{}, fmt.Errorf("Function  '%s' argument validation failed  due to error  %s", f.Name, err.Error())
 	}
 	values := method.Call(args)
 	return f.extractErrorFromValues(values)
@@ -287,7 +287,7 @@ func ensureArguments(method reflect.Value, in []reflect.Value) ([]reflect.Value,
 		if xt, targ := in[i].Type(), methodType.In(i); !xt.AssignableTo(targ) {
 			v, err := convertArgs(targ, in[i])
 			if err != nil {
-				return nil, fmt.Errorf("use %s as type %s", xt.String(), targ.String())
+				return nil, fmt.Errorf("argument type mismatch. Can not convert type %s to type %s. ", xt.String(), targ.String())
 			}
 			retInputs = append(retInputs, reflect.ValueOf(v))
 		} else {
@@ -303,7 +303,7 @@ func ensureArguments(method reflect.Value, in []reflect.Value) ([]reflect.Value,
 			if xt := x.Type(); !xt.AssignableTo(elem) {
 				v, err := convertArgs(elem, x)
 				if err != nil {
-					return nil, fmt.Errorf("use %s as type %s", xt.String(), elem.String())
+					return nil, fmt.Errorf("argument type mismatch. Can not convert type %s to type %s. ", xt.String(), elem.String())
 				}
 				retInputs = append(retInputs, reflect.ValueOf(v))
 			} else {
