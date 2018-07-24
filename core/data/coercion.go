@@ -49,6 +49,11 @@ func CoerceToString(val interface{}) (string, error) {
 
 	switch t := val.(type) {
 	case string:
+		if strings.HasPrefix(t, "SECRET:") {
+			// Secret Resolution is needed
+			encodedValue := t[7:]
+			return GetSecretValueHandler().DecodeValue(encodedValue)
+		}
 		return t, nil
 	case int:
 		return strconv.Itoa(t), nil
