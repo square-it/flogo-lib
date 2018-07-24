@@ -46,7 +46,7 @@ func LoadConfig(flogoJson string) (*Config, error) {
 			return nil, err
 		}
 
-		updated, err := AppConfigPreprocess(file)
+		updated, err := preprocessConfig(file)
 		if err != nil {
 			return nil, err
 		}
@@ -58,7 +58,7 @@ func LoadConfig(flogoJson string) (*Config, error) {
 		}
 		return app, nil
 	} else {
-		updated, err := AppConfigPreprocess([]byte(flogoJson))
+		updated, err := preprocessConfig([]byte(flogoJson))
 		if err != nil {
 			return nil, err
 		}
@@ -72,7 +72,7 @@ func LoadConfig(flogoJson string) (*Config, error) {
 	}
 }
 
-func AppConfigPreprocess(appJson []byte) ([]byte, error) {
+func preprocessConfig(appJson []byte) ([]byte, error) {
 
 	// For now decode secret values
 	re := regexp.MustCompile("SECRET:[^\\\\\"]*")
