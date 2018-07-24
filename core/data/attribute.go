@@ -105,14 +105,7 @@ func (a *Attribute) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	} else {
-		if ser.Secret {
-			a.value, err = GetSecretValueHandler().DecodeValue(a.value)
-			if err != nil {
-				return err
-			}
-		} else {
-			a.value = val
-		}
+		a.value = val
 	}
 
 	return nil
