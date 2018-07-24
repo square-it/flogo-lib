@@ -34,10 +34,6 @@ func TestCoerceToString(t *testing.T) {
 	var valNil interface{} // = nil
 	cval, _ = CoerceToString(valNil)
 	assert.Equal(t, "", cval, "not equal")
-
-	var valSecret interface{} = "SECRET:Im+IXj7pSqwxe47QFGIuOqbZGvluudaX"
-	cval, _ = CoerceToString(valSecret)
-	assert.Equal(t, "mysecret", cval, "not equal")
 }
 
 func TestCoerceToInteger(t *testing.T) {

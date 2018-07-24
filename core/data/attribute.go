@@ -85,7 +85,6 @@ func (a *Attribute) UnmarshalJSON(data []byte) error {
 		Name   string      `json:"name"`
 		Type   string      `json:"type"`
 		Value  interface{} `json:"value"`
-		Secret bool        `json:"secret,omitempty"`
 	}{}
 
 	if err := json.Unmarshal(data, ser); err != nil {

@@ -9,6 +9,8 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
+	"regexp"
+	"io/ioutil"
 )
 
 // App is the configuration for the App
@@ -25,38 +27,66 @@ type Config struct {
 	Actions []*action.Config `json:"actions"`
 }
 
-// defaultConfigProvider implementation of ConfigProvider
-type defaultConfigProvider struct {
-}
-
 // ConfigProvider interface to implement to provide the app configuration
 type ConfigProvider interface {
 	GetApp() (*Config, error)
 }
 
-// DefaultSerializer returns the default App Serializer
-func DefaultConfigProvider() ConfigProvider {
-	return &defaultConfigProvider{}
+func LoadConfig(flogoJson string) (*Config, error) {
+	if flogoJson == "" {
+		configPath := config.GetFlogoConfigPath()
+
+		flogo, err := os.Open(configPath)
+		if err != nil {
+			return nil, err
+		}
+
+		file, err := ioutil.ReadAll(flogo)
+		if err != nil {
+			return nil, err
+		}
+
+		updated, err := preprocessConfig(file)
+		if err != nil {
+			return nil, err
+		}
+
+		app := &Config{}
+		err = json.Unmarshal(updated, &app)
+		if err != nil {
+			return nil, err
+		}
+		return app, nil
+	} else {
+		updated, err := preprocessConfig([]byte(flogoJson))
+		if err != nil {
+			return nil, err
+		}
+
+		app := &Config{}
+		err = json.Unmarshal(updated, &app)
+		if err != nil {
+			return nil, err
+		}
+		return app, nil
+	}
 }
 
-// GetApp returns the app configuration
-func (d *defaultConfigProvider) GetApp() (*Config, error) {
+func preprocessConfig(appJson []byte) ([]byte, error) {
 
-	configPath := config.GetFlogoConfigPath()
-
-	flogo, err := os.Open(configPath)
-	if err != nil {
-		return nil, err
+	// For now decode secret values
+	re := regexp.MustCompile("SECRET:[^\\\\\"]*")
+	for _, match := range re.FindAll(appJson, -1) {
+		encodedValue := string(match[7:])
+		decodedValue, err := data.GetSecretValueHandler().DecodeValue(encodedValue)
+		if err != nil {
+			return nil, err
+		}
+		mreg := regexp.MustCompile(string(match))
+		appJson = mreg.ReplaceAll([]byte(appJson), []byte(decodedValue))
 	}
 
-	jsonParser := json.NewDecoder(flogo)
-	app := &Config{}
-	err = jsonParser.Decode(&app)
-	if err != nil {
-		return nil, err
-	}
-
-	return app, nil
+	return appJson, nil
 }
 
 func GetProperties(properties []*data.Attribute) (map[string]interface{}, error) {
