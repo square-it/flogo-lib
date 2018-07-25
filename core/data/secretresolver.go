@@ -1,15 +1,16 @@
 package data
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/config"
-	"crypto/sha256"
 	"crypto/aes"
 	"crypto/cipher"
-	"encoding/base64"
-	"fmt"
-	"github.com/pkg/errors"
-	"io"
 	"crypto/rand"
+	"crypto/sha256"
+	"encoding/base64"
+	"errors"
+	"fmt"
+	"io"
+
+	"github.com/TIBCOSoftware/flogo-lib/config"
 )
 
 var secretValueHandler SecretValueHandler
@@ -21,7 +22,7 @@ type SecretValueHandler interface {
 }
 
 // Set secret value decoder
-func SetSecretValueHandler(pwdResolver SecretValueHandler ) {
+func SetSecretValueHandler(pwdResolver SecretValueHandler) {
 	secretValueHandler = pwdResolver
 }
 
@@ -36,14 +37,14 @@ func GetSecretValueHandler() SecretValueHandler {
 }
 
 // A key based secret value decoder. Secret value encryption/decryption is based on SHA256
-// and refers https://gist.github.com/willshiao/f4b03650e5a82561a460b4a15789cfa1
+// and uses implementation from https://gist.github.com/willshiao/f4b03650e5a82561a460b4a15789cfa1
 type KeyBasedSecretValueHandler struct {
 	Key string
 }
 
 // Decode value based on a key
 func (defaultResolver *KeyBasedSecretValueHandler) DecodeValue(value interface{}) (string, error) {
-	if value != nil   {
+	if value != nil {
 		if defaultResolver.Key != "" {
 			kBytes := sha256.Sum256([]byte(defaultResolver.Key))
 			return decryptValue(kBytes[:], value.(string))
@@ -54,7 +55,7 @@ func (defaultResolver *KeyBasedSecretValueHandler) DecodeValue(value interface{}
 }
 
 func (defaultResolver *KeyBasedSecretValueHandler) EncodeValue(value interface{}) (string, error) {
-	if value != nil   {
+	if value != nil {
 		if defaultResolver.Key != "" {
 			kBytes := sha256.Sum256([]byte(defaultResolver.Key))
 			return encryptValue(kBytes[:], value.(string))
@@ -87,7 +88,6 @@ func encryptValue(key []byte, text string) (string, error) {
 	return base64.StdEncoding.EncodeToString(ciphertext), nil
 }
 
-
 // decrypt from base64 to decrypted string
 func decryptValue(key []byte, encryptedData string) (string, error) {
 	ciphertext, err := base64.StdEncoding.DecodeString(encryptedData)
@@ -110,5 +110,3 @@ func decryptValue(key []byte, encryptedData string) (string, error) {
 	stream.XORKeyStream(ciphertext, ciphertext)
 	return fmt.Sprintf("%s", ciphertext), nil
 }
-
-
