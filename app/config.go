@@ -27,9 +27,23 @@ type Config struct {
 	Actions []*action.Config `json:"actions"`
 }
 
+// defaultConfigProvider implementation of ConfigProvider
+type defaultConfigProvider struct {
+}
+
 // ConfigProvider interface to implement to provide the app configuration
 type ConfigProvider interface {
 	GetApp() (*Config, error)
+}
+
+// DefaultSerializer returns the default App Serializer
+func DefaultConfigProvider() ConfigProvider {
+	return &defaultConfigProvider{}
+}
+
+// GetApp returns the app configuration
+func (d *defaultConfigProvider) GetApp() (*Config, error) {
+	return LoadConfig("")
 }
 
 func LoadConfig(flogoJson string) (*Config, error) {
