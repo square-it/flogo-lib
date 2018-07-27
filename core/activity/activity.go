@@ -38,5 +38,5 @@ type Cleanup interface {
 
 	// Cleanup is called to let developers do cleanup of resources during graceful shutdown of runtime.
 	// It should return quickly.
-	Cleanup() (error)
+	Cleanup()
 }

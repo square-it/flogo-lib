@@ -226,7 +226,6 @@ func (e *engineImpl) Stop() error {
 	// Let activities do cleanup
 	for _, contribAct := range activity.Activities() {
 		if cleanupRequired, ok := contribAct.(activity.Cleanup); ok {
-			// Ignore Error for now
 			cleanupRequired.Cleanup()
 		}
 	}
