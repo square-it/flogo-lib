@@ -10,13 +10,13 @@ type key int
 var handlerKey key
 
 type HandlerInfo struct {
-	name string
+	Name string
 }
 
 // NewHandlerContext add the handler info to a new child context
 func NewHandlerContext(parentCtx context.Context, config *HandlerConfig) context.Context {
 	if config != nil && config.Name != "" {
-		return context.WithValue(parentCtx, handlerKey, &HandlerInfo{name:config.Name})
+		return context.WithValue(parentCtx, handlerKey, &HandlerInfo{Name:config.Name})
 	}
 	return parentCtx
 }
