@@ -17,7 +17,11 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/TIBCOSoftware/flogo-lib/util"
 	"github.com/TIBCOSoftware/flogo-lib/util/managed"
+	"sync"
 )
+
+var managedServices []managed.Managed
+var lock = &sync.Mutex{}
 
 // Interface for the engine behaviour
 type Engine interface {
@@ -33,6 +37,13 @@ type Engine interface {
 	// TriggerInfos get info for the triggers
 	TriggerInfos() []*managed.Info
 }
+
+func LifeCycle(managedEntity managed.Managed)  {
+	defer lock.Unlock()
+	lock.Lock()
+	managedServices = append(managedServices, managedEntity)
+}
+
 
 // engineImpl is the type for the Default Engine Implementation
 type engineImpl struct {
@@ -159,6 +170,16 @@ func (e *engineImpl) Start() error {
 		logger.Info("Started Services")
 	}
 
+	if len(managedServices) > 0 {
+		for _, mService := range managedServices {
+			err = mService.Start()
+			if err != nil {
+				logger.Error("Error Starting Services - " + err.Error())
+				//TODO Should we exit here?
+			}
+		}
+	}
+
 	// Start the triggers
 	logger.Info("Starting Triggers...")
 
@@ -229,6 +250,15 @@ func (e *engineImpl) Stop() error {
 		logger.Error("Error Stopping Services - " + err.Error())
 	} else {
 		logger.Info("Stopped Services")
+	}
+
+	if len(managedServices) > 0 {
+		for _, mService := range managedServices {
+			err = mService.Stop()
+			if err != nil {
+				logger.Error("Error Stopping Services - " + err.Error())
+			}
+		}
 	}
 
 	logger.Info("Engine Stopped")
