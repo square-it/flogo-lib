@@ -9,8 +9,9 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
-	"regexp"
 	"io/ioutil"
+	"regexp"
+	"strings"
 )
 
 // App is the configuration for the App
@@ -96,8 +97,8 @@ func preprocessConfig(appJson []byte) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		mreg := regexp.MustCompile(string(match))
-		appJson = mreg.ReplaceAll([]byte(appJson), []byte(decodedValue))
+		appstring := strings.Replace(string(appJson), string(match), decodedValue, -1)
+		appJson = []byte(appstring)
 	}
 
 	return appJson, nil
