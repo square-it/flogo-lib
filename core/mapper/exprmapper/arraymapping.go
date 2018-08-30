@@ -118,7 +118,11 @@ func (a *ArrayMapping) DoArrayMapping(inputScope, outputScope data.Scope, resolv
 		//Loop array
 		fromArrayvalues, ok := fromValue.([]interface{})
 		if !ok {
-			return fmt.Errorf("Failed to get array value from [%s], due to error- [%s] value not an array", a.From, a.From)
+			//Try to convert to array.
+			fromArrayvalues, err = data.CoerceToArray(fromValue)
+			if err != nil {
+				return fmt.Errorf("Failed to get array value from [%s], due to error- [%s] value not an array", a.From, a.From)
+			}
 		}
 
 		toValue, err := toRef.GetValueFromOutputScope(outputScope)
@@ -356,7 +360,7 @@ func GetValueFromArrayRef(object interface{}, expressionRef interface{}, inputSc
 	exp, err := expression.ParseExpression(stringVal)
 	if err == nil {
 		//flogo expression
-		expValue, err := exp.EvalWithScope(inputScope, resolver)
+		expValue, err := exp.EvalWithData(object, inputScope, resolver)
 		if err != nil {
 			err = fmt.Errorf("Execution failed for mapping [%s] due to error - %s", stringVal, err.Error())
 			log.Error(err)

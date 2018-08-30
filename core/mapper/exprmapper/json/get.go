@@ -10,6 +10,7 @@ import (
 
 	"sync"
 
+	"encoding/json"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
@@ -22,7 +23,11 @@ func GetFieldValueFromInP(data interface{}, path string) (interface{}, error) {
 	if reflect.TypeOf(data).Kind() == reflect.String {
 		jsonParsed, err = ParseJSON([]byte(data.(string)))
 	} else {
-		jsonParsed = &Container{object: data}
+		b, err := json.Marshal(data)
+		if err != nil {
+			return nil, err
+		}
+		jsonParsed, err = ParseJSON(b)
 	}
 
 	if err != nil {
@@ -39,7 +44,11 @@ func GetFieldValueFromIn(data interface{}, mappingField *field.MappingField) (in
 	if reflect.TypeOf(data).Kind() == reflect.String {
 		jsonParsed, err = ParseJSON([]byte(data.(string)))
 	} else {
-		jsonParsed = &Container{object: data}
+		b, err := json.Marshal(data)
+		if err != nil {
+			return nil, err
+		}
+		jsonParsed, err = ParseJSON(b)
 	}
 
 	if err != nil {
