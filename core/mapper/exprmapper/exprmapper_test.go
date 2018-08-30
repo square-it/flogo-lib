@@ -6,11 +6,46 @@ import (
 	"fmt"
 	"strings"
 
+	"encoding/json"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/stretchr/testify/assert"
 )
 
+//1. activity mapping
+func TestActivityMapping(t *testing.T) {
+	mappingValue := `$activity[a1].field.id`
+	v, err := GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	assert.Nil(t, err)
+	assert.NotNil(t, v)
+	assert.Equal(t, "d", v)
+}
+
+func TestMappingRef(t *testing.T) {
+	mappingValue := `$activity[a1].field.id`
+	v, err := GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	assert.Nil(t, err)
+	assert.NotNil(t, v)
+	assert.Equal(t, "d", v)
+
+	mappingValue = `ddddd`
+	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	assert.Nil(t, err)
+	assert.NotNil(t, v)
+	assert.Equal(t, "ddddd", v)
+
+}
+
+//2. flow mapping
+func TestFlowMapping(t *testing.T) {
+	mappingValue := `$.field.id`
+	v, err := GetMappingValue(mappingValue, GetSimpleScope("field", `{"id":"d"}`), data.GetBasicResolver())
+	assert.Nil(t, err)
+	assert.NotNil(t, v)
+	assert.Equal(t, "d", v)
+}
+
+//3. function
 func TestGetMapValueFunction(t *testing.T) {
 	mappingValue := `string.concat("ddddd",$activity[a1].field.id)`
 	v, err := GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
@@ -23,9 +58,31 @@ func TestGetMapValueFunction(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
 	assert.Equal(t, "dddddddd", v)
-
 }
 
+//4. function with different type
+func TestGetMapValueFunctionTypes(t *testing.T) {
+	mappingValue := `string.concat(123,$activity[a1].field.id)`
+	v, err := GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	assert.Nil(t, err)
+	assert.NotNil(t, v)
+	assert.Equal(t, "123d", v)
+
+	mappingValue = `string.concat("s-",$activity[a1].field.id, string.concat($activity[a1].field.id,$activity[a1].field.id),true)`
+	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	assert.Nil(t, err)
+	assert.NotNil(t, v)
+	assert.Equal(t, "s-dddtrue", v)
+
+	mappingValue = `string.concat(123,$activity[a1].field.id, "dddd", 450)`
+	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	assert.Nil(t, err)
+	assert.NotNil(t, v)
+	assert.Equal(t, "123ddddd450", v)
+}
+
+//5. expression
+//6. ternary expression
 func TestGetMapValueExpression(t *testing.T) {
 	mappingValue := `string.length(string.concat("ddddd",$activity[a1].field.id)) == 6`
 	v, err := GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
@@ -90,21 +147,6 @@ func TestGetMapValueExpression(t *testing.T) {
 
 }
 
-func TestMappingRef(t *testing.T) {
-	mappingValue := `$activity[a1].field.id`
-	v, err := GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
-	assert.Nil(t, err)
-	assert.NotNil(t, v)
-	assert.Equal(t, "d", v)
-
-	mappingValue = `ddddd`
-	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
-	assert.Nil(t, err)
-	assert.NotNil(t, v)
-	assert.Equal(t, "ddddd", v)
-
-}
-
 func GetSimpleScope(name, value string) data.Scope {
 	a, _ := data.NewAttribute(name, data.TypeObject, value)
 	maps := make(map[string]*data.Attribute)
@@ -113,6 +155,64 @@ func GetSimpleScope(name, value string) data.Scope {
 	scope.SetAttrValue(name, value)
 	return scope
 }
+
+//7. array mapping
+func TestArrayMapping(t *testing.T) {
+	mappingValue := `{
+    "fields": [
+        {
+            "from": "$.street",
+            "to": "$$['street']",
+            "type": "primitive"
+        },
+        {
+            "from": "$.zipcode",
+            "to": "$$['zipcode']",
+            "type": "primitive"
+        },
+        {
+            "from": "$.state",
+            "to": "$$['state']",
+            "type": "primitive"
+        }
+    ],
+    "from": "$activity[a1].field.addresses",
+    "to": "field.addresses",
+    "type": "foreach"
+}`
+
+	arrayData := `{
+    "person": "name",
+    "addresses": [
+        {
+            "street": "street",
+            "zipcode": 77479,
+            "state": "tx"
+        }
+    ]
+}`
+
+	array, err := ParseArrayMapping(mappingValue)
+	assert.Nil(t, array.Validate())
+
+	inputScope := GetSimpleScope("_A.a1.field", arrayData)
+	outputScope := GetSimpleScope("field", "")
+	err = array.DoArrayMapping(inputScope, outputScope, GetTestResolver())
+	assert.Nil(t, err)
+
+	arr, ok := outputScope.GetAttr("field")
+	assert.True(t, ok)
+	v, _ := json.Marshal(arr.Value().(map[string]interface{})["addresses"].([]interface{})[0])
+	fmt.Println(string(v))
+	assert.Equal(t, "street", arr.Value().(map[string]interface{})["addresses"].([]interface{})[0].(map[string]interface{})["street"])
+	assert.Equal(t, float64(77479), arr.Value().(map[string]interface{})["addresses"].([]interface{})[0].(map[string]interface{})["zipcode"])
+	assert.Equal(t, "tx", arr.Value().(map[string]interface{})["addresses"].([]interface{})[0].(map[string]interface{})["state"])
+
+}
+
+//8. array mapping with leaf field
+//9. array mappping with static function and leaf field
+//10. array mapping with other activity output
 
 //For test  purpuse copy it from flogo-contrib
 var resolver = &TestResolver{}
