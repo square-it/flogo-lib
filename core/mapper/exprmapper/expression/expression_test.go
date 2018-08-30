@@ -745,7 +745,7 @@ func TestExpressionWithNULL(t *testing.T) {
 	assert.Equal(t, true, v)
 }
 
-func TestExpressionWithNegtiveNumbert(t *testing.T) {
+func TestExpressionWithNegtiveNumber(t *testing.T) {
 	e, err := ParseExpression(`-2 + 3`)
 	if err != nil {
 		t.Fatal(err)
