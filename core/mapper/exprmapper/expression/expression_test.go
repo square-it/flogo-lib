@@ -745,6 +745,65 @@ func TestExpressionWithNULL(t *testing.T) {
 	assert.Equal(t, true, v)
 }
 
+func TestExpressionWithNegtiveNumbert(t *testing.T) {
+	e, err := ParseExpression(`-2 + 3`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	v, err := e.Eval()
+	assert.Nil(t, err)
+	assert.Equal(t, int(1), v)
+
+	e, err = ParseExpression(`(-2 + 3) + (-3344 + 4444)`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	v, err = e.Eval()
+	assert.Nil(t, err)
+	assert.Equal(t, int(1101), v)
+
+	e, err = ParseExpression(`3 > -2`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	v, err = e.Eval()
+	assert.Nil(t, err)
+	assert.Equal(t, true, v)
+
+	e, err = ParseExpression(`3 >= -2`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	v, err = e.Eval()
+	assert.Nil(t, err)
+	assert.Equal(t, true, v)
+
+	d := `{"test":"test", "obj":{"id":-123, "value":null}}`
+	testScope := GetSimpleScope("name", d)
+
+	e, err = ParseExpression(`$.name.obj.id >= -2`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	v, err = e.EvalWithScope(testScope, data.GetBasicResolver())
+	assert.Nil(t, err)
+	assert.Equal(t, false, v)
+
+	e, err = ParseExpression(`$.name.obj.id == -123`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	v, err = e.EvalWithScope(testScope, data.GetBasicResolver())
+	assert.Nil(t, err)
+	assert.Equal(t, true, v)
+}
+
 func GetSimpleScope(name, value string) data.Scope {
 	a, _ := data.NewAttribute(name, data.TypeObject, value)
 	maps := make(map[string]*data.Attribute)

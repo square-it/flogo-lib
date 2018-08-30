@@ -39,7 +39,7 @@ _function_name:  'a'-'z' | 'A'-'Z' | '0'-'9' | '.' | '_' | '-';
        	-           -> -
        	*           -> *
 */
-_operator_charactor : '>' | '<' | '|' | '&' | '!' | '=' | '+' | '-' | '*' | '/' | ' ';
+_operator_charactor : '>' | '<' | '|' | '&' | '!' | '=' | '+' | '-' | '*' | '/';
 operator_charactor : {_operator_charactor} ;
 
 _refbracket : '[' {.} ']';
