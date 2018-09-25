@@ -108,8 +108,15 @@ func GetProperties(properties []*data.Attribute) (map[string]interface{}, error)
 
 	props := make(map[string]interface{})
 	if properties != nil {
+		overriddenProps, err := loadExternalProperties()
+		if err != nil {
+			return props, err
+		}
 		for _, property := range properties {
 			pValue := property.Value()
+			if newValue, ok := overriddenProps[property.Name()]; ok {
+				pValue = newValue
+			}
 			strValue, ok := pValue.(string)
 			if ok {
 				if strValue != "" && strValue[0] == '$' {
@@ -130,6 +137,21 @@ func GetProperties(properties []*data.Attribute) (map[string]interface{}, error)
 		return props, nil
 	}
 
+	return props, nil
+}
+
+func loadExternalProperties() (map[string]interface{}, error) {
+
+	props := make(map[string]interface{})
+	propFile := config.GetAppPropertiesFilePath()
+	if propFile != "" {
+		file, e := ioutil.ReadFile(propFile)
+		if e != nil {
+			return props, e
+		}
+		e = json.Unmarshal(file, &props)
+		return props, e
+	}
 	return props, nil
 }
 
