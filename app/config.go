@@ -12,6 +12,9 @@ import (
 	"io/ioutil"
 	"regexp"
 	"strings"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"fmt"
+	"errors"
 )
 
 // App is the configuration for the App
@@ -117,17 +120,6 @@ func GetProperties(properties []*data.Attribute) (map[string]interface{}, error)
 			if newValue, ok := overriddenProps[property.Name()]; ok {
 				pValue = newValue
 			}
-			strValue, ok := pValue.(string)
-			if ok {
-				if strValue != "" && strValue[0] == '$' {
-					// Needs resolution
-					resolvedValue, err := data.GetBasicResolver().Resolve(strValue, nil)
-					if err != nil {
-						return props, err
-					}
-					pValue = resolvedValue
-				}
-			}
 			value, err := data.CoerceToValue(pValue, property.Type())
 			if err != nil {
 				return props, err
@@ -143,14 +135,56 @@ func GetProperties(properties []*data.Attribute) (map[string]interface{}, error)
 func loadExternalProperties() (map[string]interface{}, error) {
 
 	props := make(map[string]interface{})
-	propFile := config.GetAppPropertiesFilePath()
+	propFile := config.GetAppPropertiesOverride()
 	if propFile != "" {
-		file, e := ioutil.ReadFile(propFile)
-		if e != nil {
-			return props, e
+		logger.Infof("'%s' is set. Loading overridden properties", config.ENV_APP_PROPERTY_OVERRIDE_KEY)
+		if strings.HasSuffix(propFile, ".json") {
+			// Override through file
+			file, e := ioutil.ReadFile(propFile)
+			if e != nil {
+				return nil, e
+			}
+			e = json.Unmarshal(file, &props)
+
+			if e != nil {
+				return nil, e
+			}
+		} else if strings.ContainsRune(propFile, '=') {
+			// Override through P1=V1,P2=V2
+			for _, pair := range strings.Split(propFile, ",") {
+				kv := strings.Split(pair, "=")
+				if len(kv) == 2 && kv[0] != "" &&  kv[1] != "" {
+					props[kv[0]] = kv[1]
+				} else {
+					logger.Warnf("'%s' is not valid override value. It must be in PropName=PropValue format.", pair)
+				}
+			}
 		}
-		e = json.Unmarshal(file, &props)
-		return props, e
+
+		if len(props) > 0 {
+			// Resolve property values
+			resolverType := config.GetAppPropertiesValueResolver()
+			if resolverType != "" {
+				logger.Infof("'%s' is set to '%s'. ", config.ENV_APP_PROPERTY_RESOLVER_KEY, resolverType)
+				resolver := GetPropertyValueResolver(resolverType)
+				if resolver == nil {
+					errMag := fmt.Sprintf("Unsupported resolver type - %s. Resolver not registered.", resolverType)
+					return nil, errors.New(errMag)
+				}
+
+				for k, v := range  props {
+					strVal, ok := v.(string)
+					if ok {
+						newVal, err := resolver.ResolveValue(strVal)
+						if err != nil {
+							return nil, err
+						}
+						props[k] = newVal
+					}
+				}
+			}
+		}
+
 	}
 	return props, nil
 }
