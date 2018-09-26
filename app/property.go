@@ -25,7 +25,5 @@ func (pp *PropertyProvider) SetProperty(property string, value interface{}) {
 }
 
 func (pp *PropertyProvider) SetProperties(value map[string]interface{}) {
-	for k, v := range value {
-		pp.SetProperty(k,v)
-	}
+	pp.properties = value
 }
