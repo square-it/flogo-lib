@@ -31,8 +31,8 @@ const (
 	MAP_TO_INPUT = "$INPUT"
 )
 
-func Map(mapping *data.MappingDef, inputScope, outputScope data.Scope, resolver data.Resolver) error {
-	mappingValue, err := GetMappingValue(mapping.Value, inputScope, resolver)
+func DoExpreesion(mapping *data.MappingDef, inputScope, outputScope data.Scope, resolver data.Resolver) error {
+	mappingValue, err := GetExpresssionValue(mapping.Value, inputScope, resolver)
 	if err != nil {
 		return err
 	}
@@ -46,7 +46,22 @@ func Map(mapping *data.MappingDef, inputScope, outputScope data.Scope, resolver 
 	return nil
 }
 
-func GetMappingValue(mappingV interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
+func DoAssign(mapping *data.MappingDef, inputScope, outputScope data.Scope, resolver data.Resolver) error {
+	mappingValue, err := GetAssignValue(mapping.Value, inputScope, resolver)
+	if err != nil {
+		return err
+	}
+	err = SetValueToOutputScope(mapping.MapTo, outputScope, mappingValue)
+	if err != nil {
+		err = fmt.Errorf("Set value %+v to output [%s] error - %s", mappingValue, mapping.MapTo, err.Error())
+		log.Error(err)
+		return err
+	}
+	log.Debugf("Set value %+v to %s Done", mappingValue, mapping.MapTo)
+	return nil
+}
+
+func GetExpresssionValue(mappingV interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
 	if mappingV == nil || reflect.TypeOf(mappingV).Kind() != reflect.String {
 		return mappingV, nil
 	}
@@ -75,6 +90,28 @@ func GetMappingValue(mappingV interface{}, inputScope data.Scope, resolver data.
 			log.Debugf("Mapping ref %s and value %+v", mappingValue, mappingValue)
 			return mappingValue, nil
 		}
+	}
+	return nil, nil
+}
+
+func GetAssignValue(mappingV interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
+	if mappingV == nil || reflect.TypeOf(mappingV).Kind() != reflect.String {
+		return mappingV, nil
+	}
+	mappingValue := mappingV.(string)
+	if !isMappingRef(mappingValue) {
+		log.Debugf("Mapping value is literal set directly to field")
+		log.Debugf("Mapping ref %s and value %+v", mappingValue, mappingValue)
+		return mappingValue, nil
+	} else {
+		mappingref := ref.NewMappingRef(mappingValue)
+		mappingValue, err := mappingref.GetValue(inputScope, resolver)
+		if err != nil {
+			return nil, fmt.Errorf("Get value from ref [%s] error - %s", mappingref.GetRef(), err.Error())
+
+		}
+		log.Debugf("Mapping ref %s and value %+v", mappingValue, mappingValue)
+		return mappingValue, nil
 	}
 	return nil, nil
 }

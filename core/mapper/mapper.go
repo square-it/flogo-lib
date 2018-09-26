@@ -89,28 +89,10 @@ func (m *BasicMapper) Apply(inputScope data.Scope, outputScope data.Scope) error
 
 		switch mapping.Type {
 		case data.MtAssign:
-
-			toResolve, ok := mapping.Value.(string)
-			if !ok {
-				return fmt.Errorf("invalid assign value: %v", mapping.Value)
-			}
-
-			var val interface{}
-			var err error
-
-			if m.resolver != nil {
-				val, err = m.resolver.Resolve(toResolve, inputScope)
-				if err != nil {
-					return err
-				}
-			}
-
-			assignExpr := NewAssignExpr(mapping.MapTo, val)
-			_, err = assignExpr.Eval(outputScope)
+			err := exprmapper.DoAssign(mapping, inputScope, outputScope, m.resolver)
 			if err != nil {
-				return err
+				return fmt.Errorf("assign mapping failed, due to %s", err.Error())
 			}
-
 		case data.MtLiteral:
 			assignExpr := NewAssignExpr(mapping.MapTo, mapping.Value)
 
@@ -132,7 +114,7 @@ func (m *BasicMapper) Apply(inputScope data.Scope, outputScope data.Scope) error
 				return err
 			}
 		case data.MtExpression:
-			err := exprmapper.Map(mapping, inputScope, outputScope, m.resolver)
+			err := exprmapper.DoExpreesion(mapping, inputScope, outputScope, m.resolver)
 			if err != nil {
 				return fmt.Errorf("expression mapping failed, due to %s", err.Error())
 			}
