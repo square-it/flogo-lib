@@ -10,6 +10,8 @@
 _digit : '0'-'9' ;
 
 _number : _digit {_digit} ;
+_negnumber : ('-' _number);
+
 _float_exp  : ( 'e' | 'E' ) [ '+' | '-' ] _number ;
 
 _float_lit : ( _number '.' _number _float_exp )
@@ -19,7 +21,7 @@ _float_lit : ( _number '.' _number _float_exp )
 	;
 
 float : (_float_lit);
-number : (_number);
+number : (_number) | (_negnumber);
 _function_name:  'a'-'z' | 'A'-'Z' | '0'-'9' | '.' | '_' | '-';
 
 /*Expression Operator*/
@@ -37,7 +39,7 @@ _function_name:  'a'-'z' | 'A'-'Z' | '0'-'9' | '.' | '_' | '-';
        	-           -> -
        	*           -> *
 */
-_operator_charactor : '>' | '<' | '|' | '&' | '!' | '=' | '+' | '-' | '*' | '/' | ' ';
+_operator_charactor : '>' | '<' | '|' | '&' | '!' | '=' | '+' | '-' | '*' | '/';
 operator_charactor : {_operator_charactor} ;
 
 _refbracket : '[' {.} ']';

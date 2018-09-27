@@ -238,6 +238,20 @@ func TestFunctionWithSpecialFiled(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+func TestFunctionWithNegtiveNumber(t *testing.T) {
+	d := `{"test":"test", "obj":{"id":-123, "value":"value"}}`
+	testScope := GetSimpleScope("name", d)
+
+	e, err := ParseExpression(`string.length($.name.obj.value) >= -2`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	v, err := e.EvalWithScope(testScope, data.GetBasicResolver())
+	assert.Nil(t, err)
+	assert.Equal(t, true, v)
+}
+
 type Concat struct {
 }
 
