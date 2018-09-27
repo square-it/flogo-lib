@@ -11,107 +11,122 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetMapValueFunction(t *testing.T) {
-	mappingValue := `string.concat("ddddd",$activity[a1].field.id)`
-	v, err := GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+//1. activity mapping
+func TestActivityMapping(t *testing.T) {
+	v, err := expressMap("$activity[a1].field.id", "field", GetTestResolver())
 	assert.Nil(t, err)
-	assert.NotNil(t, v)
-	assert.Equal(t, "dddddd", v)
-
-	mappingValue = `string.concat("ddddd",$activity[a1].field.id, string.concat($activity[a1].field.id,$activity[a1].field.id))`
-	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
-	assert.Nil(t, err)
-	assert.NotNil(t, v)
-	assert.Equal(t, "dddddddd", v)
-
+	assert.Equal(t, "d", v)
 }
 
+//Literal string
+func TestMappingRef(t *testing.T) {
+	v, err := expressMap("dddd", "field", GetTestResolver())
+	assert.Nil(t, err)
+	assert.Equal(t, "dddd", v)
+}
+
+//2. flow mapping
+func TestFlowMapping(t *testing.T) {
+	v, err := expressMapWithFlow("$.field.id", "field", data.GetBasicResolver())
+	assert.Nil(t, err)
+	assert.Equal(t, "d", v)
+}
+
+//3. function
+func TestGetMapValueFunction(t *testing.T) {
+	v, err := expressMap(`string.concat("ddddd",$activity[a1].field.id)`, "field", GetTestResolver())
+	assert.Nil(t, err)
+	assert.Equal(t, "dddddd", v)
+	v, err = expressMap(`string.concat("ddddd",$activity[a1].field.id, string.concat($activity[a1].field.id,$activity[a1].field.id))`, "field", GetTestResolver())
+	assert.Nil(t, err)
+	assert.Equal(t, "dddddddd", v)
+}
+
+//4. function with different type
+func TestGetMapValueFunctionTypes(t *testing.T) {
+
+	v, err := expressMap(`string.concat(123,$activity[a1].field.id)`, "field", GetTestResolver())
+	assert.Nil(t, err)
+	assert.Equal(t, "123d", v)
+
+	v, err = expressMap(`string.concat("s-",$activity[a1].field.id, string.concat($activity[a1].field.id,$activity[a1].field.id),true)`, "field", GetTestResolver())
+	assert.Nil(t, err)
+	assert.Equal(t, "s-dddtrue", v)
+
+	v, err = expressMap(`string.concat(123,$activity[a1].field.id, "dddd", 450)`, "field", GetTestResolver())
+	assert.Nil(t, err)
+	assert.Equal(t, "123ddddd450", v)
+}
+
+//5. expression
+//6. ternary expression
 func TestGetMapValueExpression(t *testing.T) {
-	mappingValue := `string.length(string.concat("ddddd",$activity[a1].field.id)) == 6`
-	v, err := GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+
+	v, err := expressMapBoolMapToField(`string.length(string.concat("ddddd",$activity[a1].field.id)) == 6`, "field", GetTestResolver())
 	assert.Nil(t, err)
-	assert.NotNil(t, v)
 	assert.Equal(t, true, v)
 
-	//
-	mappingValue = `$activity[a1].field.id == "d"`
-	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	v, err = expressMapBoolMapToField(`$activity[a1].field.id == "d"`, "field", GetTestResolver())
 	assert.Nil(t, err)
-	assert.NotNil(t, v)
 	assert.Equal(t, true, v)
 
-	mappingValue = `($activity[a1].field.id == "d") == true`
-	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	v, err = expressMapBoolMapToField(`($activity[a1].field.id == "d") == true`, "field", GetTestResolver())
 	assert.Nil(t, err)
-	assert.NotNil(t, v)
 	assert.Equal(t, true, v)
 
-	mappingValue = `$activity[a1].field.id == "d" ? $activity[a1].field.id : string.concat("ssss",$activity[a1].field.id)`
-	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	v, err = expressMap(`$activity[a1].field.id == "d" ? $activity[a1].field.id : string.concat("ssss",$activity[a1].field.id)`, "field", GetTestResolver())
 	assert.Nil(t, err)
-	assert.NotNil(t, v)
 	assert.Equal(t, "d", v)
 
-	mappingValue = `$activity[a1].field.id == "d" ? string.concat("ssss",$activity[a1].field.id) : $activity[a1].field.id`
-	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	v, err = expressMap(`$activity[a1].field.id == "d" ? string.concat("ssss",$activity[a1].field.id) : $activity[a1].field.id`, "field", GetTestResolver())
 	assert.Nil(t, err)
-	assert.NotNil(t, v)
 	assert.Equal(t, "ssssd", v)
 
-	mappingValue = `$activity[a1].field.id != "d" ? string.concat("ssss",$activity[a1].field.id) : $activity[a1].field.id`
-	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	v, err = expressMap(`$activity[a1].field.id != "d" ? string.concat("ssss",$activity[a1].field.id) : $activity[a1].field.id`, "field", GetTestResolver())
 	assert.Nil(t, err)
-	assert.NotNil(t, v)
 	assert.Equal(t, "d", v)
 
-	mappingValue = `$activity[a1].field.id != "d" ? "dddd":"ssss"`
-	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	v, err = expressMap(`$activity[a1].field.id != "d" ? "dddd":"ssss"`, "field", GetTestResolver())
 	assert.Nil(t, err)
-	assert.NotNil(t, v)
 	assert.Equal(t, "ssss", v)
 
-	mappingValue = `$activity[a1].field.id == "d" ? "dddd":"ssss"`
-	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	v, err = expressMap(`$activity[a1].field.id == "d" ? "dddd":"ssss"`, "field", GetTestResolver())
 	assert.Nil(t, err)
-	assert.NotNil(t, v)
 	assert.Equal(t, "dddd", v)
 
-	mappingValue = ` 2>1 ? "dddd":"ssss"`
-	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	v, err = expressMap(` 2>1 ? "dddd":"ssss"`, "field", GetTestResolver())
 	assert.Nil(t, err)
-	assert.NotNil(t, v)
 	assert.Equal(t, "dddd", v)
 
-	mappingValue = ` 2<1 ? "dddd":"ssss"`
-	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	v, err = expressMap(` 2<1 ? "dddd":"ssss"`, "field", GetTestResolver())
 	assert.Nil(t, err)
-	assert.NotNil(t, v)
 	assert.Equal(t, "ssss", v)
 
 }
 
-func TestMappingRef(t *testing.T) {
-	mappingValue := `$activity[a1].field.id`
-	v, err := GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
-	assert.Nil(t, err)
-	assert.NotNil(t, v)
-	assert.Equal(t, "d", v)
-
-	mappingValue = `ddddd`
-	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
-	assert.Nil(t, err)
-	assert.NotNil(t, v)
-	assert.Equal(t, "ddddd", v)
-
-}
-
-func GetSimpleScope(name, value string) data.Scope {
-	a, _ := data.NewAttribute(name, data.TypeObject, value)
+func getSimpleScope(name, value string, fieldType data.Type) data.Scope {
+	a, _ := data.NewAttribute(name, fieldType, value)
 	maps := make(map[string]*data.Attribute)
 	maps[name] = a
 	scope := data.NewFixedScope(maps)
 	scope.SetAttrValue(name, value)
 	return scope
+}
+
+func GetObjectFieldScope(name, value string) data.Scope {
+	return getSimpleScope(name, value, data.TypeObject)
+}
+
+func GetStringFieldScope(name, value string) data.Scope {
+	return getSimpleScope(name, value, data.TypeString)
+}
+
+func GetBoolFieldScope(name, value string) data.Scope {
+	return getSimpleScope(name, value, data.TypeBoolean)
+}
+
+func GetComplexxFieldScope(name, value string) data.Scope {
+	return getSimpleScope(name, value, data.TypeComplexObject)
 }
 
 //For test  purpuse copy it from flogo-contrib
@@ -164,4 +179,49 @@ func (r *TestResolver) Resolve(toResolve string, scope data.Scope) (value interf
 	}
 
 	return value, nil
+}
+
+func expressMap(from, to string, resolver data.Resolver) (interface{}, error) {
+	mapDef := &data.MappingDef{Type: data.MtExpression, Value: from, MapTo: to}
+	inputScope := GetObjectFieldScope("_A.a1.field", `{"id":"d"}`)
+	outputScope := GetStringFieldScope("field", "")
+	err := Map(mapDef, inputScope, outputScope, resolver)
+	if err != nil {
+		return nil, err
+	}
+	arr, ok := outputScope.GetAttr("field")
+	if !ok {
+		return nil, fmt.Errorf("Cannot find attribute [%s] in output scope", "field")
+	}
+	return arr.Value(), nil
+}
+
+func expressMapBoolMapToField(from, to string, resolver data.Resolver) (interface{}, error) {
+	mapDef := &data.MappingDef{Type: data.MtExpression, Value: from, MapTo: to}
+	inputScope := GetObjectFieldScope("_A.a1.field", `{"id":"d"}`)
+	outputScope := GetBoolFieldScope("field", "")
+	err := Map(mapDef, inputScope, outputScope, resolver)
+	if err != nil {
+		return nil, err
+	}
+	arr, ok := outputScope.GetAttr("field")
+	if !ok {
+		return nil, fmt.Errorf("Cannot find attribute [%s] in output scope", "field")
+	}
+	return arr.Value(), nil
+}
+
+func expressMapWithFlow(from, to string, resolver data.Resolver) (interface{}, error) {
+	mapDef := &data.MappingDef{Type: data.MtExpression, Value: from, MapTo: to}
+	inputScope := GetObjectFieldScope("field", `{"id":"d"}`)
+	outputScope := GetStringFieldScope("field", "")
+	err := Map(mapDef, inputScope, outputScope, resolver)
+	if err != nil {
+		return nil, err
+	}
+	arr, ok := outputScope.GetAttr("field")
+	if !ok {
+		return nil, fmt.Errorf("Cannot find attribute [%s] in output scope", "field")
+	}
+	return arr.Value(), nil
 }
