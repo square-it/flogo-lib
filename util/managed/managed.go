@@ -18,19 +18,16 @@ type Managed interface {
 }
 
 // start starts a "Managed" object
-func start(managed Managed) error {
+func start(managed Managed) (err error) {
 
-	defer func() error {
+	defer func() {
 		if r := recover(); r != nil {
-			err, ok := r.(error)
+			var ok bool
+			err, ok = r.(error)
 			if !ok {
 				err = fmt.Errorf("%v", r)
 			}
-
-			return err
 		}
-
-		return nil
 	}()
 
 	return managed.Start()
