@@ -70,7 +70,19 @@ func TestExpressionString(t *testing.T) {
 }
 
 func TestExpressionWithOldWay(t *testing.T) {
-	v, err := ParseExpression(`${flow.petMax} > 2`)
+	v, err := ParseExpression(`"ddd" + "dddd"`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	_, err = v.EvalWithScope(nil, nil)
+	fmt.Println(err)
+	assert.NotNil(t, err)
+
+}
+
+func TestTernaryExpressionWithNagtive(t *testing.T) {
+	v, err := ParseExpression(`$.content.ParamNb3 != nil ? $.content.ParamNb3 : -1`)
 	if err != nil {
 		t.Fatal(err)
 		t.Failed()
@@ -730,6 +742,65 @@ func TestExpressionWithNULL(t *testing.T) {
 		t.Fatal(err)
 		t.Failed()
 	}
+	assert.Equal(t, true, v)
+}
+
+func TestExpressionWithNegtiveNumber(t *testing.T) {
+	e, err := ParseExpression(`-2 + 3`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	v, err := e.Eval()
+	assert.Nil(t, err)
+	assert.Equal(t, int(1), v)
+
+	e, err = ParseExpression(`(-2 + 3) + (-3344 + 4444)`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	v, err = e.Eval()
+	assert.Nil(t, err)
+	assert.Equal(t, int(1101), v)
+
+	e, err = ParseExpression(`3 > -2`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	v, err = e.Eval()
+	assert.Nil(t, err)
+	assert.Equal(t, true, v)
+
+	e, err = ParseExpression(`3 >= -2`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	v, err = e.Eval()
+	assert.Nil(t, err)
+	assert.Equal(t, true, v)
+
+	d := `{"test":"test", "obj":{"id":-123, "value":null}}`
+	testScope := GetSimpleScope("name", d)
+
+	e, err = ParseExpression(`$.name.obj.id >= -2`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	v, err = e.EvalWithScope(testScope, data.GetBasicResolver())
+	assert.Nil(t, err)
+	assert.Equal(t, false, v)
+
+	e, err = ParseExpression(`$.name.obj.id == -123`)
+	if err != nil {
+		t.Fatal(err)
+		t.Failed()
+	}
+	v, err = e.EvalWithScope(testScope, data.GetBasicResolver())
+	assert.Nil(t, err)
 	assert.Equal(t, true, v)
 }
 

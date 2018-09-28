@@ -283,15 +283,30 @@ func ensureArguments(method reflect.Value, in []reflect.Value) ([]reflect.Value,
 	var retInputs []reflect.Value
 	methodType := method.Type()
 	n := method.Type().NumIn()
-	for i := 0; i < n; i++ {
-		if xt, targ := in[i].Type(), methodType.In(i); !xt.AssignableTo(targ) {
-			v, err := convertArgs(targ, in[i])
+
+	if methodType.IsVariadic() && n == 1 {
+		x := in[0]
+		elem := methodType.In(0).Elem()
+		if xt := x.Type(); !xt.AssignableTo(elem) {
+			v, err := convertArgs(elem, x)
 			if err != nil {
-				return nil, fmt.Errorf("argument type mismatch. Can not convert type %s to type %s. ", xt.String(), targ.String())
+				return nil, fmt.Errorf("argument type mismatch. Can not convert type %s to type %s. ", xt.String(), elem.String())
 			}
 			retInputs = append(retInputs, reflect.ValueOf(v))
 		} else {
-			retInputs = append(retInputs, in[i])
+			retInputs = append(retInputs, x)
+		}
+	} else {
+		for i := 0; i < n; i++ {
+			if xt, targ := in[i].Type(), methodType.In(i); !xt.AssignableTo(targ) {
+				v, err := convertArgs(targ, in[i])
+				if err != nil {
+					return nil, fmt.Errorf("argument type mismatch. Can not convert type %s to type %s. ", xt.String(), targ.String())
+				}
+				retInputs = append(retInputs, reflect.ValueOf(v))
+			} else {
+				retInputs = append(retInputs, in[i])
+			}
 		}
 	}
 
@@ -311,6 +326,7 @@ func ensureArguments(method reflect.Value, in []reflect.Value) ([]reflect.Value,
 			}
 		}
 	}
+
 	return retInputs, nil
 }
 
