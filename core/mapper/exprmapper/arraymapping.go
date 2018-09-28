@@ -3,6 +3,7 @@ package exprmapper
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json/field"
 	"runtime/debug"
 	"strings"
 
@@ -75,7 +76,7 @@ func (a *ArrayMapping) DoArrayMapping(inputScope, outputScope data.Scope, resolv
 	switch a.Type {
 	case PRIMITIVE:
 		mappingDef := a.mappingDef()
-		err := Map(mappingDef, inputScope, outputScope, resolver)
+		err := DoExpreesion(mappingDef, inputScope, outputScope, resolver)
 		if err != nil {
 			return err
 		}
@@ -124,8 +125,11 @@ func (a *ArrayMapping) DoArrayMapping(inputScope, outputScope data.Scope, resolv
 				return fmt.Errorf("Failed to get array value from [%s], due to error- [%s] value not an array", a.From, a.From)
 			}
 		}
-
-		toValue, err := toRef.GetValueFromOutputScope(outputScope)
+		toMapField, err := field.ParseMappingField(toRef.GetRef())
+		if err != nil {
+			return err
+		}
+		toValue, err := toRef.GetValueFromOutputScope(toMapField, outputScope)
 		if err != nil {
 			return err
 		}
@@ -135,11 +139,11 @@ func (a *ArrayMapping) DoArrayMapping(inputScope, outputScope data.Scope, resolv
 			objArray[i] = make(map[string]interface{})
 		}
 
-		mappingField, err := toRef.GetFields()
+		mappingField, err := toRef.GetMapToFields(toMapField)
 		if err != nil {
 			return fmt.Errorf("Get fields from mapping string error, due to [%s]", err.Error())
 		}
-		if mappingField != nil && len(mappingField.Fields) > 0 {
+		if mappingField != nil && len(mappingField.Getfields()) > 0 {
 			vv, err := flogojson.SetFieldValue(objArray, toValue, mappingField)
 			if err != nil {
 				return err
@@ -161,17 +165,17 @@ func (a *ArrayMapping) DoArrayMapping(inputScope, outputScope data.Scope, resolv
 			}
 		}
 
-		fieldName, err := toRef.GetFieldName()
+		fieldName, err := toRef.GetFieldName(toMapField)
 		if err != nil {
 			return err
 		}
 		//Get Value from fields
-		toFieldName, err := toRef.GetFieldName()
+		toFieldName, err := toRef.GetFieldName(toMapField)
 		if err != nil {
 			return err
 		}
 
-		if len(mappingField.Fields) > 0 {
+		if len(mappingField.Getfields()) > 0 {
 			return SetAttribute(fieldName, toValue, outputScope)
 		}
 		return SetAttribute(fieldName, getFieldValue(toValue, toFieldName), outputScope)
@@ -184,24 +188,29 @@ func (a *ArrayMapping) mappingDef() *data.MappingDef {
 }
 
 func (a *ArrayMapping) runArrayMap(fromValue, value interface{}, fields []*ArrayMapping, inputScope, outputScope data.Scope, resolver data.Resolver) error {
-	for _, field := range fields {
-		if field.Type == PRIMITIVE {
-			fValue, err := GetValueFromArrayRef(fromValue, field.From, inputScope, resolver)
+	for _, arrayField := range fields {
+		if arrayField.Type == PRIMITIVE {
+			fValue, err := GetValueFromArrayRef(fromValue, arrayField.From, inputScope, resolver)
 			if err != nil {
 				return err
 			}
-			log.Debugf("Array mapping from %s 's value %+v", field.From, fValue)
-			err = field.DoMap(fValue, value, ref.GetFieldNameFromArrayRef(field.To), inputScope, outputScope, resolver)
+			log.Debugf("Array mapping from %s 's value %+v", arrayField.From, fValue)
+			tomapField, err := field.ParseMappingField(ref.GetFieldNameFromArrayRef(arrayField.To))
 			if err != nil {
 				return err
 			}
-		} else if field.Type == FOREACH {
+
+			err = arrayField.DoMap(fValue, value, tomapField, inputScope, outputScope, resolver)
+			if err != nil {
+				return err
+			}
+		} else if arrayField.Type == FOREACH {
 			var fromArrayvalues []interface{}
-			if strings.EqualFold(field.From.(string), NEWARRAY) {
-				log.Debugf("Init a new array for field", field.To)
+			if strings.EqualFold(arrayField.From.(string), NEWARRAY) {
+				log.Debugf("Init a new array for field", arrayField.To)
 				fromArrayvalues = make([]interface{}, 1)
 			} else {
-				fValue, err := GetValueFromArrayRef(fromValue, field.From, inputScope, resolver)
+				fValue, err := GetValueFromArrayRef(fromValue, arrayField.From, inputScope, resolver)
 				if err != nil {
 					return err
 				}
@@ -218,12 +227,16 @@ func (a *ArrayMapping) runArrayMap(fromValue, value interface{}, fields []*Array
 				objArray[i] = make(map[string]interface{})
 			}
 
-			_, err := flogojson.SetFieldValueP(objArray, toValue, ref.GetFieldNameFromArrayRef(field.To))
+			tomapField, err := field.ParseMappingField(ref.GetFieldNameFromArrayRef(arrayField.To))
+			if err != nil {
+				return err
+			}
+			_, err = flogojson.SetFieldValue(objArray, toValue, tomapField)
 			if err != nil {
 				return err
 			}
 			//Check if fields is empty for primitive array mapping
-			if field.Fields == nil || len(field.Fields) <= 0 {
+			if arrayField.Fields == nil || len(arrayField.Fields) <= 0 {
 				for f, v := range fromArrayvalues {
 					objArray[f] = v
 				}
@@ -231,7 +244,7 @@ func (a *ArrayMapping) runArrayMap(fromValue, value interface{}, fields []*Array
 			}
 
 			for i, arrayV := range fromArrayvalues {
-				err = a.runArrayMap(arrayV, objArray[i], field.Fields, inputScope, outputScope, resolver)
+				err = a.runArrayMap(arrayV, objArray[i], arrayField.Fields, inputScope, outputScope, resolver)
 				if err != nil {
 					return err
 				}
@@ -244,10 +257,10 @@ func (a *ArrayMapping) runArrayMap(fromValue, value interface{}, fields []*Array
 
 }
 
-func (a *ArrayMapping) DoMap(fromValue, value interface{}, to string, inputScope, outputScope data.Scope, resolver data.Resolver) error {
+func (a *ArrayMapping) DoMap(fromValue, value interface{}, tomapField *field.MappingField, inputScope, outputScope data.Scope, resolver data.Resolver) error {
 	switch a.Type {
 	case PRIMITIVE:
-		_, err := flogojson.SetFieldValueP(fromValue, value, to)
+		_, err := flogojson.SetFieldValue(fromValue, value, tomapField)
 		if err != nil {
 			return err
 		}
@@ -370,7 +383,8 @@ func GetValueFromArrayRef(object interface{}, expressionRef interface{}, inputSc
 	} else {
 		if ref.IsArrayMapping(stringVal) {
 			reference := ref.GetFieldNameFromArrayRef(stringVal)
-			fromValue, err = flogojson.GetFieldValueFromInP(object, reference)
+			toMapField, err := field.ParseMappingField(reference)
+			fromValue, err = flogojson.GetFieldValueFromIn(object, toMapField)
 			if err != nil {
 				return nil, err
 			}

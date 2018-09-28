@@ -62,10 +62,12 @@ func DoAssign(mapping *data.MappingDef, inputScope, outputScope data.Scope, reso
 }
 
 func GetExpresssionValue(mappingV interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
-	if mappingV == nil || reflect.TypeOf(mappingV).Kind() != reflect.String {
+
+	mappingValue, ok := mappingV.(string)
+	if !ok {
 		return mappingV, nil
 	}
-	mappingValue := mappingV.(string)
+
 	exp, err := expression.ParseExpression(mappingValue)
 	if err == nil {
 		//flogo expression
@@ -80,12 +82,10 @@ func GetExpresssionValue(mappingV interface{}, inputScope data.Scope, resolver d
 			log.Debugf("Mapping ref %s and value %+v", mappingValue, mappingValue)
 			return mappingValue, nil
 		} else {
-
 			mappingref := ref.NewMappingRef(mappingValue)
 			mappingValue, err := mappingref.GetValue(inputScope, resolver)
 			if err != nil {
 				return nil, fmt.Errorf("Get value from ref [%s] error - %s", mappingref.GetRef(), err.Error())
-
 			}
 			log.Debugf("Mapping ref %s and value %+v", mappingValue, mappingValue)
 			return mappingValue, nil
@@ -118,43 +118,47 @@ func GetAssignValue(mappingV interface{}, inputScope data.Scope, resolver data.R
 
 func SetValueToOutputScope(mapTo string, outputScope data.Scope, value interface{}) error {
 	toMappingRef := ref.NewMappingRef(mapTo)
-	actRootField, err := toMappingRef.GetActivtyRootField()
+
+	mapField, err := field.ParseMappingField(mapTo)
 	if err != nil {
 		return err
 	}
-	if field.HasSpecialFields(mapTo) {
-		fields, err := field.GetAllspecialFields(mapTo)
-		if err != nil {
-			return fmt.Errorf("Get fields from field %s error, due to [%s]", mapTo, err.Error())
-		}
+
+	actRootField, err := toMappingRef.GetActivtyRootField(mapField)
+	if err != nil {
+		return err
+	}
+
+	if mapField.HasSepcialField() {
+		fields := mapField.Getfields()
 		if len(fields) == 1 {
 			//No complex mapping exist
 			return SetAttribute(actRootField, value, outputScope)
 		} else if len(fields) > 1 {
 			//Complex mapping
-			return settValueToComplexObject(toMappingRef, actRootField, outputScope, value)
+			return settValueToComplexObject(toMappingRef, mapField, actRootField, outputScope, value)
 		}
 		return fmt.Errorf("No field name found for mapTo [%s]", mapTo)
 	}
 
 	if strings.HasPrefix(mapTo, "$") || strings.Index(mapTo, ".") > 0 {
-		return settValueToComplexObject(toMappingRef, actRootField, outputScope, value)
+		return settValueToComplexObject(toMappingRef, mapField, actRootField, outputScope, value)
 	}
 	return SetAttribute(mapTo, value, outputScope)
 }
 
-func settValueToComplexObject(toMappingRef *ref.MappingRef, fieldName string, outputScope data.Scope, value interface{}) error {
-	complexVlaueIn, err := toMappingRef.GetValueFromOutputScope(outputScope)
+func settValueToComplexObject(toMappingRef *ref.MappingRef, mapField *field.MappingField, fieldName string, outputScope data.Scope, value interface{}) error {
+	complexVlaueIn, err := toMappingRef.GetValueFromOutputScope(mapField, outputScope)
 	if err != nil {
 		return err
 	}
-	fields, err := toMappingRef.GetFields()
+	fields, err := toMappingRef.GetMapToFields(mapField)
 	if err != nil {
 		return err
 	}
 
 	log.Debugf("Set value %+v to fields %s", value, fields)
-	complexValue, err2 := json.SetFieldValue(value, complexVlaueIn, fields)
+	complexValue, err2 := json.SetFieldValue(value, complexVlaueIn, mapField)
 	if err2 != nil {
 		return err2
 	}

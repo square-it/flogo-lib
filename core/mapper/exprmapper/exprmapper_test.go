@@ -13,13 +13,13 @@ import (
 
 func TestGetMapValueFunction(t *testing.T) {
 	mappingValue := `string.concat("ddddd",$activity[a1].field.id)`
-	v, err := GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	v, err := GetExpresssionValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
 	assert.Equal(t, "dddddd", v)
 
 	mappingValue = `string.concat("ddddd",$activity[a1].field.id, string.concat($activity[a1].field.id,$activity[a1].field.id))`
-	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	v, err = GetExpresssionValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
 	assert.Equal(t, "dddddddd", v)
@@ -28,62 +28,62 @@ func TestGetMapValueFunction(t *testing.T) {
 
 func TestGetMapValueExpression(t *testing.T) {
 	mappingValue := `string.length(string.concat("ddddd",$activity[a1].field.id)) == 6`
-	v, err := GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	v, err := GetExpresssionValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
 	assert.Equal(t, true, v)
 
 	//
 	mappingValue = `$activity[a1].field.id == "d"`
-	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	v, err = GetExpresssionValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
 	assert.Equal(t, true, v)
 
 	mappingValue = `($activity[a1].field.id == "d") == true`
-	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	v, err = GetExpresssionValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
 	assert.Equal(t, true, v)
 
 	mappingValue = `$activity[a1].field.id == "d" ? $activity[a1].field.id : string.concat("ssss",$activity[a1].field.id)`
-	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	v, err = GetExpresssionValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
 	assert.Equal(t, "d", v)
 
 	mappingValue = `$activity[a1].field.id == "d" ? string.concat("ssss",$activity[a1].field.id) : $activity[a1].field.id`
-	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	v, err = GetExpresssionValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
 	assert.Equal(t, "ssssd", v)
 
 	mappingValue = `$activity[a1].field.id != "d" ? string.concat("ssss",$activity[a1].field.id) : $activity[a1].field.id`
-	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	v, err = GetExpresssionValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
 	assert.Equal(t, "d", v)
 
 	mappingValue = `$activity[a1].field.id != "d" ? "dddd":"ssss"`
-	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	v, err = GetExpresssionValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
 	assert.Equal(t, "ssss", v)
 
 	mappingValue = `$activity[a1].field.id == "d" ? "dddd":"ssss"`
-	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	v, err = GetExpresssionValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
 	assert.Equal(t, "dddd", v)
 
 	mappingValue = ` 2>1 ? "dddd":"ssss"`
-	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	v, err = GetExpresssionValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
 	assert.Equal(t, "dddd", v)
 
 	mappingValue = ` 2<1 ? "dddd":"ssss"`
-	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	v, err = GetExpresssionValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
 	assert.Equal(t, "ssss", v)
@@ -92,13 +92,13 @@ func TestGetMapValueExpression(t *testing.T) {
 
 func TestMappingRef(t *testing.T) {
 	mappingValue := `$activity[a1].field.id`
-	v, err := GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	v, err := GetExpresssionValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
 	assert.Equal(t, "d", v)
 
 	mappingValue = `ddddd`
-	v, err = GetMappingValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
+	v, err = GetExpresssionValue(mappingValue, GetSimpleScope("_A.a1.field", `{"id":"d"}`), GetTestResolver())
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
 	assert.Equal(t, "ddddd", v)

@@ -2,6 +2,7 @@ package data
 
 import (
 	"fmt"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json"
 	"os"
 	"strings"
 
@@ -78,8 +79,20 @@ func (r *BasicResolver) Resolve(toResolve string, scope Scope) (value interface{
 		return nil, fmt.Errorf("unsupported resolver: %s", details.ResolverName)
 	}
 
+	if value != nil {
+		switch t := value.(type) {
+		case *ComplexObject:
+			value, err = CoerceToObject(t.Value)
+			if err != nil {
+
+			}
+		default:
+			value = value
+		}
+	}
+
 	if details.Path != "" {
-		value, err = PathGetValue(value, details.Path)
+		value, err = json.ResolvePathValue(value, details.Path)
 		if err != nil {
 			logger.Error(err.Error())
 			return nil, err

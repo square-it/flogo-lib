@@ -2,6 +2,7 @@ package ref
 
 import (
 	"fmt"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json/field"
 	"strings"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
@@ -12,14 +13,13 @@ type ArrayRef struct {
 	ref string
 }
 
-func (m *ArrayRef) GetRef() string{
+func (m *ArrayRef) GetRef() string {
 	return m.ref
 }
 
 func NewArrayRef(ref string) *ArrayRef {
-	return &ArrayRef{ref:ref}
+	return &ArrayRef{ref: ref}
 }
-
 
 func (m *ArrayRef) EvalFromData(data interface{}) (interface{}, error) {
 	log.Debugf("Eval mapping field and ref: %s", m.ref)
@@ -41,7 +41,11 @@ func (m *ArrayRef) Eval(inputScope, outputScope data.Scope) (interface{}, error)
 
 func (m *ArrayRef) getValueFromRef(object interface{}, ref string) (interface{}, error) {
 	reference := GetFieldNameFromArrayRef(ref)
-	return json.GetFieldValueFromInP(object, reference)
+	mapField, err := field.ParseMappingField(reference)
+	if err != nil {
+		return nil, err
+	}
+	return json.GetFieldValueFromIn(object, mapField)
 }
 
 func GetFieldNameFromArrayRef(arrayRef string) string {

@@ -2,7 +2,6 @@ package json
 
 import (
 	"encoding/json"
-	"fmt"
 	"strings"
 	"sync"
 
@@ -14,14 +13,14 @@ type JSONData struct {
 	rw        sync.RWMutex
 }
 
-func SetFieldValueFromStringP(data interface{}, jsonData string, path string) (interface{}, error) {
-	jsonParsed, err := ParseJSON([]byte(jsonData))
-	if err != nil {
-		return nil, err
-
-	}
-	return setValueP(data, &JSONData{container: jsonParsed, rw: sync.RWMutex{}}, path)
-}
+//func SetFieldValueFromStringP(data interface{}, jsonData string, path string) (interface{}, error) {
+//	jsonParsed, err := ParseJSON([]byte(jsonData))
+//	if err != nil {
+//		return nil, err
+//
+//	}
+//	return setValueP(data, &JSONData{container: jsonParsed, rw: sync.RWMutex{}}, path)
+//}
 
 func SetFieldValueFromString(data interface{}, jsonData string, mappingField *field.MappingField) (interface{}, error) {
 	jsonParsed, err := ParseJSON([]byte(jsonData))
@@ -32,19 +31,20 @@ func SetFieldValueFromString(data interface{}, jsonData string, mappingField *fi
 	return setValue(data, &JSONData{container: jsonParsed, rw: sync.RWMutex{}}, mappingField)
 }
 
-func SetFieldValueP(data interface{}, jsonData interface{}, path string) (interface{}, error) {
-	switch t := jsonData.(type) {
-	case string:
-		return SetFieldValueFromStringP(data, t, path)
-	default:
-		jsonParsed, err := Consume(jsonData)
-		if err != nil {
-			return nil, err
-
-		}
-		return setValueP(data, &JSONData{container: jsonParsed, rw: sync.RWMutex{}}, path)
-	}
-}
+//
+//func SetFieldValueP(data interface{}, jsonData interface{}, path string) (interface{}, error) {
+//	switch t := jsonData.(type) {
+//	case string:
+//		return SetFieldValueFromStringP(data, t, path)
+//	default:
+//		jsonParsed, err := Consume(jsonData)
+//		if err != nil {
+//			return nil, err
+//
+//		}
+//		return setValueP(data, &JSONData{container: jsonParsed, rw: sync.RWMutex{}}, path)
+//	}
+//}
 
 func SetFieldValue(data interface{}, jsonData interface{}, mappingField *field.MappingField) (interface{}, error) {
 	switch t := jsonData.(type) {
@@ -60,46 +60,38 @@ func SetFieldValue(data interface{}, jsonData interface{}, mappingField *field.M
 	}
 }
 
-func setValueP(value interface{}, jsonData *JSONData, path string) (interface{}, error) {
-	if field.HasArray(path) && field.HasSpecialFields(path) {
-		fields, err := field.GetAllspecialFields(path)
-		if err != nil {
-			return nil, fmt.Errorf("Get All special fields error, due to [%s]", err.Error())
-		}
-		return handleArrayWithSpecialFields(value, jsonData, fields)
-	} else if field.HasArray(path) {
-		return setArrayValue(value, jsonData, path)
-	} else if field.HasSpecialFields(path) {
-		fields, err := field.GetAllspecialFields(path)
-		if err != nil {
-			return nil, err
-		}
-		_, err = jsonData.container.Set(value, fields...)
-		if err != nil {
-			return nil, err
-		}
-		return jsonData.container.object, nil
-	}
-	_, err := jsonData.container.Set(value, strings.Split(path, ".")...)
-	if err != nil {
-		return nil, err
-	}
-	return jsonData.container.object, nil
-}
+//func setValueP(value interface{}, jsonData *JSONData, mapField *field.MappingField) (interface{}, error) {
+//	if mapField.HasArray() && mapField.HasSepcialField() {
+//		return handleArrayWithSpecialFields(value, jsonData, mapField.Getfields())
+//	} else if mapField.HasArray() {
+//		return setArrayValue(value, jsonData, strings.Join(mapField.Getfields(), "."))
+//	} else if mapField.HasSepcialField() {
+//		_, err := jsonData.container.Set(value, mapField.Getfields()...)
+//		if err != nil {
+//			return nil, err
+//		}
+//		return jsonData.container.object, nil
+//	}
+//	_, err := jsonData.container.Set(value, mapField.Getfields()...)
+//	if err != nil {
+//		return nil, err
+//	}
+//	return jsonData.container.object, nil
+//}
 
 func setValue(value interface{}, jsonData *JSONData, mappingField *field.MappingField) (interface{}, error) {
-	if mappingField.HasArray && mappingField.HasSpecialField {
-		return handleArrayWithSpecialFields(value, jsonData, mappingField.Fields)
-	} else if mappingField.HasArray {
-		return setArrayValue(value, jsonData, strings.Join(mappingField.Fields, "."))
-	} else if mappingField.HasSpecialField {
-		_, err := jsonData.container.Set(value, mappingField.Fields...)
+	if mappingField.HasArray() && mappingField.HasSepcialField() {
+		return handleArrayWithSpecialFields(value, jsonData, mappingField.Getfields())
+	} else if mappingField.HasArray() {
+		return setArrayValue(value, jsonData, strings.Join(mappingField.Getfields(), "."))
+	} else if mappingField.HasSepcialField() {
+		_, err := jsonData.container.Set(value, mappingField.Getfields()...)
 		if err != nil {
 			return nil, err
 		}
 		return jsonData.container.object, nil
 	}
-	_, err := jsonData.container.Set(value, mappingField.Fields...)
+	_, err := jsonData.container.Set(value, mappingField.Getfields()...)
 	if err != nil {
 		return nil, err
 	}

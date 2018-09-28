@@ -2,11 +2,10 @@ package json
 
 import (
 	"fmt"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json/field"
 	"reflect"
 	"strconv"
 	"strings"
-
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json/field"
 
 	"sync"
 
@@ -16,25 +15,41 @@ import (
 
 var log = logger.GetLogger("json")
 
-func GetFieldValueFromInP(data interface{}, path string) (interface{}, error) {
-	var jsonParsed *Container
-	var err error
+func ResolvePathValue(value interface{}, refPath string) (interface{}, error) {
+	mappingField, err := field.ParseMappingField(refPath)
+	if err != nil {
+		return nil, fmt.Errorf("parse mapping path [%s] failed, due to %s", err.Error())
+	}
 
-	if reflect.TypeOf(data).Kind() == reflect.String {
-		jsonParsed, err = ParseJSON([]byte(data.(string)))
-	} else {
-		b, err := json.Marshal(data)
+	if mappingField == nil || len(mappingField.Getfields()) <= 0 {
+		value, err := toInterface(value)
+		if err != nil {
+			value = value
+		}
+		return value, nil
+	}
+	return GetFieldValueFromIn(value, mappingField)
+}
+
+func toInterface(value interface{}) (interface{}, error) {
+
+	var paramMap interface{}
+
+	if value == nil {
+		return paramMap, nil
+	}
+
+	switch t := value.(type) {
+	case string:
+		err := json.Unmarshal([]byte(t), &paramMap)
 		if err != nil {
 			return nil, err
 		}
-		jsonParsed, err = ParseJSON(b)
+		return paramMap, nil
+	default:
+		return value, nil
 	}
-
-	if err != nil {
-		return nil, err
-
-	}
-	return getFieldValueP(&JSONData{container: jsonParsed, rw: sync.RWMutex{}}, path)
+	return paramMap, nil
 }
 
 func GetFieldValueFromIn(data interface{}, mappingField *field.MappingField) (interface{}, error) {
@@ -61,48 +76,48 @@ func GetFieldValueFromIn(data interface{}, mappingField *field.MappingField) (in
 func getFieldValue(jsonData *JSONData, mappingField *field.MappingField) (interface{}, error) {
 	var res interface{}
 	var err error
-	if mappingField.HasArray && mappingField.HasSpecialField {
-		res, err = handleGetSpecialFields(jsonData, mappingField.Fields)
-	} else if mappingField.HasArray {
-		data, err := getFiledContainer(jsonData, strings.Join(mappingField.Fields, "."))
+	if mappingField.HasArray() && mappingField.HasSepcialField() {
+		res, err = handleGetSpecialFields(jsonData, mappingField.Getfields())
+	} else if mappingField.HasArray() {
+		data, err := getFiledContainer(jsonData, strings.Join(mappingField.Getfields(), "."))
 		if data != nil {
 			return data.Data(), err
 		}
 		return nil, err
-	} else if mappingField.HasSpecialField {
-		res, err = handleGetSpecialFields(jsonData, mappingField.Fields)
+	} else if mappingField.HasSepcialField() {
+		res, err = handleGetSpecialFields(jsonData, mappingField.Getfields())
 	} else {
-		data, err := getFiledContainer(jsonData, strings.Join(mappingField.Fields, "."))
+		data, err := getFiledContainer(jsonData, strings.Join(mappingField.Getfields(), "."))
 		return data.Data(), err
 	}
 	return res, err
 }
 
-func getFieldValueP(jsonData *JSONData, path string) (interface{}, error) {
-	var res interface{}
-	var err error
-	if field.HasArray(path) && field.HasSpecialFields(path) {
-		fields, errs := field.GetAllspecialFields(path)
-		if errs != nil {
-			return nil, errs
-		}
-		res, err = handleGetSpecialFields(jsonData, fields)
-	} else if field.HasArray(path) {
-		data, err := getFiledContainer(jsonData, path)
-		return data.Data(), err
-	} else if field.HasSpecialFields(path) {
-		fields, errs := field.GetAllspecialFields(path)
-		if errs != nil {
-			return nil, errs
-		}
-		res, err = handleGetSpecialFields(jsonData, fields)
-	} else {
-		data, err := getFiledContainer(jsonData, path)
-		return data.Data(), err
-	}
-
-	return res, err
-}
+//func getFieldValueP(jsonData *JSONData, path string) (interface{}, error) {
+//	var res interface{}
+//	var err error
+//	if field.HasArray() && field.HasSpecialFields(path) {
+//		fields, errs := field.GetAllspecialFields(path)
+//		if errs != nil {
+//			return nil, errs
+//		}
+//		res, err = handleGetSpecialFields(jsonData, fields)
+//	} else if field.HasArray(path) {
+//		data, err := getFiledContainer(jsonData, path)
+//		return data.Data(), err
+//	} else if field.HasSpecialFields(path) {
+//		fields, errs := field.GetAllspecialFields(path)
+//		if errs != nil {
+//			return nil, errs
+//		}
+//		res, err = handleGetSpecialFields(jsonData, fields)
+//	} else {
+//		data, err := getFiledContainer(jsonData, path)
+//		return data.Data(), err
+//	}
+//
+//	return res, err
+//}
 
 func getFiledContainer(jsonData *JSONData, path string) (*Container, error) {
 	jsonData.rw.RLock()
