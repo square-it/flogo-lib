@@ -185,7 +185,7 @@ func expressMap(from, to string, resolver data.Resolver) (interface{}, error) {
 	mapDef := &data.MappingDef{Type: data.MtExpression, Value: from, MapTo: to}
 	inputScope := GetObjectFieldScope("_A.a1.field", `{"id":"d"}`)
 	outputScope := GetStringFieldScope("field", "")
-	err := Map(mapDef, inputScope, outputScope, resolver)
+	err := MapExpreesion(mapDef, inputScope, outputScope, resolver)
 	if err != nil {
 		return nil, err
 	}
@@ -200,7 +200,7 @@ func expressMapBoolMapToField(from, to string, resolver data.Resolver) (interfac
 	mapDef := &data.MappingDef{Type: data.MtExpression, Value: from, MapTo: to}
 	inputScope := GetObjectFieldScope("_A.a1.field", `{"id":"d"}`)
 	outputScope := GetBoolFieldScope("field", "")
-	err := Map(mapDef, inputScope, outputScope, resolver)
+	err := MapExpreesion(mapDef, inputScope, outputScope, resolver)
 	if err != nil {
 		return nil, err
 	}
@@ -215,7 +215,7 @@ func expressMapWithFlow(from, to string, resolver data.Resolver) (interface{}, e
 	mapDef := &data.MappingDef{Type: data.MtExpression, Value: from, MapTo: to}
 	inputScope := GetObjectFieldScope("field", `{"id":"d"}`)
 	outputScope := GetStringFieldScope("field", "")
-	err := Map(mapDef, inputScope, outputScope, resolver)
+	err := MapExpreesion(mapDef, inputScope, outputScope, resolver)
 	if err != nil {
 		return nil, err
 	}

@@ -134,62 +134,6 @@ func (m *MappingRef) GetFieldName(mapfield *field.MappingField) (string, error) 
 	return getFieldName(m.ref), nil
 }
 
-func (m *MappingRef) GetActivityId() (string, error) {
-
-	dotIndex := strings.Index(m.ref, ".")
-
-	if dotIndex == -1 {
-		return "", fmt.Errorf("invalid resolution expression [%s]", m.ref)
-	}
-
-	firstItemIndex := strings.Index(m.ref[:dotIndex], "[")
-
-	if firstItemIndex != -1 {
-		return m.ref[firstItemIndex+1 : dotIndex-1], nil
-	}
-	return "", nil
-}
-
-//
-//func GetResolutionDetails(toResolve string) (*string, error) {
-//
-//
-//	dotIdx := strings.Index(toResolve, ".")
-//
-//	if dotIdx == -1 {
-//		return nil, fmt.Errorf("invalid resolution expression [%s]", toResolve)
-//	}
-//
-//	details := &ResolutionDetails{}
-//	itemIdx := strings.Index(toResolve[:dotIdx], "[")
-//
-//	if itemIdx != -1 {
-//		details.Item = toResolve[itemIdx+1:dotIdx-1]
-//		details.ResolverName = toResolve[:itemIdx]
-//	} else {
-//		details.ResolverName = toResolve[:dotIdx]
-//
-//		//special case for activity without brackets
-//		if strings.HasPrefix(toResolve, "activity") {
-//			nextDot := strings.Index(toResolve[dotIdx+1:], ".") + dotIdx + 1
-//			details.Item = toResolve[dotIdx+1:nextDot]
-//			dotIdx = nextDot
-//		}
-//	}
-//
-//	pathIdx := strings.IndexFunc(toResolve[dotIdx+1:], isSep)
-//
-//	if pathIdx != -1 {
-//		pathStart := pathIdx + dotIdx + 1
-//		details.Path = toResolve[pathStart:]
-//		details.Property = toResolve[dotIdx+1:pathStart]
-//	} else {
-//		details.Property = toResolve[dotIdx+1:]
-//	}
-//
-//	return details, nil
-//}
-
 func getFieldName(fieldname string) string {
 	if strings.Index(fieldname, "[") > 0 && strings.Index(fieldname, "]") > 0 {
 		return fieldname[:strings.Index(fieldname, "[")]

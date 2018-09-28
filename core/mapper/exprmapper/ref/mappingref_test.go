@@ -14,13 +14,6 @@ func TestMappingRef(t *testing.T) {
 
 	mappingref := MappingRef{ref: "$activity[name].input.query.address.city"}
 
-	id, err := mappingref.GetActivityId()
-
-	if err != nil {
-		t.Fatal(err)
-	}
-	assert.Equal(t, "name", id)
-
 	resu, _ := data.GetResolutionDetails(mappingref.ref)
 
 	v, _ := json.Marshal(resu)

@@ -7,8 +7,6 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json/field"
 
-	"reflect"
-
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json"
@@ -31,8 +29,8 @@ const (
 	MAP_TO_INPUT = "$INPUT"
 )
 
-func DoExpreesion(mapping *data.MappingDef, inputScope, outputScope data.Scope, resolver data.Resolver) error {
-	mappingValue, err := GetExpresssionValue(mapping.Value, inputScope, resolver)
+func MapExpreesion(mapping *data.MappingDef, inputScope, outputScope data.Scope, resolver data.Resolver) error {
+	mappingValue, err := getExpresssionValue(mapping.Value, inputScope, resolver)
 	if err != nil {
 		return err
 	}
@@ -46,8 +44,8 @@ func DoExpreesion(mapping *data.MappingDef, inputScope, outputScope data.Scope, 
 	return nil
 }
 
-func DoAssign(mapping *data.MappingDef, inputScope, outputScope data.Scope, resolver data.Resolver) error {
-	mappingValue, err := GetAssignValue(mapping.Value, inputScope, resolver)
+func MapAssign(mapping *data.MappingDef, inputScope, outputScope data.Scope, resolver data.Resolver) error {
+	mappingValue, err := getMappingValue(mapping.Value, inputScope, resolver)
 	if err != nil {
 		return err
 	}
@@ -61,13 +59,11 @@ func DoAssign(mapping *data.MappingDef, inputScope, outputScope data.Scope, reso
 	return nil
 }
 
-func GetExpresssionValue(mappingV interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
-
+func getExpresssionValue(mappingV interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
 	mappingValue, ok := mappingV.(string)
 	if !ok {
 		return mappingV, nil
 	}
-
 	exp, err := expression.ParseExpression(mappingValue)
 	if err == nil {
 		//flogo expression
@@ -77,28 +73,15 @@ func GetExpresssionValue(mappingV interface{}, inputScope data.Scope, resolver d
 		}
 		return expValue, nil
 	} else {
-		if !isMappingRef(mappingValue) {
-			log.Debugf("Mapping value is literal set directly to field")
-			log.Debugf("Mapping ref %s and value %+v", mappingValue, mappingValue)
-			return mappingValue, nil
-		} else {
-			mappingref := ref.NewMappingRef(mappingValue)
-			mappingValue, err := mappingref.GetValue(inputScope, resolver)
-			if err != nil {
-				return nil, fmt.Errorf("Get value from ref [%s] error - %s", mappingref.GetRef(), err.Error())
-			}
-			log.Debugf("Mapping ref %s and value %+v", mappingValue, mappingValue)
-			return mappingValue, nil
-		}
+		return getMappingValue(mappingV, inputScope, resolver)
 	}
-	return nil, nil
 }
 
-func GetAssignValue(mappingV interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
-	if mappingV == nil || reflect.TypeOf(mappingV).Kind() != reflect.String {
+func getMappingValue(mappingV interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
+	mappingValue, ok := mappingV.(string)
+	if !ok {
 		return mappingV, nil
 	}
-	mappingValue := mappingV.(string)
 	if !isMappingRef(mappingValue) {
 		log.Debugf("Mapping value is literal set directly to field")
 		log.Debugf("Mapping ref %s and value %+v", mappingValue, mappingValue)
