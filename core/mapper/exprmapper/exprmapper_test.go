@@ -1,6 +1,7 @@
 package exprmapper
 
 import (
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json"
 	"testing"
 
 	"fmt"
@@ -171,7 +172,7 @@ func (r *TestResolver) Resolve(toResolve string, scope data.Scope) (value interf
 	}
 
 	if details.Path != "" {
-		value, err = data.PathGetValue(value, details.Path)
+		value, err = json.ResolvePathValue(value, details.Path)
 		if err != nil {
 			logger.Error(err.Error())
 			return nil, err

@@ -68,10 +68,10 @@ func TestAssignMapper(t *testing.T) {
 
 	factory := GetFactory()
 
-	mapping1 := &data.MappingDef{Type: data.MtAssign, Value: "SimpleI", MapTo: "SimpleO"}
-	mapping2 := &data.MappingDef{Type: data.MtAssign, Value: "ObjI.key", MapTo: "ObjO.key"}
-	mapping3 := &data.MappingDef{Type: data.MtAssign, Value: "ArrayI[2]", MapTo: "ArrayO[2]"}
-	mapping4 := &data.MappingDef{Type: data.MtAssign, Value: "ParamsI.paramKey", MapTo: "ParamsO.paramKey"}
+	mapping1 := &data.MappingDef{Type: data.MtAssign, Value: "$.SimpleI", MapTo: "SimpleO"}
+	mapping2 := &data.MappingDef{Type: data.MtAssign, Value: "$.ObjI.key", MapTo: "ObjO.key"}
+	mapping3 := &data.MappingDef{Type: data.MtAssign, Value: "$.ArrayI[2]", MapTo: "ArrayO[2]"}
+	mapping4 := &data.MappingDef{Type: data.MtAssign, Value: "$.ParamsI.paramKey", MapTo: "ParamsO.paramKey"}
 
 	mappings := []*data.MappingDef{mapping1, mapping2, mapping3, mapping4}
 

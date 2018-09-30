@@ -30,7 +30,7 @@ const (
 )
 
 func MapExpreesion(mapping *data.MappingDef, inputScope, outputScope data.Scope, resolver data.Resolver) error {
-	mappingValue, err := getExpresssionValue(mapping.Value, inputScope, resolver)
+	mappingValue, err := GetExpresssionValue(mapping.Value, inputScope, resolver)
 	if err != nil {
 		return err
 	}
@@ -45,7 +45,7 @@ func MapExpreesion(mapping *data.MappingDef, inputScope, outputScope data.Scope,
 }
 
 func MapAssign(mapping *data.MappingDef, inputScope, outputScope data.Scope, resolver data.Resolver) error {
-	mappingValue, err := getMappingValue(mapping.Value, inputScope, resolver)
+	mappingValue, err := GetMappingValue(mapping.Value, inputScope, resolver)
 	if err != nil {
 		return err
 	}
@@ -59,7 +59,7 @@ func MapAssign(mapping *data.MappingDef, inputScope, outputScope data.Scope, res
 	return nil
 }
 
-func getExpresssionValue(mappingV interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
+func GetExpresssionValue(mappingV interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
 	mappingValue, ok := mappingV.(string)
 	if !ok {
 		return mappingV, nil
@@ -73,11 +73,11 @@ func getExpresssionValue(mappingV interface{}, inputScope data.Scope, resolver d
 		}
 		return expValue, nil
 	} else {
-		return getMappingValue(mappingV, inputScope, resolver)
+		return GetMappingValue(mappingV, inputScope, resolver)
 	}
 }
 
-func getMappingValue(mappingV interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
+func GetMappingValue(mappingV interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
 	mappingValue, ok := mappingV.(string)
 	if !ok {
 		return mappingV, nil
@@ -107,41 +107,36 @@ func SetValueToOutputScope(mapTo string, outputScope data.Scope, value interface
 		return err
 	}
 
-	actRootField, err := toMappingRef.GetActivtyRootField(mapField)
+	actRootField, err := toMappingRef.GetMapToAttrName(mapField)
 	if err != nil {
 		return err
 	}
 
-	if mapField.HasSepcialField() {
-		fields := mapField.Getfields()
-		if len(fields) == 1 {
-			//No complex mapping exist
-			return SetAttribute(actRootField, value, outputScope)
-		} else if len(fields) > 1 {
-			//Complex mapping
-			return settValueToComplexObject(toMappingRef, mapField, actRootField, outputScope, value)
-		}
+	fields := mapField.Getfields()
+	if len(fields) == 1 && !ref.HasArray(fields[0]) {
+		//No complex mapping exist
+		return SetAttribute(mapTo, value, outputScope)
+	} else if ref.HasArray(fields[0]) || len(fields) > 1 {
+		//Complex mapping
+		return settValueToComplexObject(mapField, actRootField, outputScope, value)
+	} else {
 		return fmt.Errorf("No field name found for mapTo [%s]", mapTo)
 	}
 
-	if strings.HasPrefix(mapTo, "$") || strings.Index(mapTo, ".") > 0 {
-		return settValueToComplexObject(toMappingRef, mapField, actRootField, outputScope, value)
-	}
-	return SetAttribute(mapTo, value, outputScope)
 }
 
-func settValueToComplexObject(toMappingRef *ref.MappingRef, mapField *field.MappingField, fieldName string, outputScope data.Scope, value interface{}) error {
-	complexVlaueIn, err := toMappingRef.GetValueFromOutputScope(mapField, outputScope)
+func settValueToComplexObject(mapField *field.MappingField, fieldName string, outputScope data.Scope, value interface{}) error {
+	complexVlaueIn, err := ref.GetValueFromOutputScope(mapField, outputScope)
 	if err != nil {
 		return err
 	}
-	fields, err := toMappingRef.GetMapToFields(mapField)
+	pathfields, err := ref.GetMapToPathFields(mapField)
 	if err != nil {
 		return err
 	}
 
-	log.Debugf("Set value %+v to fields %s", value, fields)
-	complexValue, err2 := json.SetFieldValue(value, complexVlaueIn, mapField)
+	log.Debugf("Set value %+v to fields %s", value, pathfields)
+	complexValue, err2 := json.SetFieldValue(value, complexVlaueIn, pathfields)
 	if err2 != nil {
 		return err2
 	}

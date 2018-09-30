@@ -28,7 +28,9 @@ func SetFieldValueFromString(data interface{}, jsonData string, mappingField *fi
 		return nil, err
 
 	}
-	return setValue(data, &JSONData{container: jsonParsed, rw: sync.RWMutex{}}, mappingField)
+	container := &JSONData{container: jsonParsed, rw: sync.RWMutex{}}
+	err = setValue(data, container, mappingField)
+	return container.container.object, err
 }
 
 //
@@ -56,7 +58,9 @@ func SetFieldValue(data interface{}, jsonData interface{}, mappingField *field.M
 			return nil, err
 
 		}
-		return setValue(data, &JSONData{container: jsonParsed, rw: sync.RWMutex{}}, mappingField)
+		container := &JSONData{container: jsonParsed, rw: sync.RWMutex{}}
+		setValue(data, container, mappingField)
+		return container.container.object, nil
 	}
 }
 
@@ -79,63 +83,83 @@ func SetFieldValue(data interface{}, jsonData interface{}, mappingField *field.M
 //	return jsonData.container.object, nil
 //}
 
-func setValue(value interface{}, jsonData *JSONData, mappingField *field.MappingField) (interface{}, error) {
+func setValue(value interface{}, jsonData *JSONData, mappingField *field.MappingField) error {
 	if mappingField.HasArray() && mappingField.HasSepcialField() {
 		return handleArrayWithSpecialFields(value, jsonData, mappingField.Getfields())
 	} else if mappingField.HasArray() {
-		return setArrayValue(value, jsonData, strings.Join(mappingField.Getfields(), "."))
+		return handleArrayWithSpecialFields(value, jsonData, mappingField.Getfields())
 	} else if mappingField.HasSepcialField() {
 		_, err := jsonData.container.Set(value, mappingField.Getfields()...)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		return jsonData.container.object, nil
+		return nil
 	}
 	_, err := jsonData.container.Set(value, mappingField.Getfields()...)
-	if err != nil {
-		return nil, err
-	}
-	return jsonData.container.object, nil
+	return err
 }
 
-func setArrayValue(value interface{}, jsonData *JSONData, path string) (interface{}, error) {
+func setArrayValue(value interface{}, jsonData *JSONData, path string) error {
 
 	jsonData.rw.Lock()
 
 	defer jsonData.rw.Unlock()
 
 	container := jsonData.container
-	if strings.Index(path, "[") > 0 {
-		//Array
+	if strings.Index(path, "[") >= 0 {
+		//Array, if fieldname empty then take it as root array
 		arrayFieldName := getFieldName(path)
 		index, _ := getFieldSliceIndex(path)
+
+		if arrayFieldName == "" {
+			//No field name to with root field
+			//check if the root array already exist.
+			array, ok := container.Data().([]interface{})
+			if !ok {
+
+				toArray, err := ToArray(container.Data())
+				if err != nil {
+					toArray = make([]interface{}, index+1)
+					//for i, v := range toArray {
+					//	toArray[i] =
+					//}
+				}
+
+				array = toArray
+			}
+			container.object = array
+		}
 		log.Debug("Field Name:", arrayFieldName, " and index: ", index)
 		restPath := getRestArrayFieldName(path)
 		if restPath == "" {
 			if strings.Index(path, "]") == len(path)-1 {
+				if arrayFieldName == "" {
+					container.SetIndex(value, index)
+					return nil
+				}
 				if container.ExistsP(arrayFieldName) {
 					if index == -2 {
 						//Append
 						err := container.ArrayAppend(value, strings.Split(arrayFieldName, ".")...)
 						if err != nil {
-							return nil, err
+							return err
 						}
 					} else {
 						//set to exist index array
 						size, err := container.ArrayCountP(arrayFieldName)
 						if err != nil {
-							return nil, err
+							return err
 						}
 						if index > size-1 {
 							err := container.ArrayAppendP(value, arrayFieldName)
 							if err != nil {
-								return nil, err
+								return err
 							}
 						} else {
 							array := container.Path(arrayFieldName)
 							_, err := array.SetIndex(value, index)
 							if err != nil {
-								return nil, err
+								return err
 							}
 						}
 					}
@@ -145,21 +169,21 @@ func setArrayValue(value interface{}, jsonData *JSONData, path string) (interfac
 					if index == -2 {
 						_, err := container.Array(strings.Split(arrayFieldName, ".")...)
 						if err != nil {
-							return nil, err
+							return err
 						}
 						err = container.ArrayAppend(value, strings.Split(arrayFieldName, ".")...)
 						if err != nil {
-							return nil, err
+							return err
 						}
 					} else {
 						//Since make array with index lengh
 						array, err := container.ArrayOfSize(index+1, strings.Split(arrayFieldName, ".")...)
 						if err != nil {
-							return nil, err
+							return err
 						}
 						_, err = array.SetIndex(value, index)
 						if err != nil {
-							return nil, err
+							return err
 						}
 					}
 				}
@@ -168,15 +192,25 @@ func setArrayValue(value interface{}, jsonData *JSONData, path string) (interfac
 				jsonField := container.Path(arrayFieldName)
 				_, err := jsonField.SetIndex(value, index)
 				if err != nil {
-					return nil, err
+					return err
 				}
 			}
 
 		} else {
+			if arrayFieldName == "" {
+				c := container.Index(index)
+				data := &JSONData{container: c, rw: sync.RWMutex{}}
+				err := setArrayValue(value, data, restPath)
+				if err != nil {
+					return err
+				}
+				_, err = container.SetIndex(data.container.object, index)
+				return err
+			}
 			if container.ExistsP(arrayFieldName) {
 				size, err := container.ArrayCountP(arrayFieldName)
 				if err != nil {
-					return nil, err
+					return err
 				}
 
 				if index > size-1 {
@@ -185,31 +219,31 @@ func setArrayValue(value interface{}, jsonData *JSONData, path string) (interfac
 					_, err = newObject.SetP(value, restPath)
 					log.Debugf("new object %s", newObject.String())
 					if err != nil {
-						return nil, err
+						return err
 					}
 					//o ,_ := ParseJSON(newObject.Bytes())
 					maps := &map[string]interface{}{}
 					err = json.Unmarshal(newObject.Bytes(), maps)
 					if err != nil {
-						return nil, err
+						return err
 					}
 
 					err = container.ArrayAppendP(maps, arrayFieldName)
 					if err != nil {
-						return nil, err
+						return err
 					}
 
 					if strings.Index(restPath, "[") > 0 {
 						//TODO
 						c, err := container.ArrayElementP(index, arrayFieldName)
 						if err != nil {
-							return nil, err
+							return err
 						}
 						return setArrayValue(value, &JSONData{container: c, rw: sync.RWMutex{}}, restPath)
 					} else {
 						//_, err := jsonField.Set(value, restPath)
 						//if err != nil {
-						//	return nil, err
+						//	return  err
 						//}
 					}
 				} else {
@@ -217,7 +251,7 @@ func setArrayValue(value interface{}, jsonData *JSONData, path string) (interfac
 					jsonField, err := container.ArrayElementP(index, arrayFieldName)
 					//arraySize
 					if err != nil {
-						return nil, err
+						return err
 					}
 					if strings.Index(restPath, "[") > 0 {
 						return setArrayValue(value, &JSONData{container: jsonField, rw: sync.RWMutex{}}, restPath)
@@ -230,7 +264,7 @@ func setArrayValue(value interface{}, jsonData *JSONData, path string) (interfac
 						}
 						_, err := jsonField.SetP(value, restPath)
 						if err != nil {
-							return nil, err
+							return err
 						}
 					}
 				}
@@ -240,7 +274,7 @@ func setArrayValue(value interface{}, jsonData *JSONData, path string) (interfac
 				//Since make array with index lengh
 				array, err := container.ArrayOfSize(index+1, strings.Split(arrayFieldName, ".")...)
 				if err != nil {
-					return nil, err
+					return err
 				}
 
 				if strings.Index(restPath, "[") > 0 {
@@ -250,13 +284,13 @@ func setArrayValue(value interface{}, jsonData *JSONData, path string) (interfac
 					_, err = newObject.SetP(value, restPath)
 					log.Debugf("new object %s", newObject.String())
 					if err != nil {
-						return nil, err
+						return err
 					}
 					//o ,_ := ParseJSON(newObject.Bytes())
 					maps := &map[string]interface{}{}
 					err = json.Unmarshal(newObject.Bytes(), maps)
 					if err != nil {
-						return nil, err
+						return err
 					}
 					_, err = array.SetIndex(maps, index)
 				}
@@ -267,9 +301,9 @@ func setArrayValue(value interface{}, jsonData *JSONData, path string) (interfac
 	} else {
 		_, err := container.Set(value, strings.Split(path, ".")...)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 	}
-	return container.object, nil
+	return nil
 }

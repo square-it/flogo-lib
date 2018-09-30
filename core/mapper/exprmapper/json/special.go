@@ -7,6 +7,8 @@ import (
 	"sync"
 )
 
+const NOT_EXIST = -3
+
 func getArrayFieldName(fields []string) ([]string, int, int) {
 	var tmpFields []string
 	index := -1
@@ -40,7 +42,7 @@ func hasArrayFieldInArray(fields []string) bool {
 	return false
 }
 
-func handleArrayWithSpecialFields(value interface{}, jsonData *JSONData, fields []string) (interface{}, error) {
+func handleArrayWithSpecialFields(value interface{}, jsonData *JSONData, fields []string) error {
 
 	log.Debugf("All fields %+v", fields)
 	jsonData.rw.Lock()
@@ -55,40 +57,99 @@ func handleArrayWithSpecialFields(value interface{}, jsonData *JSONData, fields 
 				//Append
 				err := container.ArrayAppend(value, arrayFields...)
 				if err != nil {
-					return nil, err
+					return err
 				}
 			} else {
 				//set to exist index array
 				size, err := container.ArrayCount(arrayFields...)
 				if err != nil {
-					return nil, err
+					return err
 				}
 				if arrayIndex > size-1 {
 					err := container.ArrayAppend(value, arrayFields...)
 					if err != nil {
-						return nil, err
+						return err
 					}
 				} else {
 					array := container.S(arrayFields...)
 					_, err := array.SetIndex(value, arrayIndex)
 					if err != nil {
-						return nil, err
+						return err
 					}
 				}
 			}
 		} else {
 			restFields := fields[fieldNameindex+1:]
-			if container.Exists(arrayFields...) {
-				_, err := container.ArrayElement(arrayIndex, arrayFields...)
-				if err != nil {
-					return nil, err
+			if arrayFields != nil {
+				if container.Exists(arrayFields...) {
+					if restFields == nil || len(restFields) <= 0 {
+						array, ok := container.Search(arrayFields...).Data().([]interface{})
+						if ok {
+							if arrayIndex > len(array)-1 {
+								array = append(array, value)
+							} else {
+								array[arrayIndex] = value
+							}
+						}
+						_, err := container.Set(array, arrayFields...)
+						return err
+					} else {
+						var element *Container
+						var err error
+						count, err := container.ArrayCount(arrayFields...)
+						if err != nil {
+							return err
+						}
+						if arrayIndex > count-1 {
+							newObject, err := ParseJSON([]byte("{}"))
+							_, err = newObject.Set(value, restFields...)
+							log.Debugf("new object %s", newObject.String())
+							if err != nil {
+								return err
+							}
+							//o ,_ := ParseJSON(newObject.Bytes())
+							maps := &map[string]interface{}{}
+							err = json.Unmarshal(newObject.Bytes(), maps)
+							if err != nil {
+								return err
+							}
+
+							err = container.ArrayAppend(maps, arrayFields...)
+							if err != nil {
+								return err
+							}
+						}
+
+						element, err = container.ArrayElement(arrayIndex, arrayFields...)
+						if err != nil {
+							return err
+						}
+						return handleArrayWithSpecialFields(value, &JSONData{container: element, rw: sync.RWMutex{}}, restFields)
+					}
 				}
-				return handleArrayWithSpecialFields(value, &JSONData{container: container, rw: sync.RWMutex{}}, restFields)
+
+			} else if fieldNameindex == 0 && getFieldName(fields[fieldNameindex]) == "" {
+				//Root only [0]
+				array, ok := container.Data().([]interface{})
+				if !ok {
+
+					toArray, err := ToArray(container.Data())
+					if err != nil {
+						toArray = make([]interface{}, arrayIndex+1)
+					}
+
+					array = toArray
+				}
+				container.object = array
+				if restFields == nil || len(restFields) <= 0 {
+					_, err := container.SetIndex(value, arrayIndex)
+					return err
+				}
 			}
 			//Create new one
 			array, err := container.ArrayOfSize(arrayIndex+1, arrayFields...)
 			if err != nil {
-				return nil, err
+				return err
 			}
 
 			if hasArrayFieldInArray(restFields) {
@@ -98,24 +159,22 @@ func handleArrayWithSpecialFields(value interface{}, jsonData *JSONData, fields 
 			_, err = newObject.Set(value, restFields...)
 			log.Debugf("new object %s", newObject.String())
 			if err != nil {
-				return nil, err
+				return err
 			}
-			maps := &map[string]interface{}{}
-			err = json.Unmarshal(newObject.Bytes(), maps)
-			if err != nil {
-				return nil, err
-			}
-			_, err = array.SetIndex(maps, arrayIndex)
-
+			//maps := &map[string]interface{}{}
+			//err = json.Unmarshal(newObject.Bytes(), maps)
+			//if err != nil {
+			//	return err
+			//}
+			_, err = array.SetIndex(newObject.object, arrayIndex)
 		}
 	} else {
 		_, err := jsonData.container.Set(value, fields...)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
-
-	return jsonData.container.object, nil
+	return nil
 }
 
 func handleGetSpecialFields(jsonData *JSONData, fields []string) (interface{}, error) {

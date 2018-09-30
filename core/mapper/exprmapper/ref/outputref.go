@@ -9,8 +9,8 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
-func (m *MappingRef) GetValueFromOutputScope(mapfield *field.MappingField, outputtscope data.Scope) (interface{}, error) {
-	fieldName, err := m.GetFieldName(mapfield)
+func GetValueFromOutputScope(mapfield *field.MappingField, outputtscope data.Scope) (interface{}, error) {
+	fieldName, err := GetFieldName(mapfield)
 	if err != nil {
 		return nil, err
 	}
@@ -38,79 +38,37 @@ func (m *MappingRef) GetValueFromOutputScope(mapfield *field.MappingField, outpu
 	return nil, fmt.Errorf("Cannot found attribute %s", fieldName)
 }
 
-func (m *MappingRef) GetActivtyRootField(field *field.MappingField) (string, error) {
-	if field.HasSepcialField() {
-		fields := field.Getfields()
-
-		activityNameRef := fields[0]
-		if strings.HasPrefix(activityNameRef, "$") {
-			activityName := activityNameRef[1:]
-			activityName = getActivityName(activityName)
-			fieldName := "_A." + activityName + "." + getFieldName(fields[1])
-			return fieldName, nil
-		}
-		return getFieldName(fields[0]), nil
-	}
-
-	if strings.HasPrefix(m.ref, "$") {
-		log.Debugf("Mapping ref %s", m.ref)
-		mappingFields := strings.Split(m.ref, ".")
-		//Which might like $A3.
-		//field := mappingFields[1]
-		var activityID string
-		if strings.HasPrefix(m.ref, "$") {
-			activityID = mappingFields[0][1:]
-		} else {
-			activityID = mappingFields[0]
-		}
-
-		//fieldName := "{" + activityID + "." + getFieldName(mappingFields[1]) + "}"
-		fieldName := "_A." + getActivityName(activityID) + "." + getFieldName(mappingFields[1])
-
-		log.Debugf("Field name now is: %s", fieldName)
-		return fieldName, nil
-	} else if strings.Index(m.ref, ".") > 0 {
-		log.Debugf("Mapping ref %s", m.ref)
-		mappingFields := strings.Split(m.ref, ".")
-		log.Debugf("Field name now is: %s", mappingFields[0])
-		return getFieldName(mappingFields[0]), nil
-	} else {
-		return m.ref, nil
-	}
+func (m *MappingRef) GetMapToAttrName(field *field.MappingField) (string, error) {
+	fields := field.Getfields()
+	return getFieldName(fields[0]), nil
 }
 
 //
-func (m *MappingRef) GetMapToFields(mapField *field.MappingField) (*field.MappingField, error) {
-	hasArray := mapField.HasArray()
+func GetMapToPathFields(mapField *field.MappingField) (*field.MappingField, error) {
 	fields := mapField.Getfields()
-	activityNameRef := fields[0]
-	if strings.HasPrefix(activityNameRef, "$") {
-		if strings.HasSuffix(fields[1], "]") {
+
+	if len(fields) == 1 && !HasArray(fields[0]) {
+		return field.NewMappingField(mapField.HasSepcialField(), mapField.HasArray(), []string{}), nil
+	} else if HasArray(fields[0]) {
+		arrayIndexPart := getArrayIndexPart(fields[0])
+		fields[0] = arrayIndexPart
+		return field.NewMappingField(mapField.HasSepcialField(), mapField.HasArray(), fields), nil
+	} else if len(fields) > 1 {
+		if strings.HasSuffix(fields[0], "]") {
 			//Root element is an array
-			arrayIndexPart := getArrayIndexPart(fields[1])
-			fields[1] = arrayIndexPart
-			return field.NewMappingField(mapField.HasSepcialField(), mapField.HasArray(), fields[1:]), nil
+			arrayIndexPart := getArrayIndexPart(fields[0])
+			fields[0] = arrayIndexPart
+			return field.NewMappingField(mapField.HasSepcialField(), mapField.HasArray(), fields), nil
 		} else {
-			return field.NewMappingField(hasArray, mapField.HasArray(), fields[2:]), nil
+			return field.NewMappingField(mapField.HasSepcialField(), mapField.HasArray(), mapField.Getfields()[1:]), nil
 		}
 	} else {
-		if len(fields) > 1 {
-			if strings.HasSuffix(fields[0], "]") {
-				//Root element is an array
-				arrayIndexPart := getArrayIndexPart(fields[0])
-				fields[0] = arrayIndexPart
-				return field.NewMappingField(mapField.HasSepcialField(), mapField.HasArray(), fields), nil
-			} else {
-				return field.NewMappingField(mapField.HasSepcialField(), mapField.HasArray(), mapField.Getfields()[1:]), nil
-			}
-		} else {
-			//Only attribute name no field name
-			return field.NewMappingField(mapField.HasSepcialField(), mapField.HasArray(), []string{}), nil
-		}
+		//Only attribute name no field name
+		return field.NewMappingField(mapField.HasSepcialField(), mapField.HasArray(), []string{}), nil
 	}
 }
 
-func (m *MappingRef) GetFieldName(mapfield *field.MappingField) (string, error) {
+func GetFieldName(mapfield *field.MappingField) (string, error) {
 	if mapfield.HasSepcialField() {
 		fields := mapfield.Getfields()
 		activityNameRef := fields[0]
@@ -120,10 +78,10 @@ func (m *MappingRef) GetFieldName(mapfield *field.MappingField) (string, error) 
 		return getFieldName(fields[0]), nil
 	}
 
-	if strings.HasPrefix(m.ref, "$") || strings.Index(m.ref, ".") > 0 {
-		log.Debugf("Mapping ref %s", m.ref)
-		mappingFields := strings.Split(m.ref, ".")
-		if strings.HasPrefix(m.ref, "$") {
+	if strings.HasPrefix(mapfield.GetRef(), "$") || strings.Index(mapfield.GetRef(), ".") > 0 {
+		log.Debugf("Mapping ref %s", mapfield.GetRef())
+		mappingFields := strings.Split(mapfield.GetRef(), ".")
+		if strings.HasPrefix(mapfield.GetRef(), "$") {
 			return getFieldName(mappingFields[1]), nil
 
 		}
@@ -131,7 +89,7 @@ func (m *MappingRef) GetFieldName(mapfield *field.MappingField) (string, error) 
 		return getFieldName(mappingFields[0]), nil
 
 	}
-	return getFieldName(m.ref), nil
+	return getFieldName(mapfield.GetRef()), nil
 }
 
 func getFieldName(fieldname string) string {
@@ -141,15 +99,11 @@ func getFieldName(fieldname string) string {
 	return fieldname
 }
 
-func getActivityName(fieldname string) string {
-	//$activity[name]
-	startIndex := strings.Index(fieldname, "[")
-	endIndex := strings.Index(fieldname, "]")
-	if startIndex >= 0 {
-		return fieldname[startIndex+1 : endIndex]
-	} else {
-		return fieldname
+func HasArray(fieldname string) bool {
+	if strings.Index(fieldname, "[") > 0 && strings.Index(fieldname, "]") > 0 {
+		return true
 	}
+	return false
 }
 
 //getArrayIndexPart get array part of the string. such as name[0] return [0]

@@ -86,7 +86,7 @@ func (a *ArrayMapping) DoArrayMapping(inputScope, outputScope data.Scope, resolv
 			log.Debugf("Init a new array for field", a.To)
 			fromValue = make([]interface{}, 1)
 		} else {
-			fromValue, err = getExpresssionValue(stringVal, inputScope, resolver)
+			fromValue, err = GetExpresssionValue(stringVal, inputScope, resolver)
 		}
 
 		//Check if fields is empty for primitive array mapping
@@ -110,7 +110,7 @@ func (a *ArrayMapping) DoArrayMapping(inputScope, outputScope data.Scope, resolv
 		if err != nil {
 			return err
 		}
-		toValue, err := toRef.GetValueFromOutputScope(toMapField, outputScope)
+		toValue, err := ref.GetValueFromOutputScope(toMapField, outputScope)
 		if err != nil {
 			return err
 		}
@@ -120,7 +120,7 @@ func (a *ArrayMapping) DoArrayMapping(inputScope, outputScope data.Scope, resolv
 			objArray[i] = make(map[string]interface{})
 		}
 
-		mappingField, err := toRef.GetMapToFields(toMapField)
+		mappingField, err := ref.GetMapToPathFields(toMapField)
 		if err != nil {
 			return fmt.Errorf("Get fields from mapping string error, due to [%s]", err.Error())
 		}
@@ -147,7 +147,7 @@ func (a *ArrayMapping) DoArrayMapping(inputScope, outputScope data.Scope, resolv
 		}
 
 		//Get Value from fields
-		toFieldName, err := toRef.GetFieldName(toMapField)
+		toFieldName, err := ref.GetFieldName(toMapField)
 		if err != nil {
 			return err
 		}

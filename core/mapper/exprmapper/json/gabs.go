@@ -26,6 +26,7 @@ package json
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"strings"
@@ -197,8 +198,20 @@ func (g *Container) Set(value interface{}, path ...string) (*Container, error) {
 				mmap[path[target]] = map[string]interface{}{}
 			}
 			object = mmap[path[target]]
+		} else if mmap, ok := object.(map[string]string); ok {
+			if target == len(path)-1 {
+				v, ok := value.(string)
+				if !ok {
+					return &Container{nil}, fmt.Errorf("convert [%+v] to string failed", value)
+				}
+				mmap[path[target]] = v
+			} else if mmap[path[target]] == "" {
+				mmap[path[target]] = ""
+			}
+			object = mmap[path[target]]
 		} else {
 			return &Container{nil}, ErrPathCollision
+
 		}
 	}
 	return &Container{object}, nil

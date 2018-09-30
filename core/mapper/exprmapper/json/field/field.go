@@ -68,7 +68,11 @@ func (m *MappingField) paserName() error {
 		} else {
 			//HandleArray
 			m.hasArray = true
-			m.fields[len(m.fields)-1] = m.fields[len(m.fields)-1] + "[" + m.s.TokenText() + "]"
+			if m.fields == nil || len(m.fields) <= 0 {
+				m.fields = append(m.fields, "["+m.s.TokenText()+"]")
+			} else {
+				m.fields[len(m.fields)-1] = m.fields[len(m.fields)-1] + "[" + m.s.TokenText() + "]"
+			}
 			ch := m.s.Scan()
 			if ch != ']' {
 				return fmt.Errorf("Inliad array format")
@@ -128,7 +132,11 @@ func (m *MappingField) Parser() error {
 			return m.handleSpecialField()
 		} else {
 			//HandleArray
-			m.fields[len(m.fields)-1] = m.fields[len(m.fields)-1] + "[" + m.s.TokenText() + "]"
+			if m.fields == nil || len(m.fields) <= 0 {
+				m.fields = append(m.fields, "["+m.s.TokenText()+"]")
+			} else {
+				m.fields[len(m.fields)-1] = m.fields[len(m.fields)-1] + "[" + m.s.TokenText() + "]"
+			}
 			//m.handleArray()
 			ch := m.s.Scan()
 			if ch != ']' {

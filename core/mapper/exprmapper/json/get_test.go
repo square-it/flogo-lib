@@ -53,76 +53,66 @@ var jsonData = `{
 }`
 
 func TestRootChildArray(t *testing.T) {
-	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
-	mappingField.Fields = []string{"City[0]"}
+	mappingField := field.NewMappingField(false, true, []string{"City[0]"})
 	value, err := GetFieldValueFromIn(jsonData, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, value)
-	log.Debug("Value is:", value)
 }
 
 func TestRoot(t *testing.T) {
-	mappingField := &field.MappingField{HasArray: false, HasSpecialField: false}
-	mappingField.Fields = []string{"City"}
+	mappingField := field.NewMappingField(false, false, []string{"City"})
 	value, err := GetFieldValueFromIn(jsonData, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, value)
-	log.Debug("Value is:", value)
 }
 
 func TestGetFieldWithSpaces(t *testing.T) {
-	mappingField := &field.MappingField{HasArray: false, HasSpecialField: false}
-	mappingField.Fields = []string{"hello world"}
+	mappingField := field.NewMappingField(false, false, []string{"hello world"})
 	value, err := GetFieldValueFromIn(jsonData, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, value)
-	log.Debug("Value is:", value)
+	assert.Equal(t, "CHINA", value)
 }
 
 func TestGetFieldWithTag(t *testing.T) {
-	mappingField := &field.MappingField{HasArray: false, HasSpecialField: false}
-	mappingField.Fields = []string{"tag  world"}
+	mappingField := field.NewMappingField(false, false, []string{"tag  world"})
 	value, err := GetFieldValueFromIn(jsonData, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, value)
-	log.Info("Value is:", value)
+	assert.Equal(t, "CHINA", value)
 }
 
 func TestGetArray(t *testing.T) {
-	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
-	mappingField.Fields = []string{"Emails[0]"}
+	mappingField := field.NewMappingField(false, true, []string{"Emails[0]"})
 	value, err := GetFieldValueFromIn(jsonData, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, value)
-	log.Debug("Value is:", value)
+	assert.Equal(t, "123@123.com", value)
 
 }
 
 func TestMultipleLevelArray(t *testing.T) {
-	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
-	mappingField.Fields = []string{"City[0]", "Array[1]", "id"}
+	mappingField := field.NewMappingField(false, true, []string{"City[0]", "Array[1]", "id"})
 	value, err := GetFieldValueFromIn(jsonData, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, value)
-	log.Debug("Value:", value)
+	assert.Equal(t, "2222", value)
 }
 
 func TestMultipleLevelObject(t *testing.T) {
-	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
-	mappingField.Fields = []string{"City[0]", "Park", "Maps", "bb"}
+	mappingField := field.NewMappingField(false, true, []string{"City[0]", "Park", "Maps", "bb"})
 	value, err := GetFieldValueFromIn(jsonData, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, value)
-	log.Debug("Value:", value)
+	assert.Equal(t, "bb", value)
 }
 
 func TestID(t *testing.T) {
-	mappingField := &field.MappingField{HasArray: false, HasSpecialField: false}
-	mappingField.Fields = []string{"Id"}
+	mappingField := field.NewMappingField(false, false, []string{"Id"})
 	value, err := GetFieldValueFromIn(jsonData, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, value)
-	log.Debug("Value:", value)
+	assert.Equal(t, float64(1234), value)
 }
 
 func TestGetFieldValue(t *testing.T) {
@@ -180,13 +170,14 @@ func TestGetFieldValue(t *testing.T) {
     }
 }
 `
-	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
-	mappingField.Fields = []string{"Account", "records[0]", "Name"}
+	mappingField := field.NewMappingField(false, true, []string{"Account", "records[0]", "Name"})
 	value, err := GetFieldValueFromIn(account, mappingField)
 	log.Infof("Value:%s", value)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, value)
+	assert.Equal(t, "may24_a", value)
+
 }
 
 func TestConcurrentGetk(t *testing.T) {
@@ -203,8 +194,7 @@ func TestConcurrentGetk(t *testing.T) {
 					recovered = r
 				}
 			}()
-			mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
-			mappingField.Fields = []string{"City[0]", "Park", "Maps", "bb"}
+			mappingField := field.NewMappingField(false, true, []string{"City[0]", "Park", "Maps", "bb"})
 			value, err := GetFieldValueFromIn(jsonData, mappingField)
 			assert.Nil(t, err)
 			assert.NotNil(t, value)
@@ -229,11 +219,12 @@ func TestRootArray(t *testing.T) {
     }
 ]`
 
-	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
-	mappingField.Fields = []string{"[0]", "MessageId"}
+	mappingField := field.NewMappingField(false, true, []string{"[0]", "MessageId"})
 	value, err := GetFieldValueFromIn(jsonArray, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, value)
+	assert.Equal(t, "1c0483d9-8166-4df0-be9f-cd03177a38c6", value)
+
 }
 
 func TestRootArrayInvalid(t *testing.T) {
@@ -260,11 +251,11 @@ func TestRootArrayInvalid(t *testing.T) {
     }
 ]`
 
-	mappingField := &field.MappingField{HasArray: true, HasSpecialField: false}
-	mappingField.Fields = []string{"[0]", "MessageId[0]"}
+	mappingField := field.NewMappingField(false, true, []string{"[0]", "MessageId[0]"})
 	value, err := GetFieldValueFromIn(jsonArray, mappingField)
 	assert.NotNil(t, err)
-	assert.Nil(t, value)
+	assert.Nil(t, nil, value)
+
 }
 
 func TestGetValue(t *testing.T) {
@@ -280,8 +271,7 @@ func TestGetValue(t *testing.T) {
 		IntV:   int(12),
 	}
 
-	mappingField := &field.MappingField{HasArray: false, HasSpecialField: false}
-	mappingField.Fields = []string{"id"}
+	mappingField := field.NewMappingField(false, false, []string{"id"})
 
 	v, err := GetFieldValueFromIn(value, mappingField)
 	assert.Nil(t, err)
@@ -295,33 +285,28 @@ func TestGetValue(t *testing.T) {
 	testMap2["id"] = value
 	testMap2["id2"] = int(2)
 
-	mappingField2 := &field.MappingField{HasArray: false, HasSpecialField: false}
-	mappingField2.Fields = []string{"id"}
+	mappingField2 := field.NewMappingField(false, false, []string{"id"})
 	v, err = GetFieldValueFromIn(testMap, mappingField2)
 	assert.Nil(t, err)
 	assert.Equal(t, "id", v)
 
-	mappingField3 := &field.MappingField{HasArray: false, HasSpecialField: false}
-	mappingField3.Fields = []string{"id2"}
+	mappingField3 := field.NewMappingField(false, false, []string{"id2"})
 	v, err = GetFieldValueFromIn(testMap2, mappingField3)
 	assert.Nil(t, err)
 	assert.Equal(t, float64(2), v)
 
-	mappingField4 := &field.MappingField{HasArray: false, HasSpecialField: false}
-	mappingField4.Fields = []string{"id", "id"}
+	mappingField4 := field.NewMappingField(false, false, []string{"id", "id"})
 	v, err = GetFieldValueFromIn(testMap2, mappingField4)
 	assert.Nil(t, err)
 	assert.Equal(t, "12222", v)
 
 	////Int64
-	mappingFieldInt64 := &field.MappingField{HasArray: false, HasSpecialField: false}
-	mappingFieldInt64.Fields = []string{"id", "int_64"}
+	mappingFieldInt64 := field.NewMappingField(false, false, []string{"id", "int_64"})
 	v, err = GetFieldValueFromIn(testMap2, mappingFieldInt64)
 	assert.Nil(t, err)
 	assert.Equal(t, float64(123), v)
 	//Int
-	mappingFieldint := &field.MappingField{HasArray: false, HasSpecialField: false}
-	mappingFieldint.Fields = []string{"id", "int_v"}
+	mappingFieldint := field.NewMappingField(false, false, []string{"id", "int_v"})
 	v, err = GetFieldValueFromIn(testMap2, mappingFieldint)
 	assert.Nil(t, err)
 	assert.Equal(t, float64(12), v)

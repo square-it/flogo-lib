@@ -13,6 +13,20 @@ func TestGetSpecialFields(t *testing.T) {
 	assert.Equal(t, []string{"Object", "Maps3", "dd*cc", "y.x", "d.d"}, fields)
 }
 
+func TestMapTo(t *testing.T) {
+	path := `Object`
+	fields, err := GetAllspecialFields(path)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"Object"}, fields)
+}
+
+func TestMapToArrayIndex(t *testing.T) {
+	path := `[0]`
+	fields, err := GetAllspecialFields(path)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"[0]"}, fields)
+}
+
 func TestGetSpecialFields2(t *testing.T) {
 	path := `Id_dd.name-sss.test["dd*cc"]["y.x"]["d.d"]`
 	fields, err := GetAllspecialFields(path)

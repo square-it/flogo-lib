@@ -74,23 +74,28 @@ func GetFieldValueFromIn(data interface{}, mappingField *field.MappingField) (in
 }
 
 func getFieldValue(jsonData *JSONData, mappingField *field.MappingField) (interface{}, error) {
-	var res interface{}
-	var err error
-	if mappingField.HasArray() && mappingField.HasSepcialField() {
-		res, err = handleGetSpecialFields(jsonData, mappingField.Getfields())
-	} else if mappingField.HasArray() {
-		data, err := getFiledContainer(jsonData, strings.Join(mappingField.Getfields(), "."))
-		if data != nil {
-			return data.Data(), err
-		}
-		return nil, err
-	} else if mappingField.HasSepcialField() {
-		res, err = handleGetSpecialFields(jsonData, mappingField.Getfields())
-	} else {
-		data, err := getFiledContainer(jsonData, strings.Join(mappingField.Getfields(), "."))
-		return data.Data(), err
-	}
-	return res, err
+	//var res interface{}
+	//var err error
+
+	return handleGetSpecialFields(jsonData, mappingField.Getfields())
+
+	//if mappingField.HasArray() && mappingField.HasSepcialField() {
+	//	res, err = handleGetSpecialFields(jsonData, mappingField.Getfields())
+	//} else if mappingField.HasArray() {
+	//	//data, err := getFiledContainer(jsonData, strings.Join(mappingField.Getfields(), "."))
+	//	//if data != nil {
+	//	//	return data.Data(), err
+	//	//}
+	//	res, err = handleGetSpecialFields(jsonData, mappingField.Getfields())
+	//	return nil, err
+	//} else if mappingField.HasSepcialField() {
+	//	res, err = handleGetSpecialFields(jsonData, mappingField.Getfields())
+	//} else {
+	//
+	//	data, err := getFiledContainer(jsonData, strings.Join(mappingField.Getfields(), "."))
+	//	return data.Data(), err
+	//}
+	//return res, err
 }
 
 //func getFieldValueP(jsonData *JSONData, path string) (interface{}, error) {
