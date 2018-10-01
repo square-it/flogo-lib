@@ -7,8 +7,6 @@ import (
 	"sync"
 )
 
-const NOT_EXIST = -3
-
 func getArrayFieldName(fields []string) ([]string, int, int) {
 	var tmpFields []string
 	index := -1
@@ -42,7 +40,7 @@ func hasArrayFieldInArray(fields []string) bool {
 	return false
 }
 
-func handleArrayWithSpecialFields(value interface{}, jsonData *JSONData, fields []string) error {
+func handleSetValue(value interface{}, jsonData *JSONData, fields []string) error {
 
 	log.Debugf("All fields %+v", fields)
 	jsonData.rw.Lock()
@@ -113,18 +111,21 @@ func handleArrayWithSpecialFields(value interface{}, jsonData *JSONData, fields 
 							if err != nil {
 								return err
 							}
-
 							err = container.ArrayAppend(maps, arrayFields...)
 							if err != nil {
 								return err
 							}
+							if !hasArrayFieldInArray(restFields) {
+								return nil
+							}
+
 						}
 
 						element, err = container.ArrayElement(arrayIndex, arrayFields...)
 						if err != nil {
 							return err
 						}
-						return handleArrayWithSpecialFields(value, &JSONData{container: element, rw: sync.RWMutex{}}, restFields)
+						return handleSetValue(value, &JSONData{container: element, rw: sync.RWMutex{}}, restFields)
 					}
 				}
 
@@ -153,7 +154,7 @@ func handleArrayWithSpecialFields(value interface{}, jsonData *JSONData, fields 
 			}
 
 			if hasArrayFieldInArray(restFields) {
-				return handleArrayWithSpecialFields(value, &JSONData{container: array, rw: sync.RWMutex{}}, restFields)
+				return handleSetValue(value, &JSONData{container: array, rw: sync.RWMutex{}}, restFields)
 			}
 			newObject, err := ParseJSON([]byte("{}"))
 			_, err = newObject.Set(value, restFields...)

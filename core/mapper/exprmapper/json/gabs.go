@@ -159,6 +159,12 @@ func (g *Container) Children() ([]*Container, error) {
 			children = append(children, &Container{obj})
 		}
 		return children, nil
+	} else if mmap, ok := g.Data().(map[string]string); ok {
+		children := []*Container{}
+		for _, obj := range mmap {
+			children = append(children, &Container{obj})
+		}
+		return children, nil
 	}
 	return nil, ErrNotObjOrArray
 }
@@ -166,6 +172,12 @@ func (g *Container) Children() ([]*Container, error) {
 // ChildrenMap - Return a map of all the children of an object.
 func (g *Container) ChildrenMap() (map[string]*Container, error) {
 	if mmap, ok := g.Data().(map[string]interface{}); ok {
+		children := map[string]*Container{}
+		for name, obj := range mmap {
+			children[name] = &Container{obj}
+		}
+		return children, nil
+	} else if mmap, ok := g.Data().(map[string]string); ok {
 		children := map[string]*Container{}
 		for name, obj := range mmap {
 			children[name] = &Container{obj}
@@ -297,6 +309,15 @@ func (g *Container) Delete(path ...string) error {
 	object = g.object
 	for target := 0; target < len(path); target++ {
 		if mmap, ok := object.(map[string]interface{}); ok {
+			if target == len(path)-1 {
+				if _, ok := mmap[path[target]]; ok {
+					delete(mmap, path[target])
+				} else {
+					return ErrNotObj
+				}
+			}
+			object = mmap[path[target]]
+		} else if mmap, ok := object.(map[string]string); ok {
 			if target == len(path)-1 {
 				if _, ok := mmap[path[target]]; ok {
 					delete(mmap, path[target])

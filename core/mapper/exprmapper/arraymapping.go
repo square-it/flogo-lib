@@ -390,7 +390,7 @@ func getArrayValue(object interface{}, expressionRef interface{}, inputScope dat
 			return nil, err
 		}
 
-		fromValue, err = flogojson.GetFieldValueFromIn(object, toMapField)
+		fromValue, err = flogojson.GetFieldValue(object, toMapField)
 		if err != nil {
 			return nil, err
 		}

@@ -45,7 +45,7 @@ func (m *ArrayRef) getValueFromRef(object interface{}, ref string) (interface{},
 	if err != nil {
 		return nil, err
 	}
-	return json.GetFieldValueFromIn(object, mapField)
+	return json.GetFieldValue(object, mapField)
 }
 
 func GetFieldNameFromArrayRef(arrayRef string) string {

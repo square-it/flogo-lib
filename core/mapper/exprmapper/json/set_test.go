@@ -11,9 +11,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+//1. without array
+//2. root array, array with path field, array with
 func TestSetArrayObject(t *testing.T) {
 	mappingField := field.NewMappingField(false, true, []string{"City[0]", "Array[1]", "id"})
-	v, err := SetFieldValueFromString("setvalue", jsonData, mappingField)
+	v, err := SetStringValue("setvalue", jsonData, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
 
@@ -30,7 +32,7 @@ func printvalue(in interface{}) {
 
 func TestSetRootChildArray(t *testing.T) {
 	mappingField := field.NewMappingField(false, true, []string{"Emails[0]"})
-	v, err := SetFieldValueFromString("test-cases@gmail.com", jsonData, mappingField)
+	v, err := SetStringValue("test-cases@gmail.com", jsonData, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
 
@@ -53,7 +55,7 @@ func TestSetRootArray(t *testing.T) {
 
 func TestSetObject(t *testing.T) {
 	mappingField := field.NewMappingField(false, false, []string{"ZipCode"})
-	v, err := SetFieldValueFromString("77479", jsonData, mappingField)
+	v, err := SetStringValue("77479", jsonData, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
 
@@ -65,7 +67,7 @@ func TestSetObject(t *testing.T) {
 func TestSetEmptyField(t *testing.T) {
 	mappingField := field.NewMappingField(false, false, []string{"ZipCode"})
 	jsond := "{}"
-	v, err := SetFieldValueFromString("77479", jsond, mappingField)
+	v, err := SetStringValue("77479", jsond, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
 	printvalue(v)
@@ -77,7 +79,7 @@ func TestSetEmptyField(t *testing.T) {
 func TestSetEmptyField4(t *testing.T) {
 	jsond := "{}"
 	mappingField := field.NewMappingField(false, true, []string{"ZipCode[1]"})
-	v, err := SetFieldValueFromString("77479", jsond, mappingField)
+	v, err := SetStringValue("77479", jsond, mappingField)
 	assert.Nil(t, err)
 	assert.NotNil(t, v)
 	d, err := getValue(v, []string{"ZipCode[1]"}, false, true)
@@ -88,7 +90,7 @@ func TestSetEmptyField4(t *testing.T) {
 func TestSetEmptyField5(t *testing.T) {
 	jsond := "{}"
 	mappingField := field.NewMappingField(false, true, []string{"ZipCode[1]"})
-	v, err := SetFieldValueFromString("77479", jsond, mappingField)
+	v, err := SetStringValue("77479", jsond, mappingField)
 
 	mappingField = field.NewMappingField(false, true, []string{"ZipCode[0]"})
 	v2, err := SetFieldValue("77479", v, mappingField)
@@ -106,7 +108,7 @@ func TestSetEmptyField5(t *testing.T) {
 func TestSetEmptyNestField1(t *testing.T) {
 	jsond := "{}"
 	mappingField := field.NewMappingField(false, true, []string{"pet", "photoUrls[0]"})
-	v, err := SetFieldValueFromString("url", jsond, mappingField)
+	v, err := SetStringValue("url", jsond, mappingField)
 
 	mappingField = field.NewMappingField(false, true, []string{"pet", "photoUrls[1]"})
 
@@ -203,7 +205,7 @@ func TestNameWithTag(t *testing.T) {
 func TestSetEmptyNestField(t *testing.T) {
 	jsond := "{}"
 	mappingField := field.NewMappingField(false, true, []string{"Response", "Pet", "Tags[0]", "Name"})
-	v, err := SetFieldValueFromString("tagID", jsond, mappingField)
+	v, err := SetStringValue("tagID", jsond, mappingField)
 
 	mappingField = field.NewMappingField(false, true, []string{"Response", "Pet", "Tags[1]", "Name"})
 
@@ -251,5 +253,58 @@ func TestConcurrentSet(t *testing.T) {
 
 func getValue(value interface{}, fields []string, hasSpec, hasArray bool) (interface{}, error) {
 	mapField := field.NewMappingField(hasSpec, hasArray, fields)
-	return GetFieldValueFromIn(value, mapField)
+	return GetFieldValue(value, mapField)
+}
+
+func TestSetSpecialObjectField(t *testing.T) {
+	mappingField := field.NewMappingField(true, false, []string{"Object", "Maps3", "dd*cc", "y.x", "d.d"})
+
+	value, err := SetStringValue("lixi", "{}", mappingField)
+	assert.Nil(t, err)
+	assert.NotNil(t, value)
+	log.Info(value)
+	v, _ := json.Marshal(value)
+	assert.Equal(t, `{"Object":{"Maps3":{"dd*cc":{"y.x":{"d.d":"lixi"}}}}}`, string(v))
+}
+
+func TestSetSpecialArrayField2(t *testing.T) {
+	mappingField := field.NewMappingField(true, true, []string{"Object", "Maps3[0]", "dd*cc"})
+
+	value, err := SetStringValue("lixi", "{}", mappingField)
+	assert.Nil(t, err)
+	assert.NotNil(t, value)
+	log.Info(value)
+	v, _ := json.Marshal(value)
+	fmt.Println(string(v))
+	assert.Equal(t, `{"Object":{"Maps3":[{"dd*cc":"lixi"}]}}`, string(v))
+}
+
+func TestSetSpecialArrayFieldMultipleLEvel(t *testing.T) {
+	// path := `Object.Maps3["dd.cc"][0]["y.x"][d.d].name`
+	mappingField := field.NewMappingField(true, true, []string{"Object", "Maps3", "dd.cc[0]", "y.x", "d.d", "name"})
+	value, err := SetStringValue("lixi", "{}", mappingField)
+	assert.Nil(t, err)
+	assert.NotNil(t, value)
+	log.Info(value)
+	v, _ := json.Marshal(value)
+	fmt.Println(string(v))
+	assert.Equal(t, `{"Object":{"Maps3":{"dd.cc":[{"y.x":{"d.d":{"name":"lixi"}}}]}}}`, string(v))
+}
+
+func TestSetArrayRootOnly(t *testing.T) {
+	mappingField := field.NewMappingField(true, true, []string{"[0]"})
+	value, err := SetStringValue("lixi", "{}", mappingField)
+	assert.Nil(t, err)
+	assert.NotNil(t, value)
+	v, err := getValue(value, []string{"[0]"}, false, true)
+	assert.Nil(t, err)
+	assert.Equal(t, "lixi", v)
+
+	mappingField = field.NewMappingField(true, true, []string{"[0]", "tt"})
+	value, err = SetStringValue("ssssss", "{}", mappingField)
+	assert.Nil(t, err)
+	assert.NotNil(t, value)
+	v, err = getValue(value, []string{"[0]", "tt"}, false, true)
+	assert.Nil(t, err)
+	assert.Equal(t, "ssssss", v)
 }
