@@ -95,8 +95,7 @@ func preprocessConfig(appJson []byte) ([]byte, error) {
 	// For now decode secret values
 	re := regexp.MustCompile("SECRET:[^\\\\\"]*")
 	for _, match := range re.FindAll(appJson, -1) {
-		encodedValue := string(match[7:])
-		decodedValue, err := data.GetSecretValueHandler().DecodeValue(encodedValue)
+		decodedValue, err := resolveSecretValue(string(match))
 		if err != nil {
 			return nil, err
 		}
@@ -105,6 +104,15 @@ func preprocessConfig(appJson []byte) ([]byte, error) {
 	}
 
 	return appJson, nil
+}
+
+func resolveSecretValue(encrypted string) (string, error) {
+	encodedValue := string(encrypted[7:])
+	decodedValue, err := data.GetSecretValueHandler().DecodeValue(encodedValue)
+	if err != nil {
+		return "", err
+	}
+	return decodedValue, nil
 }
 
 func GetProperties(properties []*data.Attribute) (map[string]interface{}, error) {
@@ -174,12 +182,22 @@ func loadExternalProperties() (map[string]interface{}, error) {
 
 				for k, v := range  props {
 					strVal, ok := v.(string)
-					if ok {
-						newVal, err := resolver.ResolveValue(strVal)
-						if err != nil {
-							return nil, err
+					if ok  {
+						if strVal[0] == '$' {
+							// Use resolver
+							newVal, err := resolver.ResolveValue(strVal[1:])
+							if err != nil {
+								return nil, err
+							}
+							props[k] = newVal
+						} else if strings.HasPrefix(strVal, "SECRET:") {
+							// Resolve secret value
+							newVal, err := resolveSecretValue(strVal)
+							if err != nil {
+								return nil, err
+							}
+							props[k] = newVal
 						}
-						props[k] = newVal
 					}
 				}
 			}
