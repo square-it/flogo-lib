@@ -115,7 +115,7 @@ func SetValueToOutputScope(mapTo string, outputScope data.Scope, value interface
 	fields := mapField.Getfields()
 	if len(fields) == 1 && !ref.HasArray(fields[0]) {
 		//No complex mapping exist
-		return SetAttribute(mapTo, value, outputScope)
+		return SetAttribute(actRootField, value, outputScope)
 	} else if ref.HasArray(fields[0]) || len(fields) > 1 {
 		//Complex mapping
 		return settValueToComplexObject(mapField, actRootField, outputScope, value)
