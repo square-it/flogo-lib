@@ -182,7 +182,7 @@ func loadExternalProperties() (map[string]interface{}, error) {
 
 				for k, v := range  props {
 					strVal, ok := v.(string)
-					if ok  {
+					if ok && len(strVal) > 0 {
 						if strVal[0] == '$' {
 							// Use resolver
 							newVal, err := resolver.ResolveValue(strVal[1:])
@@ -190,7 +190,12 @@ func loadExternalProperties() (map[string]interface{}, error) {
 								return nil, err
 							}
 							props[k] = newVal
-						} else if strings.HasPrefix(strVal, "SECRET:") {
+
+							// May be a secret??
+							strVal, _ = newVal.(string)
+						}
+
+						if len(strVal) > 0 &&  strings.HasPrefix(strVal, "SECRET:") {
 							// Resolve secret value
 							newVal, err := resolveSecretValue(strVal)
 							if err != nil {
