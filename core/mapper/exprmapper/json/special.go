@@ -1,7 +1,6 @@
 package json
 
 import (
-	"encoding/json"
 	"strconv"
 	"strings"
 	"sync"
@@ -99,18 +98,14 @@ func handleSetValue(value interface{}, jsonData *JSONData, fields []string) erro
 							return err
 						}
 						if arrayIndex > count-1 {
-							newObject, err := ParseJSON([]byte("{}"))
+							maps := make(map[string]interface{})
+							newObject, _ := Consume(maps)
 							_, err = newObject.Set(value, restFields...)
 							log.Debugf("new object %s", newObject.String())
 							if err != nil {
 								return err
 							}
-							//o ,_ := ParseJSON(newObject.Bytes())
-							maps := &map[string]interface{}{}
-							err = json.Unmarshal(newObject.Bytes(), maps)
-							if err != nil {
-								return err
-							}
+
 							err = container.ArrayAppend(maps, arrayFields...)
 							if err != nil {
 								return err
@@ -156,17 +151,13 @@ func handleSetValue(value interface{}, jsonData *JSONData, fields []string) erro
 			if hasArrayFieldInArray(restFields) {
 				return handleSetValue(value, &JSONData{container: array, rw: sync.RWMutex{}}, restFields)
 			}
-			newObject, err := ParseJSON([]byte("{}"))
+			maps := make(map[string]interface{})
+			newObject, _ := Consume(maps)
 			_, err = newObject.Set(value, restFields...)
 			log.Debugf("new object %s", newObject.String())
 			if err != nil {
 				return err
 			}
-			//maps := &map[string]interface{}{}
-			//err = json.Unmarshal(newObject.Bytes(), maps)
-			//if err != nil {
-			//	return err
-			//}
 			_, err = array.SetIndex(newObject.object, arrayIndex)
 		}
 	} else {
@@ -178,7 +169,7 @@ func handleSetValue(value interface{}, jsonData *JSONData, fields []string) erro
 	return nil
 }
 
-func handleGetSpecialFields(jsonData *JSONData, fields []string) (interface{}, error) {
+func handleGetValue(jsonData *JSONData, fields []string) (interface{}, error) {
 
 	log.Debugf("All fields %+v", fields)
 	jsonData.rw.Lock()
@@ -198,7 +189,7 @@ func handleGetSpecialFields(jsonData *JSONData, fields []string) (interface{}, e
 		}
 		log.Debugf("Array element value %s", specialField)
 		if hasArrayFieldInArray(restFields) {
-			return handleGetSpecialFields(&JSONData{container: specialField, rw: sync.RWMutex{}}, restFields)
+			return handleGetValue(&JSONData{container: specialField, rw: sync.RWMutex{}}, restFields)
 		}
 		return specialField.S(restFields...).Data(), nil
 	}

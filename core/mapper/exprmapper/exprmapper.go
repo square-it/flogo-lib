@@ -100,14 +100,12 @@ func GetMappingValue(mappingV interface{}, inputScope data.Scope, resolver data.
 }
 
 func SetValueToOutputScope(mapTo string, outputScope data.Scope, value interface{}) error {
-	toMappingRef := ref.NewMappingRef(mapTo)
-
 	mapField, err := field.ParseMappingField(mapTo)
 	if err != nil {
 		return err
 	}
 
-	actRootField, err := toMappingRef.GetMapToAttrName(mapField)
+	actRootField, err := ref.GetMapToAttrName(mapField)
 	if err != nil {
 		return err
 	}

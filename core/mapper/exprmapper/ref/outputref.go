@@ -10,7 +10,7 @@ import (
 )
 
 func GetValueFromOutputScope(mapfield *field.MappingField, outputtscope data.Scope) (interface{}, error) {
-	fieldName, err := GetFieldName(mapfield)
+	fieldName, err := GetMapToAttrName(mapfield)
 	if err != nil {
 		return nil, err
 	}
@@ -38,58 +38,33 @@ func GetValueFromOutputScope(mapfield *field.MappingField, outputtscope data.Sco
 	return nil, fmt.Errorf("Cannot found attribute %s", fieldName)
 }
 
-func (m *MappingRef) GetMapToAttrName(field *field.MappingField) (string, error) {
+func GetMapToAttrName(field *field.MappingField) (string, error) {
 	fields := field.Getfields()
 	return getFieldName(fields[0]), nil
 }
 
-//
 func GetMapToPathFields(mapField *field.MappingField) (*field.MappingField, error) {
 	fields := mapField.Getfields()
 
 	if len(fields) == 1 && !HasArray(fields[0]) {
-		return field.NewMappingField(mapField.HasSepcialField(), mapField.HasArray(), []string{}), nil
+		return field.NewMappingField([]string{}), nil
 	} else if HasArray(fields[0]) {
 		arrayIndexPart := getArrayIndexPart(fields[0])
 		fields[0] = arrayIndexPart
-		return field.NewMappingField(mapField.HasSepcialField(), mapField.HasArray(), fields), nil
+		return field.NewMappingField(fields), nil
 	} else if len(fields) > 1 {
 		if strings.HasSuffix(fields[0], "]") {
 			//Root element is an array
 			arrayIndexPart := getArrayIndexPart(fields[0])
 			fields[0] = arrayIndexPart
-			return field.NewMappingField(mapField.HasSepcialField(), mapField.HasArray(), fields), nil
+			return field.NewMappingField(fields), nil
 		} else {
-			return field.NewMappingField(mapField.HasSepcialField(), mapField.HasArray(), mapField.Getfields()[1:]), nil
+			return field.NewMappingField(mapField.Getfields()[1:]), nil
 		}
 	} else {
 		//Only attribute name no field name
-		return field.NewMappingField(mapField.HasSepcialField(), mapField.HasArray(), []string{}), nil
+		return field.NewMappingField([]string{}), nil
 	}
-}
-
-func GetFieldName(mapfield *field.MappingField) (string, error) {
-	if mapfield.HasSepcialField() {
-		fields := mapfield.Getfields()
-		activityNameRef := fields[0]
-		if strings.HasPrefix(activityNameRef, "$") {
-			return getFieldName(fields[1]), nil
-		}
-		return getFieldName(fields[0]), nil
-	}
-
-	if strings.HasPrefix(mapfield.GetRef(), "$") || strings.Index(mapfield.GetRef(), ".") > 0 {
-		log.Debugf("Mapping ref %s", mapfield.GetRef())
-		mappingFields := strings.Split(mapfield.GetRef(), ".")
-		if strings.HasPrefix(mapfield.GetRef(), "$") {
-			return getFieldName(mappingFields[1]), nil
-
-		}
-		log.Debugf("Field name now is: %s", mappingFields[0])
-		return getFieldName(mappingFields[0]), nil
-
-	}
-	return getFieldName(mapfield.GetRef()), nil
 }
 
 func getFieldName(fieldname string) string {

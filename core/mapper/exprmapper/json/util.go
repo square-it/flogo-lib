@@ -42,3 +42,33 @@ func ToArray(val interface{}) ([]interface{}, error) {
 		return nil, fmt.Errorf("unable to coerce %#v to []interface{}", val)
 	}
 }
+
+func GetFieldByName(object interface{}, name string) (reflect.Value, error) {
+	val := reflect.ValueOf(object)
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	} else {
+	}
+
+	field := val.FieldByName(name)
+	if field.IsValid() {
+		return field, nil
+	}
+
+	typ := reflect.TypeOf(object)
+	if typ.Kind() == reflect.Ptr {
+		typ = typ.Elem()
+	}
+	for i := 0; i < typ.NumField(); i++ {
+		p := typ.Field(i)
+		if !p.Anonymous {
+			if p.Tag != "" && len(p.Tag) > 0 {
+				if name == p.Tag.Get("json") {
+					return val.FieldByName(typ.Field(i).Name), nil
+				}
+			}
+		}
+	}
+
+	return reflect.Value{}, nil
+}

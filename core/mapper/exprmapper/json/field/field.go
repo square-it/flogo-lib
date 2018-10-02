@@ -8,15 +8,13 @@ import (
 )
 
 type MappingField struct {
-	hasSpecialField bool
-	hasArray        bool
-	fields          []string
-	ref             string
-	s               *scanner.Scanner
+	fields []string
+	ref    string
+	s      *scanner.Scanner
 }
 
-func NewMappingField(hasSpecialField, hasArray bool, fields []string) *MappingField {
-	return &MappingField{hasSpecialField: hasSpecialField, hasArray: hasArray, fields: fields}
+func NewMappingField(fields []string) *MappingField {
+	return &MappingField{fields: fields}
 }
 
 func ParseMappingField(mRef string) (*MappingField, error) {
@@ -41,14 +39,6 @@ func (m *MappingField) Getfields() []string {
 	return m.fields
 }
 
-func (m *MappingField) HasSepcialField() bool {
-	return m.hasSpecialField
-}
-
-func (m *MappingField) HasArray() bool {
-	return m.hasArray
-}
-
 func (m *MappingField) paserName() error {
 	fieldName := ""
 	switch ch := m.s.Scan(); ch {
@@ -67,7 +57,6 @@ func (m *MappingField) paserName() error {
 			return m.handleSpecialField()
 		} else {
 			//HandleArray
-			m.hasArray = true
 			if m.fields == nil || len(m.fields) <= 0 {
 				m.fields = append(m.fields, "["+m.s.TokenText()+"]")
 			} else {
@@ -96,7 +85,6 @@ func (m *MappingField) paserName() error {
 }
 
 func (m *MappingField) handleSpecialField() error {
-	m.hasSpecialField = true
 	fieldName := ""
 	run := true
 
@@ -142,7 +130,6 @@ func (m *MappingField) Parser() error {
 			if ch != ']' {
 				return fmt.Errorf("Inliad array format")
 			}
-			m.hasArray = true
 			m.s.Mode = scanner.ScanIdents
 			return m.Parser()
 		}

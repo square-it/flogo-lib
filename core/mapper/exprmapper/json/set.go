@@ -18,7 +18,7 @@ func SetStringValue(data interface{}, jsonData string, mappingField *field.Mappi
 
 	}
 	container := &JSONData{container: jsonParsed, rw: sync.RWMutex{}}
-	err = setValue(data, container, mappingField)
+	err = handleSetValue(data, container, mappingField.Getfields())
 	return container.container.object, err
 }
 
@@ -30,17 +30,13 @@ func SetFieldValue(data interface{}, jsonData interface{}, mappingField *field.M
 		jsonParsed, err := Consume(jsonData)
 		if err != nil {
 			return nil, err
-
 		}
 		container := &JSONData{container: jsonParsed, rw: sync.RWMutex{}}
-		err = setValue(data, container, mappingField)
+		err = handleSetValue(data, container, mappingField.Getfields())
 		if err != nil {
 			return nil, err
 		}
 		return container.container.object, nil
 	}
-}
 
-func setValue(value interface{}, jsonData *JSONData, mappingField *field.MappingField) error {
-	return handleSetValue(value, jsonData, mappingField.Getfields())
 }

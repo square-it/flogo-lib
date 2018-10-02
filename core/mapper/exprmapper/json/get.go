@@ -21,7 +21,7 @@ func ResolvePathValue(value interface{}, refPath string) (interface{}, error) {
 	}
 
 	if mappingField == nil || len(mappingField.Getfields()) <= 0 {
-		value, err := toInterface(value)
+		value, err := makeInterface(value)
 		if err != nil {
 			value = value
 		}
@@ -30,34 +30,17 @@ func ResolvePathValue(value interface{}, refPath string) (interface{}, error) {
 	return GetFieldValue(value, mappingField)
 }
 
-func toInterface(value interface{}) (interface{}, error) {
-
-	var paramMap interface{}
-
-	if value == nil {
-		return paramMap, nil
-	}
-
-	switch t := value.(type) {
-	case string:
-		err := json.Unmarshal([]byte(t), &paramMap)
-		if err != nil {
-			return nil, err
-		}
-		return paramMap, nil
-	default:
-		return value, nil
-	}
-	return paramMap, nil
-}
-
 func GetFieldValue(data interface{}, mappingField *field.MappingField) (interface{}, error) {
 	var jsonParsed *Container
 	var err error
-	value, ok := data.(string)
-	if ok {
-		jsonParsed, err = ParseJSON([]byte(value))
-	} else {
+
+	switch data.(type) {
+	case string:
+		jsonParsed, err = ParseJSON([]byte(data.(string)))
+	case map[string]interface{}, map[string]string:
+		jsonParsed, err = Consume(data)
+	default:
+		//Take is as string to handle
 		b, err := json.Marshal(data)
 		if err != nil {
 			return nil, err
@@ -69,22 +52,7 @@ func GetFieldValue(data interface{}, mappingField *field.MappingField) (interfac
 		return nil, err
 
 	}
-	return getFieldValue(&JSONData{container: jsonParsed, rw: sync.RWMutex{}}, mappingField)
-}
-
-func getFieldValue(jsonData *JSONData, mappingField *field.MappingField) (interface{}, error) {
-	return handleGetSpecialFields(jsonData, mappingField.Getfields())
-}
-
-func getRestArrayFieldName(fieldName string) string {
-	if strings.Index(fieldName, "]") >= 0 {
-		closeBracketIndex := strings.Index(fieldName, "]")
-		if len(fieldName) == closeBracketIndex+1 {
-			return ""
-		}
-		return fieldName[closeBracketIndex+2:]
-	}
-	return fieldName
+	return handleGetValue(&JSONData{container: jsonParsed, rw: sync.RWMutex{}}, mappingField.Getfields())
 }
 
 func getFieldName(fieldName string) string {
@@ -116,4 +84,25 @@ func getNameInsideBrancket(fieldName string) string {
 	}
 
 	return ""
+}
+
+func makeInterface(value interface{}) (interface{}, error) {
+
+	var paramMap interface{}
+
+	if value == nil {
+		return paramMap, nil
+	}
+
+	switch t := value.(type) {
+	case string:
+		err := json.Unmarshal([]byte(t), &paramMap)
+		if err != nil {
+			return nil, err
+		}
+		return paramMap, nil
+	default:
+		return value, nil
+	}
+	return paramMap, nil
 }

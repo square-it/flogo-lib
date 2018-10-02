@@ -89,14 +89,14 @@ func TestGetActivtyRootField(t *testing.T) {
 	mappingref := MappingRef{ref: `input[0].query.address.zipcode`}
 	mapField, err := field.ParseMappingField(mappingref.ref)
 
-	name, err := GetFieldName(mapField)
+	name, err := GetMapToAttrName(mapField)
 
 	assert.Nil(t, err)
 	assert.Equal(t, "input", name)
 
 	mappingref = MappingRef{ref: `input.query.address.zipcode`}
 
-	name, err = GetFieldName(mapField)
+	name, err = GetMapToAttrName(mapField)
 	assert.Nil(t, err)
 	assert.Equal(t, "input", name)
 
@@ -106,7 +106,6 @@ func TestGetFieldsMapFrom(t *testing.T) {
 	ref := &MappingRef{ref: "Message[0].MessageId"}
 	mapField, _ := field.ParseMappingField(ref.ref)
 	mappingFields, err := GetMapToPathFields(mapField)
-	assert.True(t, mapField.HasArray())
 	assert.Nil(t, err)
 	assert.Equal(t, []string{"[0]", "MessageId"}, mappingFields.Getfields())
 	fmt.Println(fmt.Printf("%+v", mappingFields))
@@ -127,7 +126,7 @@ func TestGetFieldsMapFrom2(t *testing.T) {
 	ref := &MappingRef{ref: `ReceiveSQSMessage.["x.y"][0]["name&name"]`}
 	mapField, _ := field.ParseMappingField(ref.ref)
 
-	s, err := ref.GetMapToAttrName(mapField)
+	s, err := GetMapToAttrName(mapField)
 	assert.Equal(t, "ReceiveSQSMessage", s)
 
 	mappingFields, err := GetMapToPathFields(mapField)
@@ -141,7 +140,7 @@ func TestGetFieldsMapTo(t *testing.T) {
 	ref := &MappingRef{ref: `["x.y"][0]["name&name"]`}
 	mapField, _ := field.ParseMappingField(ref.ref)
 
-	s, err := ref.GetMapToAttrName(mapField)
+	s, err := GetMapToAttrName(mapField)
 	assert.Nil(t, err)
 	assert.Equal(t, "x.y", s)
 }

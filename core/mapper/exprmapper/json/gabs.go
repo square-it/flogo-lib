@@ -29,6 +29,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"reflect"
 	"strings"
 )
 
@@ -110,7 +111,16 @@ func (g *Container) Search(hierarchy ...string) *Container {
 			}
 			return &Container{tmpArray}
 		} else {
+			if object != nil {
+				field, err := GetFieldByName(object, hierarchy[target])
+				if err != nil {
+					log.Errorf("no field name [%s] found in [%+v]", hierarchy[target], object)
+					return &Container{nil}
+				}
+				return &Container{field.Interface()}
+			}
 			return &Container{nil}
+
 		}
 	}
 	return &Container{object}
@@ -222,7 +232,24 @@ func (g *Container) Set(value interface{}, path ...string) (*Container, error) {
 			}
 			object = mmap[path[target]]
 		} else {
-			return &Container{nil}, ErrPathCollision
+			field, err := GetFieldByName(object, path[target])
+			if target == len(path)-1 {
+				if err != nil {
+					return &Container{nil}, fmt.Errorf("not found name [%s] in struct [%+v]", path[target], field)
+				}
+				fmt.Println(field.CanSet())
+				field.Set(reflect.ValueOf(value))
+			} else {
+				if err != nil {
+					return &Container{nil}, fmt.Errorf("not found name [%s] in struct [%+v]", path[target], field)
+				}
+				fmt.Println("=========", field.CanSet())
+
+				if field.Interface() == nil {
+					field.Set(reflect.New(field.Type()))
+				}
+			}
+			object = field
 
 		}
 	}

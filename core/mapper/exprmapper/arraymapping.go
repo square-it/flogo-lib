@@ -147,7 +147,7 @@ func (a *ArrayMapping) DoArrayMapping(inputScope, outputScope data.Scope, resolv
 		}
 
 		//Get Value from fields
-		toFieldName, err := ref.GetFieldName(toMapField)
+		toFieldName, err := ref.GetMapToAttrName(toMapField)
 		if err != nil {
 			return err
 		}
