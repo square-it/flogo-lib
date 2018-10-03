@@ -17,7 +17,7 @@ import (
 	"errors"
 )
 
-// App is the configuration for the App
+// Config is the configuration for the App
 type Config struct {
 	Name        string             `json:"name"`
 	Type        string             `json:"type"`
