@@ -2,6 +2,7 @@ package mapper
 
 import (
 	"fmt"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/assign"
 
 	"encoding/json"
 	"strings"
@@ -89,7 +90,7 @@ func (m *BasicMapper) Apply(inputScope data.Scope, outputScope data.Scope) error
 
 		switch mapping.Type {
 		case data.MtAssign:
-			err := exprmapper.MapAssign(mapping, inputScope, outputScope, m.resolver)
+			err := assign.MapAssign(mapping, inputScope, outputScope, m.resolver)
 			if err != nil {
 				return fmt.Errorf("assign mapping failed, due to %s", err.Error())
 			}
@@ -107,7 +108,7 @@ func (m *BasicMapper) Apply(inputScope data.Scope, outputScope data.Scope) error
 			if err != nil {
 				return err
 			}
-			err = exprmapper.SetValueToOutputScope(mapping.MapTo, outputScope, val)
+			err = assign.SetValueToOutputScope(mapping.MapTo, outputScope, val)
 			if err != nil {
 				err = fmt.Errorf("set value %+v to output [%s] error - %s", val, mapping.MapTo, err.Error())
 				mapplerLog.Error(err)

@@ -3,6 +3,7 @@ package exprmapper
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/assign"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json/field"
 	"runtime/debug"
 	"strings"
@@ -92,7 +93,7 @@ func (a *ArrayMapping) DoArrayMapping(inputScope, outputScope data.Scope, resolv
 		//Check if fields is empty for primitive array mapping
 		if a.Fields == nil || len(a.Fields) <= 0 {
 			//Set value directlly to MapTo field
-			return SetValueToOutputScope(a.To, outputScope, fromValue)
+			return assign.SetValueToOutputScope(a.To, outputScope, fromValue)
 		}
 
 		//Loop array
@@ -153,9 +154,9 @@ func (a *ArrayMapping) DoArrayMapping(inputScope, outputScope data.Scope, resolv
 		}
 
 		if len(mappingField.Getfields()) > 0 {
-			return SetAttribute(toFieldName, toValue, outputScope)
+			return assign.SetAttribute(toFieldName, toValue, outputScope)
 		}
-		return SetAttribute(toFieldName, getFieldValue(toValue, toFieldName), outputScope)
+		return assign.SetAttribute(toFieldName, getFieldValue(toValue, toFieldName), outputScope)
 	}
 	return nil
 }
@@ -408,4 +409,16 @@ func getArrayValue(object interface{}, expressionRef interface{}, inputScope dat
 
 	return fromValue, nil
 
+}
+
+func RemovePrefixInput(str string) string {
+	if str != "" && strings.HasPrefix(str, MAP_TO_INPUT) {
+		//Remove $INPUT for mapTo
+		newMapTo := str[len(MAP_TO_INPUT):]
+		if strings.HasPrefix(newMapTo, ".") {
+			newMapTo = newMapTo[1:]
+		}
+		str = newMapTo
+	}
+	return str
 }
