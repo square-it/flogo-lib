@@ -31,6 +31,16 @@ type Config struct {
 	Actions     []*action.Config   `json:"actions"`
 }
 
+var appName, appVersion string
+
+func GetApplicationName() string {
+	return appName
+}
+
+func GetApplicationVersion() string {
+	return appVersion
+}
+
 // defaultConfigProvider implementation of ConfigProvider
 type defaultConfigProvider struct {
 }
@@ -51,6 +61,7 @@ func (d *defaultConfigProvider) GetApp() (*Config, error) {
 }
 
 func LoadConfig(flogoJson string) (*Config, error) {
+	app := &Config{}
 	if flogoJson == "" {
 		configPath := config.GetFlogoConfigPath()
 
@@ -69,25 +80,24 @@ func LoadConfig(flogoJson string) (*Config, error) {
 			return nil, err
 		}
 
-		app := &Config{}
 		err = json.Unmarshal(updated, &app)
 		if err != nil {
 			return nil, err
 		}
-		return app, nil
+
 	} else {
 		updated, err := preprocessConfig([]byte(flogoJson))
 		if err != nil {
 			return nil, err
 		}
-
-		app := &Config{}
 		err = json.Unmarshal(updated, &app)
 		if err != nil {
 			return nil, err
 		}
-		return app, nil
 	}
+	appName = app.Name
+	appVersion = app.Version
+	return app, nil
 }
 
 func preprocessConfig(appJson []byte) ([]byte, error) {
