@@ -33,11 +33,13 @@ type Config struct {
 
 var appName, appVersion string
 
-func GetApplicationName() string {
+// Returns name of the application
+func GetName() string {
 	return appName
 }
 
-func GetApplicationVersion() string {
+// Returns version of the application
+func GetVersion() string {
 	return appVersion
 }
 
