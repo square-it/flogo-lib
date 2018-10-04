@@ -43,7 +43,6 @@ func SetFieldValue(data interface{}, jsonData interface{}, mappingField *field.M
 
 func handleSetValue(value interface{}, jsonData *JSONData, fields []string) error {
 
-	log.Debugf("All fields %+v", fields)
 	jsonData.rw.Lock()
 	defer jsonData.rw.Unlock()
 

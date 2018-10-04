@@ -79,8 +79,9 @@ func (r *BasicResolver) Resolve(toResolve string, scope Scope) (value interface{
 		return nil, fmt.Errorf("unsupported resolver: %s", details.ResolverName)
 	}
 
+	value = GetComplexValue(value)
 	if details.Path != "" {
-		value, err = json.ResolvePathValue(GetComplexValue(value), details.Path)
+		value, err = json.ResolvePathValue(value, details.Path)
 		if err != nil {
 			logger.Error(err.Error())
 			return nil, err

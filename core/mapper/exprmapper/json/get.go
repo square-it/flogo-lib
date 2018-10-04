@@ -78,7 +78,6 @@ func handleGetValue(jsonData *JSONData, fields []string) (interface{}, error) {
 		}
 		return specialField.S(restFields...).Data(), nil
 	}
-	log.Debugf("No array found for array %+v and size %d", fields, len(fields))
 	return container.S(fields...).Data(), nil
 }
 
