@@ -74,30 +74,38 @@ func SetValueToOutputScope(mapTo string, outputScope data.Scope, value interface
 		return SetAttribute(actRootField, value, outputScope)
 	} else if ref.HasArray(fields[0]) || len(fields) > 1 {
 		//Complex mapping
-		return settValueToComplexObject(mapField, actRootField, outputScope, value)
+		return settValue(mapField, actRootField, outputScope, value)
 	} else {
 		return fmt.Errorf("No field name found for mapTo [%s]", mapTo)
 	}
 
 }
 
-func settValueToComplexObject(mapField *field.MappingField, fieldName string, outputScope data.Scope, value interface{}) error {
-	complexVlaueIn, err := ref.GetValueFromOutputScope(mapField, outputScope)
+func settValue(mapField *field.MappingField, fieldName string, outputScope data.Scope, value interface{}) error {
+	existValue, err := ref.GetValueFromOutputScope(mapField, outputScope)
 	if err != nil {
 		return err
 	}
-	pathfields, err := ref.GetMapToPathFields(mapField)
-	if err != nil {
-		return err
-	}
-
-	log.Debugf("Set value %+v to fields %s", value, pathfields)
-	complexValue, err2 := json.SetFieldValue(value, complexVlaueIn, pathfields)
+	newValue, err2 := SetPathValue(existValue, mapField, value)
 	if err2 != nil {
 		return err2
 	}
 
-	return SetAttribute(fieldName, complexValue, outputScope)
+	return SetAttribute(fieldName, newValue, outputScope)
+}
+
+func SetPathValue(value interface{}, mapField *field.MappingField, attrvalue interface{}) (interface{}, error) {
+	pathfields, err := ref.GetMapToPathFields(mapField)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Debugf("Set value %+v to fields %s", value, pathfields)
+	value, err = json.SetFieldValue(attrvalue, value, pathfields)
+	if err != nil {
+		return nil, err
+	}
+	return value, nil
 }
 
 func SetAttribute(fieldName string, value interface{}, outputScope data.Scope) error {

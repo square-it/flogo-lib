@@ -95,11 +95,10 @@ func (m *BasicMapper) Apply(inputScope data.Scope, outputScope data.Scope) error
 				return fmt.Errorf("assign mapping failed, due to %s", err.Error())
 			}
 		case data.MtLiteral:
-			assignExpr := NewAssignExpr(mapping.MapTo, mapping.Value)
-
-			_, err := assignExpr.Eval(outputScope)
-
+			err := assign.SetValueToOutputScope(mapping.MapTo, outputScope, mapping.Value)
 			if err != nil {
+				err = fmt.Errorf("set value %+v to output [%s] error - %s", mapping.Value, mapping.MapTo, err.Error())
+				mapplerLog.Error(err)
 				return err
 			}
 		case data.MtObject:

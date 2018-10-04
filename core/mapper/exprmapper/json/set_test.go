@@ -25,6 +25,18 @@ func TestSetArrayObject(t *testing.T) {
 
 }
 
+func TestSetArrayObjectEMpty(t *testing.T) {
+	mappingField := field.NewMappingField([]string{"City[0]", "Array[1]", "id"})
+	v, err := SetStringValue("setvalue", "{}", mappingField)
+	assert.Nil(t, err)
+	assert.NotNil(t, v)
+	printvalue(v)
+	d, err := getValue(v, []string{"City[0]", "Array[1]", "id"})
+	assert.Nil(t, err)
+	assert.Equal(t, "setvalue", d)
+
+}
+
 func printvalue(in interface{}) {
 	v, _ := json.Marshal(in)
 	fmt.Println(string(v))

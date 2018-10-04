@@ -33,11 +33,10 @@ func ResolvePathValue(value interface{}, refPath string) (interface{}, error) {
 func GetFieldValue(data interface{}, mappingField *field.MappingField) (interface{}, error) {
 	var jsonParsed *Container
 	var err error
-
 	switch data.(type) {
 	case string:
 		jsonParsed, err = ParseJSON([]byte(data.(string)))
-	case map[string]interface{}, map[string]string:
+	case map[string]interface{}, map[string]string, []int, []int64, []string, []map[string]interface{}, []map[string]string:
 		jsonParsed, err = Consume(data)
 	default:
 		//Take is as string to handle
@@ -53,6 +52,34 @@ func GetFieldValue(data interface{}, mappingField *field.MappingField) (interfac
 
 	}
 	return handleGetValue(&JSONData{container: jsonParsed, rw: sync.RWMutex{}}, mappingField.Getfields())
+}
+
+func handleGetValue(jsonData *JSONData, fields []string) (interface{}, error) {
+
+	log.Debugf("All fields %+v", fields)
+	jsonData.rw.Lock()
+	defer jsonData.rw.Unlock()
+
+	container := jsonData.container
+	if hasArrayFieldInArray(fields) {
+		arrayFields, fieldNameindex, arrayIndex := getArrayFieldName(fields)
+		//No array field found
+		if fieldNameindex == -1 {
+			return container.S(arrayFields...).Data(), nil
+		}
+		restFields := fields[fieldNameindex+1:]
+		specialField, err := container.ArrayElement(arrayIndex, arrayFields...)
+		if err != nil {
+			return nil, err
+		}
+		log.Debugf("Array element value %s", specialField)
+		if hasArrayFieldInArray(restFields) {
+			return handleGetValue(&JSONData{container: specialField, rw: sync.RWMutex{}}, restFields)
+		}
+		return specialField.S(restFields...).Data(), nil
+	}
+	log.Debugf("No array found for array %+v and size %d", fields, len(fields))
+	return container.S(fields...).Data(), nil
 }
 
 func getFieldName(fieldName string) string {
@@ -105,4 +132,37 @@ func makeInterface(value interface{}) (interface{}, error) {
 		return value, nil
 	}
 	return paramMap, nil
+}
+
+func getArrayFieldName(fields []string) ([]string, int, int) {
+	var tmpFields []string
+	index := -1
+	var arrayIndex int
+	for i, field := range fields {
+		if strings.Index(field, "[") >= 0 && strings.Index(field, "]") >= 0 {
+			arrayIndex, _ = getFieldSliceIndex(field)
+			fieldName := getFieldName(field)
+			index = i
+			if fieldName != "" {
+				tmpFields = append(tmpFields, getFieldName(field))
+			}
+			break
+		} else {
+			tmpFields = append(tmpFields, field)
+		}
+	}
+	return tmpFields, index, arrayIndex
+}
+
+func hasArrayFieldInArray(fields []string) bool {
+	for _, field := range fields {
+		if strings.Index(field, "[") >= 0 && strings.HasSuffix(field, "]") {
+			//Make sure the index are integer
+			_, err := strconv.Atoi(getNameInsideBrancket(field))
+			if err == nil {
+				return true
+			}
+		}
+	}
+	return false
 }

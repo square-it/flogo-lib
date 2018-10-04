@@ -112,12 +112,15 @@ func (g *Container) Search(hierarchy ...string) *Container {
 			return &Container{tmpArray}
 		} else {
 			if object != nil {
+				fmt.Println(reflect.TypeOf(object).Kind().String())
+				//if reflect.TypeOf(object).Kind() == reflect.Struct {
 				field, err := GetFieldByName(object, hierarchy[target])
 				if err != nil {
 					log.Errorf("no field name [%s] found in [%+v]", hierarchy[target], object)
 					return &Container{nil}
 				}
 				return &Container{field.Interface()}
+				//}
 			}
 			return &Container{nil}
 
@@ -237,13 +240,11 @@ func (g *Container) Set(value interface{}, path ...string) (*Container, error) {
 				if err != nil {
 					return &Container{nil}, fmt.Errorf("not found name [%s] in struct [%+v]", path[target], field)
 				}
-				fmt.Println(field.CanSet())
 				field.Set(reflect.ValueOf(value))
 			} else {
 				if err != nil {
 					return &Container{nil}, fmt.Errorf("not found name [%s] in struct [%+v]", path[target], field)
 				}
-				fmt.Println("=========", field.CanSet())
 
 				if field.Interface() == nil {
 					field.Set(reflect.New(field.Type()))
