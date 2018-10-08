@@ -102,7 +102,15 @@ func (m *MappingRef) getValueFromAttribute(inputscope data.Scope, resolver data.
 		return resolver.Resolve(m.ref, inputscope)
 	}
 
-	resolutionDetails, err := data.GetResolutionDetails(m.ref)
+	var resolutionDetails *data.ResolutionDetails
+	var err error
+	if strings.HasPrefix(m.ref, "$") {
+		//Call this method without $
+		resolutionDetails, err = data.GetResolutionDetails(m.ref[1:])
+		resolutionDetails.ResolverName = "$" + resolutionDetails.ResolverName
+	} else {
+		resolutionDetails, err = data.GetResolutionDetails(m.ref)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("Get activity name and root field error, %s", err.Error())
 	}
