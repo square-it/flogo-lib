@@ -14,7 +14,7 @@ import (
 
 var log = logger.GetLogger("json")
 
-func ResolvePathValue(value interface{}, refPath string) (interface{}, error) {
+func GetPathValue(value interface{}, refPath string) (interface{}, error) {
 	mappingField, err := field.ParseMappingField(refPath)
 	if err != nil {
 		return nil, fmt.Errorf("parse mapping path [%s] failed, due to %s", err.Error())
@@ -36,15 +36,17 @@ func GetFieldValue(data interface{}, mappingField *field.MappingField) (interfac
 	switch data.(type) {
 	case string:
 		jsonParsed, err = ParseJSON([]byte(data.(string)))
-	case map[string]interface{}, map[string]string, []int, []int64, []string, []map[string]interface{}, []map[string]string:
-		jsonParsed, err = Consume(data)
 	default:
-		//Take is as string to handle
-		b, err := json.Marshal(data)
-		if err != nil {
-			return nil, err
+		if IsMapperableType(data) {
+			jsonParsed, err = Consume(data)
+		} else {
+			//Take is as string to handle
+			b, err := json.Marshal(data)
+			if err != nil {
+				return nil, err
+			}
+			jsonParsed, err = ParseJSON(b)
 		}
-		jsonParsed, err = ParseJSON(b)
 	}
 
 	if err != nil {

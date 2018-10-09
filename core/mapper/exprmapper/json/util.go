@@ -72,3 +72,27 @@ func GetFieldByName(object interface{}, name string) (reflect.Value, error) {
 
 	return reflect.Value{}, nil
 }
+
+func IsMapperableType(data interface{}) bool {
+	switch t := data.(type) {
+	case map[string]interface{}, map[string]string, []int, []int64, []string, []map[string]interface{}, []map[string]string:
+		return true
+	case []interface{}:
+		//
+		isStruct := true
+		for _, v := range t {
+			if v != nil {
+				if reflect.TypeOf(v).Kind() == reflect.Struct {
+					isStruct = false
+					break
+				} else if reflect.TypeOf(v).Kind() == reflect.Ptr {
+					isStruct = false
+					break
+				}
+			}
+		}
+		return isStruct
+	}
+
+	return false
+}
