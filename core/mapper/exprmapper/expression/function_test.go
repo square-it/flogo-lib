@@ -344,7 +344,7 @@ func (s *PanicFunc) GetCategory() string {
 }
 
 func (s *PanicFunc) Eval() string {
-	panic("Panic happend")
+	panic("Panic happened")
 	return "panic"
 }
 

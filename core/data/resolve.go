@@ -149,7 +149,7 @@ func GetResolutionDetails(toResolve string) (*ResolutionDetails, error) {
 		details.Item = toResolve[itemIdx+1 : dotIdx-1]
 		details.ResolverName = toResolve[:itemIdx]
 	} else {
-		//For the case to get current scope atribute data
+		//For the case to get current scope attribute data
 		if strings.HasPrefix(toResolve, "$.") || strings.HasPrefix(toResolve, ".") {
 			details.ResolverName = toResolve[:dotIdx+1]
 		} else {

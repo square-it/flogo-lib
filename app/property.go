@@ -44,11 +44,10 @@ type EnvVariableValueResolver struct {
 
 func (resolver *EnvVariableValueResolver) ResolveValue(toResolve string) (interface{}, error) {
 	value, exists := os.LookupEnv(toResolve)
-	if exists {
-		return value, nil
+	if !exists {
+		return nil, errors.New(fmt.Sprintf("Environment variable - %s is not set",toResolve))
 	}
-	// Return original value
-	return toResolve, nil
+	return value, nil
 }
 
 
