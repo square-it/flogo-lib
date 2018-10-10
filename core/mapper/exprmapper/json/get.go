@@ -2,11 +2,9 @@ package json
 
 import (
 	"fmt"
-	"reflect"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json/field"
 	"strconv"
 	"strings"
-
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json/field"
 
 	"sync"
 
@@ -16,150 +14,73 @@ import (
 
 var log = logger.GetLogger("json")
 
-func GetFieldValueFromInP(data interface{}, path string) (interface{}, error) {
+func GetPathValue(value interface{}, refPath string) (interface{}, error) {
+	mappingField, err := field.ParseMappingField(refPath)
+	if err != nil {
+		return nil, fmt.Errorf("parse mapping path [%s] failed, due to %s", err.Error())
+	}
+
+	if mappingField == nil || len(mappingField.Getfields()) <= 0 {
+		value, err := makeInterface(value)
+		if err != nil {
+			value = value
+		}
+		return value, nil
+	}
+	return GetFieldValue(value, mappingField)
+}
+
+func GetFieldValue(data interface{}, mappingField *field.MappingField) (interface{}, error) {
 	var jsonParsed *Container
 	var err error
-
-	if reflect.TypeOf(data).Kind() == reflect.String {
+	switch data.(type) {
+	case string:
 		jsonParsed, err = ParseJSON([]byte(data.(string)))
-	} else {
-		b, err := json.Marshal(data)
-		if err != nil {
-			return nil, err
-		}
-		jsonParsed, err = ParseJSON(b)
-	}
-
-	if err != nil {
-		return nil, err
-
-	}
-	return getFieldValueP(&JSONData{container: jsonParsed, rw: sync.RWMutex{}}, path)
-}
-
-func GetFieldValueFromIn(data interface{}, mappingField *field.MappingField) (interface{}, error) {
-	var jsonParsed *Container
-	var err error
-
-	if reflect.TypeOf(data).Kind() == reflect.String {
-		jsonParsed, err = ParseJSON([]byte(data.(string)))
-	} else {
-		b, err := json.Marshal(data)
-		if err != nil {
-			return nil, err
-		}
-		jsonParsed, err = ParseJSON(b)
-	}
-
-	if err != nil {
-		return nil, err
-
-	}
-	return getFieldValue(&JSONData{container: jsonParsed, rw: sync.RWMutex{}}, mappingField)
-}
-
-func getFieldValue(jsonData *JSONData, mappingField *field.MappingField) (interface{}, error) {
-	var res interface{}
-	var err error
-	if mappingField.HasArray && mappingField.HasSpecialField {
-		res, err = handleGetSpecialFields(jsonData, mappingField.Fields)
-	} else if mappingField.HasArray {
-		data, err := getFiledContainer(jsonData, strings.Join(mappingField.Fields, "."))
-		if data != nil {
-			return data.Data(), err
-		}
-		return nil, err
-	} else if mappingField.HasSpecialField {
-		res, err = handleGetSpecialFields(jsonData, mappingField.Fields)
-	} else {
-		data, err := getFiledContainer(jsonData, strings.Join(mappingField.Fields, "."))
-		return data.Data(), err
-	}
-	return res, err
-}
-
-func getFieldValueP(jsonData *JSONData, path string) (interface{}, error) {
-	var res interface{}
-	var err error
-	if field.HasArray(path) && field.HasSpecialFields(path) {
-		fields, errs := field.GetAllspecialFields(path)
-		if errs != nil {
-			return nil, errs
-		}
-		res, err = handleGetSpecialFields(jsonData, fields)
-	} else if field.HasArray(path) {
-		data, err := getFiledContainer(jsonData, path)
-		return data.Data(), err
-	} else if field.HasSpecialFields(path) {
-		fields, errs := field.GetAllspecialFields(path)
-		if errs != nil {
-			return nil, errs
-		}
-		res, err = handleGetSpecialFields(jsonData, fields)
-	} else {
-		data, err := getFiledContainer(jsonData, path)
-		return data.Data(), err
-	}
-
-	return res, err
-}
-
-func getFiledContainer(jsonData *JSONData, path string) (*Container, error) {
-	jsonData.rw.RLock()
-
-	defer jsonData.rw.RUnlock()
-	container := jsonData.container
-	if strings.Index(path, "[") >= 0 {
-		//Array
-
-		arrayFieldName := getFieldName(path)
-		index, err := getFieldSliceIndex(path)
-		if err != nil {
-			return nil, fmt.Errorf("Get array index error, due to [%s]", err.Error())
-		}
-
-		var jsonField *Container
-		if arrayFieldName == "" {
-			//Root level array handling
-			jsonField, err = container.ArrayElement(index)
+	default:
+		if IsMapperableType(data) {
+			jsonParsed, err = Consume(data)
 		} else {
-			log.Debug("Field Name:", arrayFieldName, " and index: ", index)
-			jsonField, err = container.ArrayElementP(index, arrayFieldName)
-
+			//Take is as string to handle
+			b, err := json.Marshal(data)
+			if err != nil {
+				return nil, err
+			}
+			jsonParsed, err = ParseJSON(b)
 		}
+	}
+
+	if err != nil {
+		return nil, err
+
+	}
+	return handleGetValue(&JSONData{container: jsonParsed, rw: sync.RWMutex{}}, mappingField.Getfields())
+}
+
+func handleGetValue(jsonData *JSONData, fields []string) (interface{}, error) {
+
+	log.Debugf("All fields %+v", fields)
+	jsonData.rw.Lock()
+	defer jsonData.rw.Unlock()
+
+	container := jsonData.container
+	if hasArrayFieldInArray(fields) {
+		arrayFields, fieldNameindex, arrayIndex := getArrayFieldName(fields)
+		//No array field found
+		if fieldNameindex == -1 {
+			return container.S(arrayFields...).Data(), nil
+		}
+		restFields := fields[fieldNameindex+1:]
+		specialField, err := container.ArrayElement(arrayIndex, arrayFields...)
 		if err != nil {
 			return nil, err
 		}
-
-		restPath := getRestArrayFieldName(path)
-		if restPath == "" {
-			// value := jsonField.Data()
-			// log.Debug("Type :", reflect.TypeOf(value))
-			// log.Debug("Value :", value)
-			return jsonField, nil
+		log.Debugf("Array element value %s", specialField)
+		if hasArrayFieldInArray(restFields) {
+			return handleGetValue(&JSONData{container: specialField, rw: sync.RWMutex{}}, restFields)
 		}
-		if strings.Index(restPath, "[") > 0 {
-			return getFiledContainer(&JSONData{container: jsonField, rw: sync.RWMutex{}}, restPath)
-		}
-		filed := jsonField.Path(restPath)
-		return filed, nil
-
+		return specialField.S(restFields...).Data(), nil
 	}
-	// value := container.Path(path).Data()
-	// log.Debug("Type :", reflect.TypeOf(value))
-	// log.Debug("Value :", value)
-	return container.Path(path), nil
-}
-
-func getRestArrayFieldName(fieldName string) string {
-	if strings.Index(fieldName, "]") >= 0 {
-		closeBracketIndex := strings.Index(fieldName, "]")
-		if len(fieldName) == closeBracketIndex+1 {
-			return ""
-		}
-		return fieldName[closeBracketIndex+2:]
-	}
-	return fieldName
+	return container.S(fields...).Data(), nil
 }
 
 func getFieldName(fieldName string) string {
@@ -191,4 +112,58 @@ func getNameInsideBrancket(fieldName string) string {
 	}
 
 	return ""
+}
+
+func makeInterface(value interface{}) (interface{}, error) {
+
+	var paramMap interface{}
+
+	if value == nil {
+		return paramMap, nil
+	}
+
+	switch t := value.(type) {
+	case string:
+		err := json.Unmarshal([]byte(t), &paramMap)
+		if err != nil {
+			return nil, err
+		}
+		return paramMap, nil
+	default:
+		return value, nil
+	}
+	return paramMap, nil
+}
+
+func getArrayFieldName(fields []string) ([]string, int, int) {
+	var tmpFields []string
+	index := -1
+	var arrayIndex int
+	for i, field := range fields {
+		if strings.Index(field, "[") >= 0 && strings.Index(field, "]") >= 0 {
+			arrayIndex, _ = getFieldSliceIndex(field)
+			fieldName := getFieldName(field)
+			index = i
+			if fieldName != "" {
+				tmpFields = append(tmpFields, getFieldName(field))
+			}
+			break
+		} else {
+			tmpFields = append(tmpFields, field)
+		}
+	}
+	return tmpFields, index, arrayIndex
+}
+
+func hasArrayFieldInArray(fields []string) bool {
+	for _, field := range fields {
+		if strings.Index(field, "[") >= 0 && strings.HasSuffix(field, "]") {
+			//Make sure the index are integer
+			_, err := strconv.Atoi(getNameInsideBrancket(field))
+			if err == nil {
+				return true
+			}
+		}
+	}
+	return false
 }

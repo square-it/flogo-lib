@@ -370,7 +370,6 @@ func CoerceToComplexObject(val interface{}) (*ComplexObject, error) {
 			err := json.Unmarshal([]byte(t), complexObject)
 			if err != nil {
 				return nil, err
-
 			}
 			return handleComplex(complexObject), nil
 		}

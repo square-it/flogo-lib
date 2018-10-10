@@ -26,9 +26,10 @@ package json
 import (
 	"encoding/json"
 	"errors"
-	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"fmt"
 	"io"
 	"io/ioutil"
+	"reflect"
 	"strings"
 )
 
@@ -110,7 +111,19 @@ func (g *Container) Search(hierarchy ...string) *Container {
 			}
 			return &Container{tmpArray}
 		} else {
+			if object != nil {
+				fmt.Println(reflect.TypeOf(object).Kind().String())
+				//if reflect.TypeOf(object).Kind() == reflect.Struct {
+				field, err := GetFieldByName(object, hierarchy[target])
+				if err != nil {
+					log.Errorf("no field name [%s] found in [%+v]", hierarchy[target], object)
+					return &Container{nil}
+				}
+				return &Container{field.Interface()}
+				//}
+			}
 			return &Container{nil}
+
 		}
 	}
 	return &Container{object}
@@ -159,6 +172,12 @@ func (g *Container) Children() ([]*Container, error) {
 			children = append(children, &Container{obj})
 		}
 		return children, nil
+	} else if mmap, ok := g.Data().(map[string]string); ok {
+		children := []*Container{}
+		for _, obj := range mmap {
+			children = append(children, &Container{obj})
+		}
+		return children, nil
 	}
 	return nil, ErrNotObjOrArray
 }
@@ -166,6 +185,12 @@ func (g *Container) Children() ([]*Container, error) {
 // ChildrenMap - Return a map of all the children of an object.
 func (g *Container) ChildrenMap() (map[string]*Container, error) {
 	if mmap, ok := g.Data().(map[string]interface{}); ok {
+		children := map[string]*Container{}
+		for name, obj := range mmap {
+			children[name] = &Container{obj}
+		}
+		return children, nil
+	} else if mmap, ok := g.Data().(map[string]string); ok {
 		children := map[string]*Container{}
 		for name, obj := range mmap {
 			children[name] = &Container{obj}
@@ -198,8 +223,35 @@ func (g *Container) Set(value interface{}, path ...string) (*Container, error) {
 				mmap[path[target]] = map[string]interface{}{}
 			}
 			object = mmap[path[target]]
+		} else if mmap, ok := object.(map[string]string); ok {
+			if target == len(path)-1 {
+				v, ok := value.(string)
+				if !ok {
+					return &Container{nil}, fmt.Errorf("convert [%+v] to string failed", value)
+				}
+				mmap[path[target]] = v
+			} else if mmap[path[target]] == "" {
+				mmap[path[target]] = ""
+			}
+			object = mmap[path[target]]
 		} else {
-			return &Container{nil}, ErrPathCollision
+			field, err := GetFieldByName(object, path[target])
+			if target == len(path)-1 {
+				if err != nil {
+					return &Container{nil}, fmt.Errorf("not found name [%s] in struct [%+v]", path[target], field)
+				}
+				field.Set(reflect.ValueOf(value))
+			} else {
+				if err != nil {
+					return &Container{nil}, fmt.Errorf("not found name [%s] in struct [%+v]", path[target], field)
+				}
+
+				if field.Interface() == nil {
+					field.Set(reflect.New(field.Type()))
+				}
+			}
+			object = field
+
 		}
 	}
 	return &Container{object}, nil
@@ -293,6 +345,15 @@ func (g *Container) Delete(path ...string) error {
 				}
 			}
 			object = mmap[path[target]]
+		} else if mmap, ok := object.(map[string]string); ok {
+			if target == len(path)-1 {
+				if _, ok := mmap[path[target]]; ok {
+					delete(mmap, path[target])
+				} else {
+					return ErrNotObj
+				}
+			}
+			object = mmap[path[target]]
 		} else {
 			return ErrNotObj
 		}
@@ -360,7 +421,7 @@ func (g *Container) ArrayElement(index int, path ...string) (*Container, error) 
 	if !ok {
 		//Convert to array
 		var err error
-		array, err = data.CoerceToArray(g.Search(path...).Data())
+		array, err = ToArray(g.Search(path...).Data())
 		if err != nil {
 			return &Container{nil}, ErrNotArray
 		}

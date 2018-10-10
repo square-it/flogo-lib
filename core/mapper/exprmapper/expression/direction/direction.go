@@ -8,8 +8,6 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json/field"
-
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/expr"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/function"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/gocc/token"
@@ -27,7 +25,7 @@ func NewDoubleQuoteStringLit(lit interface{}) (string, error) {
 	log.Debugf("New double qutoes [%s]", str)
 
 	if str != "" && len(str) > 0 {
-		str = field.RemoveQuote(str)
+		str = RemoveQuote(str)
 	}
 	//Eascap string
 	if strings.Contains(str, "\\\"") {
@@ -44,7 +42,7 @@ func NewSingleQuoteStringLit(lit interface{}) (string, error) {
 	log.Debugf("New single qutoe [%s]", str)
 
 	if str != "" && len(str) > 0 {
-		str = field.RemoveQuote(str)
+		str = RemoveQuote(str)
 	}
 
 	//Eascap string
@@ -289,4 +287,25 @@ func NewTernaryExpression(first Attribute, second Attribute, third Attribute) (A
 	log.Debugf("third [%+v] and type [%s]", third, reflect.TypeOf(third))
 	ternaryExp := &expr.TernaryExpressio{First: first, Second: second, Third: third}
 	return ternaryExp, nil
+}
+
+func RemoveQuote(quoteStr string) string {
+	if HasQuote(quoteStr) {
+		if strings.HasPrefix(quoteStr, `"`) || strings.HasPrefix(quoteStr, `'`) {
+			quoteStr = quoteStr[1 : len(quoteStr)-1]
+		}
+	}
+	return quoteStr
+}
+
+func HasQuote(quoteStr string) bool {
+	if strings.HasPrefix(quoteStr, `"`) && strings.HasSuffix(quoteStr, `"`) {
+		return true
+	}
+
+	if strings.HasPrefix(quoteStr, `'`) && strings.HasSuffix(quoteStr, `'`) {
+		return true
+	}
+
+	return false
 }

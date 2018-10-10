@@ -1,159 +1,156 @@
 package field
 
 import (
-	"regexp"
-	"strconv"
+	"fmt"
 	"strings"
-
-	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"text/scanner"
+	"unicode"
 )
 
-var log = logger.GetLogger("expr-mapper-field")
-
 type MappingField struct {
-	HasSpecialField bool
-	HasArray        bool
-	Fields          []string
+	fields []string
+	ref    string
+	s      *scanner.Scanner
 }
 
-//GetAllspecialFields get all fields that conainer special fields
-func GetAllspecialFields(path string) ([]string, error) {
-	var re = regexp.MustCompile(`(\[\"(.*?)\"\])|(\[\'(.*?)\'\])`)
-	var fields []string
-	var lastIndex = 0
-	matches := re.FindAllStringIndex(path, -1)
-	for i, match := range matches {
-		//log.Debugf("Mathing index %d", match)
-		//log.Debugf("Mathing string %s", path[match[0]:match[1]])
+func NewMappingField(fields []string) *MappingField {
+	return &MappingField{fields: fields}
+}
 
-		if i == 0 && lastIndex == 0 {
-			startPart := trimDot(path[:match[0]])
-			if startPart != "" {
-				if strings.Index(startPart, ".") > 0 {
-					fields = append(fields, strings.Split(startPart, ".")...)
-				} else {
-					fields = append(fields, startPart)
-				}
-			}
-		} else if lastIndex > 0 {
-			//between match string
-			if match[0] > lastIndex {
-				missingPart := path[lastIndex:match[0]]
-				if missingPart != "" {
-					missingPart = trimDot(missingPart)
-					//Array index part then append to last one
-					if missingPart != "" {
-						if strings.Index(missingPart, ".") > 0 {
-							misspartsArray := strings.Split(missingPart, ".")
-							if strings.HasPrefix(missingPart, "[") {
-								fields[len(fields)-1] = fields[len(fields)-1] + misspartsArray[0]
-								misspartsArray = misspartsArray[1:]
-							}
-							fields = append(fields, misspartsArray...)
-						} else {
-							if strings.HasPrefix(missingPart, "[") {
-								fields[len(fields)-1] = fields[len(fields)-1] + missingPart
-							} else {
-								fields = append(fields, missingPart)
-							}
-						}
-					}
-				}
-			}
+func ParseMappingField(mRef string) (*MappingField, error) {
+	//Remove any . at beginning
+	if strings.HasPrefix(mRef, ".") {
+		mRef = mRef[1:]
+	}
+	g := &MappingField{ref: mRef}
+
+	err := g.Start(mRef)
+	if err != nil {
+		return nil, fmt.Errorf("parse mapping [%s] failed, due to %s", mRef, err.Error())
+	}
+	return g, nil
+}
+
+func (m *MappingField) GetRef() string {
+	return m.ref
+}
+
+func (m *MappingField) Getfields() []string {
+	return m.fields
+}
+
+func (m *MappingField) paserName() error {
+	fieldName := ""
+	switch ch := m.s.Scan(); ch {
+	case '.':
+		return m.Parser()
+	case '[':
+		//Done
+		if fieldName != "" {
+			m.fields = append(m.fields, fieldName)
 		}
-
-		matchStr := path[match[0]+1 : match[1]-1]
-		if HasQuote(matchStr) {
-			fields = append(fields, RemoveQuote(matchStr))
+		m.s.Mode = scanner.ScanInts
+		nextAfterBracket := m.s.Scan()
+		if nextAfterBracket == '"' || nextAfterBracket == '\'' {
+			//Special charactors
+			m.s.Mode = scanner.ScanIdents
+			return m.handleSpecialField()
 		} else {
-			fields = append(fields, matchStr)
-		}
-		lastIndex = match[1]
-
-		//Last matches and append rest
-		if i == len(matches)-1 {
-			lastPart := trimDot(path[lastIndex:])
-			if lastPart != "" {
-				if lastPart != "" {
-					//Array index part then append to last one
-					if strings.Index(lastPart, ".") > 0 {
-						lastPartArray := strings.Split(lastPart, ".")
-						if strings.HasPrefix(lastPart, "[") {
-							fields[len(fields)-1] = fields[len(fields)-1] + lastPartArray[0]
-							lastPartArray = lastPartArray[1:]
-						}
-						fields = append(fields, lastPartArray...)
-					} else {
-						if strings.HasPrefix(lastPart, "[") {
-							fields[len(fields)-1] = fields[len(fields)-1] + lastPart
-						} else {
-							fields = append(fields, lastPart)
-						}
-					}
-				}
+			//HandleArray
+			if m.fields == nil || len(m.fields) <= 0 {
+				m.fields = append(m.fields, "["+m.s.TokenText()+"]")
+			} else {
+				m.fields[len(m.fields)-1] = m.fields[len(m.fields)-1] + "[" + m.s.TokenText() + "]"
 			}
-		}
-	}
-	return fields, nil
-}
-
-func HasQuote(quoteStr string) bool {
-	if strings.HasPrefix(quoteStr, `"`) && strings.HasSuffix(quoteStr, `"`) {
-		return true
-	}
-
-	if strings.HasPrefix(quoteStr, `'`) && strings.HasSuffix(quoteStr, `'`) {
-		return true
-	}
-
-	return false
-}
-
-func RemoveQuote(quoteStr string) string {
-	if HasQuote(quoteStr) {
-		if strings.HasPrefix(quoteStr, `"`) || strings.HasPrefix(quoteStr, `'`) {
-			quoteStr = quoteStr[1 : len(quoteStr)-1]
-		}
-	}
-	return quoteStr
-}
-
-func HasArray(path string) bool {
-	var re = regexp.MustCompile(`\[(.*?)\]`)
-	for _, match := range re.FindAllString(path, -1) {
-		if match != "" && len(match) > 0 {
-			nameInBracket := match[1 : len(match)-1]
-			_, err := strconv.Atoi(nameInBracket)
-			if err != nil {
-				continue
+			ch := m.s.Scan()
+			if ch != ']' {
+				return fmt.Errorf("Inliad array format")
 			}
-			return true
+			m.s.Mode = scanner.ScanIdents
+			return m.Parser()
 		}
+	case scanner.EOF:
+		if fieldName != "" {
+			m.fields = append(m.fields, fieldName)
+		}
+	default:
+		fieldName = fieldName + m.s.TokenText()
+		if fieldName != "" {
+			m.fields = append(m.fields, fieldName)
+		}
+		return m.Parser()
 	}
-	return false
+
+	return nil
 }
 
-func HasSpecialFields(path string) bool {
-	var re = regexp.MustCompile(`(\[\"(.*?)\"\])|(\[\'(.*?)\'\])`)
-	for _, match := range re.FindAllString(path, -1) {
-		if match != "" && len(match) > 0 {
-			nameInBracket := match[1 : len(match)-1]
-			if HasQuote(nameInBracket) {
-				return true
+func (m *MappingField) handleSpecialField() error {
+	fieldName := ""
+	run := true
+
+	for run {
+		switch ch := m.s.Scan(); ch {
+		case '"', '\'':
+			nextAfterQuotes := m.s.Scan()
+			if nextAfterQuotes == ']' {
+				//end specialfield, startover
+				m.fields = append(m.fields, fieldName)
+				run = false
+				return m.Parser()
+			} else {
+				fieldName = fieldName + m.s.TokenText()
 			}
-			_, err := strconv.Atoi(nameInBracket)
-			if err != nil {
-				return true
-			}
+		default:
+			fieldName = fieldName + m.s.TokenText()
 		}
 	}
-	return false
+	return nil
 }
 
-func trimDot(str string) string {
-	if str != "" {
-		str = strings.TrimPrefix(str, ".")
-		return strings.TrimSuffix(str, ".")
+func (m *MappingField) Parser() error {
+	switch ch := m.s.Scan(); ch {
+	case '.':
+		return m.paserName()
+	case '[':
+		m.s.Mode = scanner.ScanInts
+		nextAfterBracket := m.s.Scan()
+		if nextAfterBracket == '"' || nextAfterBracket == '\'' {
+			//Special charactors
+			m.s.Mode = scanner.ScanIdents
+			return m.handleSpecialField()
+		} else {
+			//HandleArray
+			if m.fields == nil || len(m.fields) <= 0 {
+				m.fields = append(m.fields, "["+m.s.TokenText()+"]")
+			} else {
+				m.fields[len(m.fields)-1] = m.fields[len(m.fields)-1] + "[" + m.s.TokenText() + "]"
+			}
+			//m.handleArray()
+			ch := m.s.Scan()
+			if ch != ']' {
+				return fmt.Errorf("Inliad array format")
+			}
+			m.s.Mode = scanner.ScanIdents
+			return m.Parser()
+		}
+	case scanner.EOF:
+		//Done
+		return nil
+	default:
+		m.fields = append(m.fields, m.s.TokenText())
+		return m.paserName()
 	}
-	return str
+	return nil
+}
+
+func (m *MappingField) Start(jsonPath string) error {
+	m.s = new(scanner.Scanner)
+	m.s.IsIdentRune = IsIdentRune
+	m.s.Init(strings.NewReader(jsonPath))
+	m.s.Mode = scanner.ScanIdents
+	return m.Parser()
+}
+
+func IsIdentRune(ch rune, i int) bool {
+	return ch == '$' || ch == '-' || ch == '_' || unicode.IsLetter(ch) || unicode.IsDigit(ch) && i > 0
 }

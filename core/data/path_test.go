@@ -1,12 +1,14 @@
 package data
 
 import (
-	"testing"
-
+	"fmt"
+	mjson "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json/field"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
-func TestPathGetValue(t *testing.T) {
+func TestResolvePathValue(t *testing.T) {
 	// Resolution of Old Trigger expression
 
 	mapVal, _ := CoerceToObject("{\"myParam\":5}")
@@ -77,7 +79,7 @@ func TestPathSetValue(t *testing.T) {
 
 	mapVal, _ := CoerceToObject("{\"myParam\":5}")
 	path := ".myParam"
-	err := PathSetValue(mapVal, path, 6)
+	v, err := PathSetValue(mapVal, path, 6)
 	assert.Nil(t, err)
 	newVal, err := PathGetValue(mapVal, path)
 	assert.Nil(t, err)
@@ -86,16 +88,17 @@ func TestPathSetValue(t *testing.T) {
 	// Resolution of Old Trigger expression
 	arrVal, _ := CoerceToArray("[1,6,3]")
 	path = "[1]"
-	err = PathSetValue(arrVal, path, 4)
+	v, err = PathSetValue(arrVal, path, 4)
 	assert.Nil(t, err)
+	assert.Equal(t, 4, arrVal[1])
 	newVal, err = PathGetValue(arrVal, path)
 	assert.Nil(t, err)
 	assert.Equal(t, 4, newVal)
-
+	//
 	mapVal, _ = CoerceToObject("{\"myParam\":{\"nestedMap\":1}}")
 	path = ".myParam.nestedMap"
 	assert.Nil(t, err)
-	err = PathSetValue(mapVal, path, 7)
+	v, err = PathSetValue(mapVal, path, 7)
 	newVal, err = PathGetValue(mapVal, path)
 	assert.Nil(t, err)
 	assert.Equal(t, 7, newVal)
@@ -103,7 +106,7 @@ func TestPathSetValue(t *testing.T) {
 	mapVal, _ = CoerceToObject("{\"myParam\":{\"nestedMap\":1}}")
 	path = `["myParam"].nestedMap`
 	assert.Nil(t, err)
-	err = PathSetValue(mapVal, path, 7)
+	v, err = PathSetValue(mapVal, path, 7)
 	newVal, err = PathGetValue(mapVal, path)
 	assert.Nil(t, err)
 	assert.Equal(t, 7, newVal)
@@ -111,23 +114,22 @@ func TestPathSetValue(t *testing.T) {
 	mapVal, _ = CoerceToObject("{\"myParam\":{\"nestedMap\":1}}")
 	path = `.myParam["nestedMap"]`
 	assert.Nil(t, err)
-	err = PathSetValue(mapVal, path, 7)
+	v, err = PathSetValue(mapVal, path, 7)
 	newVal, err = PathGetValue(mapVal, path)
 	assert.Nil(t, err)
 	assert.Equal(t, 7, newVal)
 
-
 	arrVal, _ = CoerceToArray("[{\"nestedMap1\":1},{\"nestedMap2\":2}]")
 	path = "[1].nestedMap2"
-	err = PathSetValue(arrVal, path, 3)
+	v, err = PathSetValue(arrVal, path, 3)
 	assert.Nil(t, err)
-	newVal, err = PathGetValue(arrVal, path)
+	newVal, err = PathGetValue(v, path)
 	assert.Nil(t, err)
 	assert.Equal(t, 3, newVal)
-
+	//
 	mapVal, _ = CoerceToObject("{\"myParam\":{\"nestedArray\":[7,8,9]}}")
 	path = ".myParam.nestedArray[1]"
-	err = PathSetValue(mapVal, path, 1)
+	v, err = PathSetValue(mapVal, path, 1)
 	assert.Nil(t, err)
 	newVal, err = PathGetValue(mapVal, path)
 	assert.Nil(t, err)
@@ -135,20 +137,21 @@ func TestPathSetValue(t *testing.T) {
 
 	arrVal, _ = CoerceToArray("[{\"nestedMap1\":1},{\"nestedMap2\":{\"nestedArray\":[7,8,9]}}]")
 	path = "[1].nestedMap2.nestedArray[2]"
-	err = PathSetValue(arrVal, path, 5)
+	v, err = PathSetValue(arrVal, path, 5)
 	assert.Nil(t, err)
-	newVal, err = PathGetValue(arrVal, path)
+	fmt.Println(fmt.Sprintf("%+v", v))
+	newVal, err = PathGetValue(v, path)
 	assert.Nil(t, err)
 	assert.Equal(t, 5, newVal)
 
-	//mapVal,_ = CoerceToObject("{\"myParam\":{\"nestedArray\":[7,8,9]}}")
-	//path = ".myParam.nestedArray"
-	//err = PathSetValue(arrVal, path, 3)
-	//assert.Nil(t, err)
-	//newVal,err = PathGetValue(mapVal, path)
-	//assert.Nil(t, err)
-	////todo check if array
-	//
+	newVal, _ = CoerceToObject("{\"myParam\":{\"nestedArray\":[7,8,9]}}")
+	path = ".myParam.nestedArray"
+	v, err = PathSetValue(newVal, path, 3)
+	assert.Nil(t, err)
+	newVal, err = PathGetValue(v, path)
+	assert.Nil(t, err)
+
+	//todo check if array
 	//arrVal,_ = CoerceToArray("[{\"nestedMap1\":1},{\"nestedMap2\":{\"nestedArray\":[7,8,9]}}]")
 	//path = "[1].nestedMap2"
 	//assert.Nil(t, err)
@@ -156,4 +159,13 @@ func TestPathSetValue(t *testing.T) {
 	//newVal,err = PathGetValue(arrVal, path)
 	//assert.Nil(t, err)
 	//////todo check if map
+}
+
+func PathSetValue(value interface{}, path string, attrValue interface{}) (interface{}, error) {
+	mapField, err := field.ParseMappingField(path)
+	if err != nil {
+		return nil, err
+	}
+
+	return mjson.SetFieldValue(attrValue, value, mapField)
 }

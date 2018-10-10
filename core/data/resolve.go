@@ -78,6 +78,7 @@ func (r *BasicResolver) Resolve(toResolve string, scope Scope) (value interface{
 		return nil, fmt.Errorf("unsupported resolver: %s", details.ResolverName)
 	}
 
+	value = GetComplexValue(value)
 	if details.Path != "" {
 		value, err = PathGetValue(value, details.Path)
 		if err != nil {
@@ -246,4 +247,14 @@ func GetValueWithResolver(valueMap map[string]interface{}, key string) (interfac
 	}
 
 	return val, true
+}
+
+func GetComplexValue(value interface{}) interface{} {
+	if value != nil {
+		switch t := value.(type) {
+		case *ComplexObject:
+			return t.Value
+		}
+	}
+	return value
 }

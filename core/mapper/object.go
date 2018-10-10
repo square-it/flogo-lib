@@ -83,5 +83,5 @@ func evalExpr(exprString string, scope data.Scope, resolver data.Resolver) (inte
 	exprStr := exprString[2 : len(exprString)-2]
 	//support just assign for now
 	//todo: optimization - trim whitspace when first creating object mapping
-	return exprmapper.GetMappingValue(strings.TrimSpace(exprStr), scope, resolver)
+	return exprmapper.GetExpresssionValue(strings.TrimSpace(exprStr), scope, resolver)
 }
