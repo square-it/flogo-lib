@@ -4,11 +4,19 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"sync"
 	"runtime/debug"
+	"errors"
 )
 
-type EventListenerFunc func(*EventContext) error
+type EventListener interface {
+	// Returns name of the listener
+	Name() string
+	// Returns true if interested in given event
+	Interested(string) bool
+	// Called when matching event occurs
+	OnEvent(*EventContext) error
+}
 
-var eventListeners = make(map[string][]EventListenerFunc)
+var eventListeners = make(map[string]EventListener)
 
 // Buffered channel
 var eventQueue = make(chan *EventContext, 100)
@@ -18,10 +26,16 @@ var shutdown = make(chan bool)
 var lock = &sync.RWMutex{}
 
 // Registers listener for flow events
-func RegisterEventListener(eventType string, fel EventListenerFunc) error {
+func RegisterEventListener(evtListener EventListener) error {
 	lock.Lock()
 	defer lock.Unlock()
-	eventListeners[eventType] = append(eventListeners[eventType], fel)
+	_, exists := eventListeners[evtListener.Name()]
+	if exists {
+		return errors.New("Failed to register event listener. Listener already registered with given name.")
+	}
+
+	eventListeners[evtListener.Name()] = evtListener
+	logger.Debugf("Event Listener - '%s' successfully registered", evtListener.Name())
 	startPublisherRoutine()
 	return nil
 }
@@ -30,10 +44,11 @@ func RegisterEventListener(eventType string, fel EventListenerFunc) error {
 func UnRegisterEventListener(name string) {
 	lock.Lock()
 	defer lock.Unlock()
-	_, exists := eventListeners[name]
+	ls, exists := eventListeners[name]
 	if exists {
 		delete(eventListeners, name)
 	}
+	logger.Debugf("Event Listener - '%s' successfully unregistered", ls.Name())
 	stopPublisherRoutine()
 }
 
@@ -87,30 +102,38 @@ func publishEvents() {
 	}
 }
 
-func publishEvent(fe *EventContext) {
+func HasListeners(eventType string) bool {
+	for _, ls := range eventListeners {
+		if ls.Interested(eventType) {
+			return true
+		}
+	}
+	return false
+}
 
-	for _, fel := range eventListeners[fe.eventType] {
-		func() {
-			defer func() {
-				if r := recover(); r != nil {
-					logger.Errorf("Registered event handler failed to process event due to error - '%v' ", r)
-					logger.Errorf("StackTrace: %s", debug.Stack())
+func publishEvent(fe *EventContext) {
+	for _, ls := range eventListeners {
+		// Find interested listeners
+		if ls.Interested(fe.eventType) {
+			func() {
+				defer func() {
+					if r := recover(); r != nil {
+						logger.Errorf("Registered event handler - '%s' failed to process event due to error - '%v' ", ls.Name(), r)
+						logger.Errorf("StackTrace: %s", debug.Stack())
+					}
+				}()
+				err := ls.OnEvent(fe)
+				if err != nil {
+					logger.Errorf("Registered event handler - '%s' failed to process event due to error - '%s' ", ls.Name(), err.Error())
 				}
 			}()
-			err := fel(fe)
-			if err != nil {
-				logger.Errorf("Registered event handler failed to process event due to error - '%s' ", err.Error())
-			}
-		}()
+		}
 	}
 }
 
 //TODO channel to be passed to actions
 func PublishEvent(eType string, event interface{}) {
-	listeners := eventListeners[eType]
-	if len(listeners) > 0 {
-		evtContext := &EventContext{event: event, eventType: eType}
-		// Put event on the queue
-		eventQueue <- evtContext
-	}
+	evtContext := &EventContext{event: event, eventType: eType}
+	// Put event on the queue
+	eventQueue <- evtContext
 }
