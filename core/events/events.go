@@ -25,7 +25,7 @@ var shutdown = make(chan bool)
 
 var lock = &sync.RWMutex{}
 
-// Registers listener for flow events
+// Registers listener for events
 func RegisterEventListener(evtListener EventListener) error {
 	lock.Lock()
 	defer lock.Unlock()
@@ -40,7 +40,7 @@ func RegisterEventListener(evtListener EventListener) error {
 	return nil
 }
 
-// Unregisters flow event listener
+// Unregisters event listener
 func UnRegisterEventListener(name string) {
 	lock.Lock()
 	defer lock.Unlock()
@@ -76,7 +76,7 @@ func stopPublisherRoutine() {
 	}
 }
 
-//  EventContext is a wrapper over specific event context
+//  EventContext is a wrapper over specific event
 type EventContext struct {
 	// Type of event
 	eventType string
@@ -132,6 +132,7 @@ func publishEvent(fe *EventContext) {
 }
 
 //TODO channel to be passed to actions
+// Puts event with given type and data on the channel
 func PublishEvent(eType string, event interface{}) {
 	evtContext := &EventContext{event: event, eventType: eType}
 	// Put event on the queue
