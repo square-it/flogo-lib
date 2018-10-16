@@ -44,12 +44,12 @@ func RegisterEventListener(evtListener EventListener) error {
 func UnRegisterEventListener(name string) {
 	lock.Lock()
 	defer lock.Unlock()
-	ls, exists := eventListeners[name]
+	_, exists := eventListeners[name]
 	if exists {
 		delete(eventListeners, name)
+		logger.Debugf("Event Listener - '%s' successfully unregistered", name)
+		stopPublisherRoutine()
 	}
-	logger.Debugf("Event Listener - '%s' successfully unregistered", ls.Name())
-	stopPublisherRoutine()
 }
 
 func startPublisherRoutine() {
