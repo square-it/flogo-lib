@@ -1,35 +1,27 @@
 package events
 
 import (
-	"fmt"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"sync"
-	"errors"
 	"runtime/debug"
 )
 
 type EventListenerFunc func(*EventContext) error
 
-var eventListeners = make(map[string]EventListenerFunc)
+var eventListeners = make(map[string][]EventListenerFunc)
 
 // Buffered channel
-var eventQueue = make(chan interface{}, 100)
+var eventQueue = make(chan *EventContext, 100)
 var publisherRoutineStarted = false
 var shutdown = make(chan bool)
 
 var lock = &sync.RWMutex{}
 
 // Registers listener for flow events
-func RegisterEventListener(name string, fel EventListenerFunc) error {
+func RegisterEventListener(eventType string, fel EventListenerFunc) error {
 	lock.Lock()
 	defer lock.Unlock()
-	_, exists := eventListeners[name]
-	if exists {
-		errMsg := fmt.Sprintf("Event listener with name - '%s' already registered", name)
-		logger.Error(errMsg)
-		return errors.New(errMsg)
-	}
-	eventListeners[name] = fel
+	eventListeners[eventType] = append(eventListeners[eventType], fel)
 	startPublisherRoutine()
 	return nil
 }
@@ -64,13 +56,15 @@ func stopPublisherRoutine() {
 
 	if len(eventListeners) == 0 {
 		// No more listeners. Stop go routine
-		shutdown <- true
+		close(shutdown)
 		publisherRoutineStarted = false
 	}
 }
 
 //  EventContext is a wrapper over specific event context
 type EventContext struct {
+	// Type of event
+	eventType string
 	// Event can be FlowEventContext or TaskEventContext
 	event interface{}
 }
@@ -85,8 +79,7 @@ func publishEvents() {
 		select {
 		case event := <-eventQueue:
 			lock.RLock()
-			evtContext := &EventContext{event: event}
-			publishEvent(evtContext)
+			publishEvent(event)
 			lock.RUnlock()
 		case <-shutdown:
 			return
@@ -96,24 +89,28 @@ func publishEvents() {
 
 func publishEvent(fe *EventContext) {
 
-	for name, fel := range eventListeners {
+	for _, fel := range eventListeners[fe.eventType] {
 		func() {
 			defer func() {
 				if r := recover(); r != nil {
-					logger.Errorf("Registered event handler - '%s' failed to process event due to error - '%v' ", name, r)
+					logger.Errorf("Registered event handler failed to process event due to error - '%v' ", r)
 					logger.Errorf("StackTrace: %s", debug.Stack())
 				}
 			}()
 			err := fel(fe)
 			if err != nil {
-				logger.Errorf("Registered event handler - '%s' failed to process event due to error - '%s' ", name, err.Error())
+				logger.Errorf("Registered event handler failed to process event due to error - '%s' ", err.Error())
 			}
 		}()
 	}
 }
 
 //TODO channel to be passed to actions
-// Put event on the queue
-func PublishEvent(event interface{}) {
-	eventQueue <- event
+func PublishEvent(eType string, event interface{}) {
+	listeners := eventListeners[eType]
+	if len(listeners) > 0 {
+		evtContext := &EventContext{event: event, eventType: eType}
+		// Put event on the queue
+		eventQueue <- evtContext
+	}
 }
