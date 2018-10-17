@@ -80,13 +80,18 @@ func stopPublisherRoutine() {
 type EventContext struct {
 	// Type of event
 	eventType string
-	// Event can be FlowEventContext or TaskEventContext
+	// Event data
 	event interface{}
 }
 
-// Returns wrapped event
+// Returns wrapped event data
 func (ec *EventContext) GetEvent() interface{} {
 	return ec.event
+}
+
+// Returns event type
+func (ec *EventContext) GetType() string {
+	return ec.eventType
 }
 
 func publishEvents() {
@@ -102,6 +107,8 @@ func publishEvents() {
 	}
 }
 
+// Returns true if listener is registered for given event type
+// Event publishers should publish event only if listener is registered
 func HasListeners(eventType string) bool {
 	for _, ls := range eventListeners {
 		if ls.Interested(eventType) {
@@ -134,7 +141,9 @@ func publishEvent(fe *EventContext) {
 //TODO channel to be passed to actions
 // Puts event with given type and data on the channel
 func PublishEvent(eType string, event interface{}) {
-	evtContext := &EventContext{event: event, eventType: eType}
-	// Put event on the queue
-	eventQueue <- evtContext
+	if HasListeners(eType) {
+		evtContext := &EventContext{event: event, eventType: eType}
+		// Put event on the queue
+		eventQueue <- evtContext
+	}
 }
