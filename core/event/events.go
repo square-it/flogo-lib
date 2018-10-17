@@ -1,4 +1,4 @@
-package events
+package event
 
 import (
 	"github.com/TIBCOSoftware/flogo-lib/logger"
@@ -11,9 +11,6 @@ import (
 type EventListener interface {
 	// Returns name of the listener
 	Name() string
-
-	// Returns list of event types interested in
-	EventTypes() []string
 
 	// Called when matching event occurs
 	HandleEvent(*EventContext) error
@@ -28,31 +25,31 @@ var shutdown = make(chan bool)
 
 var lock = &sync.RWMutex{}
 
-// Registers listener for events
-func RegisterEventListener(evtListener EventListener) error {
+// Registers listener for given event types
+func RegisterEventListener(evtListener EventListener, eventTypes []string) error {
 	if evtListener == nil {
-		return errors.New("Event handler must not nil")
+		return errors.New("Event listener must not nil")
 	}
 
-	if len(evtListener.EventTypes()) == 0 {
-		return errors.New("Failed register event handler. At-least one event type must be configured.")
+	if len(eventTypes) == 0 {
+		return errors.New("Failed register event listener. At-least one event type must be provided.")
 	}
 
 	lock.Lock()
 	defer lock.Unlock()
 
-	for _, eType := range evtListener.EventTypes() {
+	for _, eType := range eventTypes {
 		eventListeners[eType] = append(eventListeners[eType], evtListener)
-		logger.Debugf("Event Listener - '%s' successfully registered for event type - '%s'", evtListener.Name(), eType)
+		logger.Debugf("Event listener - '%s' successfully registered for event type - '%s'", evtListener.Name(), eType)
 	}
 
 	startPublisherRoutine()
 	return nil
 }
 
-// Unregisters event listener for given name.
-// Set eventType to unregister listener from specific event types
-func UnRegisterEventListener(name string, eventTypes ...string) {
+// Unregister event listener for given event types .
+// To unregister from all event types, set eventTypes to nil
+func UnRegisterEventListener(name string, eventTypes []string) {
 
 	if name == "" {
 		return
@@ -64,7 +61,7 @@ func UnRegisterEventListener(name string, eventTypes ...string) {
 	var deleteList []string
 	var index = -1
 
-	if len(eventTypes) > 0 {
+	if eventTypes != nil && len(eventTypes) > 0 {
 		for _, eType := range eventTypes {
 			evtLs, ok := eventListeners[eType]
 			if ok {
@@ -84,7 +81,7 @@ func UnRegisterEventListener(name string, eventTypes ...string) {
 						// Single listener in the map. Remove map entry
 						deleteList = append(deleteList, eType)
 					}
-					logger.Debugf("Event Listener - '%s' successfully unregistered for event type - '%s'", name, eType)
+					logger.Debugf("Event listener - '%s' successfully unregistered for event type - '%s'", name, eType)
 					index = -1
 				}
 			}
@@ -107,7 +104,7 @@ func UnRegisterEventListener(name string, eventTypes ...string) {
 					// Single listener in the map. Remove map entry
 					deleteList = append(deleteList, eType)
 				}
-				logger.Debugf("Event Listener - '%s' successfully unregistered for event type - '%s'", name, eType)
+				logger.Debugf("Event listener - '%s' successfully unregistered for event type - '%s'", name, eType)
 				index = -1
 			}
 		}
@@ -184,27 +181,30 @@ func publishEvent(fe *EventContext) {
 			func() {
 				defer func() {
 					if r := recover(); r != nil {
-						logger.Errorf("Registered event handler - '%s' failed to process event due to error - '%v' ", ls.Name(), r)
+						logger.Errorf("Registered event listener - '%s' failed to process event due to error - '%v' ", ls.Name(), r)
 						logger.Errorf("StackTrace: %s", debug.Stack())
 					}
 				}()
 				err := ls.HandleEvent(fe)
 				if err != nil {
-					logger.Errorf("Registered event handler - '%s' failed to process event due to error - '%s' ", ls.Name(), err.Error())
+					logger.Errorf("Registered event listener - '%s' failed to process event due to error - '%s' ", ls.Name(), err.Error())
 				} else {
-					logger.Debugf("Event - '%s' is successfully delivered to event handler - '%s'", fe.eventType, ls.Name())
+					logger.Debugf("Event - '%s' is successfully delivered to event listener - '%s'", fe.eventType, ls.Name())
 				}
 			}()
 		}
 	}
 }
 
+func HasListener(eventType string) bool {
+	ls, ok := eventListeners[eventType]
+	return ok && len(ls) > 0
+}
+
 //TODO channel to be passed to actions
 // Puts event with given type and data on the channel
-func PublishEvent(eType string, event interface{}) {
-
-	ls, ok := eventListeners[eType]
-	if ok && len(ls) > 0 {
+func PostEvent(eType string, event interface{}) {
+	if HasListener(eType) {
 		evtContext := &EventContext{event: event, eventType: eType}
 		// Put event on the queue
 		eventQueue <- evtContext
