@@ -10,8 +10,7 @@ import (
 type EventListener interface {
 	// Returns name of the listener
 	Name() string
-	// Returns true if interested in given event
-	Interested(string) bool
+
 	// Called when matching event occurs
 	OnEvent(*EventContext) error
 }
@@ -107,43 +106,27 @@ func publishEvents() {
 	}
 }
 
-// Returns true if listener is registered for given event type
-// Event publishers should publish event only if listener is registered
-func HasListeners(eventType string) bool {
-	for _, ls := range eventListeners {
-		if ls.Interested(eventType) {
-			return true
-		}
-	}
-	return false
-}
-
 func publishEvent(fe *EventContext) {
 	for _, ls := range eventListeners {
-		// Find interested listeners
-		if ls.Interested(fe.eventType) {
-			func() {
-				defer func() {
-					if r := recover(); r != nil {
-						logger.Errorf("Registered event handler - '%s' failed to process event due to error - '%v' ", ls.Name(), r)
-						logger.Errorf("StackTrace: %s", debug.Stack())
-					}
-				}()
-				err := ls.OnEvent(fe)
-				if err != nil {
-					logger.Errorf("Registered event handler - '%s' failed to process event due to error - '%s' ", ls.Name(), err.Error())
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					logger.Errorf("Registered event handler - '%s' failed to process event due to error - '%v' ", ls.Name(), r)
+					logger.Errorf("StackTrace: %s", debug.Stack())
 				}
 			}()
-		}
+			err := ls.OnEvent(fe)
+			if err != nil {
+				logger.Errorf("Registered event handler - '%s' failed to process event due to error - '%s' ", ls.Name(), err.Error())
+			}
+		}()
 	}
 }
 
 //TODO channel to be passed to actions
 // Puts event with given type and data on the channel
 func PublishEvent(eType string, event interface{}) {
-	if HasListeners(eType) {
-		evtContext := &EventContext{event: event, eventType: eType}
-		// Put event on the queue
-		eventQueue <- evtContext
-	}
+	evtContext := &EventContext{event: event, eventType: eType}
+	// Put event on the queue
+	eventQueue <- evtContext
 }
