@@ -5,17 +5,21 @@ import (
 	"sync"
 	"runtime/debug"
 	"errors"
+	"strings"
 )
 
 type EventListener interface {
 	// Returns name of the listener
 	Name() string
 
+	// Returns list of event types interested in
+	EventTypes() []string
+
 	// Called when matching event occurs
-	OnEvent(*EventContext) error
+	HandleEvent(*EventContext) error
 }
 
-var eventListeners = make(map[string]EventListener)
+var eventListeners = make(map[string][]EventListener)
 
 // Buffered channel
 var eventQueue = make(chan *EventContext, 100)
@@ -28,13 +32,16 @@ var lock = &sync.RWMutex{}
 func RegisterEventListener(evtListener EventListener) error {
 	lock.Lock()
 	defer lock.Unlock()
-	_, exists := eventListeners[evtListener.Name()]
-	if exists {
-		return errors.New("Failed to register event listener. Listener already registered with given name.")
+
+	if len(evtListener.EventTypes()) == 0 {
+		return errors.New("Failed register event handler. At-least one event type must be configured.")
 	}
 
-	eventListeners[evtListener.Name()] = evtListener
-	logger.Debugf("Event Listener - '%s' successfully registered", evtListener.Name())
+	for _, eType := range evtListener.EventTypes() {
+		eventListeners[eType] = append(eventListeners[eType], evtListener)
+		logger.Debugf("Event Listener - '%s' successfully registered for event type - '%s'", evtListener.Name(), eType)
+	}
+
 	startPublisherRoutine()
 	return nil
 }
@@ -43,12 +50,36 @@ func RegisterEventListener(evtListener EventListener) error {
 func UnRegisterEventListener(name string) {
 	lock.Lock()
 	defer lock.Unlock()
-	_, exists := eventListeners[name]
-	if exists {
-		delete(eventListeners, name)
-		logger.Debugf("Event Listener - '%s' successfully unregistered", name)
-		stopPublisherRoutine()
+
+	var deleteList []string
+
+	for eType, elList := range eventListeners {
+		var index = -1
+		for i, el := range elList {
+			if strings.EqualFold(el.Name(), name) {
+				index = i
+				break
+			}
+		}
+		if index > -1 {
+			if len(elList) > 1 {
+				// More than one listeners. Just adjust slice
+				eventListeners[eType] = append(eventListeners[eType][:index], eventListeners[eType][index+1:]...)
+			} else {
+				// Single listener in the map. Remove map entry
+				deleteList = append(deleteList, eType)
+			}
+			logger.Debugf("Event Listener - '%s' successfully unregistered for event type - '%s'", name, eType)
+		}
 	}
+
+	if len(deleteList) > 0 {
+		for _, evtType := range deleteList {
+			delete(eventListeners, evtType)
+		}
+	}
+
+	stopPublisherRoutine()
 }
 
 func startPublisherRoutine() {
@@ -107,26 +138,34 @@ func publishEvents() {
 }
 
 func publishEvent(fe *EventContext) {
-	for _, ls := range eventListeners {
-		func() {
-			defer func() {
-				if r := recover(); r != nil {
-					logger.Errorf("Registered event handler - '%s' failed to process event due to error - '%v' ", ls.Name(), r)
-					logger.Errorf("StackTrace: %s", debug.Stack())
+	regListeners, ok := eventListeners[fe.eventType]
+	if ok {
+		for _, ls := range regListeners {
+			func() {
+				defer func() {
+					if r := recover(); r != nil {
+						logger.Errorf("Registered event handler - '%s' failed to process event due to error - '%v' ", ls.Name(), r)
+						logger.Errorf("StackTrace: %s", debug.Stack())
+					}
+				}()
+				err := ls.HandleEvent(fe)
+				if err != nil {
+					logger.Errorf("Registered event handler - '%s' failed to process event due to error - '%s' ", ls.Name(), err.Error())
+				} else {
+					logger.Debugf("Event - '%s' is successfully delivered to event handler - '%s'", fe.eventType, ls.Name())
 				}
 			}()
-			err := ls.OnEvent(fe)
-			if err != nil {
-				logger.Errorf("Registered event handler - '%s' failed to process event due to error - '%s' ", ls.Name(), err.Error())
-			}
-		}()
+		}
 	}
 }
 
 //TODO channel to be passed to actions
 // Puts event with given type and data on the channel
 func PublishEvent(eType string, event interface{}) {
-	evtContext := &EventContext{event: event, eventType: eType}
-	// Put event on the queue
-	eventQueue <- evtContext
+
+	if len(eventListeners[eType]) > 0 {
+		evtContext := &EventContext{event: event, eventType: eType}
+		// Put event on the queue
+		eventQueue <- evtContext
+	}
 }
