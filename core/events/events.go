@@ -76,8 +76,10 @@ func UnRegisterEventListener(name string, eventTypes ...string) {
 				}
 				if index > -1 {
 					if len(evtLs) > 1 {
-						// More than one listeners. Just adjust slice
-						eventListeners[eType] = append(eventListeners[eType][:index], eventListeners[eType][index+1:]...)
+						// More than one listeners
+						copy(evtLs[index:], evtLs[index+1:])
+						evtLs[len(evtLs)-1] = nil
+						eventListeners[eType] = evtLs[:len(evtLs)-1]
 					} else {
 						// Single listener in the map. Remove map entry
 						deleteList = append(deleteList, eType)
@@ -97,8 +99,10 @@ func UnRegisterEventListener(name string, eventTypes ...string) {
 			}
 			if index > -1 {
 				if len(elList) > 1 {
-					// More than one listeners. Just adjust slice
-					eventListeners[eType] = append(eventListeners[eType][:index], eventListeners[eType][index+1:]...)
+					// More than one listeners
+					copy(elList[index:], elList[index+1:])
+					elList[len(elList)-1] = nil
+					eventListeners[eType] = elList[:len(elList)-1]
 				} else {
 					// Single listener in the map. Remove map entry
 					deleteList = append(deleteList, eType)
