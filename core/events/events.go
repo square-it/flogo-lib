@@ -199,7 +199,8 @@ func publishEvent(fe *EventContext) {
 // Puts event with given type and data on the channel
 func PublishEvent(eType string, event interface{}) {
 
-	if len(eventListeners[eType]) > 0 {
+	ls, ok := eventListeners[eType]
+	if ok && len(ls) > 0 {
 		evtContext := &EventContext{event: event, eventType: eType}
 		// Put event on the queue
 		eventQueue <- evtContext
