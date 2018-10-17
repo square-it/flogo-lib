@@ -30,12 +30,16 @@ var lock = &sync.RWMutex{}
 
 // Registers listener for events
 func RegisterEventListener(evtListener EventListener) error {
-	lock.Lock()
-	defer lock.Unlock()
+	if evtListener == nil {
+		return errors.New("Event handler must not nil")
+	}
 
 	if len(evtListener.EventTypes()) == 0 {
 		return errors.New("Failed register event handler. At-least one event type must be configured.")
 	}
+
+	lock.Lock()
+	defer lock.Unlock()
 
 	for _, eType := range evtListener.EventTypes() {
 		eventListeners[eType] = append(eventListeners[eType], evtListener)
@@ -46,30 +50,62 @@ func RegisterEventListener(evtListener EventListener) error {
 	return nil
 }
 
-// Unregisters event listener
-func UnRegisterEventListener(name string) {
+// Unregisters event listener for given name.
+// Set eventType to unregister listener from specific event types
+func UnRegisterEventListener(name string, eventTypes ...string) {
+
+	if name == "" {
+		return
+	}
+
 	lock.Lock()
 	defer lock.Unlock()
 
 	var deleteList []string
+	var index = -1
 
-	for eType, elList := range eventListeners {
-		var index = -1
-		for i, el := range elList {
-			if strings.EqualFold(el.Name(), name) {
-				index = i
-				break
+	if len(eventTypes) > 0 {
+		for _, eType := range eventTypes {
+			evtLs, ok := eventListeners[eType]
+			if ok {
+				for i, el := range evtLs {
+					if strings.EqualFold(el.Name(), name) {
+						index = i
+						break
+					}
+				}
+				if index > -1 {
+					if len(evtLs) > 1 {
+						// More than one listeners. Just adjust slice
+						eventListeners[eType] = append(eventListeners[eType][:index], eventListeners[eType][index+1:]...)
+					} else {
+						// Single listener in the map. Remove map entry
+						deleteList = append(deleteList, eType)
+					}
+					logger.Debugf("Event Listener - '%s' successfully unregistered for event type - '%s'", name, eType)
+					index = -1
+				}
 			}
 		}
-		if index > -1 {
-			if len(elList) > 1 {
-				// More than one listeners. Just adjust slice
-				eventListeners[eType] = append(eventListeners[eType][:index], eventListeners[eType][index+1:]...)
-			} else {
-				// Single listener in the map. Remove map entry
-				deleteList = append(deleteList, eType)
+	} else {
+		for eType, elList := range eventListeners {
+			for i, el := range elList {
+				if strings.EqualFold(el.Name(), name) {
+					index = i
+					break
+				}
 			}
-			logger.Debugf("Event Listener - '%s' successfully unregistered for event type - '%s'", name, eType)
+			if index > -1 {
+				if len(elList) > 1 {
+					// More than one listeners. Just adjust slice
+					eventListeners[eType] = append(eventListeners[eType][:index], eventListeners[eType][index+1:]...)
+				} else {
+					// Single listener in the map. Remove map entry
+					deleteList = append(deleteList, eType)
+				}
+				logger.Debugf("Event Listener - '%s' successfully unregistered for event type - '%s'", name, eType)
+				index = -1
+			}
 		}
 	}
 
