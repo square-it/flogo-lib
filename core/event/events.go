@@ -162,6 +162,10 @@ func (ec *EventContext) GetType() string {
 }
 
 func publishEvents() {
+	defer func() {
+		publisherRoutineStarted = false
+	}()
+
 	for {
 		select {
 		case event := <-eventQueue:
@@ -204,7 +208,7 @@ func HasListener(eventType string) bool {
 //TODO channel to be passed to actions
 // Puts event with given type and data on the channel
 func PostEvent(eType string, event interface{}) {
-	if HasListener(eType) {
+	if publisherRoutineStarted && HasListener(eType) {
 		evtContext := &EventContext{event: event, eventType: eType}
 		// Put event on the queue
 		eventQueue <- evtContext
