@@ -20,6 +20,7 @@ const (
 	DATA_SECRET_KEY_DEFAULT       = "flogo"
 	ENV_APP_PROPERTY_OVERRIDE_KEY = "FLOGO_APP_PROPS_OVERRIDE"
 	ENV_APP_PROPERTY_RESOLVER_KEY = "FLOGO_APP_PROPS_VALUE_RESOLVER"
+	ENV_PUBLISH_AUDIT_EVENTS_KEY  = "FLOGO_PUBLISH_AUDIT_EVENTS"
 )
 
 var defaultLogLevel = LOG_LEVEL_DEFAULT
@@ -94,4 +95,13 @@ func GetAppPropertiesValueResolver() string {
 		return key
 	}
 	return ""
+}
+
+func PublishAuditEvents() bool {
+	key := os.Getenv(ENV_PUBLISH_AUDIT_EVENTS_KEY)
+	if len(key) > 0 {
+		publish, _ := strconv.ParseBool(key)
+		return publish
+	}
+	return true
 }
