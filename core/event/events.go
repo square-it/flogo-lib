@@ -36,13 +36,11 @@ func RegisterEventListener(evtListener EventListener, eventTypes []string) error
 	}
 
 	lock.Lock()
-	defer lock.Unlock()
-
 	for _, eType := range eventTypes {
 		eventListeners[eType] = append(eventListeners[eType], evtListener)
 		logger.Debugf("Event listener - '%s' successfully registered for event type - '%s'", evtListener.Name(), eType)
 	}
-
+	lock.Unlock()
 	startPublisherRoutine()
 	return nil
 }
@@ -56,7 +54,6 @@ func UnRegisterEventListener(name string, eventTypes []string) {
 	}
 
 	lock.Lock()
-	defer lock.Unlock()
 
 	var deleteList []string
 	var index = -1
@@ -116,6 +113,7 @@ func UnRegisterEventListener(name string, eventTypes []string) {
 		}
 	}
 
+	lock.Unlock()
 	stopPublisherRoutine()
 }
 
@@ -195,13 +193,17 @@ func publishEvent(fe *EventContext) {
 				} else {
 					logger.Debugf("Event - '%s' is successfully delivered to event listener - '%s'", fe.eventType, ls.Name())
 				}
+
 			}()
 		}
+		fe = nil
 	}
 }
 
 func HasListener(eventType string) bool {
+	lock.RLock()
 	ls, ok := eventListeners[eventType]
+	lock.RUnlock()
 	return ok && len(ls) > 0
 }
 
