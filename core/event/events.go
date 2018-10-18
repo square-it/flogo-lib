@@ -6,6 +6,7 @@ import (
 	"runtime/debug"
 	"errors"
 	"strings"
+	"github.com/TIBCOSoftware/flogo-lib/config"
 )
 
 type EventListener interface {
@@ -22,6 +23,7 @@ var eventListeners = make(map[string][]EventListener)
 var eventQueue = make(chan *EventContext, 100)
 var publisherRoutineStarted = false
 var shutdown = make(chan bool)
+var publishEventsEnabled = config.PublishAuditEvents()
 
 var lock = &sync.RWMutex{}
 
@@ -201,16 +203,21 @@ func publishEvent(fe *EventContext) {
 }
 
 func HasListener(eventType string) bool {
+	// event publishing is turned off
+	if !publishEventsEnabled {
+		return false
+	}
+
 	lock.RLock()
 	ls, ok := eventListeners[eventType]
 	lock.RUnlock()
-	return ok && len(ls) > 0
+	return  ok && len(ls) > 0
 }
 
 //TODO channel to be passed to actions
 // Puts event with given type and data on the channel
 func PostEvent(eType string, event interface{}) {
-	if publisherRoutineStarted && HasListener(eType) {
+	if publishEventsEnabled && publisherRoutineStarted && HasListener(eType) {
 		evtContext := &EventContext{event: event, eventType: eType}
 		// Put event on the queue
 		eventQueue <- evtContext
