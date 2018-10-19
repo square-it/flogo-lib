@@ -2,6 +2,7 @@ package direction
 
 import (
 	"errors"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"reflect"
 	"strconv"
 	"strings"
@@ -13,7 +14,6 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/gocc/token"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/funcexprtype"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 var log = logger.GetLogger("expression-direction")
@@ -22,7 +22,6 @@ type Attribute interface{}
 
 func NewDoubleQuoteStringLit(lit interface{}) (string, error) {
 	str := strings.TrimSpace(string(lit.(*token.Token).Lit))
-	log.Debugf("New double qutoes [%s]", str)
 
 	if str != "" && len(str) > 0 {
 		str = RemoveQuote(str)
@@ -32,14 +31,11 @@ func NewDoubleQuoteStringLit(lit interface{}) (string, error) {
 		str = strings.Replace(str, "\\\"", "\"", -1)
 	}
 
-	log.Debugf("Final double qutoes [%s]", str)
-
 	return str, nil
 }
 
 func NewSingleQuoteStringLit(lit interface{}) (string, error) {
 	str := strings.TrimSpace(string(lit.(*token.Token).Lit))
-	log.Debugf("New single qutoe [%s]", str)
 
 	if str != "" && len(str) > 0 {
 		str = RemoveQuote(str)
@@ -49,8 +45,6 @@ func NewSingleQuoteStringLit(lit interface{}) (string, error) {
 	if strings.Contains(str, "\\'") {
 		str = strings.Replace(str, "\\'", "'", -1)
 	}
-
-	log.Debugf("Final single qutoe [%s]", str)
 
 	return str, nil
 }
@@ -82,7 +76,6 @@ func NewNilLit(lit interface{}) (*NIL, error) {
 
 func NewMappingRef(lit interface{}) (interface{}, error) {
 	s := strings.TrimSpace(string(lit.(*token.Token).Lit))
-	log.Debugf("New mapping ref and value [%s]", s)
 	if strings.HasPrefix(s, "$.") || strings.HasPrefix(s, "$$") {
 		m := ref.NewArrayRef(s)
 		return m, nil
@@ -93,8 +86,6 @@ func NewMappingRef(lit interface{}) (interface{}, error) {
 }
 
 func NewFunction(name Attribute, parameters Attribute) (interface{}, error) {
-	log.Debugf("New function name type [%s] and parameter type [%s]:", reflect.TypeOf(name), reflect.TypeOf(parameters))
-
 	f_func := &function.FunctionExp{}
 	to := name.(*token.Token)
 	f_func.Name = string(to.Lit)
@@ -109,11 +100,12 @@ func NewFunction(name Attribute, parameters Attribute) (interface{}, error) {
 			}
 		}
 	}
+
+	log.Debug(f_func.Tostring())
 	return f_func, nil
 }
 
 func NewArgument(a Attribute) (interface{}, error) {
-	log.Debugf("New Argument and type [%s]", reflect.TypeOf(a))
 	param := &function.Parameter{}
 	parameters := []*function.Parameter{}
 	switch t := a.(type) {
@@ -177,7 +169,6 @@ func exprFieldToArgument(ex *expr.Expression, param *function.Parameter) {
 }
 
 func NewArguments(as ...Attribute) (interface{}, error) {
-	log.Debugf("New Arguments and type [%s]", reflect.TypeOf(as))
 	parameters := []*function.Parameter{}
 	for _, a := range as {
 		param := &function.Parameter{}
@@ -220,14 +211,11 @@ func NewArguments(as ...Attribute) (interface{}, error) {
 }
 
 func NewExpressionField(a Attribute) (interface{}, error) {
-	log.Debugf("New Expression field [%+v] and type [%s]", a, reflect.TypeOf(a))
 	expression := getExpression(a)
 	return expression, nil
 }
 
 func NewExpression(left Attribute, op Attribute, right Attribute) (interface{}, error) {
-	log.Debugf("New Expression and operator [%s]", string(op.(*token.Token).Lit))
-
 	expression := expr.NewExpression()
 	operator, found := expr.ToOperator(strings.TrimSpace(string(op.(*token.Token).Lit)))
 	if found {
@@ -239,6 +227,7 @@ func NewExpression(left Attribute, op Attribute, right Attribute) (interface{}, 
 	expression.Left = getExpression(left)
 	expression.Right = getExpression(right)
 	expression.Type = funcexprtype.EXPRESSION
+	log.Debugf("New expression left [%+v] right [%s+v and operator [%s]", expression.Left, expression.Right, expression.Operator)
 	return expression, nil
 }
 

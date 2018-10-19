@@ -1,6 +1,7 @@
 package function
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"reflect"
@@ -72,10 +73,7 @@ func (p *Parameter) IsEmtpy() bool {
 }
 
 func (p *Parameter) IsFunction() bool {
-	if funcexprtype.FUNCTION == p.Type {
-		return true
-	}
-	return false
+	return funcexprtype.FUNCTION == p.Type
 }
 
 func (f *FunctionExp) Eval() (interface{}, error) {
@@ -142,10 +140,7 @@ func (f *FunctionExp) getMethod() (reflect.Value, error) {
 	}
 
 	method := value.MethodByName("Eval")
-	if method.IsValid() {
-		logrus.Debug("valid")
-	} else {
-		logrus.Debug("invalid")
+	if !method.IsValid() {
 		method = ptr.MethodByName("Eval")
 		if !method.IsValid() {
 			logrus.Debug("invalid also, ", f.Name)
@@ -157,11 +152,16 @@ func (f *FunctionExp) getMethod() (reflect.Value, error) {
 	return method, nil
 }
 
-func convertToFunctionName(name string) string {
-	if name != "" {
-		return strings.Title(name)
+func (f *FunctionExp) Tostring() string {
+	var buffer bytes.Buffer
+
+	buffer.WriteString(fmt.Sprintf("function name [%s] ", f.Name))
+	for i, param := range f.Params {
+		if param != nil {
+			buffer.WriteString(fmt.Sprintf(" parameter [%d]'s type [%s] and value [%+v]", i, param.Type, param.Value))
+		}
 	}
-	return name
+	return buffer.String()
 }
 
 func (f *FunctionExp) callFunction(fdata interface{}, inputScope data.Scope, resolver data.Resolver) (results reflect.Value, err error) {
@@ -184,11 +184,11 @@ func (f *FunctionExp) callFunction(fdata interface{}, inputScope data.Scope, res
 			if err != nil {
 				return reflect.Value{}, err
 			}
+			logrus.Debugf("function [%s] [%d]'s argument type [%s] and value [%+v]", f.Name, i, p.Type, result)
 			inputs = append(inputs, result)
 		} else {
 			if !p.IsEmtpy() {
 				if p.Type == funcexprtype.REF {
-					logrus.Debug("Mapping ref field should done before eval function.")
 					var field *ref.MappingRef
 					switch p.Value.(type) {
 					case string:
@@ -196,7 +196,6 @@ func (f *FunctionExp) callFunction(fdata interface{}, inputScope data.Scope, res
 					case *ref.MappingRef:
 						field = p.Value.(*ref.MappingRef)
 					}
-					//TODO
 					if inputScope == nil {
 						p.Value = field.GetRef()
 					} else {
@@ -209,7 +208,6 @@ func (f *FunctionExp) callFunction(fdata interface{}, inputScope data.Scope, res
 					}
 
 				} else if p.Type == funcexprtype.ARRAYREF {
-					logrus.Debug("Mapping ref field should done before eval function.")
 					var field *ref.ArrayRef
 					switch p.Value.(type) {
 					case string:
@@ -241,6 +239,8 @@ func (f *FunctionExp) callFunction(fdata interface{}, inputScope data.Scope, res
 
 					}
 				}
+
+				logrus.Debugf("function [%s] [%d]'s argument type [%s] and value [%+v]", f.Name, i, p.Type, p.Value)
 				if p.Value != nil {
 					inputs = append(inputs, reflect.ValueOf(p.Value))
 				} else {

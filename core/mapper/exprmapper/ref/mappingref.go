@@ -8,7 +8,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
-var log = logger.GetLogger("MappingRef")
+var log = logger.GetLogger("mapping-string")
 
 type MappingRef struct {
 	ref string
@@ -27,7 +27,7 @@ func (m *MappingRef) GetRef() string {
 }
 
 func (m *MappingRef) Eval(inputScope data.Scope, resovler data.Resolver) (interface{}, error) {
-	log.Debugf("Eval mapping field and ref: %s", m.ref)
+	log.Debugf("Eval mapping field %s", m.ref)
 
 	if inputScope == nil {
 		return nil, errors.New("Input scope cannot nil while eval mapping ref")
@@ -37,7 +37,7 @@ func (m *MappingRef) Eval(inputScope data.Scope, resovler data.Resolver) (interf
 		log.Errorf("Get From from ref error %+v", err)
 	}
 
-	log.Debugf("Mapping ref eval result: %+v", value)
+	log.Debugf("Eval mapping field result: %+v", value)
 	return value, err
 
 }

@@ -242,22 +242,18 @@ func (e *Expression) IsFunction() bool {
 }
 
 func (f *Expression) Eval() (interface{}, error) {
-	log.Debug("Expression eval method....")
 	return f.evaluate(nil, nil, nil)
 }
 
 func (f *Expression) EvalWithScope(inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
-	log.Debug("Expression eval method....")
 	return f.evaluate(nil, inputScope, resolver)
 }
 
 func (f *Expression) EvalWithData(data interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
-	log.Debug("Expression eval method....")
 	return f.evaluate(data, inputScope, resolver)
 }
 
 func (f *Expression) evaluate(data interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
-	log.Debug("Expression evaluate method....")
 	//Left
 	leftResultChan := make(chan interface{}, 1)
 	rightResultChan := make(chan interface{}, 1)
@@ -265,6 +261,7 @@ func (f *Expression) evaluate(data interface{}, inputScope data.Scope, resolver 
 		log.Debugf("Expression right and left are nil, return value directly")
 		return f.Value, nil
 	}
+
 	go f.Left.do(data, inputScope, resolver, leftResultChan)
 	go f.Right.do(data, inputScope, resolver, rightResultChan)
 
@@ -281,9 +278,6 @@ func (f *Expression) evaluate(data interface{}, inputScope data.Scope, resolver 
 	case error:
 		return nil, rightValue.(error)
 	}
-
-	log.Debugf("Left value ", leftValue, " Type ", reflect.TypeOf(leftValue))
-	log.Debugf("Right value ", rightValue, " Type ", reflect.TypeOf(rightValue))
 	//Operator
 	operator := f.Operator
 
@@ -294,7 +288,6 @@ func (f *Expression) do(edata interface{}, inputScope data.Scope, resolver data.
 	if f == nil {
 		resultChan <- nil
 	}
-	log.Debug("Do left and expression ", f)
 	var leftValue interface{}
 	if f.IsFunction() {
 		funct := f.Value.(*function.FunctionExp)
@@ -377,7 +370,7 @@ func (f *Expression) run(left interface{}, op OPERATIOR, right interface{}) (int
 }
 
 func equals(left interface{}, right interface{}) (bool, error) {
-	log.Debugf("Left expression value %+v, right expression value %+v", left, right)
+	log.Debugf("Equals condition -> left expression value %+v, right expression value %+v", left, right)
 	if left == nil && right == nil {
 		return true, nil
 	} else if left == nil && right != nil {
@@ -391,7 +384,7 @@ func equals(left interface{}, right interface{}) (bool, error) {
 		return false, err
 	}
 
-	log.Debugf("Right expression value [%s]", rightValue)
+	log.Debugf("Equals condition -> right expression value [%s]", rightValue)
 
 	return leftValue == rightValue, nil
 }
@@ -455,7 +448,7 @@ func ConvertToSameType(left interface{}, right interface{}) (interface{}, interf
 
 func notEquals(left interface{}, right interface{}) (bool, error) {
 
-	log.Debugf("Left expression value %+v, right expression value %+v", left, right)
+	log.Debugf("Not equals condition -> left expression value %+v, right expression value %+v", left, right)
 	if left == nil && right == nil {
 		return false, nil
 	} else if left == nil && right != nil {
@@ -469,7 +462,7 @@ func notEquals(left interface{}, right interface{}) (bool, error) {
 		return false, err
 	}
 
-	log.Debugf("Right expression value [%s]", rightValue)
+	log.Debugf("Not equals condition -> right expression value [%s]", rightValue)
 
 	return leftValue != rightValue, nil
 
@@ -477,7 +470,7 @@ func notEquals(left interface{}, right interface{}) (bool, error) {
 
 func gt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 
-	log.Debugf("Left expression value %+v, right expression value %+v", left, right)
+	log.Debugf("Greater than condition -> left expression value %+v, right expression value %+v", left, right)
 	if left == nil && right == nil {
 		return false, nil
 	} else if left == nil && right != nil {
@@ -486,7 +479,7 @@ func gt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 		return false, nil
 	}
 
-	log.Debugf("Left value [%+v] and Right value: [%+v]", left, right)
+	log.Debugf("Greater than condition -> right value [%+v] and Right value: [%+v]", left, right)
 	rightType := getType(right)
 	switch le := left.(type) {
 	case int:
@@ -551,7 +544,7 @@ func gt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 
 func lt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 
-	log.Debugf("Left expression value %+v, right expression value %+v", left, right)
+	log.Debugf("Less than condition -> left expression value %+v, right expression value %+v", left, right)
 	if left == nil && right == nil {
 		return false, nil
 	} else if left == nil && right != nil {
@@ -621,7 +614,7 @@ func lt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 
 func add(left interface{}, right interface{}) (bool, error) {
 
-	log.Infof("Add operator, Left expression value %+v, right expression value %+v", left, right)
+	log.Infof("Add condition -> left expression value %+v, right expression value %+v", left, right)
 
 	switch le := left.(type) {
 	case bool:
@@ -639,7 +632,7 @@ func add(left interface{}, right interface{}) (bool, error) {
 
 func or(left interface{}, right interface{}) (bool, error) {
 
-	log.Infof("Add operator, Left expression value %+v, right expression value %+v", left, right)
+	log.Infof("Or condition -> left expression value %+v, right expression value %+v", left, right)
 	switch le := left.(type) {
 	case bool:
 		rightValue, err := data.CoerceToBoolean(right)
@@ -656,7 +649,7 @@ func or(left interface{}, right interface{}) (bool, error) {
 
 func additon(left interface{}, right interface{}) (interface{}, error) {
 
-	log.Infof("Left expression value %+v, right expression value %+v", left, right)
+	log.Infof("Addition condition -> left expression value %+v, right expression value %+v", left, right)
 	if left == nil && right == nil {
 		return false, nil
 	} else if left == nil && right != nil {
@@ -708,7 +701,7 @@ func additon(left interface{}, right interface{}) (interface{}, error) {
 
 func sub(left interface{}, right interface{}) (interface{}, error) {
 
-	log.Debugf("Left expression value %+v, right expression value %+v", left, right)
+	log.Debugf("Sub condition -> left expression value %+v, right expression value %+v", left, right)
 	if left == nil && right == nil {
 		return false, nil
 	} else if left == nil && right != nil {
@@ -760,7 +753,7 @@ func sub(left interface{}, right interface{}) (interface{}, error) {
 
 func multiplication(left interface{}, right interface{}) (interface{}, error) {
 
-	log.Infof("Left expression value %+v, right expression value %+v", left, right)
+	log.Infof("Multiplication condition -> left expression value %+v, right expression value %+v", left, right)
 	if left == nil && right == nil {
 		return false, nil
 	} else if left == nil && right != nil {
@@ -812,7 +805,7 @@ func multiplication(left interface{}, right interface{}) (interface{}, error) {
 
 func div(left interface{}, right interface{}) (interface{}, error) {
 
-	log.Debugf("Left expression value %+v, right expression value %+v", left, right)
+	log.Debugf("Div condition -> left expression value %+v, right expression value %+v", left, right)
 	if left == nil && right == nil {
 		return false, nil
 	} else if left == nil && right != nil {
