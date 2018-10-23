@@ -57,8 +57,6 @@ func GetFieldValue(data interface{}, mappingField *field.MappingField) (interfac
 }
 
 func handleGetValue(jsonData *JSONData, fields []string) (interface{}, error) {
-
-	log.Debugf("All fields %+v", fields)
 	jsonData.rw.Lock()
 	defer jsonData.rw.Unlock()
 

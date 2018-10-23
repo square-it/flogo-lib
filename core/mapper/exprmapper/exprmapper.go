@@ -46,12 +46,14 @@ func GetExpresssionValue(mappingV interface{}, inputScope data.Scope, resolver d
 	exp, err := expression.ParseExpression(mappingValue)
 	if err == nil {
 		//flogo expression
+		log.Debugf("[%s] is an valid expression", mappingValue)
 		expValue, err := exp.EvalWithScope(inputScope, resolver)
 		if err != nil {
 			return nil, fmt.Errorf("Execution failed for mapping [%s] due to error - %s", mappingValue, err.Error())
 		}
 		return expValue, nil
 	} else {
+		log.Debugf("[%s] is not an expression, take it as assign", mappingValue)
 		return assign.GetMappingValue(mappingV, inputScope, resolver)
 	}
 }
