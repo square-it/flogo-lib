@@ -348,6 +348,7 @@ func (f *Expression) run(left interface{}, op OPERATIOR, right interface{}) (int
 	case MULTIPLICATION:
 		return multiplication(left, right)
 	case DIVISION:
+		//TODO
 		return div(left, right)
 	case INT_DIVISTION:
 		//TODO....
@@ -398,17 +399,34 @@ func ConvertToSameType(left interface{}, right interface{}) (interface{}, interf
 	var err error
 	switch t := left.(type) {
 	case int:
-		rightValue, err = data.CoerceToInteger(right)
-		if err != nil {
-			err = fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+		if isDoubleType(right) {
+			leftValue, err = data.CoerceToDouble(left)
+			if err != nil {
+				err = fmt.Errorf("Convert left expression to type float64 failed, due to %s", err.Error())
+			}
+			rightValue = right
+		} else {
+			rightValue, err = data.CoerceToInteger(right)
+			if err != nil {
+				err = fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+			}
+			leftValue = t
 		}
-		leftValue = t
+
 	case int64:
-		rightValue, err = data.CoerceToInteger(right)
-		if err != nil {
-			err = fmt.Errorf("Convert right expression to type int64 failed, due to %s", err.Error())
+		if isDoubleType(right) {
+			leftValue, err = data.CoerceToDouble(left)
+			if err != nil {
+				err = fmt.Errorf("Convert left expression to type float64 failed, due to %s", err.Error())
+			}
+			rightValue = right
+		} else {
+			rightValue, err = data.CoerceToInteger(right)
+			if err != nil {
+				err = fmt.Errorf("Convert right expression to type int64 failed, due to %s", err.Error())
+			}
+			leftValue = t
 		}
-		leftValue = t
 	case float64:
 		rightValue, err = data.CoerceToNumber(right)
 		if err != nil {
@@ -483,28 +501,59 @@ func gt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 	rightType := getType(right)
 	switch le := left.(type) {
 	case int:
-		//We should conver to int first
-		rightValue, err := data.CoerceToInteger(right)
-		if err != nil {
-			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
-		}
-		if includeEquals {
-			return le >= rightValue, nil
+		//For int float compare, convert int to float to compare
+		if isDoubleType(right) {
+			leftValue, err := data.CoerceToDouble(left)
+			if err != nil {
+				err = fmt.Errorf("Convert left expression to type float64 failed, due to %s", err.Error())
+			}
+			rightValue := right.(float64)
+			if includeEquals {
+				return leftValue >= rightValue, nil
+
+			} else {
+				return leftValue > rightValue, nil
+			}
 
 		} else {
-			return le > rightValue, nil
+			//We should conver to int first
+			rightValue, err := data.CoerceToInteger(right)
+			if err != nil {
+				return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+			}
+			if includeEquals {
+				return le >= rightValue, nil
+
+			} else {
+				return le > rightValue, nil
+			}
 		}
 
 	case int64:
-		rightValue, err := data.CoerceToInteger(right)
-		if err != nil {
-			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
-		}
-		if includeEquals {
-			return int(le) >= rightValue, nil
+		if isDoubleType(right) {
+			leftValue, err := data.CoerceToDouble(left)
+			if err != nil {
+				err = fmt.Errorf("Convert left expression to type float64 failed, due to %s", err.Error())
+			}
+			rightValue := right.(float64)
+			if includeEquals {
+				return leftValue >= rightValue, nil
+
+			} else {
+				return leftValue > rightValue, nil
+			}
 
 		} else {
-			return int(le) > rightValue, nil
+			rightValue, err := data.CoerceToInteger(right)
+			if err != nil {
+				return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+			}
+			if includeEquals {
+				return int(le) >= rightValue, nil
+
+			} else {
+				return int(le) > rightValue, nil
+			}
 		}
 	case float64:
 		rightValue, err := data.CoerceToNumber(right)
@@ -555,26 +604,54 @@ func lt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 
 	switch le := left.(type) {
 	case int:
-		rightValue, err := data.CoerceToInteger(right)
-		if err != nil {
-			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
-		}
-		if includeEquals {
-			return le <= rightValue, nil
+		if isDoubleType(right) {
+			leftValue, err := data.CoerceToDouble(left)
+			if err != nil {
+				err = fmt.Errorf("Convert left expression to type float64 failed, due to %s", err.Error())
+			}
+			rightValue := right.(float64)
+			if includeEquals {
+				return leftValue <= rightValue, nil
 
+			} else {
+				return leftValue < rightValue, nil
+			}
 		} else {
-			return le < rightValue, nil
+			rightValue, err := data.CoerceToInteger(right)
+			if err != nil {
+				return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+			}
+			if includeEquals {
+				return le <= rightValue, nil
+
+			} else {
+				return le < rightValue, nil
+			}
 		}
 	case int64:
-		rightValue, err := data.CoerceToInteger(right)
-		if err != nil {
-			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
-		}
-		if includeEquals {
-			return int(le) <= rightValue, nil
+		if isDoubleType(right) {
+			leftValue, err := data.CoerceToDouble(left)
+			if err != nil {
+				err = fmt.Errorf("Convert left expression to type float64 failed, due to %s", err.Error())
+			}
+			rightValue := right.(float64)
+			if includeEquals {
+				return leftValue <= rightValue, nil
 
+			} else {
+				return leftValue < rightValue, nil
+			}
 		} else {
-			return int(le) < rightValue, nil
+			rightValue, err := data.CoerceToInteger(right)
+			if err != nil {
+				return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+			}
+			if includeEquals {
+				return int(le) <= rightValue, nil
+
+			} else {
+				return int(le) < rightValue, nil
+			}
 		}
 	case float64:
 		rightValue, err := data.CoerceToNumber(right)
@@ -660,20 +737,37 @@ func additon(left interface{}, right interface{}) (interface{}, error) {
 
 	switch le := left.(type) {
 	case int:
-		rightValue, err := data.CoerceToInteger(right)
-		if err != nil {
-			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
-		}
+		if isDoubleType(right) {
+			leftValue, err := data.CoerceToDouble(left)
+			if err != nil {
+				err = fmt.Errorf("Convert left expression to type float64 failed, due to %s", err.Error())
+			}
+			rightValue := right.(float64)
+			return leftValue + rightValue, nil
+		} else {
+			rightValue, err := data.CoerceToInteger(right)
+			if err != nil {
+				return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+			}
 
-		return le + rightValue, nil
+			return le + rightValue, nil
+		}
 
 	case int64:
-		rightValue, err := data.CoerceToInteger(right)
-		if err != nil {
-			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+		if isDoubleType(right) {
+			leftValue, err := data.CoerceToDouble(left)
+			if err != nil {
+				err = fmt.Errorf("Convert left expression to type float64 failed, due to %s", err.Error())
+			}
+			rightValue := right.(float64)
+			return leftValue + rightValue, nil
+		} else {
+			rightValue, err := data.CoerceToInteger(right)
+			if err != nil {
+				return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+			}
+			return int(le) + rightValue, nil
 		}
-
-		return int(le) + rightValue, nil
 	case float64:
 		rightValue, err := data.CoerceToNumber(right)
 		if err != nil {
@@ -712,19 +806,35 @@ func sub(left interface{}, right interface{}) (interface{}, error) {
 
 	switch le := left.(type) {
 	case int:
-		rightValue, err := data.CoerceToInteger(right)
-		if err != nil {
-			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+		if isDoubleType(right) {
+			leftValue, err := data.CoerceToDouble(left)
+			if err != nil {
+				err = fmt.Errorf("Convert left expression to type float64 failed, due to %s", err.Error())
+			}
+			rightValue := right.(float64)
+			return leftValue - rightValue, nil
+		} else {
+			rightValue, err := data.CoerceToInteger(right)
+			if err != nil {
+				return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+			}
+			return le - rightValue, nil
 		}
-
-		return le - rightValue, nil
 	case int64:
-		rightValue, err := data.CoerceToInteger(right)
-		if err != nil {
-			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+		if isDoubleType(right) {
+			leftValue, err := data.CoerceToDouble(left)
+			if err != nil {
+				err = fmt.Errorf("Convert left expression to type float64 failed, due to %s", err.Error())
+			}
+			rightValue := right.(float64)
+			return leftValue - rightValue, nil
+		} else {
+			rightValue, err := data.CoerceToInteger(right)
+			if err != nil {
+				return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+			}
+			return int(le) - rightValue, nil
 		}
-
-		return int(le) - rightValue, nil
 	case float64:
 		rightValue, err := data.CoerceToNumber(right)
 		if err != nil {
@@ -764,19 +874,36 @@ func multiplication(left interface{}, right interface{}) (interface{}, error) {
 
 	switch le := left.(type) {
 	case int:
-		rightValue, err := data.CoerceToInteger(right)
-		if err != nil {
-			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+		if isDoubleType(right) {
+			leftValue, err := data.CoerceToDouble(left)
+			if err != nil {
+				err = fmt.Errorf("Convert left expression to type float64 failed, due to %s", err.Error())
+			}
+			rightValue := right.(float64)
+			return leftValue * rightValue, nil
+		} else {
+			rightValue, err := data.CoerceToInteger(right)
+			if err != nil {
+				return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+			}
+			return le * rightValue, nil
 		}
-
-		return le * rightValue, nil
 	case int64:
-		rightValue, err := data.CoerceToInteger(right)
-		if err != nil {
-			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
-		}
+		if isDoubleType(right) {
+			leftValue, err := data.CoerceToDouble(left)
+			if err != nil {
+				err = fmt.Errorf("Convert left expression to type float64 failed, due to %s", err.Error())
+			}
+			rightValue := right.(float64)
+			return leftValue * rightValue, nil
+		} else {
+			rightValue, err := data.CoerceToInteger(right)
+			if err != nil {
+				return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
+			}
 
-		return int(le) * rightValue, nil
+			return int(le) * rightValue, nil
+		}
 	case float64:
 		rightValue, err := data.CoerceToNumber(right)
 		if err != nil {
@@ -854,4 +981,12 @@ func div(left interface{}, right interface{}) (interface{}, error) {
 
 func getType(in interface{}) reflect.Type {
 	return reflect.TypeOf(in)
+}
+
+func isDoubleType(in interface{}) bool {
+	switch in.(type) {
+	case float64:
+		return true
+	}
+	return false
 }

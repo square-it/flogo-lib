@@ -804,6 +804,49 @@ func TestExpressionWithNegtiveNumber(t *testing.T) {
 	assert.Equal(t, true, v)
 }
 
+func TestFloatWithInt(t *testing.T) {
+	expr, _ := ParseExpression("1 == 1.23")
+	fmt.Println(fmt.Sprintf("%+v", expr))
+	i, err := expr.Eval()
+	if err != nil {
+		t.Fatalf("error %s\n", err)
+	}
+	res := i.(bool)
+	if res {
+		t.Errorf("Expected false, got : %t\n ", res)
+	}
+
+	expr, _ = ParseExpression("1 < 1.23")
+	i, err = expr.Eval()
+	if err != nil {
+		t.Fatalf("error %s\n", err)
+	}
+	res = i.(bool)
+	if !res {
+		t.Errorf("Expected true, got : %t\n ", res)
+	}
+
+	expr, _ = ParseExpression("1.23 == 1")
+	i, err = expr.Eval()
+	if err != nil {
+		t.Fatalf("error %s\n", err)
+	}
+	res = i.(bool)
+	if res {
+		t.Errorf("Expected false, got : %t\n ", res)
+	}
+
+	expr, _ = ParseExpression("1.23 > 1")
+	i, err = expr.Eval()
+	if err != nil {
+		t.Fatalf("error %s\n", err)
+	}
+	res = i.(bool)
+	if !res {
+		t.Errorf("Expected true, got : %t\n ", res)
+	}
+}
+
 func GetSimpleScope(name, value string) data.Scope {
 	a, _ := data.NewAttribute(name, data.TypeObject, value)
 	maps := make(map[string]*data.Attribute)
