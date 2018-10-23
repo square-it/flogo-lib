@@ -804,7 +804,7 @@ func TestExpressionWithNegtiveNumber(t *testing.T) {
 	assert.Equal(t, true, v)
 }
 
-func Test_Eval(t *testing.T) {
+func TestFloatWithInt(t *testing.T) {
 	expr, _ := ParseExpression("1 == 1.23")
 	fmt.Println(fmt.Sprintf("%+v", expr))
 	i, err := expr.Eval()
@@ -815,39 +815,33 @@ func Test_Eval(t *testing.T) {
 	if res {
 		t.Errorf("Expected false, got : %t\n ", res)
 	}
-}
 
-func Test_Eval2(t *testing.T) {
-	expr, _ := ParseExpression("1 < 1.23")
-	i, err := expr.Eval()
+	expr, _ = ParseExpression("1 < 1.23")
+	i, err = expr.Eval()
 	if err != nil {
 		t.Fatalf("error %s\n", err)
 	}
-	res := i.(bool)
+	res = i.(bool)
 	if !res {
 		t.Errorf("Expected true, got : %t\n ", res)
 	}
-}
 
-func Test_Eval3(t *testing.T) {
-	expr, _ := ParseExpression("1.23 == 1")
-	i, err := expr.Eval()
+	expr, _ = ParseExpression("1.23 == 1")
+	i, err = expr.Eval()
 	if err != nil {
 		t.Fatalf("error %s\n", err)
 	}
-	res := i.(bool)
+	res = i.(bool)
 	if res {
 		t.Errorf("Expected false, got : %t\n ", res)
 	}
-}
 
-func Test_Eval4(t *testing.T) {
-	expr, _ := ParseExpression("1.23 > 1")
-	i, err := expr.Eval()
+	expr, _ = ParseExpression("1.23 > 1")
+	i, err = expr.Eval()
 	if err != nil {
 		t.Fatalf("error %s\n", err)
 	}
-	res := i.(bool)
+	res = i.(bool)
 	if !res {
 		t.Errorf("Expected true, got : %t\n ", res)
 	}
