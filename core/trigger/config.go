@@ -26,6 +26,20 @@ func (c *Config) FixUp(metadata *Metadata) {
 		c.Output = c.Outputs
 	}
 
+	for k, v := range c.Settings {
+		strValue, ok := v.(string)
+		if ok {
+			if strValue != "" && strValue[0] == '$' {
+				// Let resolver resolve value
+				val, err := data.GetBasicResolver().Resolve(strValue, nil)
+				if err != nil {
+					val = strValue
+				}
+				c.Settings[k] = val
+			}
+		}
+	}
+
 	// fix up top-level outputs
 	for name, value := range c.Output {
 
@@ -59,6 +73,19 @@ func (c *Config) FixUp(metadata *Metadata) {
 			hc.Output = hc.Outputs
 		}
 
+		for k, v := range hc.Settings {
+			strValue, ok := v.(string)
+			if ok {
+				if strValue != "" && strValue[0] == '$' {
+					// Let resolver resolve value
+					val, err := data.GetBasicResolver().Resolve(strValue, nil)
+					if err != nil {
+						val = strValue
+					}
+					hc.Settings[k] = val
+				}
+			}
+		}
 		// fix up outputs
 		for name, value := range hc.Output {
 
@@ -79,13 +106,7 @@ func (c *Config) FixUp(metadata *Metadata) {
 
 func (c *Config) GetSetting(setting string) string {
 
-	val, exists := data.GetValueWithResolver(c.Settings, setting)
-
-	if !exists {
-		return ""
-	}
-
-	strVal, err := data.CoerceToString(val)
+	strVal, err := data.CoerceToString(c.Settings[setting])
 
 	if err != nil {
 		return ""
@@ -96,7 +117,7 @@ func (c *Config) GetSetting(setting string) string {
 
 type HandlerConfig struct {
 	parent   *Config
-	Name     string `json:"name,omitempty"`
+	Name     string                 `json:"name,omitempty"`
 	Settings map[string]interface{} `json:"settings"`
 	Output   map[string]interface{} `json:"output"`
 	Action   *ActionConfig
@@ -124,13 +145,7 @@ type ActionConfig struct {
 
 func (hc *HandlerConfig) GetSetting(setting string) string {
 
-	val, exists := data.GetValueWithResolver(hc.Settings, setting)
-
-	if !exists {
-		return ""
-	}
-
-	strVal, err := data.CoerceToString(val)
+	strVal, err := data.CoerceToString(hc.Settings[setting])
 
 	if err != nil {
 		return ""
