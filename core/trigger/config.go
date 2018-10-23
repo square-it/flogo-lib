@@ -106,13 +106,7 @@ func (c *Config) FixUp(metadata *Metadata) {
 
 func (c *Config) GetSetting(setting string) string {
 
-	val, exists := data.GetValueWithResolver(c.Settings, setting)
-
-	if !exists {
-		return ""
-	}
-
-	strVal, err := data.CoerceToString(val)
+	strVal, err := data.CoerceToString(c.Settings[setting])
 
 	if err != nil {
 		return ""
@@ -151,13 +145,7 @@ type ActionConfig struct {
 
 func (hc *HandlerConfig) GetSetting(setting string) string {
 
-	val, exists := data.GetValueWithResolver(hc.Settings, setting)
-
-	if !exists {
-		return ""
-	}
-
-	strVal, err := data.CoerceToString(val)
+	strVal, err := data.CoerceToString(hc.Settings[setting])
 
 	if err != nil {
 		return ""
