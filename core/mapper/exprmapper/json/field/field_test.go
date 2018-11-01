@@ -62,6 +62,34 @@ func TestGetAllSpecialFields(t *testing.T) {
 	assert.Equal(t, []string{"Object", "Maps3", "dd.cc[0]", "y.x", "d.d", "name"}, res)
 }
 
+func TestApostoph(t *testing.T) {
+	path := `["'apostoph"]`
+	res, err := GetAllspecialFields(path)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"'apostoph"}, res)
+
+	path = `[''apostoph']`
+	res, err = GetAllspecialFields(path)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"'apostoph"}, res)
+
+	path = `['"apo"stoph"']`
+	res, err = GetAllspecialFields(path)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{`"apo"stoph"`}, res)
+
+	path = `["apo'"stoph''"]`
+	res, err = GetAllspecialFields(path)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{`apo'"stoph''`}, res)
+
+	path = "[\"apo`stoph\"]"
+	res, err = GetAllspecialFields(path)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"apo`stoph"}, res)
+
+}
+
 func TestGetAllSpecialFields2(t *testing.T) {
 	path := `ReceiveSQSMessage.["x.y"][0]["name&name"]`
 	res, err := GetAllspecialFields(path)
