@@ -150,6 +150,8 @@ func (m *MappingField) Start(jsonPath string) error {
 	m.s.IsIdentRune = IsIdentRune
 	m.s.Init(strings.NewReader(jsonPath))
 	m.s.Mode = scanner.ScanIdents
+	//Donot skip space and new line
+	m.s.Whitespace ^= 1<<'\t' | 1<<'\n' | 1<<'\r' | 1<<' '
 	return m.Parser()
 }
 
