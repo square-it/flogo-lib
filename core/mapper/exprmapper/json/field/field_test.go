@@ -98,6 +98,29 @@ func TestGetAllSpecialFields2(t *testing.T) {
 
 }
 
+func TestGetAllSpecialEmpty(t *testing.T) {
+	path := `["Output**&&&&$$$%%%@(){ String"]`
+	res, err := GetAllspecialFields(path)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"Output**&&&&$$$%%%@(){ String"}, res)
+
+	path = `["Output ** &&&&$$$%%%@(){ String"]`
+	res, err = GetAllspecialFields(path)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"Output ** &&&&$$$%%%@(){ String"}, res)
+
+	path = `["Output String"]`
+	res, err = GetAllspecialFields(path)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"Output String"}, res)
+
+	path = `["Output	String"]`
+	res, err = GetAllspecialFields(path)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"Output	String"}, res)
+
+}
+
 func TestGetAllSpecialSingleQuote(t *testing.T) {
 	path := "['data']['Array1']"
 
