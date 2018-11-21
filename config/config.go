@@ -94,7 +94,7 @@ func GetAppPropertiesValueResolver() string {
 	if len(key) > 0 {
 		return key
 	}
-	return ""
+	return "env"
 }
 
 func PublishAuditEvents() bool {
