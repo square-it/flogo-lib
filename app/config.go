@@ -131,7 +131,7 @@ func GetProperties(properties []*data.Attribute) (map[string]interface{}, error)
 
 	props := make(map[string]interface{})
 	if properties != nil {
-		overriddenProps, err := loadExternalProperties()
+		overriddenProps, err := loadExternalProperties(properties)
 		if err != nil {
 			return props, err
 		}
@@ -152,7 +152,7 @@ func GetProperties(properties []*data.Attribute) (map[string]interface{}, error)
 	return props, nil
 }
 
-func loadExternalProperties() (map[string]interface{}, error) {
+func loadExternalProperties(properties []*data.Attribute) (map[string]interface{}, error) {
 
 	props := make(map[string]interface{})
 	propFile := config.GetAppPropertiesOverride()
@@ -178,6 +178,10 @@ func loadExternalProperties() (map[string]interface{}, error) {
 				} else {
 					logger.Warnf("'%s' is not valid override value. It must be in PropName=PropValue format.", pair)
 				}
+			}
+		} else {
+			for _, p := range properties {
+				props[p.Name()] = p.Value()
 			}
 		}
 
