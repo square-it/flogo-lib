@@ -73,6 +73,10 @@ func New(appCfg *app.Config) (Engine, error) {
 		return nil, errors.New("no App version provided")
 	}
 
+	// sets explicitly application name and version since it is not set in embedded mode (flogo build -e)
+	app.SetName(appCfg.Name)
+	app.SetVersion(appCfg.Version)
+
 	//fix up app configuration if it is older
 	//app.FixUpApp(appCfg)
 
