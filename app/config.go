@@ -205,7 +205,16 @@ func loadExternalProperties(properties []*data.Attribute) (map[string]interface{
 							if err != nil {
 								return nil, err
 							}
-							props[k] = newVal
+							if (newVal != strVal) {
+								props[k] = newVal
+							} else {
+								for _, p := range properties {
+									if (p.Name() == k) {
+										logger.Warnf("Using default '%s' for variable '%s'", p.Value(), p.Name())
+										props[k] = p.Value()
+									}
+								}
+							}
 
 							// May be a secret??
 							strVal, _ = newVal.(string)
