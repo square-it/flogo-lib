@@ -43,6 +43,16 @@ func GetVersion() string {
 	return appVersion
 }
 
+// Sets name of the application (useful when embedding flogo.json in embeddedapp.go)
+func SetName(name string) {
+	appName = name
+}
+
+// Sets version of the application (useful when embedding flogo.json in embeddedapp.go)
+func SetVersion(version string) {
+	appVersion = version
+}
+
 // defaultConfigProvider implementation of ConfigProvider
 type defaultConfigProvider struct {
 }
