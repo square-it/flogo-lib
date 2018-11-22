@@ -181,7 +181,7 @@ func loadExternalProperties(properties []*data.Attribute) (map[string]interface{
 			}
 		} else {
 			for _, p := range properties {
-				props[p.Name()] = p.Value()
+				props[p.Name()] = "$" + p.Name()
 			}
 		}
 
