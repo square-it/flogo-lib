@@ -44,7 +44,6 @@ func GetVersion() string {
 	return appVersion
 }
 
-
 // Sets name of the application (useful when embedding flogo.json in embeddedapp.go)
 func SetName(name string) {
 	appName = name
@@ -203,9 +202,7 @@ func loadExternalProperties(properties []*data.Attribute) (map[string]interface{
 			errMag := fmt.Sprintf("Unsupported resolver type - %s. Resolver not registered.", resolverType)
 			return nil, errors.New(errMag)
 		}
-	}
 
-	if resolverType != "" {
 		if len(props) > 0 {
 			// Get value using overridden property name
 			for k, v := range props {
@@ -237,7 +234,7 @@ func loadExternalProperties(properties []*data.Attribute) (map[string]interface{
 			// Resolver is set. Get values using app prop name
 			for _, prop := range properties {
 				newVal, _ := resolver.ResolveValue(prop.Name())
-				if newVal != nil {
+				if newVal != nil { // if resolver returns nil, default value from flogo.json will be used
 					// Use new value
 					props[prop.Name()] = newVal
 					// May be a secret??
@@ -251,7 +248,7 @@ func loadExternalProperties(properties []*data.Attribute) (map[string]interface{
 						props[prop.Name()] = newVal
 					}
 				} else {
-					logger.Infof("Property - '%s' could not be resolved using Resolver - '%s'. May be not configured. Using default value.", prop.Name(), resolverType)
+					logger.Warnf("Property '%s' could not be resolved using resolver '%s'. Using default value '%s'.", prop.Name(), resolverType, prop.Value())
 				}
 			}
 		}
