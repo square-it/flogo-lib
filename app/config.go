@@ -4,31 +4,32 @@ import (
 	"encoding/json"
 	"os"
 
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"regexp"
+	"strings"
+
 	"github.com/TIBCOSoftware/flogo-lib/app/resource"
 	"github.com/TIBCOSoftware/flogo-lib/config"
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
-	"io/ioutil"
-	"regexp"
-	"strings"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"fmt"
-	"errors"
 )
 
 // Config is the configuration for the App
 type Config struct {
-	Name        string             `json:"name"`
-	Type        string             `json:"type"`
-	Version     string             `json:"version"`
-	Description string             `json:"description"`
+	Name        string `json:"name"`
+	Type        string `json:"type"`
+	Version     string `json:"version"`
+	Description string `json:"description"`
 
-	Properties  []*data.Attribute  `json:"properties"`
-	Channels    []string           `json:"channels"`
-	Triggers    []*trigger.Config  `json:"triggers"`
-	Resources   []*resource.Config `json:"resources"`
-	Actions     []*action.Config   `json:"actions"`
+	Properties []*data.Attribute  `json:"properties"`
+	Channels   []string           `json:"channels"`
+	Triggers   []*trigger.Config  `json:"triggers"`
+	Resources  []*resource.Config `json:"resources"`
+	Actions    []*action.Config   `json:"actions"`
 }
 
 var appName, appVersion string
@@ -42,6 +43,7 @@ func GetName() string {
 func GetVersion() string {
 	return appVersion
 }
+
 
 // Sets name of the application (useful when embedding flogo.json in embeddedapp.go)
 func SetName(name string) {
@@ -183,67 +185,78 @@ func loadExternalProperties(properties []*data.Attribute) (map[string]interface{
 			// Override through P1=V1,P2=V2
 			for _, pair := range strings.Split(propFile, ",") {
 				kv := strings.Split(pair, "=")
-				if len(kv) == 2 && kv[0] != "" &&  kv[1] != "" {
+				if len(kv) == 2 && kv[0] != "" && kv[1] != "" {
 					props[kv[0]] = kv[1]
 				} else {
 					logger.Warnf("'%s' is not valid override value. It must be in PropName=PropValue format.", pair)
 				}
 			}
-		} else {
-			for _, p := range properties {
-				props[p.Name()] = "$" + p.Name()
-			}
 		}
+	}
 
+	resolverType := config.GetAppPropertiesValueResolver()
+	var resolver PropertyValueResolver
+	if resolverType != "" {
+		logger.Infof("'%s' is set to '%s'. ", config.ENV_APP_PROPERTY_RESOLVER_KEY, resolverType)
+		resolver = GetPropertyValueResolver(resolverType)
+		if resolver == nil {
+			errMag := fmt.Sprintf("Unsupported resolver type - %s. Resolver not registered.", resolverType)
+			return nil, errors.New(errMag)
+		}
+	}
+
+	if resolverType != "" {
 		if len(props) > 0 {
-			// Resolve property values
-			resolverType := config.GetAppPropertiesValueResolver()
-			if resolverType != "" {
-				logger.Infof("'%s' is set to '%s'. ", config.ENV_APP_PROPERTY_RESOLVER_KEY, resolverType)
-				resolver := GetPropertyValueResolver(resolverType)
-				if resolver == nil {
-					errMag := fmt.Sprintf("Unsupported resolver type - %s. Resolver not registered.", resolverType)
-					return nil, errors.New(errMag)
-				}
-
-				for k, v := range  props {
-					strVal, ok := v.(string)
-					if ok && len(strVal) > 0 {
-						if strVal[0] == '$' {
-							// Use resolver
-							newVal, err := resolver.ResolveValue(strVal[1:])
-							if err != nil {
-								return nil, err
-							}
-							if (newVal != strVal) {
-								props[k] = newVal
-							} else {
-								for _, p := range properties {
-									if (p.Name() == k) {
-										logger.Warnf("Using default '%s' for variable '%s'", p.Value(), p.Name())
-										props[k] = p.Value()
-									}
-								}
-							}
-
-							// May be a secret??
-							strVal, _ = newVal.(string)
+			// Get value using overridden property name
+			for k, v := range props {
+				strVal, ok := v.(string)
+				if ok && len(strVal) > 0 {
+					if strVal[0] == '$' {
+						// Use resolver
+						newVal, err := resolver.ResolveValue(strVal[1:])
+						if err != nil {
+							return nil, err
 						}
+						props[k] = newVal
 
-						if len(strVal) > 0 &&  strings.HasPrefix(strVal, "SECRET:") {
-							// Resolve secret value
-							newVal, err := resolveSecretValue(strVal)
-							if err != nil {
-								return nil, err
-							}
-							props[k] = newVal
+						// May be a secret??
+						strVal, _ = newVal.(string)
+					}
+
+					if len(strVal) > 0 && strings.HasPrefix(strVal, "SECRET:") {
+						// Resolve secret value
+						newVal, err := resolveSecretValue(strVal)
+						if err != nil {
+							return nil, err
 						}
+						props[k] = newVal
 					}
 				}
 			}
+		} else {
+			// Resolver is set. Get values using app prop name
+			for _, prop := range properties {
+				newVal, _ := resolver.ResolveValue(prop.Name())
+				if newVal != nil {
+					// Use new value
+					props[prop.Name()] = newVal
+					// May be a secret??
+					strVal, _ := newVal.(string)
+					if len(strVal) > 0 && strings.HasPrefix(strVal, "SECRET:") {
+						// Resolve secret value
+						newVal, err := resolveSecretValue(strVal)
+						if err != nil {
+							return nil, err
+						}
+						props[prop.Name()] = newVal
+					}
+				} else {
+					logger.Infof("Property - '%s' could not be resolved using Resolver - '%s'. May be not configured. Using default value.", prop.Name(), resolverType)
+				}
+			}
 		}
-
 	}
+
 	return props, nil
 }
 
