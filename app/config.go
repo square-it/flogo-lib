@@ -248,7 +248,7 @@ func loadExternalProperties(properties []*data.Attribute) (map[string]interface{
 						props[prop.Name()] = newVal
 					}
 				} else {
-					logger.Warnf("Property '%s' could not be resolved using resolver '%s'. Using default value '%s'.", prop.Name(), resolverType, prop.Value())
+					logger.Warnf("Property '%s' could not be resolved using resolver '%s'. Using default value.", prop.Name(), resolverType)
 				}
 			}
 		}
