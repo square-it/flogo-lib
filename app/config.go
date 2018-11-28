@@ -174,7 +174,7 @@ func loadExternalProperties(properties []*data.Attribute) (map[string]interface{
 		resolvers = append(resolvers, "file")
 	}
 	if config.GetAppConfigExternal() != "" {
-		resolvers = append(resolvers, "external")
+		resolvers = append(resolvers, config.GetAppConfigExternal())
 	}
 
 	props := make(map[string]interface{})
@@ -183,7 +183,7 @@ func loadExternalProperties(properties []*data.Attribute) (map[string]interface{
 		resolver := GetPropertyValueResolver(resolverType)
 
 		if resolver == nil {
-			errMag := fmt.Sprintf("Unsupported resolver type - %s. Resolver not registered.", resolverType)
+			errMag := fmt.Sprintf("Unsupported resolver type '%s'. Resolver not registered.", resolverType)
 			return nil, errors.New(errMag)
 		}
 
