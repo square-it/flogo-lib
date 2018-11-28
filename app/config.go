@@ -2,10 +2,10 @@ package app
 
 import (
 	"encoding/json"
-	"os"
-
 	"errors"
 	"fmt"
+	"os"
+
 	"io/ioutil"
 	"regexp"
 	"strings"
@@ -164,95 +164,56 @@ func GetProperties(properties []*data.Attribute) (map[string]interface{}, error)
 }
 
 func loadExternalProperties(properties []*data.Attribute) (map[string]interface{}, error) {
+	logger.Debug("Resolving properties...")
 
-	props := make(map[string]interface{})
-	propFile := config.GetAppPropertiesOverride()
-	if propFile != "" {
-		logger.Infof("'%s' is set. Loading overridden properties", config.ENV_APP_PROPERTY_OVERRIDE_KEY)
-		if strings.HasSuffix(propFile, ".json") {
-			// Override through file
-			file, e := ioutil.ReadFile(propFile)
-			if e != nil {
-				return nil, e
-			}
-			e = json.Unmarshal(file, &props)
-
-			if e != nil {
-				return nil, e
-			}
-		} else if strings.ContainsRune(propFile, '=') {
-			// Override through P1=V1,P2=V2
-			for _, pair := range strings.Split(propFile, ",") {
-				kv := strings.Split(pair, "=")
-				if len(kv) == 2 && kv[0] != "" && kv[1] != "" {
-					props[kv[0]] = kv[1]
-				} else {
-					logger.Warnf("'%s' is not valid override value. It must be in PropName=PropValue format.", pair)
-				}
-			}
-		}
+	var resolvers []string
+	if config.GetAppConfigEnvVars() {
+		resolvers = append(resolvers, "env")
+	}
+	if config.GetAppConfigProfiles() != "" {
+		resolvers = append(resolvers, "file")
+	}
+	if config.GetAppConfigExternal() != "" {
+		resolvers = append(resolvers, "external")
 	}
 
-	resolverType := config.GetAppPropertiesValueResolver()
-	var resolver PropertyValueResolver
-	if resolverType != "" {
-		logger.Infof("'%s' is set to '%s'. ", config.ENV_APP_PROPERTY_RESOLVER_KEY, resolverType)
-		resolver = GetPropertyValueResolver(resolverType)
+	props := make(map[string]interface{})
+
+	for _, resolverType := range resolvers {
+		resolver := GetPropertyValueResolver(resolverType)
+
 		if resolver == nil {
 			errMag := fmt.Sprintf("Unsupported resolver type - %s. Resolver not registered.", resolverType)
 			return nil, errors.New(errMag)
 		}
 
-		if len(props) > 0 {
-			// Get value using overridden property name
-			for k, v := range props {
-				strVal, ok := v.(string)
-				if ok && len(strVal) > 0 {
-					if strVal[0] == '$' {
-						// Use resolver
-						newVal, err := resolver.ResolveValue(strVal[1:])
-						if err != nil {
-							return nil, err
-						}
-						props[k] = newVal
-
-						// May be a secret??
-						strVal, _ = newVal.(string)
-					}
-
-					if len(strVal) > 0 && strings.HasPrefix(strVal, "SECRET:") {
-						// Resolve secret value
-						newVal, err := resolveSecretValue(strVal)
-						if err != nil {
-							return nil, err
-						}
-						props[k] = newVal
-					}
-				}
+		for _, prop := range properties {
+			if props[prop.Name()] != nil { // Ignore property already resolved by another resolver
+				continue
 			}
-		} else {
-			// Resolver is set. Get values using app prop name
-			for _, prop := range properties {
-				newVal, _ := resolver.ResolveValue(prop.Name())
-				if newVal != nil { // if resolver returns nil, default value from flogo.json will be used
-					// Use new value
-					props[prop.Name()] = newVal
-					// May be a secret??
-					strVal, _ := newVal.(string)
-					if len(strVal) > 0 && strings.HasPrefix(strVal, "SECRET:") {
-						// Resolve secret value
-						newVal, err := resolveSecretValue(strVal)
-						if err != nil {
-							return nil, err
-						}
-						props[prop.Name()] = newVal
+			newVal, _ := resolver.ResolveValue(prop.Name())
+			if newVal != nil { // if resolver returns nil, default value from flogo.json will be used
+				logger.Debugf("Property '%s' resolved using resolver '%s'.", prop.Name(), resolverType)
+
+				// Use new value
+				props[prop.Name()] = newVal
+				// May be a secret??
+				strVal, _ := newVal.(string)
+				if len(strVal) > 0 && strings.HasPrefix(strVal, "SECRET:") {
+					// Resolve secret value
+					newVal, err := resolveSecretValue(strVal)
+					if err != nil {
+						return nil, err
 					}
-				} else {
-					logger.Warnf("Property '%s' could not be resolved using resolver '%s'. Using default value.", prop.Name(), resolverType)
+					props[prop.Name()] = newVal
 				}
+			} else {
+				logger.Debugf("Property '%s' could not be resolved using resolver '%s'.", prop.Name(), resolverType)
 			}
 		}
 	}
+
+	logger.Debug("Resolved properties")
 
 	return props, nil
 }

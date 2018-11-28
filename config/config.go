@@ -18,9 +18,11 @@ const (
 	ENV_STOP_ENGINE_ON_ERROR_KEY  = "FLOGO_ENGINE_STOP_ON_ERROR"
 	ENV_DATA_SECRET_KEY_KEY       = "FLOGO_DATA_SECRET_KEY"
 	DATA_SECRET_KEY_DEFAULT       = "flogo"
-	ENV_APP_PROPERTY_OVERRIDE_KEY = "FLOGO_APP_PROPS_OVERRIDE"
-	ENV_APP_PROPERTY_RESOLVER_KEY = "FLOGO_APP_PROPS_VALUE_RESOLVER"
 	ENV_PUBLISH_AUDIT_EVENTS_KEY  = "FLOGO_PUBLISH_AUDIT_EVENTS"
+
+	ENV_FLOGO_APP_CONFIG_ENV_VARS = "FLOGO_APP_CONFIG_ENV_VARS"
+	ENV_FLOGO_APP_CONFIG_PROFILES = "FLOGO_APP_CONFIG_PROFILES"
+	ENV_FLOGO_APP_CONFIG_EXTERNAL = "FLOGO_APP_CONFIG_EXTERNAL"
 )
 
 var defaultLogLevel = LOG_LEVEL_DEFAULT
@@ -81,16 +83,25 @@ func GetDataSecretKey() string {
 	return DATA_SECRET_KEY_DEFAULT
 }
 
-func GetAppPropertiesOverride() string {
-	key := os.Getenv(ENV_APP_PROPERTY_OVERRIDE_KEY)
+func GetAppConfigEnvVars() bool {
+	key := os.Getenv(ENV_FLOGO_APP_CONFIG_ENV_VARS)
+	if len(key) > 0 {
+		result, _ := strconv.ParseBool(key)
+		return result
+	}
+	return true // default value is true to "expose" all public properties as environment variable
+}
+
+func GetAppConfigProfiles() string {
+	key := os.Getenv(ENV_FLOGO_APP_CONFIG_PROFILES)
 	if len(key) > 0 {
 		return key
 	}
 	return ""
 }
 
-func GetAppPropertiesValueResolver() string {
-	key := os.Getenv(ENV_APP_PROPERTY_RESOLVER_KEY)
+func GetAppConfigExternal() string {
+	key := os.Getenv(ENV_FLOGO_APP_CONFIG_EXTERNAL)
 	if len(key) > 0 {
 		return key
 	}
